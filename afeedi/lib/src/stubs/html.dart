@@ -44,6 +44,8 @@ class CanvasElement {
 class IFrameElement {
     set src(String? value) {}
     String? get src => '';
+    set srcdoc(String? value) {}
+    String? get srcdoc => '';
     final style = IFrameElementStyle();
     set allowFullscreen(bool? value) {}
     bool? get allowFullscreen => false;

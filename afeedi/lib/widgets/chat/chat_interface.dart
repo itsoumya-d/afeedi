@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../controllers/chat_controller.dart';
+import '../../widgets/chat/chat_controller.dart';
 import '../../widgets/onboarding/chat_message_widget.dart';
 import '../../widgets/onboarding/typing_indicator.dart';
 import '../../widgets/onboarding/quick_reply_chips.dart';
@@ -10,10 +10,28 @@ import '../../services/navigation_service.dart';
 
 class ChatInterface extends StatefulWidget {
   final ChatController controller;
-  
+  final ScrollController scrollController;
+  final TextEditingController textController;
+  final FocusNode textFocusNode;
+  final TextEditingController searchController;
+  final FocusNode searchFocusNode;
+  final Function(String) handleTextInput;
+  final Function(String) handleSuggestionTap;
+  final Function(String) handleGenreToggle;
+  final Set<String> selectedGenres;
+
   const ChatInterface({
     super.key,
     required this.controller,
+    required this.scrollController,
+    required this.textController,
+    required this.textFocusNode,
+    required this.searchController,
+    required this.searchFocusNode,
+    required this.handleTextInput,
+    required this.handleSuggestionTap,
+    required this.handleGenreToggle,
+    required this.selectedGenres,
   });
 
   @override
@@ -100,7 +118,7 @@ class _ChatInterfaceState extends State<ChatInterface>
             animation: widget.controller,
             builder: (context, child) {
               return ListView.builder(
-                controller: widget.controller.scrollController,
+                controller: widget.scrollController,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 itemCount: _calculateItemCount(),
                 itemBuilder: _buildChatItem,
@@ -175,15 +193,15 @@ class _ChatInterfaceState extends State<ChatInterface>
     
     if (widget.controller.showTextInput && index == 0) {
       return TextInputWidget(
-        controller: widget.controller.textController,
-        focusNode: widget.controller.textFocusNode,
+        controller: widget.textController,
+        focusNode: widget.textFocusNode,
         hintText: 'Type your message...',
-        onSubmitted: (_) => widget.controller.handleTextInput(),
-        onSend: widget.controller.handleTextInput,
+        onSubmitted: (val) => widget.handleTextInput(val),
+        onSend: () => widget.handleTextInput(widget.textController.text),
         slideAnimation: _slideAnimation,
         fadeAnimation: _fadeAnimation,
         suggestions: widget.controller.currentSuggestions,
-        onSuggestionTap: widget.controller.handleSuggestionTap,
+        onSuggestionTap: widget.handleSuggestionTap,
       );
     }
     if (widget.controller.showTextInput) index--;
@@ -192,10 +210,10 @@ class _ChatInterfaceState extends State<ChatInterface>
       return GenreSelection(
         allGenres: widget.controller.allGenres,
         filteredGenres: widget.controller.filteredGenres,
-        selectedGenres: widget.controller.selectedGenres,
-        searchController: widget.controller.searchController,
-        searchFocusNode: widget.controller.searchFocusNode,
-        onGenreToggle: widget.controller.handleGenreToggle,
+        selectedGenres: widget.controller.allGenres.where((g) => widget.selectedGenres.contains(g.name)).toList(),
+        searchController: widget.searchController,
+        searchFocusNode: widget.searchFocusNode,
+        onGenreToggle: (genre) => widget.handleGenreToggle(genre.name),
         onSearchChanged: widget.controller.handleGenreSearchChanged,
         onContinue: widget.controller.handleGenreContinue,
         slideAnimation: _slideAnimation,

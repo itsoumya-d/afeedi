@@ -4,7 +4,6 @@ import '../../models/genre.dart';
 import '../../models/chat_message.dart';
 import '../../services/analytics_service.dart';
 import '../../services/smart_suggestions_service.dart';
-import '../../utils/constants.dart';
 
 class ChatController extends ChangeNotifier {
   final List<OnboardingStep> onboardingSteps;

@@ -36,8 +36,9 @@ class ContentAggregationService {
       }
       
       // Filter connections by requested platforms
-      final filteredConnections = platforms != null
-          ? connections.where((c) => platforms.contains(c.platform)).toList()
+      final platformSet = platforms?.toSet();
+      final filteredConnections = platformSet != null
+          ? connections.where((c) => platformSet.contains(c.platform)).toList()
           : connections;
       
       final allContent = <Content>[];

@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import '../models/user_model.dart';
 import '../core/storage/local_storage_service.dart';
@@ -12,8 +14,16 @@ class LocalAuthService {
   LocalAuthService._();
   
   final LocalStorageService _storage = LocalStorageService.instance;
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   User? _currentUser;
   
+  // Hash password
+  String _hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
   // Current user getter
   User? get currentUser => _currentUser;
   
@@ -56,12 +66,15 @@ class LocalAuthService {
       // Save user to storage
       await _storage.saveUser(user);
       
-      // Save credentials (in a real app, use proper encryption)
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_credentials_${user.id}', jsonEncode({
-        'email': email,
-        'password': password, // Should be hashed in production
-      }));
+      // Save credentials securely
+      final hashedPassword = _hashPassword(password);
+      await _secureStorage.write(
+        key: 'user_credentials_${user.id}',
+        value: jsonEncode({
+          'email': email,
+          'password': hashedPassword,
+        })
+      );
       
       // Set as current user
       await _setCurrentUser(user);
@@ -96,13 +109,39 @@ class LocalAuthService {
         orElse: () => throw Exception('User not found'),
       );
       
-      // Verify password (in a real app, use proper password verification)
+      // Verify password
+      String? credentialsJson = await _secureStorage.read(key: 'user_credentials_${user.id}');
       final prefs = await SharedPreferences.getInstance();
-      final credentialsJson = prefs.getString('user_credentials_${user.id}');
+
+      // Fallback for migration from SharedPreferences
+      bool isMigration = false;
+      if (credentialsJson == null) {
+        credentialsJson = prefs.getString('user_credentials_${user.id}');
+        isMigration = true;
+      }
       
       if (credentialsJson != null) {
         final credentials = jsonDecode(credentialsJson);
-        if (credentials['password'] == password) {
+        final hashedInputPassword = _hashPassword(password);
+
+        // Check if the password matches either the hash or the plaintext
+        if (credentials['password'] == hashedInputPassword || credentials['password'] == password) {
+          // If it's a migration or the password was plaintext, update it securely
+          if (isMigration || credentials['password'] == password) {
+            await _secureStorage.write(
+              key: 'user_credentials_${user.id}',
+              value: jsonEncode({
+                'email': email,
+                'password': hashedInputPassword,
+              })
+            );
+
+            // Clean up the old plaintext data
+            if (isMigration) {
+              await prefs.remove('user_credentials_${user.id}');
+            }
+          }
+
           // Set as current user
           await _setCurrentUser(user);
           
@@ -205,8 +244,9 @@ class LocalAuthService {
       await _storage.deleteUser(userId);
       
       // Clear credentials
+      await _secureStorage.delete(key: 'user_credentials_$userId');
       final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('user_credentials_$userId');
+      await prefs.remove('user_credentials_$userId'); // Clean up any remaining legacy data
       await prefs.remove('current_user_id');
       
       _currentUser = null;

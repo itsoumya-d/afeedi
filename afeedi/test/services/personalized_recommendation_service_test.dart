@@ -1,3 +1,6 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:afeedi/services/onboarding_service.dart';
+import 'package:afeedi/services/auth_service.dart';
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -188,5 +191,34 @@ void main() {
       }
       expect(categoryGroups.length, greaterThanOrEqualTo(1));
     });
+  });
+
+    group('generateComprehensiveRecommendations', () {
+      test('returns empty list when user is not authenticated (caught exception)', () async {
+        SharedPreferences.setMockInitialValues({});
+        await AuthService.instance.initializeAuth();
+
+        // Act
+        final recommendations = await recommendationService.generateComprehensiveRecommendations();
+
+        // Assert
+        expect(recommendations, isEmpty);
+      });
+
+      test('returns empty list when authenticated', () async {
+        // Setting mock preferences to simulate an authenticated user
+        SharedPreferences.setMockInitialValues({
+          'user_id': 'test_user',
+          'user_email': 'test@test.com'
+        });
+        await AuthService.instance.initializeAuth();
+
+        // Act
+        final recommendations = await recommendationService.generateComprehensiveRecommendations();
+
+        // Assert
+        // In the current implementation it returns an empty list as a fallback or after behavior insights
+        expect(recommendations, isEmpty);
+      });
   });
 }

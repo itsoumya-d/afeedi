@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+import '../services/auth_service.dart';
+import '../services/navigation_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen>
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _rememberMe = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -310,32 +313,69 @@ class _LoginScreenState extends State<LoginScreen>
                                     width: double.infinity,
                                     height: 52,
                                     child: ElevatedButton(
-                                      onPressed: () {
-                                        if (_formKey.currentState!.validate()) {
-                                          // TODO: Implement login
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Login successful!'),
-                                              backgroundColor: Color(0xFF00D4FF),
-                                            ),
-                                          );
-                                        }
-                                      },
+                                      onPressed: _isLoading
+                                          ? null
+                                          : () async {
+                                              if (_formKey.currentState!.validate()) {
+                                                setState(() {
+                                                  _isLoading = true;
+                                                });
+
+                                                final result = await AuthService.instance.signIn(
+                                                  email: _emailController.text.trim(),
+                                                  password: _passwordController.text,
+                                                );
+
+                                                if (mounted) {
+                                                  setState(() {
+                                                    _isLoading = false;
+                                                  });
+
+                                                  if (result.success) {
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text('Login successful!'),
+                                                        backgroundColor: Color(0xFF00D4FF),
+                                                      ),
+                                                    );
+                                                    Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+                                                  } else {
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(result.error ?? 'Login failed'),
+                                                        backgroundColor: const Color(0xFFFF3C7E),
+                                                      ),
+                                                    );
+                                                  }
+                                                }
+                                              }
+                                            },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: const Color(0xFF00D4FF),
                                         foregroundColor: const Color(0xFF0D0B1E),
+                                        disabledBackgroundColor: const Color(0xFF00D4FF).withOpacity(0.5),
+                                        disabledForegroundColor: const Color(0xFF0D0B1E).withOpacity(0.5),
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(26),
                                         ),
                                         elevation: 0,
                                       ),
-                                      child: const Text(
-                                        'Log In',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                      child: _isLoading
+                                          ? const SizedBox(
+                                              height: 24,
+                                              width: 24,
+                                              child: CircularProgressIndicator(
+                                                color: Color(0xFF0D0B1E),
+                                                strokeWidth: 2,
+                                              ),
+                                            )
+                                          : const Text(
+                                              'Log In',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
                                     ),
                                   ),
                                   const SizedBox(height: 24),
@@ -372,9 +412,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     width: double.infinity,
                                     height: 52,
                                     child: OutlinedButton.icon(
-                                      onPressed: () {
-                                        // TODO: Implement Google Sign In
-                                      },
+                                      onPressed: _isLoading ? null : () => _handleOAuthLogin('google'),
                                       icon: const Icon(
                                         Icons.g_mobiledata,
                                         color: Colors.white,
@@ -405,9 +443,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     width: double.infinity,
                                     height: 52,
                                     child: OutlinedButton.icon(
-                                      onPressed: () {
-                                        // TODO: Implement Apple Sign In
-                                      },
+                                      onPressed: _isLoading ? null : () => _handleOAuthLogin('apple'),
                                       icon: const Icon(
                                         Icons.apple,
                                         color: Colors.white,
@@ -532,6 +568,37 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
+  Future<void> _handleOAuthLogin(String provider) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final result = await AuthService.instance.signInWithOAuth(provider);
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (result.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Login successful!'),
+            backgroundColor: Color(0xFF00D4FF),
+          ),
+        );
+        Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.error ?? 'Login failed'),
+            backgroundColor: const Color(0xFFFF3C7E),
+          ),
+        );
+      }
+    }
+  }
+
   void _showForgotPasswordDialog() {
     showDialog(
       context: context,
@@ -600,15 +667,38 @@ class _LoginScreenState extends State<LoginScreen>
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                // TODO: Implement password reset
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Password reset link sent to your email!'),
-                    backgroundColor: Color(0xFF00D4FF),
-                  ),
-                );
+              onPressed: () async {
+                final email = emailController.text.trim();
+                if (email.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter your email'),
+                      backgroundColor: Color(0xFFFF3C7E),
+                    ),
+                  );
+                  return;
+                }
+
+                final result = await AuthService.instance.resetPassword(email);
+
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  if (result.success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Password reset link sent to your email!'),
+                        backgroundColor: Color(0xFF00D4FF),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(result.error ?? 'Failed to send reset link'),
+                        backgroundColor: const Color(0xFFFF3C7E),
+                      ),
+                    );
+                  }
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF00D4FF),

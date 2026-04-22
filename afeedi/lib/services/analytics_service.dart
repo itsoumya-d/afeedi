@@ -7,18 +7,18 @@ import 'package:path_provider/path_provider.dart';
 class AnalyticsService {
   static final AnalyticsService _instance = AnalyticsService._internal();
   static AnalyticsService get instance => _instance;
-  
+
   AnalyticsService._internal();
-  
+
   SharedPreferences? _prefs;
   List<Map<String, dynamic>> _eventQueue = [];
-  
+
   // Initialize the analytics service
   Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
     await _loadQueuedEvents();
   }
-  
+
   // Track onboarding events
   Future<void> trackOnboardingEvent({
     required String eventName,
@@ -38,10 +38,10 @@ class AnalyticsService {
       'app_version': await _getAppVersion(),
       ...?additionalData,
     };
-    
+
     await _queueEvent(event);
   }
-  
+
   // Track OAuth connection events
   Future<void> trackOAuthEvent({
     required String platform,
@@ -61,10 +61,10 @@ class AnalyticsService {
       'app_version': await _getAppVersion(),
       ...?additionalData,
     };
-    
+
     await _queueEvent(event);
   }
-  
+
   // Track user interaction events
   Future<void> trackUserInteraction({
     required String action,
@@ -84,10 +84,10 @@ class AnalyticsService {
       'app_version': await _getAppVersion(),
       ...?additionalData,
     };
-    
+
     await _queueEvent(event);
   }
-  
+
   // Track app performance metrics
   Future<void> trackPerformanceMetric({
     required String metricName,
@@ -107,10 +107,10 @@ class AnalyticsService {
       'app_version': await _getAppVersion(),
       ...?additionalData,
     };
-    
+
     await _queueEvent(event);
   }
-  
+
   // Track errors and crashes
   Future<void> trackError({
     required String errorType,
@@ -132,15 +132,17 @@ class AnalyticsService {
       'app_version': await _getAppVersion(),
       ...?additionalData,
     };
-    
+
     await _queueEvent(event);
   }
-  
+
   // Get onboarding completion metrics
   Future<Map<String, dynamic>> getOnboardingMetrics() async {
     final events = await _getStoredEvents();
-    final onboardingEvents = events.where((e) => e['event_type'] == 'onboarding').toList();
-    
+    final onboardingEvents = events
+        .where((e) => e['event_type'] == 'onboarding')
+        .toList();
+
     if (onboardingEvents.isEmpty) {
       return {
         'total_events': 0,
@@ -149,33 +151,55 @@ class AnalyticsService {
         'drop_off_points': <String, int>{},
       };
     }
-    
-    final startEvents = onboardingEvents.where((e) => e['event_name'] == 'onboarding_started').toList();
-    final completeEvents = onboardingEvents.where((e) => e['event_name'] == 'onboarding_completed').toList();
-    
-    final completionRate = startEvents.isNotEmpty ? (completeEvents.length / startEvents.length) * 100 : 0.0;
-    
-    // Calculate average completion time
-    double averageTime = 0.0;
-    if (startEvents.isNotEmpty && completeEvents.isNotEmpty) {
-      final times = <double>[];
-      for (final complete in completeEvents) {
-        final sessionId = complete['session_id'];
-        final start = startEvents.firstWhere(
-          (e) => e['session_id'] == sessionId,
-          orElse: () => <String, dynamic>{},
-        );
-        if (start.isNotEmpty) {
-          final startTime = DateTime.parse(start['timestamp']);
-          final endTime = DateTime.parse(complete['timestamp']);
-          times.add(endTime.difference(startTime).inSeconds.toDouble());
+
+    final startEventsBySessionId = <String, Map<String, dynamic>>{};
+    final completeEvents = <Map<String, dynamic>>[];
+
+    int startEventsCount = 0;
+
+    for (final event in onboardingEvents) {
+      final eventName = event['event_name'];
+      if (eventName == 'onboarding_started') {
+        startEventsCount++;
+        final sessionId = event['session_id'];
+        if (sessionId != null) {
+          final sessionIdStr = sessionId.toString();
+          if (!startEventsBySessionId.containsKey(sessionIdStr)) {
+            startEventsBySessionId[sessionIdStr] = event;
+          }
         }
-      }
-      if (times.isNotEmpty) {
-        averageTime = times.reduce((a, b) => a + b) / times.length;
+      } else if (eventName == 'onboarding_completed') {
+        completeEvents.add(event);
       }
     }
-    
+
+    final completionRate = startEventsCount > 0
+        ? (completeEvents.length / startEventsCount) * 100
+        : 0.0;
+
+    // Calculate average completion time
+    double averageTime = 0.0;
+    if (startEventsCount > 0 && completeEvents.isNotEmpty) {
+      double totalTime = 0.0;
+      int validTimesCount = 0;
+
+      for (final complete in completeEvents) {
+        final sessionId = complete['session_id']?.toString();
+        if (sessionId != null) {
+          final start = startEventsBySessionId[sessionId];
+          if (start != null) {
+            final startTime = DateTime.parse(start['timestamp']);
+            final endTime = DateTime.parse(complete['timestamp']);
+            totalTime += endTime.difference(startTime).inSeconds.toDouble();
+            validTimesCount++;
+          }
+        }
+      }
+      if (validTimesCount > 0) {
+        averageTime = totalTime / validTimesCount;
+      }
+    }
+
     // Calculate drop-off points
     final dropOffPoints = <String, int>{};
     final stepCounts = <int, int>{};
@@ -183,7 +207,7 @@ class AnalyticsService {
       final stepNumber = event['step_number'] as int? ?? 0;
       stepCounts[stepNumber] = (stepCounts[stepNumber] ?? 0) + 1;
     }
-    
+
     return {
       'total_events': onboardingEvents.length,
       'completion_rate': completionRate,
@@ -192,27 +216,30 @@ class AnalyticsService {
       'drop_off_points': dropOffPoints,
     };
   }
-  
+
   // Get OAuth connection metrics
   Future<Map<String, dynamic>> getOAuthMetrics() async {
     final events = await _getStoredEvents();
-    final oauthEvents = events.where((e) => e['event_type'] == 'oauth').toList();
-    
+    final oauthEvents = events
+        .where((e) => e['event_type'] == 'oauth')
+        .toList();
+
     final platformStats = <String, Map<String, int>>{};
     for (final event in oauthEvents) {
       final platform = event['platform'] as String;
       final action = event['action'] as String;
-      
+
       platformStats[platform] ??= {'connect': 0, 'disconnect': 0, 'error': 0};
-      platformStats[platform]![action] = (platformStats[platform]![action] ?? 0) + 1;
+      platformStats[platform]![action] =
+          (platformStats[platform]![action] ?? 0) + 1;
     }
-    
+
     return {
       'total_oauth_events': oauthEvents.length,
       'platform_stats': platformStats,
     };
   }
-  
+
   // Export analytics data for debugging
   Future<String> exportAnalyticsData() async {
     final events = await _getStoredEvents();
@@ -222,7 +249,7 @@ class AnalyticsService {
       'events': events,
     });
   }
-  
+
   // Clear all analytics data
   Future<void> clearAnalyticsData() async {
     _eventQueue.clear();
@@ -232,22 +259,24 @@ class AnalyticsService {
       await file.delete();
     }
   }
-  
+
   // Private helper methods
   Future<void> _queueEvent(Map<String, dynamic> event) async {
     _eventQueue.add(event);
-    
+
     // Get all events including the new one
     final allEvents = await _getStoredEvents();
     allEvents.add(event);
     await _persistEvents(allEvents);
-    
+
     // Log event in debug mode
     if (kDebugMode) {
-      debugPrint('Analytics Event: ${event['event_type']} - ${event['event_name'] ?? event['action']}');
+      debugPrint(
+        'Analytics Event: ${event['event_type']} - ${event['event_name'] ?? event['action']}',
+      );
     }
   }
-  
+
   Future<void> _persistEvents(List<Map<String, dynamic>> events) async {
     try {
       if (kIsWeb) {
@@ -261,7 +290,7 @@ class AnalyticsService {
           if (await file.exists()) {
             await file.delete();
           }
-          
+
           // Write new events
           await file.writeAsString(jsonEncode(events));
         }
@@ -270,7 +299,7 @@ class AnalyticsService {
       debugPrint('Error persisting analytics events: $e');
     }
   }
-  
+
   Future<void> _loadQueuedEvents() async {
     try {
       final eventsJson = _prefs?.getString('analytics_events');
@@ -282,7 +311,7 @@ class AnalyticsService {
       debugPrint('Error loading queued events: $e');
     }
   }
-  
+
   Future<List<Map<String, dynamic>>> _getStoredEvents() async {
     try {
       if (kIsWeb) {
@@ -306,7 +335,7 @@ class AnalyticsService {
     }
     return [];
   }
-  
+
   Future<File?> _getAnalyticsFile() async {
     if (kIsWeb) {
       // For web, we don't use file storage
@@ -320,29 +349,29 @@ class AnalyticsService {
       return null;
     }
   }
-  
+
   Future<String> _getSessionId() async {
     final sessionId = _prefs?.getString('session_id');
     if (sessionId != null) {
       return sessionId;
     }
-    
+
     final newSessionId = DateTime.now().millisecondsSinceEpoch.toString();
     await _prefs?.setString('session_id', newSessionId);
     return newSessionId;
   }
-  
+
   Future<String> _getUserId() async {
     final userId = _prefs?.getString('user_id');
     if (userId != null) {
       return userId;
     }
-    
+
     final newUserId = 'user_${DateTime.now().millisecondsSinceEpoch}';
     await _prefs?.setString('user_id', newUserId);
     return newUserId;
   }
-  
+
   Future<String> _getAppVersion() async {
     // In a real app, you would get this from package_info_plus
     return '1.0.0';
@@ -358,7 +387,7 @@ class AnalyticsService {
       return 'unknown';
     }
   }
-  
+
   // Generic event tracking method for all types of events
   Future<void> trackEvent({
     required String eventName,
@@ -377,7 +406,7 @@ class AnalyticsService {
       'app_version': await _getAppVersion(),
       ...?additionalData,
     };
-    
+
     await _queueEvent(event);
   }
 }
@@ -389,13 +418,13 @@ class AnalyticsEvents {
   static const String onboardingStepCompleted = 'onboarding_step_completed';
   static const String onboardingCompleted = 'onboarding_completed';
   static const String onboardingAbandoned = 'onboarding_abandoned';
-  
+
   // OAuth events
   static const String oauthConnectAttempt = 'oauth_connect_attempt';
   static const String oauthConnectSuccess = 'oauth_connect_success';
   static const String oauthConnectError = 'oauth_connect_error';
   static const String oauthDisconnect = 'oauth_disconnect';
-  
+
   // User interaction events
   static const String buttonTap = 'button_tap';
   static const String screenView = 'screen_view';

@@ -5,11 +5,10 @@ import '../../services/social_media_streaming_service.dart';
 import '../../services/analytics_service.dart';
 import '../../utils/logger.dart';
 import 'platform_branding_widget.dart';
-import 'video_controls_widget.dart';
 
 // Platform-specific imports - only for web
-// import 'dart:html' as html;
-// import 'dart:ui' as ui;
+import '../../src/stubs/html.dart' if (dart.library.html) 'dart:html' as html;
+import '../../src/stubs/ui_web.dart' if (dart.library.html) 'dart:ui_web' as ui_web;
 
 /// Widget for playing social media videos from Instagram, TikTok, and Facebook
 class SocialMediaVideoPlayer extends StatefulWidget {
@@ -23,7 +22,7 @@ class SocialMediaVideoPlayer extends StatefulWidget {
   final int? maxHeight;
 
   const SocialMediaVideoPlayer({
-    Key? key,
+    super.key,
     required this.content,
     this.autoPlay = false,
     this.showControls = true,
@@ -32,7 +31,7 @@ class SocialMediaVideoPlayer extends StatefulWidget {
     this.onError,
     this.maxWidth,
     this.maxHeight,
-  }) : super(key: key);
+  });
 
   @override
   State<SocialMediaVideoPlayer> createState() => _SocialMediaVideoPlayerState();
@@ -71,6 +70,29 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
       );
 
       if (embedResult.success) {
+        if (kIsWeb) {
+          _webViewId = 'social_media_embed_${widget.content.platform.name}_${widget.content.id}_${DateTime.now().millisecondsSinceEpoch}';
+
+          ui_web.platformViewRegistry.registerViewFactory(_webViewId!, (int viewId) {
+            final iframe = html.IFrameElement()
+              ..style.border = 'none'
+              ..style.width = '100%'
+              ..style.height = '100%'
+              ..allowFullscreen = true;
+
+            if (embedResult.embedHtml != null && embedResult.embedHtml!.isNotEmpty) {
+              iframe.srcdoc = embedResult.embedHtml;
+            } else if (embedResult.embedUrl != null && embedResult.embedUrl!.isNotEmpty) {
+              iframe.src = embedResult.embedUrl;
+            } else {
+              // Fallback if neither is available, try fallbackUrl or just empty
+              iframe.src = embedResult.fallbackUrl ?? '';
+            }
+
+            return iframe;
+          });
+        }
+
         setState(() {
           _embedResult = embedResult;
           _isLoading = false;
@@ -270,8 +292,10 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
   }
 
   Widget _buildWebEmbedPlayer() {
-    // For now, use mobile player on web as well
-    // TODO: Implement proper web embed support
+    if (_webViewId != null) {
+      return HtmlElementView(viewType: _webViewId!);
+    }
+    // Fallback if view ID wasn't generated
     return _buildMobileEmbedPlayer();
   }
 
@@ -373,12 +397,12 @@ class CompactSocialMediaVideoPlayer extends StatelessWidget {
   final double? height;
 
   const CompactSocialMediaVideoPlayer({
-    Key? key,
+    super.key,
     required this.content,
     this.onTap,
     this.width,
     this.height,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -437,7 +461,7 @@ class CompactSocialMediaVideoPlayer extends StatelessWidget {
               ),
               
               // Duration badge (if available)
-              if (content.metadata?['duration'] != null)
+              if (content.metadata['duration'] != null)
                 Positioned(
                   bottom: 4,
                   right: 4,
@@ -451,7 +475,7 @@ class CompactSocialMediaVideoPlayer extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      _formatDuration(Duration(seconds: content.metadata?['duration'] ?? 0)),
+                      _formatDuration(Duration(seconds: content.metadata['duration'] ?? 0)),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,

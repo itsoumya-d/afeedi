@@ -44,7 +44,7 @@ dependencies:
   flutter_riverpod: ^2.5.1
   
   # UI and Material Design
-  material_color_utilities: ^0.11.1
+  material_color_utilities: ^0.13.0
   
   # Image and Media
   cached_network_image: ^3.3.1

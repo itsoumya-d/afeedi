@@ -5,7 +5,7 @@ import '../widgets/feed/enhanced_feed_post_card.dart';
 import '../widgets/common/shared_bottom_navigation.dart';
 import '../services/content_service.dart';
 import '../models/content_model.dart';
-// import '../widgets/common/loading_shimmer.dart'; // TODO: Create LoadingShimmer widget
+import '../widgets/common/loading_shimmer.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -94,7 +94,7 @@ class _FeedScreenState extends State<FeedScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const LoadingShimmer()
           : SmartRefresher(
               controller: _refreshController,
               enablePullDown: true,

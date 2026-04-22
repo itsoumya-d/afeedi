@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import '../models/user_model.dart';
 import '../core/storage/local_storage_service.dart';
 import 'analytics_service.dart';
@@ -56,11 +57,11 @@ class LocalAuthService {
       // Save user to storage
       await _storage.saveUser(user);
       
-      // Save credentials (in a real app, use proper encryption)
+      // Save credentials with hashed password
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_credentials_${user.id}', jsonEncode({
         'email': email,
-        'password': password, // Should be hashed in production
+        'password': _hashPassword(password),
       }));
       
       // Set as current user
@@ -96,13 +97,14 @@ class LocalAuthService {
         orElse: () => throw Exception('User not found'),
       );
       
-      // Verify password (in a real app, use proper password verification)
+      // Verify hashed password
       final prefs = await SharedPreferences.getInstance();
       final credentialsJson = prefs.getString('user_credentials_${user.id}');
       
       if (credentialsJson != null) {
         final credentials = jsonDecode(credentialsJson);
-        if (credentials['password'] == password) {
+        final hashedPassword = _hashPassword(password);
+        if (credentials['password'] == hashedPassword) {
           // Set as current user
           await _setCurrentUser(user);
           
@@ -221,6 +223,13 @@ class LocalAuthService {
   // Check if user is authenticated
   bool get isAuthenticated => _currentUser != null;
   
+  // Hash password using SHA-256
+  String _hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
   // Get user preferences
   Future<UserPreferences?> getUserPreferences() async {
     if (_currentUser == null) return null;

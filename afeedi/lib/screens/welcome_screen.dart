@@ -154,6 +154,58 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     }
   }
 
+  void _showTermsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2D1B69),
+        title: const Text(
+          'Terms of Service',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          'You will be redirected to our website to view the complete terms of service.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Close',
+              style: TextStyle(color: Color(0xFF00D4FF)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPrivacyDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2D1B69),
+        title: const Text(
+          'Privacy Policy',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          'You will be redirected to our website to view the complete privacy policy.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Close',
+              style: TextStyle(color: Color(0xFF00D4FF)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -449,9 +501,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           TextButton(
-                            onPressed: () {
-                              // TODO: Show Terms
-                            },
+                            onPressed: _showTermsDialog,
                             child: const Text(
                               'Terms',
                               style: TextStyle(
@@ -469,9 +519,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             ),
                           ),
                           TextButton(
-                            onPressed: () {
-                              // TODO: Show Privacy Policy
-                            },
+                            onPressed: _showPrivacyDialog,
                             child: const Text(
                               'Privacy Policy',
                               style: TextStyle(

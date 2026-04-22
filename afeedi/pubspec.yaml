@@ -52,7 +52,7 @@ dependencies:
   image_picker: ^1.1.2
   
   # Local Storage
-  shared_preferences: ^2.2.3
+  shared_preferences: ^2.5.5
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   

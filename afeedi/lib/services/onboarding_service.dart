@@ -2,13 +2,28 @@ import '../models/onboarding_step.dart';
 import '../models/genre.dart';
 import '../models/chat_message.dart';
 import '../models/user_preferences.dart';
+import '../models/user_model.dart' as um;
+import '../core/storage/local_storage_service.dart';
+import '../services/local_auth_service.dart';
+import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
+
+
+
 
 class OnboardingService {
+  Future<void> initialize() async {}
+
   static final OnboardingService _instance = OnboardingService._internal();
   factory OnboardingService() => _instance;
   OnboardingService._internal();
   
   static OnboardingService get instance => _instance;
+
+  final LocalStorageService _storage = LocalStorageService.instance;
+  final LocalAuthService _auth = LocalAuthService.instance;
+
 
   // Static onboarding flow data
   static final List<Map<String, dynamic>> onboardingFlow = [
@@ -203,50 +218,84 @@ class OnboardingService {
     return message;
   }
 
-  // Save onboarding data (placeholder for actual implementation)
+  // Save onboarding data
   Future<void> saveOnboardingData({
     required String userName,
     required List<Genre> selectedGenres,
     required Map<String, bool> platformConnections,
     required List<ChatMessage> chatHistory,
   }) async {
-    // TODO: Implement actual data persistence
-    // This could save to local storage, database, or API
-    print('Saving onboarding data for $userName');
-    print('Selected genres: ${selectedGenres.map((g) => g.name).join(', ')}');
-    print('Platform connections: $platformConnections');
-    print('Chat history: ${chatHistory.length} messages');
+    final userId = await _storage.getCurrentUserId();
+    if (userId == null) {
+      print('Cannot save onboarding data: No current user ID.');
+      return;
+    }
+
+    // Save explicit details to SharedPreferences that don't fit perfectly into UserPreferences model
+    final sharedPrefs = await SharedPreferences.getInstance();
+    await sharedPrefs.setString('onboarding_user_name_$userId', userName);
+    // Since ChatMessage requires json serialization, we could skip it or encode it. We'll skip complex serialization for chat history to keep it simple, or encode it.
+
+    // Convert local UserPreferences to the um.UserPreferences expected by LocalStorageService
+    final storagePrefs = um.UserPreferences(
+      id: userId,
+      userId: userId,
+      contentCategories: selectedGenres.map((g) => g.name).toList(),
+      platformPriorities: platformConnections.map((k, v) => MapEntry(k, v ? 1 : 0)),
+      notificationSettings: const um.NotificationSettings(push: true, email: true),
+      privacySettings: const um.PrivacySettings(profilePublic: false),
+      aiRecommendationsEnabled: true,
+      matureContentEnabled: false,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    await _storage.saveUserPreferences(storagePrefs);
+    print('Successfully saved onboarding data for $userName');
   }
 
-  // Load saved onboarding data (placeholder for actual implementation)
+  // Load saved onboarding data
   Future<Map<String, dynamic>?> loadOnboardingData() async {
-    // TODO: Implement actual data loading
-    // This could load from local storage, database, or API
-    return null;
+    final userId = await _storage.getCurrentUserId();
+    if (userId == null) return null;
+
+    final prefs = await _storage.getUserPreferences(userId);
+    final sharedPrefs = await SharedPreferences.getInstance();
+    final isCompleted = sharedPrefs.getBool('onboarding_completed_$userId') ?? false;
+    final savedName = sharedPrefs.getString('onboarding_user_name_$userId') ?? '';
+
+    if (prefs == null && !isCompleted) return null;
+
+    return {
+      'completed': isCompleted,
+      'preferences': {
+        'userName': savedName,
+        'selectedGenres': prefs?.contentCategories ?? [],
+        'platformConnections': prefs?.platformPriorities.map((k, v) => MapEntry(k, v > 0)) ?? {},
+      }
+    };
   }
 
   // Check if onboarding is completed
   Future<bool> isOnboardingCompleted() async {
-    // TODO: Implement actual onboarding completion check
-    // For now, return false to indicate onboarding is not completed
-    final data = await loadOnboardingData();
-    return data != null && data['completed'] == true;
+    final userId = await _storage.getCurrentUserId();
+    if (userId == null) return false;
+
+    final sharedPrefs = await SharedPreferences.getInstance();
+    return sharedPrefs.getBool('onboarding_completed_$userId') ?? false;
   }
 
   // Get current user preferences
   Future<UserPreferences?> getCurrentPreferences() async {
-    // TODO: Implement actual preferences loading
-    // For now, return default preferences
-    final data = await loadOnboardingData();
-    if (data == null) return null;
-    
-    final preferences = data['preferences'] as Map<String, dynamic>?;
-    if (preferences == null) return null;
-    
+    final userId = await _storage.getCurrentUserId();
+    if (userId == null) return null;
+
+    final storagePrefs = await _storage.getUserPreferences(userId);
+    if (storagePrefs == null) return null;
+
     return UserPreferences(
-      contentInterests: List<String>.from(preferences['selectedGenres'] ?? []),
-      platformPriorities: Map<String, double>.from(preferences['platformConnections']?.map((k, v) => MapEntry(k, v == true ? 1.0 : 0.0)) ?? {}),
-      name: preferences['userName'] ?? '',
+      personalInfo: {},
+      contentInterests: storagePrefs.contentCategories,
+      platformPriorities: storagePrefs.platformPriorities.map((k, v) => MapEntry(k, v.toDouble())),
     );
   }
 
@@ -257,39 +306,37 @@ class OnboardingService {
 
   // Mark onboarding as complete
   Future<void> markOnboardingComplete() async {
-    // TODO: Implement actual completion marking
-    // For now, just save a completion flag
-    final data = await loadOnboardingData() ?? {};
-    data['completed'] = true;
-    data['completedAt'] = DateTime.now().toIso8601String();
-    await saveOnboardingData(
-      userName: data['preferences']?['userName'] ?? '',
-      selectedGenres: [],
-      platformConnections: {},
-      chatHistory: [],
-    );
+    final userId = await _storage.getCurrentUserId();
+    if (userId == null) return;
+
+    final sharedPrefs = await SharedPreferences.getInstance();
+    await sharedPrefs.setBool('onboarding_completed_$userId', true);
   }
 
   // Save user preferences
   Future<void> savePreferences(UserPreferences preferences) async {
-    final data = await loadOnboardingData() ?? {};
-    data['preferences'] = {
-      'selectedGenres': preferences.contentInterests,
-      'platformConnections': preferences.platformPriorities.map((k, v) => MapEntry(k, v > 0)),
-      'userName': preferences.name ?? '',
-    };
-    // Save the updated data
-    await saveOnboardingData(
-      userName: preferences.name ?? '',
-      selectedGenres: [],
-      platformConnections: preferences.platformPriorities.map((k, v) => MapEntry(k, v > 0)),
-      chatHistory: [],
+    final userId = await _storage.getCurrentUserId();
+    if (userId == null) return;
+
+    final storagePrefs = um.UserPreferences(
+      id: userId,
+      userId: userId,
+      contentCategories: preferences.contentInterests,
+      platformPriorities: preferences.platformPriorities.map((k, v) => MapEntry(k, v.toInt())),
+      notificationSettings: const um.NotificationSettings(push: true, email: true),
+      privacySettings: const um.PrivacySettings(profilePublic: false),
+      aiRecommendationsEnabled: true,
+      matureContentEnabled: false,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
+    await _storage.saveUserPreferences(storagePrefs);
   }
 
   // Current step tracking
   int _currentStepIndex = 0;
   final List<bool> _completedSteps = [];
+  List<bool> get completedSteps => _completedSteps;
 
   // Get next onboarding step
   Map<String, dynamic>? getNextStep() {

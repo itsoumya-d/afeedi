@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui' as ui;
 import '../services/navigation_service.dart';
 import '../services/oauth_service.dart';
@@ -53,6 +54,17 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     Future.delayed(const Duration(milliseconds: 300), () {
       _slideController.forward();
     });
+  }
+
+  Future<void> _launchUrl(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch $urlString')),
+        );
+      }
+    }
   }
 
   @override
@@ -450,7 +462,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         children: [
                           TextButton(
                             onPressed: () {
-                              // TODO: Show Terms
+                              _launchUrl('https://afeedi.com/terms');
                             },
                             child: const Text(
                               'Terms',
@@ -470,7 +482,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           ),
                           TextButton(
                             onPressed: () {
-                              // TODO: Show Privacy Policy
+                              _launchUrl('https://afeedi.com/privacy');
                             },
                             child: const Text(
                               'Privacy Policy',

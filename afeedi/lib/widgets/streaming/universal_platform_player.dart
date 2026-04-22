@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-// import 'dart:html' as html;
+import '../../src/stubs/html.dart' if (dart.library.html) 'dart:html' as html;
 import 'dart:math';
 import '../../models/content_model.dart';
 import '../../services/universal_platform_player_service.dart';
@@ -208,10 +208,13 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
     try {
       final embedUrl = _getEmbedUrl();
       
-      // Create iframe element
-      // TODO: Implement proper iframe creation for web platform
-      final iframe = null; // Simplified for mobile-first approach
-      // Style properties removed - not applicable for mobile-first approach
+      // Create iframe element for web platform
+      final iframe = html.IFrameElement()
+        ..src = embedUrl
+        ..style.border = 'none'
+        ..style.width = '100%'
+        ..style.height = '100%'
+        ..allowFullscreen = true;
       
       // Register the view factory only if not already registered
       if (!_registeredViewFactories.contains(_containerId!)) {
@@ -353,8 +356,6 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
   void _cleanupPlayer() {
     if (kIsWeb && _containerId != null) {
       // TODO: Implement proper DOM cleanup for web platform
-      // final container = html.document.getElementById(_containerId!);
-      // container?.children.clear();
       // Note: We don't remove from _registeredViewFactories as the factory
       // can be reused by other instances
     }

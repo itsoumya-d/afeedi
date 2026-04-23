@@ -142,6 +142,7 @@ class _LoginScreenState extends State<LoginScreen>
                       child: FadeTransition(
                         opacity: _fadeAnimation,
                         child: IconButton(
+                          tooltip: 'Go back',
                           onPressed: () {
                             Navigator.pop(context);
                           },
@@ -244,6 +245,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     hint: 'Enter your password',
                                     obscureText: _obscurePassword,
                                     suffixIcon: IconButton(
+                                      tooltip: _obscurePassword ? 'Show password' : 'Hide password',
                                       onPressed: () {
                                         setState(() {
                                           _obscurePassword = !_obscurePassword;

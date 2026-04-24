@@ -311,12 +311,12 @@ class OpenSourceIntegrationService {
   Future<void> _initializeWebLibraries() async {
     // Load essential libraries for web streaming
     final essentialLibraries = ['hls_js', 'video_js', 'tensorflow_js'];
-    
-    for (final library in essentialLibraries) {
-      if (isLibrarySupported(library)) {
-        await loadLibrary(library);
-      }
-    }
+
+    await Future.wait(
+      essentialLibraries
+          .where((library) => isLibrarySupported(library))
+          .map((library) => loadLibrary(library)),
+    );
   }
   
   Future<void> _loadWebLibrary(String libraryKey, Map<String, dynamic> config) async {

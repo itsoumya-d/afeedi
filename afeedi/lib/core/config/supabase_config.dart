@@ -5,22 +5,23 @@ class SupabaseConfig {
   // Environment variables - these should be set in your environment
   static const String supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
-    defaultValue: 'https://your-project.supabase.co',
   );
   
   static const String supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
-    defaultValue: 'your-anon-key-here',
   );
   
   static const String supabaseServiceRoleKey = String.fromEnvironment(
     'SUPABASE_SERVICE_ROLE_KEY',
-    defaultValue: 'your-service-role-key-here',
   );
   
   // Development configuration
-  static const String devSupabaseUrl = 'https://your-dev-project.supabase.co';
-  static const String devSupabaseAnonKey = 'your-dev-anon-key';
+  static const String devSupabaseUrl = String.fromEnvironment(
+    'DEV_SUPABASE_URL',
+  );
+  static const String devSupabaseAnonKey = String.fromEnvironment(
+    'DEV_SUPABASE_ANON_KEY',
+  );
   
   // Get the appropriate configuration based on environment
   static String get currentUrl {

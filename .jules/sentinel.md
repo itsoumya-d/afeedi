@@ -1,0 +1,4 @@
+## 2024-05-01 - [Password Hashing Vulnerability Fix]
+**Vulnerability:** Weak password hashing using plain SHA-256 without salt in `LocalAuthService`'s `_hashPassword`.
+**Learning:** Storing unsalted SHA-256 hashes makes user passwords highly vulnerable to rainbow table and dictionary attacks. Even if the hash algorithm is standard, the lack of a salt means two users with the same password will have the exact same hash, allowing an attacker to reverse-engineer passwords much faster.
+**Prevention:** Always use a secure, randomly generated per-user salt when hashing passwords, and store it alongside the hashed password. Consider using algorithms specifically designed for password hashing, like bcrypt or Argon2, which handle salting internally. For backward compatibility, allow falling back to empty string salts when reading old hashes.

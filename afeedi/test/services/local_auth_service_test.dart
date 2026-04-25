@@ -1,3 +1,4 @@
+// ignore_for_file: depend_on_referenced_packages
 import 'package:flutter_test/flutter_test.dart';
 import 'package:afeedi/services/local_auth_service.dart';
 import 'package:afeedi/core/storage/local_storage_service.dart';
@@ -5,6 +6,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive/hive.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+
+class MockPathProviderPlatform extends Fake with MockPlatformInterfaceMixin implements PathProviderPlatform {
+  @override
+  Future<String?> getApplicationDocumentsPath() async {
+    return '.';
+  }
+}
 
 void main() {
   late LocalAuthService authService;
@@ -14,6 +24,7 @@ void main() {
     // Setup Hive for testing
     tempDir = await Directory.systemTemp.createTemp('afeedi_test');
     Hive.init(tempDir.path);
+    PathProviderPlatform.instance = MockPathProviderPlatform();
   });
 
   tearDownAll(() async {
@@ -51,6 +62,7 @@ void main() {
       final credentials = jsonDecode(credentialsJson!);
       expect(credentials['password'], isNot(password), reason: 'Password should be hashed, not plain text');
       expect(credentials['password'].length, 64, reason: 'SHA-256 hash should be 64 characters long');
+      expect(credentials['salt'], isNotNull, reason: 'Salt should be stored with credentials');
     });
 
     test('signIn works with correct password and fails with incorrect password', () async {
@@ -80,17 +92,17 @@ void main() {
       expect(failedUser, isNull);
     });
 
-    test('different passwords result in different hashes', () async {
-      const password1 = 'password123';
-      const password2 = 'password456';
+    test('different users with same password have different hashes due to salt', () async {
+      const sharedPassword = 'sharedPassword123';
 
-      final user1 = await authService.signUp(email: 'user1@test.com', password: password1);
-      final user2 = await authService.signUp(email: 'user2@test.com', password: password2);
+      final user1 = await authService.signUp(email: 'user1@test.com', password: sharedPassword);
+      final user2 = await authService.signUp(email: 'user2@test.com', password: sharedPassword);
 
       final prefs = await SharedPreferences.getInstance();
       final creds1 = jsonDecode(prefs.getString('user_credentials_${user1!.id}')!);
       final creds2 = jsonDecode(prefs.getString('user_credentials_${user2!.id}')!);
 
+      expect(creds1['salt'], isNot(creds2['salt']));
       expect(creds1['password'], isNot(creds2['password']));
     });
   });

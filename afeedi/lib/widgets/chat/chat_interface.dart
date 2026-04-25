@@ -118,6 +118,7 @@ class _ChatInterfaceState extends State<ChatInterface>
       child: Row(
         children: [
           IconButton(
+            tooltip: 'Back',
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           ),

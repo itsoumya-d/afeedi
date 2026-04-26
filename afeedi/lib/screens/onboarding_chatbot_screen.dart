@@ -15,12 +15,14 @@ import '../widgets/onboarding/platform_connection.dart';
 import '../widgets/onboarding/text_input_widget.dart';
 import '../widgets/chat/chat_controller.dart';
 import '../widgets/chat/chat_interface.dart';
+import '../utils/debouncer.dart';
 
 class OnboardingChatbotScreen extends StatefulWidget {
   const OnboardingChatbotScreen({super.key});
 
   @override
-  State<OnboardingChatbotScreen> createState() => _OnboardingChatbotScreenState();
+  State<OnboardingChatbotScreen> createState() =>
+      _OnboardingChatbotScreenState();
 }
 
 class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
@@ -42,6 +44,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
   List<String> _quickReplies = [];
   List<Genre> _selectedGenres = [];
   List<Genre> _filteredGenres = [];
+  final _searchDebouncer = Debouncer(milliseconds: 300);
   Map<String, bool> _platformConnections = {
     'YouTube': false,
     'Instagram': false,
@@ -49,7 +52,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
     'Facebook': false,
     'Twitter': false,
   };
-  
+
   int _currentStep = 0;
   bool _showTyping = false;
   bool _showQuickReplies = false;
@@ -119,10 +122,10 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
     _typingAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _typingController, curve: Curves.easeInOut),
     );
@@ -131,8 +134,14 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
   Future<void> _preloadResources() async {
     try {
       await Future.wait([
-        precacheImage(const AssetImage('assets/images/afeedi_logo.png'), context),
-        precacheImage(const AssetImage('assets/images/onboarding_bg.jpg'), context),
+        precacheImage(
+          const AssetImage('assets/images/afeedi_logo.png'),
+          context,
+        ),
+        precacheImage(
+          const AssetImage('assets/images/onboarding_bg.jpg'),
+          context,
+        ),
       ]);
     } catch (e) {
       debugPrint('Error preloading resources: $e');
@@ -141,6 +150,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
 
   @override
   void dispose() {
+    _searchDebouncer.dispose();
     _fadeController.dispose();
     _slideController.dispose();
     _typingController.dispose();
@@ -157,7 +167,11 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
     });
   }
 
-  void _handleStepCompleted(int stepNumber, String stepName, Map<String, dynamic> data) {
+  void _handleStepCompleted(
+    int stepNumber,
+    String stepName,
+    Map<String, dynamic> data,
+  ) {
     AnalyticsService.instance.trackOnboardingEvent(
       eventName: AnalyticsEvents.onboardingStepCompleted,
       stepNumber: stepNumber,
@@ -207,11 +221,9 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
         _typingController.stop();
         setState(() {
           _showTyping = false;
-          _messages.add(ChatMessage(
-            text: message,
-            isBot: true,
-            timestamp: DateTime.now(),
-          ));
+          _messages.add(
+            ChatMessage(text: message, isBot: true, timestamp: DateTime.now()),
+          );
         });
         _fadeController.forward();
         _showStepOptions();
@@ -222,7 +234,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
 
   void _showStepOptions() {
     final currentStep = _onboardingSteps[_currentStep];
-    
+
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {
@@ -267,9 +279,9 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
 
   void _updateSuggestions() {
     if (_currentStep >= _onboardingSteps.length) return;
-    
+
     final currentStep = _onboardingSteps[_currentStep];
-    
+
     setState(() {
       switch (_currentStep) {
         case 0: // Welcome step
@@ -277,14 +289,14 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
             'Hi there!',
             'Hello',
             'Let\'s get started',
-            'I\'m ready'
+            'I\'m ready',
           ];
           break;
         case 1: // Name step
           _currentSuggestions = [
             'My name is Alex',
             'Call me Sam',
-            'I\'m Jordan'
+            'I\'m Jordan',
           ];
           break;
         case 2: // Preferences step
@@ -292,14 +304,14 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
             'I love comedy videos',
             'I enjoy educational content',
             'I like music and entertainment',
-            'I prefer short funny clips'
+            'I prefer short funny clips',
           ];
           break;
         case 5: // Final step
           _currentSuggestions = [
             'Sounds great!',
             'I\'m excited to start',
-            'Let\'s do this'
+            'Let\'s do this',
           ];
           break;
         default:
@@ -310,11 +322,9 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
 
   void _addUserMessage(String text) {
     setState(() {
-      _messages.add(ChatMessage(
-        text: text,
-        isBot: false,
-        timestamp: DateTime.now(),
-      ));
+      _messages.add(
+        ChatMessage(text: text, isBot: false, timestamp: DateTime.now()),
+      );
       _showQuickReplies = false;
       _showTextInput = false;
       _showGenreSelection = false;
@@ -334,8 +344,10 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
   }
 
   void _handleGenreSearchChanged(String query) {
-    setState(() {
-      _filteredGenres = _onboardingService.filterGenres(_allGenres, query);
+    _searchDebouncer.run(() {
+      setState(() {
+        _filteredGenres = _onboardingService.filterGenres(_allGenres, query);
+      });
     });
   }
 
@@ -347,7 +359,8 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
 
   void _handlePlatformConnect(String platform) {
     setState(() {
-      _platformConnections[platform] = !(_platformConnections[platform] ?? false);
+      _platformConnections[platform] =
+          !(_platformConnections[platform] ?? false);
     });
   }
 
@@ -361,11 +374,11 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
         .where((entry) => entry.value)
         .map((entry) => entry.key)
         .toList();
-    
+
     final message = connectedPlatforms.isNotEmpty
         ? 'Connected: ${connectedPlatforms.join(', ')}'
         : 'I\'ll connect platforms later';
-    
+
     _addUserMessage(message);
     _processUserInput('Platform selection completed');
   }
@@ -380,13 +393,17 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
     AnalyticsService.instance.trackOnboardingEvent(
       eventName: AnalyticsEvents.onboardingStepCompleted,
       stepNumber: _currentStep,
-      stepName: _currentStep < _onboardingSteps.length ? 'step_${_currentStep + 1}' : 'final_step',
+      stepName: _currentStep < _onboardingSteps.length
+          ? 'step_${_currentStep + 1}'
+          : 'final_step',
       additionalData: {
-        'user_input': input.length > 50 ? '${input.substring(0, 50)}...' : input,
+        'user_input': input.length > 50
+            ? '${input.substring(0, 50)}...'
+            : input,
         'input_length': input.length,
       },
     );
-    
+
     _fadeController.reset();
     _slideController.reset();
 
@@ -408,7 +425,9 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
       stepName: 'completed',
       additionalData: {
         'total_steps': _onboardingSteps.length,
-        'connected_platforms': _platformConnections.values.where((v) => v).length,
+        'connected_platforms': _platformConnections.values
+            .where((v) => v)
+            .length,
         'selected_genres': _selectedGenres.length,
         'completion_time': DateTime.now().toIso8601String(),
         'user_name': _userName,
@@ -431,7 +450,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
     );
 
     _showBotMessage(welcomeMessage);
-    
+
     setState(() {
       _showFinalButton = true;
     });
@@ -457,11 +476,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1A1A2E),
-              Color(0xFF16213E),
-              Color(0xFF0F3460),
-            ],
+            colors: [Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460)],
           ),
         ),
         child: SafeArea(
@@ -532,10 +547,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
             ),
             child: const Text(
               'Start Exploring! 🚀',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
           ),
         ),

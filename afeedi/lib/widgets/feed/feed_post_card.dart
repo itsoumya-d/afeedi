@@ -88,6 +88,7 @@ class FeedPostCard extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.more_vert),
+            tooltip: 'More options',
             onPressed: () {
               // Show more options
             },
@@ -244,6 +245,7 @@ class FeedPostCard extends StatelessWidget {
           const SizedBox(width: 8),
           IconButton(
             icon: const Icon(Icons.bookmark_border),
+            tooltip: 'Save post',
             onPressed: () async {
               await ContentService.instance.trackContentInteraction(
                 contentId: content.id,

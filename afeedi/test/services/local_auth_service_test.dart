@@ -1,3 +1,4 @@
+// ignore_for_file: depend_on_referenced_packages
 import 'package:flutter_test/flutter_test.dart';
 import 'package:afeedi/services/local_auth_service.dart';
 import 'package:afeedi/core/storage/local_storage_service.dart';
@@ -5,6 +6,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive/hive.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+
+class MockPathProviderPlatform extends Fake
+    with MockPlatformInterfaceMixin
+    implements PathProviderPlatform {
+  @override
+  Future<String?> getApplicationDocumentsPath() async {
+    return Directory.systemTemp.path;
+  }
+}
 
 void main() {
   late LocalAuthService authService;
@@ -12,6 +24,7 @@ void main() {
 
   setUpAll(() async {
     // Setup Hive for testing
+    PathProviderPlatform.instance = MockPathProviderPlatform();
     tempDir = await Directory.systemTemp.createTemp('afeedi_test');
     Hive.init(tempDir.path);
   });
@@ -51,6 +64,7 @@ void main() {
       final credentials = jsonDecode(credentialsJson!);
       expect(credentials['password'], isNot(password), reason: 'Password should be hashed, not plain text');
       expect(credentials['password'].length, 64, reason: 'SHA-256 hash should be 64 characters long');
+      expect(credentials['salt'], isNotNull, reason: 'Salt should be generated and stored');
     });
 
     test('signIn works with correct password and fails with incorrect password', () async {

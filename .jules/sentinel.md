@@ -1,0 +1,4 @@
+## 2024-05-24 - Unsalted SHA-256 Password Hashing
+**Vulnerability:** Weak Password Hashing. The `LocalAuthService` was using SHA-256 to hash passwords without a cryptographic salt. This made stored passwords vulnerable to rainbow table attacks and dictionary attacks if the local storage were compromised.
+**Learning:** Legacy implementations or quick setups sometimes rely on simple cryptographic functions like `sha256` without realizing that an unsalted hash provides inadequate protection against pre-computed attacks. Backward compatibility must also be considered when upgrading from an unsalted to a salted implementation so that existing users aren't locked out.
+**Prevention:** Always use a randomly generated, cryptographically secure salt when hashing passwords (or use established libraries that handle salt generation automatically, like bcrypt/argon2). Ensure upgrade paths exist for existing unsalted credentials.

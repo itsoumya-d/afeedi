@@ -21,7 +21,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   bool _isLoading = false;
   bool _hasMore = true;
   PlatformType? _selectedPlatform;
-  
+
   @override
   bool get wantKeepAlive => true;
 
@@ -37,60 +37,70 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     _scrollController.dispose();
     super.dispose();
   }
-  
+
   void _onScroll() {
-    if (_scrollController.position.pixels >= 
+    if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       _loadMorePosts();
     }
   }
-  
+
   Future<void> _loadInitialPosts() async {
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       // Check if user is authenticated and onboarding is completed
       final authService = AuthService.instance;
       final onboardingService = OnboardingService();
       final user = authService.currentUser;
-      
+
       List<Content> feedContent;
-      
+
       if (user != null) {
-        final isOnboardingCompleted = await onboardingService.isOnboardingCompleted();
-        
+        final isOnboardingCompleted = await onboardingService
+            .isOnboardingCompleted();
+
         if (isOnboardingCompleted) {
           // Use personalized content for completed onboarding users
-          feedContent = await ContentService.instance.getPersonalizedContent(limit: 15);
+          feedContent = await ContentService.instance.getPersonalizedContent(
+            limit: 15,
+          );
         } else {
           // Use onboarding-based recommendations for users in progress
-          feedContent = await ContentService.instance.getOnboardingBasedRecommendations(limit: 15);
+          feedContent = await ContentService.instance
+              .getOnboardingBasedRecommendations(limit: 15);
         }
       } else {
         // Use general trending content for unauthenticated users
-        feedContent = await ContentService.instance.getTrendingVideos(limit: 15);
+        feedContent = await ContentService.instance.getTrendingVideos(
+          limit: 15,
+        );
       }
-      
+
       // Ensure we have YouTube content for proper video playback
-      final youtubeContent = feedContent.where((content) => 
-        content.platform == PlatformType.youtube
-      ).toList();
-      
+      final youtubeContent = feedContent
+          .where((content) => content.platform == PlatformType.youtube)
+          .toList();
+
       // Mix YouTube content with other platforms for better variety
       final mixedContent = <Content>[];
-      mixedContent.addAll(youtubeContent.take(8)); // Prioritize YouTube for video playback
-      mixedContent.addAll(feedContent.where((content) => 
-        content.platform != PlatformType.youtube
-      ).take(7));
-      
+      mixedContent.addAll(
+        youtubeContent.take(8),
+      ); // Prioritize YouTube for video playback
+      mixedContent.addAll(
+        feedContent
+            .where((content) => content.platform != PlatformType.youtube)
+            .take(7),
+      );
+
       setState(() {
         _allPosts = mixedContent;
         _posts = List.from(_allPosts);
         _isLoading = false;
       });
-      
+
       // Track successful content load with personalization info
       await AnalyticsService.instance.trackUserInteraction(
         action: 'home_content_loaded',
@@ -98,7 +108,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         additionalData: {
           'total_content': mixedContent.length,
           'youtube_content': youtubeContent.length,
-          'is_personalized': user != null && await onboardingService.isOnboardingCompleted(),
+          'is_personalized':
+              user != null && await onboardingService.isOnboardingCompleted(),
           'user_authenticated': user != null,
         },
       );
@@ -108,7 +119,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         _posts = [];
         _isLoading = false;
       });
-      
+
       // Track error
       await AnalyticsService.instance.trackError(
         errorType: 'home_content_load_error',
@@ -117,44 +128,50 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       );
     }
   }
-  
+
   Future<void> _loadMorePosts() async {
     if (_isLoading || !_hasMore) return;
-    
+
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       // Use the same personalization logic as initial load
       final authService = AuthService.instance;
       final onboardingService = OnboardingService();
       final user = authService.currentUser;
-      
+
       List<Content> newPosts;
-      
+
       if (user != null) {
-        final isOnboardingCompleted = await onboardingService.isOnboardingCompleted();
-        
+        final isOnboardingCompleted = await onboardingService
+            .isOnboardingCompleted();
+
         if (isOnboardingCompleted) {
           // Use personalized content for completed onboarding users
-          newPosts = await ContentService.instance.getPersonalizedContent(limit: 8);
+          newPosts = await ContentService.instance.getPersonalizedContent(
+            limit: 8,
+          );
         } else {
           // Use onboarding-based recommendations for users in progress
-          newPosts = await ContentService.instance.getOnboardingBasedRecommendations(limit: 8);
+          newPosts = await ContentService.instance
+              .getOnboardingBasedRecommendations(limit: 8);
         }
       } else {
         // Use general content for unauthenticated users
         newPosts = await ContentService.instance.getFeedContent(limit: 8);
       }
-      
+
       setState(() {
         _allPosts.addAll(newPosts);
         // Apply current filter to new posts
         if (_selectedPlatform == null) {
           _posts.addAll(newPosts);
         } else {
-          _posts.addAll(newPosts.where((post) => post.platform == _selectedPlatform));
+          _posts.addAll(
+            newPosts.where((post) => post.platform == _selectedPlatform),
+          );
         }
         _isLoading = false;
         _hasMore = _allPosts.length < 50;
@@ -165,7 +182,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       });
     }
   }
-  
+
   Future<void> _refreshPosts() async {
     setState(() {
       _posts.clear();
@@ -174,7 +191,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     });
     await _loadInitialPosts();
   }
-  
+
   void _handlePlatformFilter(PlatformType? platform) {
     setState(() {
       _selectedPlatform = platform;
@@ -184,7 +201,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         _posts = _allPosts.where((post) => post.platform == platform).toList();
       }
     });
-    
+
     // Navigate to specific platform content if needed
     if (platform == PlatformType.youtube) {
       _navigateToYouTube();
@@ -192,35 +209,36 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       _navigateToTikTok();
     }
   }
-  
+
   void _navigateToYouTube() {
     // Navigate to YouTube-specific content or external YouTube
-    Navigator.of(context).pushNamed('/dashboard', arguments: {'initialTab': 1, 'filter': 'youtube'});
+    Navigator.of(context).pushNamed(
+      '/dashboard',
+      arguments: {'initialTab': 1, 'filter': 'youtube'},
+    );
   }
-  
+
   void _navigateToTikTok() {
     // Navigate to TikTok-specific content (Shorts tab)
-    Navigator.of(context).pushNamed('/dashboard', arguments: {'initialTab': 3, 'filter': 'tiktok'});
+    Navigator.of(
+      context,
+    ).pushNamed('/dashboard', arguments: {'initialTab': 3, 'filter': 'tiktok'});
   }
-  
-
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return Container(
       child: Column(
         children: [
           _buildHeader(),
-          Expanded(
-            child: _buildFeed(),
-          ),
+          Expanded(child: _buildFeed()),
         ],
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -263,7 +281,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       ),
     );
   }
-  
+
   Widget _buildQuickStats() {
     return Container(
       padding: const EdgeInsets.all(8),
@@ -295,7 +313,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
 
   Widget _buildTrendingTopics() {
     final topics = ['#Flutter', '#AI', '#Tech', '#Design'];
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -340,12 +358,28 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   Widget _buildQuickFilters() {
     final filters = [
       {'name': 'All', 'platform': null, 'icon': Icons.apps},
-      {'name': 'YouTube', 'platform': PlatformType.youtube, 'icon': Icons.play_circle},
-      {'name': 'Instagram', 'platform': PlatformType.instagram, 'icon': Icons.camera_alt},
-      {'name': 'TikTok', 'platform': PlatformType.tiktok, 'icon': Icons.music_video},
-      {'name': 'Facebook', 'platform': PlatformType.facebook, 'icon': Icons.facebook},
+      {
+        'name': 'YouTube',
+        'platform': PlatformType.youtube,
+        'icon': Icons.play_circle,
+      },
+      {
+        'name': 'Instagram',
+        'platform': PlatformType.instagram,
+        'icon': Icons.camera_alt,
+      },
+      {
+        'name': 'TikTok',
+        'platform': PlatformType.tiktok,
+        'icon': Icons.music_video,
+      },
+      {
+        'name': 'Facebook',
+        'platform': PlatformType.facebook,
+        'icon': Icons.facebook,
+      },
     ];
-    
+
     return SizedBox(
       height: 32,
       child: ListView.builder(
@@ -354,19 +388,23 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         itemBuilder: (context, index) {
           final filter = filters[index];
           final isSelected = _selectedPlatform == filter['platform'];
-          
+
           return Container(
             margin: const EdgeInsets.only(right: 8),
             child: FilterChip(
               avatar: Icon(
                 filter['icon'] as IconData,
                 size: 16,
-                color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+                color: isSelected
+                    ? Colors.white
+                    : Colors.white.withOpacity(0.7),
               ),
               label: Text(
                 filter['name'] as String,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+                  color: isSelected
+                      ? Colors.white
+                      : Colors.white.withOpacity(0.7),
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
@@ -378,7 +416,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
               backgroundColor: Colors.white.withOpacity(0.1),
               selectedColor: AppTheme.primaryCyan.withOpacity(0.3),
               side: BorderSide(
-                color: isSelected 
+                color: isSelected
                     ? AppTheme.primaryCyan
                     : Colors.white.withOpacity(0.3),
               ),
@@ -389,7 +427,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       ),
     );
   }
-  
+
   Widget _buildFeed() {
     if (_isLoading && _posts.isEmpty) {
       return const Center(
@@ -398,7 +436,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         ),
       );
     }
-    
+
     return RefreshIndicator(
       onRefresh: _refreshPosts,
       color: AppTheme.primaryCyan,
@@ -413,18 +451,18 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
               padding: EdgeInsets.all(20),
               child: Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryCyan),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppTheme.primaryCyan,
+                  ),
                 ),
               ),
             );
           }
-          
+
           final post = _posts[index];
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
-            child: FeedPostCard(
-              content: post,
-            ),
+            child: FeedPostCard(content: post),
           );
         },
       ),

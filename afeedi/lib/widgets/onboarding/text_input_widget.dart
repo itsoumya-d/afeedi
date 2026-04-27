@@ -31,7 +31,6 @@ class TextInputWidget extends StatefulWidget {
 }
 
 class _TextInputWidgetState extends State<TextInputWidget> {
-
   @override
   Widget build(BuildContext context) {
     return SlideTransition(
@@ -44,10 +43,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.08),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.2),
-              width: 1,
-            ),
+            border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,19 +67,13 @@ class _TextInputWidgetState extends State<TextInputWidget> {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.2),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
       ),
       child: TextField(
         controller: widget.controller,
         focusNode: widget.focusNode,
         enabled: widget.isEnabled,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-        ),
+        style: const TextStyle(color: Colors.white, fontSize: 16),
         maxLines: 3,
         minLines: 1,
         onSubmitted: widget.onSubmitted,
@@ -103,7 +93,9 @@ class _TextInputWidgetState extends State<TextInputWidget> {
                 opacity: value.text.trim().isNotEmpty ? 1.0 : 0.5,
                 duration: const Duration(milliseconds: 200),
                 child: IconButton(
-                  onPressed: value.text.trim().isNotEmpty && widget.isEnabled ? widget.onSend : null,
+                  onPressed: value.text.trim().isNotEmpty && widget.isEnabled
+                      ? widget.onSend
+                      : null,
                   icon: Container(
                     width: 32,
                     height: 32,
@@ -151,7 +143,10 @@ class _TextInputWidgetState extends State<TextInputWidget> {
                 widget.onSuggestionTap?.call(suggestion);
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
@@ -181,7 +176,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
       valueListenable: widget.controller,
       builder: (context, value, child) {
         final hasText = value.text.trim().isNotEmpty;
-        
+
         return AnimatedOpacity(
           opacity: hasText ? 1.0 : 0.6,
           duration: const Duration(milliseconds: 200),
@@ -203,10 +198,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.send,
-                    size: 18,
-                  ),
+                  const Icon(Icons.send, size: 18),
                   const SizedBox(width: 8),
                   Text(
                     hasText ? 'Send Message' : 'Type something...',

@@ -42,7 +42,7 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  
+
   List<String> _smartSuggestions = [];
   List<String> _filteredSuggestions = [];
   bool _showSuggestions = false;
@@ -53,14 +53,15 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
     super.initState();
     _textController = TextEditingController();
     _focusNode = FocusNode();
-    
+
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.5),
       end: Offset.zero,
@@ -68,7 +69,7 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
 
     _textController.addListener(_onTextChanged);
     _focusNode.addListener(_onFocusChanged);
-    
+
     _updateSmartSuggestions();
   }
 
@@ -127,10 +128,13 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
       });
     } else {
       final filtered = _smartSuggestions
-          .where((suggestion) => 
-              suggestion.toLowerCase().contains(text) ||
-              text.split(' ').any((word) => 
-                  suggestion.toLowerCase().contains(word)))
+          .where(
+            (suggestion) =>
+                suggestion.toLowerCase().contains(text) ||
+                text
+                    .split(' ')
+                    .any((word) => suggestion.toLowerCase().contains(word)),
+          )
           .take(6)
           .toList();
       setState(() {
@@ -150,9 +154,9 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
     setState(() {
       _hasFocus = _focusNode.hasFocus;
     });
-    
+
     widget.onFocusChanged?.call();
-    
+
     if (_hasFocus) {
       _updateFilteredSuggestions();
     } else {
@@ -172,9 +176,10 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
       _showSuggestions = false;
     });
     _controller.reverse();
-    
+
     // Auto-submit if it's a complete thought
-    if (suggestion.endsWith('!') || suggestion.endsWith('.') || 
+    if (suggestion.endsWith('!') ||
+        suggestion.endsWith('.') ||
         suggestion.length > 20) {
       Future.delayed(const Duration(milliseconds: 500), () {
         _handleSubmit();
@@ -208,37 +213,33 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
               child: SuggestionChips(
                 suggestions: _filteredSuggestions,
                 onSuggestionTap: _onSuggestionTap,
-                padding: const EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                  bottom: 8,
-                ),
+                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
               ),
             ),
           ),
-        
+
         // Text input field
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-             color: AppColors.surface.withOpacity(0.9),
-             borderRadius: BorderRadius.circular(24),
-             border: Border.all(
-               color: _hasFocus
-                   ? AppColors.primary.withOpacity(0.5)
-                   : AppColors.border.withOpacity(0.3),
-               width: 1.5,
-             ),
-             boxShadow: [
-               BoxShadow(
-                 color: _hasFocus
-                     ? AppColors.primary.withOpacity(0.1)
-                     : Colors.black.withOpacity(0.05),
-                 blurRadius: _hasFocus ? 8 : 4,
-                 offset: const Offset(0, 2),
-               ),
-             ],
-           ),
+            color: AppColors.surface.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: _hasFocus
+                  ? AppColors.primary.withOpacity(0.5)
+                  : AppColors.border.withOpacity(0.3),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: _hasFocus
+                    ? AppColors.primary.withOpacity(0.1)
+                    : Colors.black.withOpacity(0.05),
+                blurRadius: _hasFocus ? 8 : 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: Row(
             children: [
               Expanded(
@@ -253,10 +254,10 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
                   decoration: InputDecoration(
                     hintText: widget.hintText ?? 'Type your message...',
                     hintStyle: TextStyle(
-                       color: AppColors.textSecondary.withOpacity(0.6),
-                       fontSize: 16,
-                       fontWeight: FontWeight.w400,
-                     ),
+                      color: AppColors.textSecondary.withOpacity(0.6),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                    ),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -264,15 +265,15 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
                     ),
                   ),
                   style: TextStyle(
-                     color: AppColors.textPrimary,
-                     fontSize: 16,
-                     fontWeight: FontWeight.w400,
-                     height: 1.4,
-                   ),
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    height: 1.4,
+                  ),
                   onSubmitted: (_) => _onSubmit(),
                 ),
               ),
-              
+
               // Send button
               AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
@@ -282,36 +283,40 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      gradient: _textController.text.trim().isNotEmpty && widget.isEnabled
-                           ? const LinearGradient(
-                               colors: [AppColors.primary, AppColors.secondary],
-                               begin: Alignment.topLeft,
-                               end: Alignment.bottomRight,
-                             )
-                           : LinearGradient(
-                               colors: [
-                                 AppColors.primary.withOpacity(0.3),
-                                 AppColors.secondary.withOpacity(0.3),
-                               ],
-                               begin: Alignment.topLeft,
-                               end: Alignment.bottomRight,
-                             ),
+                      gradient:
+                          _textController.text.trim().isNotEmpty &&
+                              widget.isEnabled
+                          ? const LinearGradient(
+                              colors: [AppColors.primary, AppColors.secondary],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                          : LinearGradient(
+                              colors: [
+                                AppColors.primary.withOpacity(0.3),
+                                AppColors.secondary.withOpacity(0.3),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
                       shape: BoxShape.circle,
-                      boxShadow: _textController.text.trim().isNotEmpty && widget.isEnabled
-                           ? [
-                               BoxShadow(
-                                 color: AppColors.primary.withOpacity(0.3),
-                                 blurRadius: 8,
-                                 offset: const Offset(0, 2),
-                               ),
-                             ]
-                           : null,
+                      boxShadow:
+                          _textController.text.trim().isNotEmpty &&
+                              widget.isEnabled
+                          ? [
+                              BoxShadow(
+                                color: AppColors.primary.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                          : null,
                     ),
                     child: Icon(
-                       Icons.send_rounded,
-                       color: Colors.white,
-                       size: 20,
-                     ),
+                      Icons.send_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
                 ),
               ),
@@ -327,19 +332,19 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
   }
 
   void _onSuggestionTap(String suggestion) {
-     _textController.text = suggestion;
-     _textController.selection = TextSelection.fromPosition(
-       TextPosition(offset: suggestion.length),
-     );
-     _onSubmit();
-   }
+    _textController.text = suggestion;
+    _textController.selection = TextSelection.fromPosition(
+      TextPosition(offset: suggestion.length),
+    );
+    _onSubmit();
+  }
 
-   void _onSubmit() {
-     final text = _textController.text.trim();
-     if (text.isNotEmpty && widget.isEnabled) {
-       widget.onMessageSent?.call(text);
-       _textController.clear();
-       _updateFilteredSuggestions();
-     }
-   }
+  void _onSubmit() {
+    final text = _textController.text.trim();
+    if (text.isNotEmpty && widget.isEnabled) {
+      widget.onMessageSent?.call(text);
+      _textController.clear();
+      _updateFilteredSuggestions();
+    }
+  }
 }

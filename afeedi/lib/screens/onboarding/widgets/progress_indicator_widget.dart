@@ -4,70 +4,74 @@ class ProgressIndicatorWidget extends StatefulWidget {
   final double progress;
   final String currentStep;
   final int totalSteps;
-  
+
   const ProgressIndicatorWidget({
     super.key,
     required this.progress,
     required this.currentStep,
     required this.totalSteps,
   });
-  
+
   @override
-  State<ProgressIndicatorWidget> createState() => _ProgressIndicatorWidgetState();
+  State<ProgressIndicatorWidget> createState() =>
+      _ProgressIndicatorWidgetState();
 }
 
 class _ProgressIndicatorWidgetState extends State<ProgressIndicatorWidget>
     with TickerProviderStateMixin {
   late AnimationController _progressController;
   late Animation<double> _progressAnimation;
-  
+
   @override
   void initState() {
     super.initState();
     _initializeAnimations();
   }
-  
+
   void _initializeAnimations() {
     _progressController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
-    _progressAnimation = Tween<double>(
-      begin: 0.0,
-      end: widget.progress,
-    ).animate(CurvedAnimation(
-      parent: _progressController,
-      curve: Curves.easeOutCubic,
-    ));
-    
+
+    _progressAnimation = Tween<double>(begin: 0.0, end: widget.progress)
+        .animate(
+          CurvedAnimation(
+            parent: _progressController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
     _progressController.forward();
   }
-  
+
   @override
   void didUpdateWidget(ProgressIndicatorWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     if (oldWidget.progress != widget.progress) {
-      _progressAnimation = Tween<double>(
-        begin: oldWidget.progress,
-        end: widget.progress,
-      ).animate(CurvedAnimation(
-        parent: _progressController,
-        curve: Curves.easeOutCubic,
-      ));
-      
+      _progressAnimation =
+          Tween<double>(
+            begin: oldWidget.progress,
+            end: widget.progress,
+          ).animate(
+            CurvedAnimation(
+              parent: _progressController,
+              curve: Curves.easeOutCubic,
+            ),
+          );
+
       _progressController.reset();
       _progressController.forward();
     }
   }
-  
+
   @override
   void dispose() {
     _progressController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -93,7 +97,7 @@ class _ProgressIndicatorWidgetState extends State<ProgressIndicatorWidget>
       ),
     );
   }
-  
+
   Widget _buildProgressHeader() {
     return Row(
       children: [
@@ -124,9 +128,9 @@ class _ProgressIndicatorWidgetState extends State<ProgressIndicatorWidget>
             children: [
               Text(
                 'Setting up your experience',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
               Text(
                 widget.currentStep,
@@ -141,10 +145,10 @@ class _ProgressIndicatorWidgetState extends State<ProgressIndicatorWidget>
       ],
     );
   }
-  
+
   Widget _buildStepCounter() {
     final currentStepNumber = (widget.progress * widget.totalSteps).ceil();
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -160,7 +164,7 @@ class _ProgressIndicatorWidgetState extends State<ProgressIndicatorWidget>
       ),
     );
   }
-  
+
   Widget _buildProgressBar() {
     return AnimatedBuilder(
       animation: _progressAnimation,
@@ -175,15 +179,16 @@ class _ProgressIndicatorWidgetState extends State<ProgressIndicatorWidget>
       },
     );
   }
-  
+
   Widget _buildSegmentedProgressBar() {
     return Row(
       children: List.generate(widget.totalSteps, (index) {
         final stepProgress = (index + 1) / widget.totalSteps;
         final isCompleted = _progressAnimation.value >= stepProgress;
-        final isCurrent = _progressAnimation.value > (index / widget.totalSteps) && 
-                         _progressAnimation.value <= stepProgress;
-        
+        final isCurrent =
+            _progressAnimation.value > (index / widget.totalSteps) &&
+            _progressAnimation.value <= stepProgress;
+
         return Expanded(
           child: Container(
             margin: EdgeInsets.only(
@@ -194,8 +199,8 @@ class _ProgressIndicatorWidgetState extends State<ProgressIndicatorWidget>
               color: isCompleted
                   ? Theme.of(context).colorScheme.primary
                   : isCurrent
-                      ? Theme.of(context).colorScheme.primary.withOpacity(0.5)
-                      : Theme.of(context).colorScheme.surfaceVariant,
+                  ? Theme.of(context).colorScheme.primary.withOpacity(0.5)
+                  : Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -203,7 +208,7 @@ class _ProgressIndicatorWidgetState extends State<ProgressIndicatorWidget>
       }),
     );
   }
-  
+
   Widget _buildLinearProgressBar() {
     return Container(
       height: 6,
@@ -223,10 +228,10 @@ class _ProgressIndicatorWidgetState extends State<ProgressIndicatorWidget>
       ),
     );
   }
-  
+
   Widget _buildProgressText() {
     final percentage = (_progressAnimation.value * 100).round();
-    
+
     return AnimatedBuilder(
       animation: _progressAnimation,
       builder: (context, child) {
@@ -279,35 +284,35 @@ class CustomProgressPainter extends CustomPainter {
   final Color backgroundColor;
   final Color progressColor;
   final double strokeWidth;
-  
+
   CustomProgressPainter({
     required this.progress,
     required this.backgroundColor,
     required this.progressColor,
     this.strokeWidth = 4.0,
   });
-  
+
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - strokeWidth) / 2;
-    
+
     // Background circle
     final backgroundPaint = Paint()
       ..color = backgroundColor
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
-    
+
     canvas.drawCircle(center, radius, backgroundPaint);
-    
+
     // Progress arc
     final progressPaint = Paint()
       ..color = progressColor
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
-    
+
     final sweepAngle = 2 * 3.14159 * progress;
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
@@ -317,12 +322,12 @@ class CustomProgressPainter extends CustomPainter {
       progressPaint,
     );
   }
-  
+
   @override
   bool shouldRepaint(CustomProgressPainter oldDelegate) {
     return oldDelegate.progress != progress ||
-           oldDelegate.backgroundColor != backgroundColor ||
-           oldDelegate.progressColor != progressColor ||
-           oldDelegate.strokeWidth != strokeWidth;
+        oldDelegate.backgroundColor != backgroundColor ||
+        oldDelegate.progressColor != progressColor ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }

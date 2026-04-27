@@ -7,7 +7,7 @@ class ViewingHabit {
   final int averageDuration; // in minutes
   final List<String> preferredGenres;
   final List<String> preferredPlatforms;
-  
+
   ViewingHabit({
     required this.id,
     required this.title,
@@ -18,7 +18,7 @@ class ViewingHabit {
     required this.preferredGenres,
     required this.preferredPlatforms,
   });
-  
+
   ViewingHabit copyWith({
     String? id,
     String? title,
@@ -40,7 +40,7 @@ class ViewingHabit {
       preferredPlatforms: preferredPlatforms ?? this.preferredPlatforms,
     );
   }
-  
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -53,7 +53,7 @@ class ViewingHabit {
       'preferredPlatforms': preferredPlatforms,
     };
   }
-  
+
   factory ViewingHabit.fromJson(Map<String, dynamic> json) {
     return ViewingHabit(
       id: json['id'],

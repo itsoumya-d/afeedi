@@ -14,42 +14,41 @@ import 'core/storage/local_storage_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
     // Initialize Hive for local storage
     await Hive.initFlutter();
-    
+
     // Initialize Local Storage Service
     await LocalStorageService.instance.initialize();
-    
+
     // Initialize Local Auth Service
     await LocalAuthService.instance.initialize();
-    
+
     // Initialize Analytics Service
     await AnalyticsService.instance.initialize();
-    
+
     // Initialize Onboarding Service
     await OnboardingService.instance.initialize();
-    
+
     // Initialize Recommendation Integration Service
     await RecommendationIntegrationService.instance.initialize();
-    
+
     // Initialize Platform View Registration Service for web
     if (kIsWeb) {
       await PlatformViewRegistrationService.instance.initialize();
     }
-    
+
     // Track app launch
     await AnalyticsService.instance.trackUserInteraction(
       action: 'app_launch',
       screen: 'main',
     );
-    
   } catch (error) {
     // Handle initialization errors
     debugPrint('Initialization error: $error');
   }
-  
+
   runApp(const ProviderScope(child: AfeediApp()));
 }
 

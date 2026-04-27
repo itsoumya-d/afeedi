@@ -8,22 +8,23 @@ class SettingsTab extends StatefulWidget {
   State<SettingsTab> createState() => _SettingsTabState();
 }
 
-class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClientMixin {
+class _SettingsTabState extends State<SettingsTab>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-  
+
   // Privacy settings
   bool _dataCollection = true;
   bool _personalizedAds = false;
   bool _analyticsSharing = true;
   bool _locationTracking = false;
-  
+
   // Content settings
   bool _autoplay = true;
   bool _downloadOnWifi = true;
   bool _highQuality = false;
   bool _darkMode = true;
-  
+
   // Notification settings
   bool _pushNotifications = true;
   bool _emailNotifications = false;
@@ -33,7 +34,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return Container(
       child: SingleChildScrollView(
         child: Column(
@@ -50,7 +51,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -67,11 +68,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
               ),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.person,
-              color: Colors.white,
-              size: 24,
-            ),
+            child: const Icon(Icons.person, color: Colors.white, size: 24),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -120,16 +117,13 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           const SizedBox(height: 2),
           Text(
             'Active',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 9,
-            ),
+            style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 9),
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildPrivacySection() {
     return _buildSection(
       title: 'Privacy & Data',
@@ -176,7 +170,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ],
     );
   }
-  
+
   Widget _buildContentSection() {
     return _buildSection(
       title: 'Content & Playback',
@@ -216,7 +210,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ],
     );
   }
-  
+
   Widget _buildNotificationSection() {
     return _buildSection(
       title: 'Notifications',
@@ -250,7 +244,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ],
     );
   }
-  
+
   Widget _buildAccountSection() {
     return _buildSection(
       title: 'Account',
@@ -284,7 +278,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ],
     );
   }
-  
+
   Widget _buildAboutSection() {
     return _buildSection(
       title: 'About',
@@ -318,7 +312,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ],
     );
   }
-  
+
   Widget _buildSection({
     required String title,
     required IconData icon,
@@ -344,11 +338,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
                     color: iconColor.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    icon,
-                    color: iconColor,
-                    size: 20,
-                  ),
+                  child: Icon(icon, color: iconColor, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -367,7 +357,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   Widget _buildToggleItem({
     required String title,
     required String subtitle,
@@ -413,7 +403,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   Widget _buildActionItem({
     required String title,
     required String subtitle,
@@ -467,7 +457,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   // Dialog methods
   void _showDataDownloadDialog() {
     showDialog(
@@ -485,10 +475,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
             onPressed: () {
@@ -504,7 +491,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   void _showDeleteAccountDialog() {
     showDialog(
       context: context,
@@ -521,35 +508,26 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               // TODO: Implement account deletion
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
   }
-  
+
   void _showClearCacheDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF2D1B69),
-        title: const Text(
-          'Clear Cache',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Clear Cache', style: TextStyle(color: Colors.white)),
         content: Text(
           'This will free up storage space but may slow down the app temporarily.',
           style: TextStyle(color: Colors.white.withOpacity(0.8)),
@@ -557,10 +535,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
             onPressed: () {
@@ -576,7 +551,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   void _showChangePasswordDialog() {
     showDialog(
       context: context,
@@ -593,10 +568,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
             onPressed: () {
@@ -612,7 +584,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   void _showConnectedAccountsDialog() {
     showDialog(
       context: context,
@@ -642,28 +614,27 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   Widget _buildConnectedAccount(String platform, bool isConnected) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            platform,
-            style: const TextStyle(color: Colors.white),
-          ),
+          Text(platform, style: const TextStyle(color: Colors.white)),
           Text(
             isConnected ? 'Connected' : 'Not Connected',
             style: TextStyle(
-              color: isConnected ? AppTheme.primaryCyan : Colors.white.withOpacity(0.5),
+              color: isConnected
+                  ? AppTheme.primaryCyan
+                  : Colors.white.withOpacity(0.5),
             ),
           ),
         ],
       ),
     );
   }
-  
+
   void _showHelpDialog() {
     showDialog(
       context: context,
@@ -689,7 +660,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   void _showTermsDialog() {
     showDialog(
       context: context,
@@ -706,10 +677,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
             onPressed: () {
@@ -725,7 +693,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   void _showPrivacyDialog() {
     showDialog(
       context: context,
@@ -742,10 +710,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
             onPressed: () {
@@ -761,12 +726,12 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   // Navigation methods
   void _navigateToProfile() {
     // TODO: Navigate to profile screen
   }
-  
+
   void _navigateToSubscription() {
     // TODO: Navigate to subscription screen
   }

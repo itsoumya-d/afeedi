@@ -4,17 +4,17 @@ class AppTheme {
   // Primary gradient colors from #00D4FF (cyan) to #FF3C7E (pink)
   static const Color primaryCyan = Color(0xFF00D4FF);
   static const Color primaryPink = Color(0xFFFF3C7E);
-  
+
   // Dark theme gradient colors from #0D0B1E to #2D1B69
   static const Color darkPrimary = Color(0xFF0D0B1E);
   static const Color darkSecondary = Color(0xFF2D1B69);
-  
+
   // Additional colors
   static const Color surfaceLight = Color(0xFFFAFAFA);
   static const Color surfaceDark = Color(0xFF121212);
   static const Color onSurfaceLight = Color(0xFF1C1B1F);
   static const Color onSurfaceDark = Color(0xFFE6E1E5);
-  
+
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
@@ -42,9 +42,7 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         color: surfaceLight,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -86,7 +84,7 @@ class AppTheme {
       ),
     );
   }
-  
+
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
@@ -115,9 +113,7 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         color: surfaceDark,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -159,14 +155,14 @@ class AppTheme {
       ),
     );
   }
-  
+
   // Gradient decorations for special UI elements
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [primaryCyan, primaryPink],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
-  
+
   static const LinearGradient darkGradient = LinearGradient(
     colors: [darkPrimary, darkSecondary],
     begin: Alignment.topLeft,

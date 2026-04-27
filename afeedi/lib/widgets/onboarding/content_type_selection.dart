@@ -20,7 +20,7 @@ class ContentTypeSelection extends StatefulWidget {
 
 class _ContentTypeSelectionState extends State<ContentTypeSelection> {
   late List<String> _selectedContentTypes;
-  
+
   // Content types with descriptions and icons
   final List<Map<String, dynamic>> _contentTypes = [
     {
@@ -115,9 +115,9 @@ class _ContentTypeSelectionState extends State<ContentTypeSelection> {
             fontWeight: FontWeight.w500,
           ),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Content type cards
         ..._contentTypes.asMap().entries.map((entry) {
           final index = entry.key;
@@ -129,9 +129,9 @@ class _ContentTypeSelectionState extends State<ContentTypeSelection> {
             index: index,
           );
         }).toList(),
-        
+
         const SizedBox(height: 16),
-        
+
         // Tip box
         Container(
           padding: const EdgeInsets.all(16),
@@ -167,78 +167,85 @@ class _ContentTypeSelectionState extends State<ContentTypeSelection> {
     required int index,
   }) {
     final isSelected = _selectedContentTypes.contains(type);
-    
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: () => _toggleContentType(type),
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? AppColors.primaryLight.withOpacity(0.1)
-                : Colors.grey.withOpacity(0.05),
+          padding: const EdgeInsets.only(bottom: 12),
+          child: InkWell(
+            onTap: () => _toggleContentType(type),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected
-                  ? AppColors.primaryLight
-                  : Colors.grey.withOpacity(0.2),
-              width: isSelected ? 2 : 1,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColors.primaryLight.withOpacity(0.1)
+                    : Colors.grey.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isSelected
+                      ? AppColors.primaryLight
+                      : Colors.grey.withOpacity(0.2),
+                  width: isSelected ? 2 : 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primaryLight.withOpacity(0.2)
+                          : Colors.grey.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: isSelected
+                          ? AppColors.primaryLight
+                          : Colors.grey[600],
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          type,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: isSelected
+                                ? AppColors.primaryLight
+                                : Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          description,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Checkbox(
+                    value: isSelected,
+                    onChanged: (_) => _toggleContentType(type),
+                    activeColor: AppColors.primaryLight,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.primaryLight.withOpacity(0.2)
-                      : Colors.grey.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  icon,
-                  color: isSelected ? AppColors.primaryLight : Colors.grey[600],
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      type,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: isSelected ? AppColors.primaryLight : Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Checkbox(
-                value: isSelected,
-                onChanged: (_) => _toggleContentType(type),
-                activeColor: AppColors.primaryLight,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ).animate().fadeIn(duration: 300.ms, delay: (50 * index).ms).slideY(begin: 0.05, end: 0);
+        )
+        .animate()
+        .fadeIn(duration: 300.ms, delay: (50 * index).ms)
+        .slideY(begin: 0.05, end: 0);
   }
 }

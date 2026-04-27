@@ -18,7 +18,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     with TickerProviderStateMixin {
   int _currentIndex = 0;
   late PageController _pageController;
-  
+
   final List<Map<String, dynamic>> _tabs = [
     {
       'title': 'Home',
@@ -56,10 +56,11 @@ class _DashboardScreenState extends State<DashboardScreen>
   void initState() {
     super.initState();
     _pageController = PageController();
-    
+
     // Handle initial tab from navigation arguments
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       if (args != null && args['initialTab'] != null) {
         final initialTab = args['initialTab'] as int;
         _onTabTapped(initialTab);
@@ -72,7 +73,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     _pageController.dispose();
     super.dispose();
   }
-  
+
   void _onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
@@ -83,7 +84,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       curve: Curves.easeInOut,
     );
   }
-  
+
   void _onPageChanged(int index) {
     setState(() {
       _currentIndex = index;
@@ -109,7 +110,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                 child: PageView(
                   controller: _pageController,
                   onPageChanged: _onPageChanged,
-                  children: _tabs.map((tab) => tab['widget'] as Widget).toList(),
+                  children: _tabs
+                      .map((tab) => tab['widget'] as Widget)
+                      .toList(),
                 ),
               ),
             ],
@@ -123,7 +126,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       ),
     );
   }
-  
+
   Widget _buildAppBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -176,11 +179,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             onPressed: () {
               // Navigate to search
             },
-            icon: const Icon(
-              Icons.search,
-              color: Colors.white,
-              size: 22,
-            ),
+            icon: const Icon(Icons.search, color: Colors.white, size: 22),
           ),
           IconButton(
             onPressed: () {
@@ -212,9 +211,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       ),
     );
   }
-  
 
-  
   String _getGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) {

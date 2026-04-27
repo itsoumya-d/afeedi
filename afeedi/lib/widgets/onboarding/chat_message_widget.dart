@@ -18,7 +18,9 @@ class ChatMessageWidget extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
-          mainAxisAlignment: message.isBot ? MainAxisAlignment.start : MainAxisAlignment.end,
+          mainAxisAlignment: message.isBot
+              ? MainAxisAlignment.start
+              : MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (message.isBot) ..._buildBotMessage(),
@@ -42,11 +44,7 @@ class ChatMessageWidget extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Icon(
-          Icons.smart_toy,
-          color: Colors.white,
-          size: 18,
-        ),
+        child: const Icon(Icons.smart_toy, color: Colors.white, size: 18),
       ),
       const SizedBox(width: 12),
       Expanded(
@@ -60,10 +58,7 @@ class ChatMessageWidget extends StatelessWidget {
               bottomLeft: Radius.circular(16),
               bottomRight: Radius.circular(16),
             ),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.2),
-              width: 1,
-            ),
+            border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
           ),
           child: Text(
             message.text,
@@ -116,11 +111,7 @@ class ChatMessageWidget extends StatelessWidget {
           color: Colors.white.withOpacity(0.2),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Icon(
-          Icons.person,
-          color: Colors.white,
-          size: 18,
-        ),
+        child: const Icon(Icons.person, color: Colors.white, size: 18),
       ),
     ];
   }

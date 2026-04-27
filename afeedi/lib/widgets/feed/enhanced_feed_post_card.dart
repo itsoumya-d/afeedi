@@ -13,7 +13,7 @@ class EnhancedFeedPostCard extends StatefulWidget {
   final VoidCallback? onShare;
   final bool showInteractions;
   final bool showPlatformLogo;
-  
+
   const EnhancedFeedPostCard({
     super.key,
     required this.content,
@@ -24,7 +24,7 @@ class EnhancedFeedPostCard extends StatefulWidget {
     this.showInteractions = true,
     this.showPlatformLogo = true,
   });
-  
+
   @override
   State<EnhancedFeedPostCard> createState() => _EnhancedFeedPostCardState();
 }
@@ -33,7 +33,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
   bool _isLiked = false;
   bool _isSaved = false;
   bool _showVideoPlayer = false;
-  
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -41,10 +41,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       color: const Color(0xFF1A1A2E),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: Colors.white.withOpacity(0.1),
-          width: 1,
-        ),
+        side: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,7 +53,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -71,7 +68,8 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             backgroundColor: AppTheme.primaryCyan.withOpacity(0.3),
             child: widget.content.creatorAvatarUrl == null
                 ? Text(
-                    widget.content.creatorName?.substring(0, 1).toUpperCase() ?? 'U',
+                    widget.content.creatorName?.substring(0, 1).toUpperCase() ??
+                        'U',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -80,7 +78,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                 : null,
           ),
           const SizedBox(width: 12),
-          
+
           // Creator info and platform
           Expanded(
             child: Column(
@@ -138,20 +136,17 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
               ],
             ),
           ),
-          
+
           // More options
           IconButton(
             onPressed: _showMoreOptions,
-            icon: Icon(
-              Icons.more_vert,
-              color: Colors.white.withOpacity(0.7),
-            ),
+            icon: Icon(Icons.more_vert, color: Colors.white.withOpacity(0.7)),
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildPlatformLogo() {
     return Container(
       padding: const EdgeInsets.all(4),
@@ -159,14 +154,10 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
         color: _getPlatformColor().withOpacity(0.2),
         borderRadius: BorderRadius.circular(6),
       ),
-      child: Icon(
-        _getPlatformIcon(),
-        size: 16,
-        color: _getPlatformColor(),
-      ),
+      child: Icon(_getPlatformIcon(), size: 16, color: _getPlatformColor()),
     );
   }
-  
+
   Widget _buildPlatformBadge() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -181,11 +172,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            _getPlatformIcon(),
-            size: 12,
-            color: _getPlatformColor(),
-          ),
+          Icon(_getPlatformIcon(), size: 12, color: _getPlatformColor()),
           const SizedBox(width: 4),
           Text(
             widget.content.platform.name.toUpperCase(),
@@ -199,7 +186,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   Widget _buildContent() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,7 +206,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-        
+
         if (widget.content.description != null) ...[
           const SizedBox(height: 8),
           Padding(
@@ -235,12 +222,12 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             ),
           ),
         ],
-        
+
         const SizedBox(height: 12),
-        
+
         // Media content
         _buildMediaContent(),
-        
+
         // Tags
         if (widget.content.tags.isNotEmpty) ...[
           const SizedBox(height: 12),
@@ -249,7 +236,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ],
     );
   }
-  
+
   Widget _buildMediaContent() {
     return GestureDetector(
       onTap: () {
@@ -258,7 +245,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
         });
         _showVideoPlayerModal();
         widget.onTap?.call();
-        
+
         // Track content tap
         AnalyticsService.instance.trackUserInteraction(
           action: 'feed_content_tapped',
@@ -295,7 +282,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
               )
             else
               _buildPlaceholderThumbnail(),
-            
+
             // Play button overlay
             Center(
               child: Container(
@@ -313,14 +300,17 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                 ),
               ),
             ),
-            
+
             // Duration badge
             if (widget.content.durationSeconds != null)
               Positioned(
                 bottom: 8,
                 right: 8,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.8),
                     borderRadius: BorderRadius.circular(4),
@@ -335,21 +325,19 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                   ),
                 ),
               ),
-            
+
             // Platform branding
             Positioned(
               top: 8,
               left: 8,
-              child: PlatformBrandingWidget(
-                platform: widget.content.platform,
-              ),
+              child: PlatformBrandingWidget(platform: widget.content.platform),
             ),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildPlaceholderThumbnail() {
     return Container(
       width: double.infinity,
@@ -386,7 +374,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   Widget _buildTags() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -413,7 +401,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   Widget _buildInteractions() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -429,7 +417,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                 _isLiked = !_isLiked;
               });
               widget.onLike?.call();
-              
+
               AnalyticsService.instance.trackUserInteraction(
                 action: _isLiked ? 'content_liked' : 'content_unliked',
                 screen: 'feed',
@@ -440,9 +428,9 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
               );
             },
           ),
-          
+
           const SizedBox(width: 24),
-          
+
           // Comment button
           _buildInteractionButton(
             icon: Icons.comment_outlined,
@@ -451,7 +439,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             onTap: () {
               widget.onComment?.call();
               _showCommentsModal();
-              
+
               AnalyticsService.instance.trackUserInteraction(
                 action: 'content_comment_opened',
                 screen: 'feed',
@@ -462,9 +450,9 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
               );
             },
           ),
-          
+
           const SizedBox(width: 24),
-          
+
           // Share button
           _buildInteractionButton(
             icon: Icons.share_outlined,
@@ -473,7 +461,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             onTap: () {
               widget.onShare?.call();
               _showShareModal();
-              
+
               AnalyticsService.instance.trackUserInteraction(
                 action: 'content_share_opened',
                 screen: 'feed',
@@ -484,19 +472,21 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
               );
             },
           ),
-          
+
           const Spacer(),
-          
+
           // Save button
           _buildInteractionButton(
             icon: _isSaved ? Icons.bookmark : Icons.bookmark_border,
             label: '',
-            color: _isSaved ? AppTheme.primaryCyan : Colors.white.withOpacity(0.7),
+            color: _isSaved
+                ? AppTheme.primaryCyan
+                : Colors.white.withOpacity(0.7),
             onTap: () {
               setState(() {
                 _isSaved = !_isSaved;
               });
-              
+
               AnalyticsService.instance.trackUserInteraction(
                 action: _isSaved ? 'content_saved' : 'content_unsaved',
                 screen: 'feed',
@@ -511,7 +501,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   Widget _buildInteractionButton({
     required IconData icon,
     required String label,
@@ -539,7 +529,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   void _showVideoPlayerModal() {
     showModalBottomSheet(
       context: context,
@@ -588,7 +578,11 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                     ),
                     child: IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close, color: Colors.white, size: 20),
+                      icon: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ],
@@ -597,7 +591,10 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             // Video Player
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Center(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
@@ -616,7 +613,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   void _showCommentsModal() {
     showModalBottomSheet(
       context: context,
@@ -647,7 +644,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   void _showShareModal() {
     showModalBottomSheet(
       context: context,
@@ -668,7 +665,10 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             const SizedBox(height: 16),
             ListTile(
               leading: const Icon(Icons.link, color: Colors.white),
-              title: const Text('Copy Link', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Copy Link',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 // Copy video URL or embed URL
                 Navigator.pop(context);
@@ -679,7 +679,10 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             ),
             ListTile(
               leading: const Icon(Icons.share, color: Colors.white),
-              title: const Text('Share to...', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Share to...',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 // Implement native sharing
@@ -690,7 +693,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   void _showMoreOptions() {
     showModalBottomSheet(
       context: context,
@@ -702,17 +705,26 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
           children: [
             ListTile(
               leading: const Icon(Icons.schedule, color: Colors.white),
-              title: const Text('Schedule for Later', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Schedule for Later',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
               leading: const Icon(Icons.report, color: Colors.white),
-              title: const Text('Report', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Report',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
               leading: const Icon(Icons.block, color: Colors.white),
-              title: const Text('Not Interested', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Not Interested',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () => Navigator.pop(context),
             ),
           ],
@@ -720,7 +732,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   // Helper methods
   Color _getPlatformColor() {
     switch (widget.content.platform) {
@@ -736,7 +748,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
         return AppTheme.primaryCyan;
     }
   }
-  
+
   IconData _getPlatformIcon() {
     switch (widget.content.platform) {
       case PlatformType.youtube:
@@ -751,7 +763,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
         return Icons.video_library;
     }
   }
-  
+
   String _formatCount(int count) {
     if (count >= 1000000) {
       return '${(count / 1000000).toStringAsFixed(1)}M';
@@ -760,13 +772,13 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
     }
     return count.toString();
   }
-  
+
   String _getTimeAgo() {
     if (widget.content.publishedAt == null) return 'Recently';
-    
+
     final now = DateTime.now();
     final difference = now.difference(widget.content.publishedAt!);
-    
+
     if (difference.inDays > 0) {
       return '${difference.inDays}d ago';
     } else if (difference.inHours > 0) {

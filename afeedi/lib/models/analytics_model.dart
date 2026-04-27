@@ -1,10 +1,4 @@
-enum EventType {
-  onboarding,
-  oauth,
-  userInteraction,
-  performance,
-  error,
-}
+enum EventType { onboarding, oauth, userInteraction, performance, error }
 
 class AnalyticsEvent {
   final String id;
@@ -194,9 +188,10 @@ class UserSession {
 
   bool get isExpired => expiresAt.isBefore(DateTime.now());
   bool get isValid => isActive && !isExpired;
-  
+
   Duration get sessionDuration => lastActivityAt.difference(createdAt);
-  Duration get timeSinceLastActivity => DateTime.now().difference(lastActivityAt);
+  Duration get timeSinceLastActivity =>
+      DateTime.now().difference(lastActivityAt);
 
   String? get deviceType => deviceInfo['type'] as String?;
   String? get deviceModel => deviceInfo['model'] as String?;
@@ -320,14 +315,14 @@ class AnalyticsReport {
   }
 
   Duration get reportPeriod => endDate.difference(startDate);
-  
+
   int? get totalEvents => summary['total_events'] as int?;
   int? get uniqueUsers => summary['unique_users'] as int?;
-  double? get averageSessionDuration => summary['average_session_duration'] as double?;
-  Map<String, int>? get eventBreakdown => 
-      summary['event_breakdown'] != null 
-          ? Map<String, int>.from(summary['event_breakdown']) 
-          : null;
+  double? get averageSessionDuration =>
+      summary['average_session_duration'] as double?;
+  Map<String, int>? get eventBreakdown => summary['event_breakdown'] != null
+      ? Map<String, int>.from(summary['event_breakdown'])
+      : null;
 
   @override
   String toString() {
@@ -363,14 +358,18 @@ class UserBehaviorInsight {
       userId: json['user_id'] as String,
       screenViews: Map<String, int>.from(json['screen_views'] ?? {}),
       actionCounts: Map<String, int>.from(json['action_counts'] ?? {}),
-      preferredContentTypes: List<String>.from(json['preferred_content_types'] ?? []),
+      preferredContentTypes: List<String>.from(
+        json['preferred_content_types'] ?? [],
+      ),
       mostUsedFeatures: List<String>.from(json['most_used_features'] ?? []),
       engagementScore: (json['engagement_score'] as num?)?.toDouble() ?? 0.0,
       averageSessionDuration: Duration(
         milliseconds: json['average_session_duration_ms'] as int? ?? 0,
       ),
       lastActiveAt: DateTime.parse(json['last_active_at'] as String),
-      additionalMetrics: Map<String, dynamic>.from(json['additional_metrics'] ?? {}),
+      additionalMetrics: Map<String, dynamic>.from(
+        json['additional_metrics'] ?? {},
+      ),
     );
   }
 
@@ -397,20 +396,18 @@ class UserBehaviorInsight {
 
   String? get mostViewedScreen {
     if (screenViews.isEmpty) return null;
-    return screenViews.entries
-        .reduce((a, b) => a.value > b.value ? a : b)
-        .key;
+    return screenViews.entries.reduce((a, b) => a.value > b.value ? a : b).key;
   }
 
   String? get mostUsedAction {
     if (actionCounts.isEmpty) return null;
-    return actionCounts.entries
-        .reduce((a, b) => a.value > b.value ? a : b)
-        .key;
+    return actionCounts.entries.reduce((a, b) => a.value > b.value ? a : b).key;
   }
 
-  int get totalActions => actionCounts.values.fold(0, (sum, count) => sum + count);
-  int get totalScreenViews => screenViews.values.fold(0, (sum, count) => sum + count);
+  int get totalActions =>
+      actionCounts.values.fold(0, (sum, count) => sum + count);
+  int get totalScreenViews =>
+      screenViews.values.fold(0, (sum, count) => sum + count);
 
   @override
   String toString() {

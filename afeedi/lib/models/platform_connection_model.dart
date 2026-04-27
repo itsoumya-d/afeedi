@@ -120,7 +120,9 @@ class PlatformConnection {
   bool get needsRefresh {
     if (tokenExpiresAt == null) return false;
     // Refresh if token expires within the next hour
-    return tokenExpiresAt!.isBefore(DateTime.now().add(const Duration(hours: 1)));
+    return tokenExpiresAt!.isBefore(
+      DateTime.now().add(const Duration(hours: 1)),
+    );
   }
 
   bool get hasError => syncError != null && syncError!.isNotEmpty;
@@ -353,13 +355,15 @@ class SyncResult {
     if (!success) {
       return 'Sync failed: $error';
     }
-    
+
     final parts = <String>[];
     if (itemsProcessed != null) parts.add('$itemsProcessed processed');
     if (itemsAdded != null && itemsAdded! > 0) parts.add('$itemsAdded added');
-    if (itemsUpdated != null && itemsUpdated! > 0) parts.add('$itemsUpdated updated');
-    if (itemsSkipped != null && itemsSkipped! > 0) parts.add('$itemsSkipped skipped');
-    
+    if (itemsUpdated != null && itemsUpdated! > 0)
+      parts.add('$itemsUpdated updated');
+    if (itemsSkipped != null && itemsSkipped! > 0)
+      parts.add('$itemsSkipped skipped');
+
     return 'Sync completed: ${parts.join(', ')}';
   }
 

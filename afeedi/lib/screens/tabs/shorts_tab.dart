@@ -24,41 +24,43 @@ class _ShortsTabState extends State<ShortsTab> {
     super.initState();
     _loadShortsContent();
   }
-  
+
   Future<void> _loadShortsContent() async {
     try {
       setState(() {
         _isLoading = true;
         _hasError = false;
       });
-      
+
       // Load short-form content from ContentService
       final allContent = await ContentService.instance.getFeedContent();
-      final shorts = allContent.where((content) => 
-        content.contentType == ContentType.short || 
-        content.contentType == ContentType.reel ||
-        (content.durationSeconds != null && content.durationSeconds! <= 180)
-      ).toList();
-      
+      final shorts = allContent
+          .where(
+            (content) =>
+                content.contentType == ContentType.short ||
+                content.contentType == ContentType.reel ||
+                (content.durationSeconds != null &&
+                    content.durationSeconds! <= 180),
+          )
+          .toList();
+
       setState(() {
         _shortsContent = shorts;
         _isLoading = false;
       });
-      
+
       // Track shorts tab view
       await AnalyticsService.instance.trackUserInteraction(
         action: 'shorts_tab_viewed',
         screen: 'shorts',
-        additionalData: {
-          'shorts_count': shorts.length,
-        },
+        additionalData: {'shorts_count': shorts.length},
       );
     } catch (error) {
       setState(() {
         _isLoading = false;
         _hasError = true;
       });
-      
+
       await AnalyticsService.instance.trackError(
         errorType: 'shorts_loading_error',
         errorMessage: error.toString(),
@@ -78,7 +80,8 @@ class _ShortsTabState extends State<ShortsTab> {
       'comments': '234',
       'shares': '89',
       'category': 'Food',
-      'thumbnail': 'https://via.placeholder.com/300x400/FF6B6B/FFFFFF?text=Cooking+Tips',
+      'thumbnail':
+          'https://via.placeholder.com/300x400/FF6B6B/FFFFFF?text=Cooking+Tips',
       'description': 'Learn how to make perfect pasta in under 10 minutes!',
     },
     {
@@ -90,7 +93,8 @@ class _ShortsTabState extends State<ShortsTab> {
       'comments': '156',
       'shares': '67',
       'category': 'Technology',
-      'thumbnail': 'https://via.placeholder.com/300x400/4ECDC4/FFFFFF?text=Tech+Review',
+      'thumbnail':
+          'https://via.placeholder.com/300x400/4ECDC4/FFFFFF?text=Tech+Review',
       'description': 'Unboxing and reviewing the newest smartphone features.',
     },
     {
@@ -102,7 +106,8 @@ class _ShortsTabState extends State<ShortsTab> {
       'comments': '445',
       'shares': '123',
       'category': 'Health',
-      'thumbnail': 'https://via.placeholder.com/300x400/45B7D1/FFFFFF?text=Fitness',
+      'thumbnail':
+          'https://via.placeholder.com/300x400/45B7D1/FFFFFF?text=Fitness',
       'description': '30-second workout that you can do anywhere!',
     },
     {
@@ -114,7 +119,8 @@ class _ShortsTabState extends State<ShortsTab> {
       'comments': '89',
       'shares': '45',
       'category': 'Art',
-      'thumbnail': 'https://via.placeholder.com/300x400/96CEB4/FFFFFF?text=Art+Tutorial',
+      'thumbnail':
+          'https://via.placeholder.com/300x400/96CEB4/FFFFFF?text=Art+Tutorial',
       'description': 'Learn watercolor techniques for beginners.',
     },
     {
@@ -126,7 +132,8 @@ class _ShortsTabState extends State<ShortsTab> {
       'comments': '567',
       'shares': '234',
       'category': 'Travel',
-      'thumbnail': 'https://via.placeholder.com/300x400/FFEAA7/FFFFFF?text=Travel',
+      'thumbnail':
+          'https://via.placeholder.com/300x400/FFEAA7/FFFFFF?text=Travel',
       'description': 'Hidden gems in Tokyo that tourists never see!',
     },
   ];
@@ -149,7 +156,7 @@ class _ShortsTabState extends State<ShortsTab> {
         ),
       );
     }
-    
+
     if (_hasError) {
       return Scaffold(
         backgroundColor: Colors.black,
@@ -157,11 +164,7 @@ class _ShortsTabState extends State<ShortsTab> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                color: Colors.white,
-                size: 64,
-              ),
+              const Icon(Icons.error_outline, color: Colors.white, size: 64),
               const SizedBox(height: 16),
               const Text(
                 'Failed to load shorts',
@@ -177,7 +180,7 @@ class _ShortsTabState extends State<ShortsTab> {
         ),
       );
     }
-    
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: PageView.builder(
@@ -187,7 +190,7 @@ class _ShortsTabState extends State<ShortsTab> {
           setState(() {
             _currentIndex = index;
           });
-          
+
           // Track short view
           if (_shortsContent.isNotEmpty && index < _shortsContent.length) {
             AnalyticsService.instance.trackUserInteraction(
@@ -201,7 +204,9 @@ class _ShortsTabState extends State<ShortsTab> {
             );
           }
         },
-        itemCount: _shortsContent.isNotEmpty ? _shortsContent.length : _mockShortsData.length,
+        itemCount: _shortsContent.isNotEmpty
+            ? _shortsContent.length
+            : _mockShortsData.length,
         itemBuilder: (context, index) {
           if (_shortsContent.isNotEmpty) {
             return _buildShortItemFromContent(_shortsContent[index]);
@@ -212,7 +217,7 @@ class _ShortsTabState extends State<ShortsTab> {
       ),
     );
   }
-  
+
   Widget _buildShortItemFromContent(Content content) {
     return Stack(
       children: [
@@ -225,14 +230,14 @@ class _ShortsTabState extends State<ShortsTab> {
             showBranding: true,
           ),
         ),
-        
+
         // Overlay with content info and interactions
         Positioned(
           right: 12,
           bottom: 80,
           child: _buildInteractionButtons(content),
         ),
-        
+
         // Content info
         Positioned(
           left: 12,
@@ -243,7 +248,7 @@ class _ShortsTabState extends State<ShortsTab> {
       ],
     );
   }
-  
+
   Widget _buildInteractionButtons(Content content) {
     return Column(
       children: [
@@ -273,7 +278,7 @@ class _ShortsTabState extends State<ShortsTab> {
       ],
     );
   }
-  
+
   Widget _buildContentInfo(Content content) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -290,10 +295,7 @@ class _ShortsTabState extends State<ShortsTab> {
         if (content.title != null)
           Text(
             content.title!,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 14),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -301,10 +303,7 @@ class _ShortsTabState extends State<ShortsTab> {
           const SizedBox(height: 4),
           Text(
             content.description!,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-            ),
+            style: const TextStyle(color: Colors.white70, fontSize: 12),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
@@ -312,7 +311,7 @@ class _ShortsTabState extends State<ShortsTab> {
       ],
     );
   }
-  
+
   void _handleLike(Content content) {
     AnalyticsService.instance.trackUserInteraction(
       action: 'short_liked',
@@ -323,7 +322,7 @@ class _ShortsTabState extends State<ShortsTab> {
       },
     );
   }
-  
+
   void _handleComment(Content content) {
     AnalyticsService.instance.trackUserInteraction(
       action: 'short_comment_opened',
@@ -335,7 +334,7 @@ class _ShortsTabState extends State<ShortsTab> {
     );
     // TODO: Open comment sheet
   }
-  
+
   void _handleShare(Content content) {
     AnalyticsService.instance.trackUserInteraction(
       action: 'short_shared',
@@ -347,7 +346,7 @@ class _ShortsTabState extends State<ShortsTab> {
     );
     // TODO: Implement share functionality
   }
-  
+
   void _showMoreOptions(Content content) {
     showModalBottomSheet(
       context: context,
@@ -359,12 +358,18 @@ class _ShortsTabState extends State<ShortsTab> {
           children: [
             ListTile(
               leading: const Icon(Icons.report, color: Colors.white),
-              title: const Text('Report', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Report',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
               leading: const Icon(Icons.block, color: Colors.white),
-              title: const Text('Not Interested', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Not Interested',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () => Navigator.pop(context),
             ),
           ],
@@ -417,7 +422,10 @@ class _ShortsTabState extends State<ShortsTab> {
                   ),
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTheme.primaryPink,
                       borderRadius: BorderRadius.circular(12),
@@ -502,7 +510,10 @@ class _ShortsTabState extends State<ShortsTab> {
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.white, width: 1),
                       borderRadius: BorderRadius.circular(4),
@@ -521,10 +532,7 @@ class _ShortsTabState extends State<ShortsTab> {
               const SizedBox(height: 8),
               Text(
                 shortData['description'],
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
+                style: const TextStyle(color: Colors.white, fontSize: 14),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -563,7 +571,9 @@ class _ShortsTabState extends State<ShortsTab> {
                   Expanded(
                     child: Row(
                       children: List.generate(
-                        _shortsContent.isNotEmpty ? _shortsContent.length : _mockShortsData.length,
+                        _shortsContent.isNotEmpty
+                            ? _shortsContent.length
+                            : _mockShortsData.length,
                         (index) => Expanded(
                           child: Container(
                             height: 2,
@@ -619,23 +629,19 @@ class _ShortsTabState extends State<ShortsTab> {
               color: Colors.black.withOpacity(0.5),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 24,
-            ),
+            child: Icon(icon, color: Colors.white, size: 24),
           ),
           if (label.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ]
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ],
       ),
     );

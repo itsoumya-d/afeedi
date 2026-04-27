@@ -10,7 +10,7 @@ class SharedBottomNavigation extends StatefulWidget {
   final int currentIndex;
   final Function(int) onTabChanged;
   final bool showFloatingActionButton;
-  
+
   const SharedBottomNavigation({
     super.key,
     required this.currentIndex,
@@ -26,13 +26,9 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
     with TickerProviderStateMixin {
   late AnimationController _fabController;
   late Animation<double> _fabAnimation;
-  
+
   final List<Map<String, dynamic>> _tabs = [
-    {
-      'title': 'Home',
-      'icon': Icons.home_outlined,
-      'activeIcon': Icons.home,
-    },
+    {'title': 'Home', 'icon': Icons.home_outlined, 'activeIcon': Icons.home},
     {
       'title': 'Videos',
       'icon': Icons.play_circle_outline,
@@ -62,9 +58,10 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    _fabAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fabController, curve: Curves.easeInOut),
-    );
+    _fabAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _fabController, curve: Curves.easeInOut));
     _fabController.forward();
   }
 
@@ -112,7 +109,7 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
                   Expanded(
                     flex: 1,
                     child: Center(
-                      child: widget.showFloatingActionButton 
+                      child: widget.showFloatingActionButton
                           ? const SizedBox(width: 48) // Space for FAB
                           : _buildNavItem(2), // Calendar without FAB
                     ),
@@ -141,14 +138,15 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
             child: ScaleTransition(
               scale: _fabAnimation,
               child: FloatingActionButton(
-                onPressed: () => widget.onTabChanged(2), // Calendar tab (now at index 2)
+                onPressed: () =>
+                    widget.onTabChanged(2), // Calendar tab (now at index 2)
                 backgroundColor: AppTheme.primaryPink,
                 elevation: 8,
                 mini: true,
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
                   child: Icon(
-                    widget.currentIndex == 2 
+                    widget.currentIndex == 2
                         ? Icons.calendar_today
                         : Icons.calendar_today_outlined,
                     key: ValueKey(widget.currentIndex == 2),
@@ -165,17 +163,17 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
 
   Widget _buildNavItem(int index) {
     if (index >= _tabs.length) return const SizedBox.shrink();
-    
+
     final tab = _tabs[index];
     final isActive = widget.currentIndex == index;
-    
+
     return GestureDetector(
       onTap: () => widget.onTabChanged(index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
         decoration: BoxDecoration(
-          color: isActive 
+          color: isActive
               ? AppTheme.primaryCyan.withOpacity(0.2)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
@@ -188,7 +186,7 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
               child: Icon(
                 isActive ? tab['activeIcon'] : tab['icon'],
                 key: ValueKey(isActive),
-                color: isActive 
+                color: isActive
                     ? AppTheme.primaryCyan
                     : Colors.white.withOpacity(0.6),
                 size: 22,
@@ -198,7 +196,7 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
             Text(
               tab['title'],
               style: TextStyle(
-                color: isActive 
+                color: isActive
                     ? AppTheme.primaryCyan
                     : Colors.white.withOpacity(0.6),
                 fontSize: 10,
@@ -222,7 +220,7 @@ class NavigationHelper {
       // This will be handled by the parent widget
       return;
     }
-    
+
     // Otherwise, navigate to dashboard with specific tab
     Navigator.of(context).pushNamedAndRemoveUntil(
       '/dashboard',
@@ -270,9 +268,7 @@ class NavigationHelper {
           : null,
       actions: actions,
       flexibleSpace: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.primaryGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
       ),
     );
   }

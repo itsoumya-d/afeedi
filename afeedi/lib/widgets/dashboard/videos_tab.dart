@@ -11,10 +11,11 @@ class VideosTab extends StatefulWidget {
   State<VideosTab> createState() => _VideosTabState();
 }
 
-class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixin {
+class _VideosTabState extends State<VideosTab>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-  
+
   final List<Map<String, dynamic>> _categories = [
     {
       'id': 'trending',
@@ -41,7 +42,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
       'color': Color(0xFFA8E6CF),
     },
   ];
-  
+
   String _selectedCategory = 'trending';
   List<Content> _videos = [];
   bool _isLoading = false;
@@ -51,14 +52,16 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
     super.initState();
     _loadVideos();
   }
-  
+
   void _loadVideos() async {
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
-      final videos = await ContentService.instance.getVideosByCategory(_selectedCategory);
+      final videos = await ContentService.instance.getVideosByCategory(
+        _selectedCategory,
+      );
       setState(() {
         _videos = videos;
         _isLoading = false;
@@ -70,7 +73,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
       print('Error loading videos: $e');
     }
   }
-  
+
   List<Content> get _filteredVideos {
     return _videos;
   }
@@ -78,20 +81,18 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return Container(
       child: Column(
         children: [
           _buildHeader(),
           _buildCategoryTabs(),
-          Expanded(
-            child: _buildVideoGrid(),
-          ),
+          Expanded(child: _buildVideoGrid()),
         ],
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -118,7 +119,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
       ),
     );
   }
-  
+
   Widget _buildCategoryTabs() {
     return Container(
       height: 50,
@@ -129,7 +130,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
         itemBuilder: (context, index) {
           final category = _categories[index];
           final isSelected = _selectedCategory == category['id'];
-          
+
           return GestureDetector(
             onTap: () {
               setState(() {
@@ -141,12 +142,12 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
               margin: const EdgeInsets.only(right: 12),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: isSelected 
+                color: isSelected
                     ? category['color'].withOpacity(0.2)
                     : Colors.white.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(25),
                 border: Border.all(
-                  color: isSelected 
+                  color: isSelected
                       ? category['color']
                       : Colors.white.withOpacity(0.3),
                   width: isSelected ? 2 : 1,
@@ -157,7 +158,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                 children: [
                   Icon(
                     category['icon'],
-                    color: isSelected 
+                    color: isSelected
                         ? category['color']
                         : Colors.white.withOpacity(0.7),
                     size: 20,
@@ -166,11 +167,13 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                   Text(
                     category['name'],
                     style: TextStyle(
-                      color: isSelected 
+                      color: isSelected
                           ? category['color']
                           : Colors.white.withOpacity(0.7),
                       fontSize: 14,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
                     ),
                   ),
                 ],
@@ -181,7 +184,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
       ),
     );
   }
-  
+
   Widget _buildVideoGrid() {
     if (_isLoading) {
       return const Center(
@@ -190,9 +193,9 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
         ),
       );
     }
-    
+
     final filteredVideos = _filteredVideos;
-    
+
     if (filteredVideos.isEmpty) {
       return Center(
         child: Column(
@@ -215,7 +218,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
         ),
       );
     }
-    
+
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -231,7 +234,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
       },
     );
   }
-  
+
   Widget _buildVideoCard(Content video) {
     return GestureDetector(
       onTap: () {
@@ -251,7 +254,9 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
               flex: 3,
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
                   image: DecorationImage(
                     image: NetworkImage(video.thumbnailUrl ?? ''),
                     fit: BoxFit.cover,
@@ -279,7 +284,10 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                       bottom: 8,
                       right: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.8),
                           borderRadius: BorderRadius.circular(4),
@@ -299,9 +307,14 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                       top: 8,
                       left: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
-                          color: _getPlatformColor(video.platform.name).withOpacity(0.9),
+                          color: _getPlatformColor(
+                            video.platform.name,
+                          ).withOpacity(0.9),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -381,7 +394,8 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      video.publishedAt?.toString().split(' ')[0] ?? 'Unknown Date',
+                      video.publishedAt?.toString().split(' ')[0] ??
+                          'Unknown Date',
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.5),
                         fontSize: 9,
@@ -396,7 +410,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
       ),
     );
   }
-  
+
   String _formatCount(int count) {
     if (count >= 1000000) {
       return '${(count / 1000000).toStringAsFixed(1)}M';
@@ -421,7 +435,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
         return AppTheme.primaryCyan;
     }
   }
-  
+
   void _playVideo(Content video) {
     showDialog(
       context: context,
@@ -468,10 +482,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(
-                          Icons.close,
-                          color: Colors.white,
-                        ),
+                        icon: const Icon(Icons.close, color: Colors.white),
                         style: IconButton.styleFrom(
                           backgroundColor: Colors.white.withOpacity(0.1),
                         ),

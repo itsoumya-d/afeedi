@@ -20,7 +20,7 @@ class ViewingHabitsWidget extends StatefulWidget {
 
 class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
   late Map<String, dynamic> _viewingHabits;
-  
+
   // Time of day options
   final List<String> _timeOfDayOptions = [
     'Morning',
@@ -28,7 +28,7 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
     'Evening',
     'Late Night',
   ];
-  
+
   // Session duration options
   final List<Map<String, dynamic>> _sessionDurationOptions = [
     {'label': 'Short (< 15 min)', 'value': 'short'},
@@ -36,7 +36,7 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
     {'label': 'Long (30-60 min)', 'value': 'long'},
     {'label': 'Extended (> 60 min)', 'value': 'extended'},
   ];
-  
+
   // Viewing frequency options
   final List<Map<String, dynamic>> _viewingFrequencyOptions = [
     {'label': 'Multiple times daily', 'value': 'multiple_daily'},
@@ -44,7 +44,7 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
     {'label': 'A few times a week', 'value': 'weekly'},
     {'label': 'Occasionally', 'value': 'occasionally'},
   ];
-  
+
   // Content consumption options
   final List<Map<String, dynamic>> _contentConsumptionOptions = [
     {
@@ -92,14 +92,16 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
   }
 
   void _toggleTimeOfDay(String timeOfDay) {
-    final List<String> updatedTimes = List.from(_viewingHabits['preferredTimeOfDay'] as List);
-    
+    final List<String> updatedTimes = List.from(
+      _viewingHabits['preferredTimeOfDay'] as List,
+    );
+
     if (updatedTimes.contains(timeOfDay)) {
       updatedTimes.remove(timeOfDay);
     } else {
       updatedTimes.add(timeOfDay);
     }
-    
+
     _updateViewingHabits('preferredTimeOfDay', updatedTimes);
   }
 
@@ -112,30 +114,30 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
         _buildSectionTitle('When do you usually watch videos?'),
         const SizedBox(height: 12),
         _buildTimeOfDaySelector(),
-        
+
         const SizedBox(height: 24),
-        
+
         // Session duration
         _buildSectionTitle('How long are your typical viewing sessions?'),
         const SizedBox(height: 12),
         _buildSessionDurationSelector(),
-        
+
         const SizedBox(height: 24),
-        
+
         // Viewing frequency
         _buildSectionTitle('How often do you watch videos?'),
         const SizedBox(height: 12),
         _buildViewingFrequencySelector(),
-        
+
         const SizedBox(height: 24),
-        
+
         // Content consumption style
         _buildSectionTitle("What's your content consumption style?"),
         const SizedBox(height: 12),
         _buildContentConsumptionStyleSelector(),
-        
+
         const SizedBox(height: 24),
-        
+
         // Tip box
         Container(
           padding: const EdgeInsets.all(16),
@@ -167,9 +169,7 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: AppTextStyles.caption.copyWith(
-        fontWeight: FontWeight.w600,
-      ),
+      style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
     ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.05, end: 0);
   }
 
@@ -180,30 +180,43 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
       children: _timeOfDayOptions.asMap().entries.map((entry) {
         final index = entry.key;
         final timeOfDay = entry.value;
-        final isSelected = (_viewingHabits['preferredTimeOfDay'] as List).contains(timeOfDay);
-        
+        final isSelected = (_viewingHabits['preferredTimeOfDay'] as List)
+            .contains(timeOfDay);
+
         return InkWell(
-          onTap: () => _toggleTimeOfDay(timeOfDay),
-          borderRadius: BorderRadius.circular(30),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+              onTap: () => _toggleTimeOfDay(timeOfDay),
               borderRadius: BorderRadius.circular(30),
-              border: Border.all(
-                color: isSelected ? AppColors.primary : Colors.grey.withOpacity(0.3),
-                width: isSelected ? 2 : 1,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppColors.primary.withOpacity(0.1)
+                      : Colors.grey.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppColors.primary
+                        : Colors.grey.withOpacity(0.3),
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                child: Text(
+                  timeOfDay,
+                  style: TextStyle(
+                    color: isSelected ? AppColors.primary : Colors.black87,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
+                ),
               ),
-            ),
-            child: Text(
-              timeOfDay,
-              style: TextStyle(
-                color: isSelected ? AppColors.primary : Colors.black87,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-          ),
-        ).animate().fadeIn(duration: 300.ms, delay: (50 * index).ms).slideY(begin: 0.05, end: 0);
+            )
+            .animate()
+            .fadeIn(duration: 300.ms, delay: (50 * index).ms)
+            .slideY(begin: 0.05, end: 0);
       }).toList(),
     );
   }
@@ -213,27 +226,36 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
       children: _sessionDurationOptions.asMap().entries.map((entry) {
         final index = entry.key;
         final option = entry.value;
-        final isSelected = _viewingHabits['preferredSessionDuration'] == option['value'];
-        
+        final isSelected =
+            _viewingHabits['preferredSessionDuration'] == option['value'];
+
         return Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: RadioListTile<String>(
-            title: Text(option['label']),
-            value: option['value'],
-            groupValue: _viewingHabits['preferredSessionDuration'],
-            onChanged: (value) => _updateViewingHabits('preferredSessionDuration', value),
-            activeColor: AppColors.primary,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-              side: BorderSide(
-                color: isSelected ? AppColors.primary : Colors.grey.withOpacity(0.3),
-                width: isSelected ? 2 : 1,
+              padding: const EdgeInsets.only(bottom: 8),
+              child: RadioListTile<String>(
+                title: Text(option['label']),
+                value: option['value'],
+                groupValue: _viewingHabits['preferredSessionDuration'],
+                onChanged: (value) =>
+                    _updateViewingHabits('preferredSessionDuration', value),
+                activeColor: AppColors.primary,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(
+                    color: isSelected
+                        ? AppColors.primary
+                        : Colors.grey.withOpacity(0.3),
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                tileColor: isSelected
+                    ? AppColors.primary.withOpacity(0.05)
+                    : null,
               ),
-            ),
-            tileColor: isSelected ? AppColors.primary.withOpacity(0.05) : null,
-          ),
-        ).animate().fadeIn(duration: 300.ms, delay: (50 * index).ms).slideY(begin: 0.05, end: 0);
+            )
+            .animate()
+            .fadeIn(duration: 300.ms, delay: (50 * index).ms)
+            .slideY(begin: 0.05, end: 0);
       }).toList(),
     );
   }
@@ -243,27 +265,36 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
       children: _viewingFrequencyOptions.asMap().entries.map((entry) {
         final index = entry.key;
         final option = entry.value;
-        final isSelected = _viewingHabits['viewingFrequency'] == option['value'];
-        
+        final isSelected =
+            _viewingHabits['viewingFrequency'] == option['value'];
+
         return Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: RadioListTile<String>(
-            title: Text(option['label']),
-            value: option['value'],
-            groupValue: _viewingHabits['viewingFrequency'],
-            onChanged: (value) => _updateViewingHabits('viewingFrequency', value),
-            activeColor: AppColors.primary,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-              side: BorderSide(
-                color: isSelected ? AppColors.primary : Colors.grey.withOpacity(0.3),
-                width: isSelected ? 2 : 1,
+              padding: const EdgeInsets.only(bottom: 8),
+              child: RadioListTile<String>(
+                title: Text(option['label']),
+                value: option['value'],
+                groupValue: _viewingHabits['viewingFrequency'],
+                onChanged: (value) =>
+                    _updateViewingHabits('viewingFrequency', value),
+                activeColor: AppColors.primary,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(
+                    color: isSelected
+                        ? AppColors.primary
+                        : Colors.grey.withOpacity(0.3),
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                tileColor: isSelected
+                    ? AppColors.primary.withOpacity(0.05)
+                    : null,
               ),
-            ),
-            tileColor: isSelected ? AppColors.primary.withOpacity(0.05) : null,
-          ),
-        ).animate().fadeIn(duration: 300.ms, delay: (50 * index).ms).slideY(begin: 0.05, end: 0);
+            )
+            .animate()
+            .fadeIn(duration: 300.ms, delay: (50 * index).ms)
+            .slideY(begin: 0.05, end: 0);
       }).toList(),
     );
   }
@@ -273,72 +304,92 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
       children: _contentConsumptionOptions.asMap().entries.map((entry) {
         final index = entry.key;
         final option = entry.value;
-        final isSelected = _viewingHabits['contentConsumptionStyle'] == option['value'];
-        
+        final isSelected =
+            _viewingHabits['contentConsumptionStyle'] == option['value'];
+
         return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: InkWell(
-            onTap: () => _updateViewingHabits('contentConsumptionStyle', option['value']),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.grey.withOpacity(0.05),
+              padding: const EdgeInsets.only(bottom: 12),
+              child: InkWell(
+                onTap: () => _updateViewingHabits(
+                  'contentConsumptionStyle',
+                  option['value'],
+                ),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isSelected ? AppColors.primary : Colors.grey.withOpacity(0.2),
-                  width: isSelected ? 2 : 1,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.primary.withOpacity(0.1)
+                        : Colors.grey.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? AppColors.primary
+                          : Colors.grey.withOpacity(0.2),
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.primary.withOpacity(0.2)
+                              : Colors.grey.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          option['icon'],
+                          color: isSelected
+                              ? AppColors.primary
+                              : Colors.grey[600],
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              option['label'],
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              option['description'],
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Radio<String>(
+                        value: option['value'],
+                        groupValue: _viewingHabits['contentConsumptionStyle'],
+                        onChanged: (value) => _updateViewingHabits(
+                          'contentConsumptionStyle',
+                          value,
+                        ),
+                        activeColor: AppColors.primary,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: isSelected ? AppColors.primary.withOpacity(0.2) : Colors.grey.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      option['icon'],
-                      color: isSelected ? AppColors.primary : Colors.grey[600],
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          option['label'],
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: isSelected ? AppColors.primary : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          option['description'],
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Radio<String>(
-                    value: option['value'],
-                    groupValue: _viewingHabits['contentConsumptionStyle'],
-                    onChanged: (value) => _updateViewingHabits('contentConsumptionStyle', value),
-                    activeColor: AppColors.primary,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ).animate().fadeIn(duration: 300.ms, delay: (50 * index).ms).slideY(begin: 0.05, end: 0);
+            )
+            .animate()
+            .fadeIn(duration: 300.ms, delay: (50 * index).ms)
+            .slideY(begin: 0.05, end: 0);
       }).toList(),
     );
   }

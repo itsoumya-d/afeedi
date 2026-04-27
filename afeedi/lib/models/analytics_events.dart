@@ -3,31 +3,31 @@
 class AnalyticsEvents {
   /// Events related to user interactions like button clicks, selections, etc.
   static const String userInteraction = 'user_interaction';
-  
+
   /// Events related to screen views and navigation.
   static const String screenView = 'screen_view';
-  
+
   /// Events related to content engagement like plays, pauses, etc.
   static const String contentEngagement = 'content_engagement';
-  
+
   /// Events related to personalization and recommendations.
   static const String personalization = 'personalization';
-  
+
   /// Events related to onboarding process.
   static const String onboarding = 'onboarding';
-  
+
   /// Events related to user account actions like login, signup, etc.
   static const String account = 'account';
-  
+
   /// Events related to errors and exceptions.
   static const String error = 'error';
-  
+
   /// Events related to performance metrics.
   static const String performance = 'performance';
-  
+
   /// Events related to feature usage.
   static const String featureUsage = 'feature_usage';
-  
+
   /// Events related to search actions.
   static const String search = 'search';
 }

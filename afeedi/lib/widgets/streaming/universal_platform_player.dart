@@ -12,7 +12,9 @@ import 'social_media_video_player.dart';
 // import '../enhanced_video_player_widget.dart';
 
 // Conditional import for web
-import '../../src/stubs/ui_web.dart' if (dart.library.html) 'dart:ui_web' as ui_web;
+import '../../src/stubs/ui_web.dart'
+    if (dart.library.html) 'dart:ui_web'
+    as ui_web;
 
 // Global registry to track registered view factories
 final Set<String> _registeredViewFactories = <String>{};
@@ -25,7 +27,7 @@ class UniversalPlatformPlayer extends StatefulWidget {
   final VoidCallback? onPlayerReady;
   final Function(String)? onError;
   final bool allowFullscreen;
-  
+
   const UniversalPlatformPlayer({
     super.key,
     required this.content,
@@ -36,9 +38,10 @@ class UniversalPlatformPlayer extends StatefulWidget {
     this.onError,
     this.allowFullscreen = true,
   });
-  
+
   @override
-  State<UniversalPlatformPlayer> createState() => _UniversalPlatformPlayerState();
+  State<UniversalPlatformPlayer> createState() =>
+      _UniversalPlatformPlayerState();
 }
 
 class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
@@ -50,32 +53,33 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
   bool _showFallbackOptions = false;
   // bool _useEnhancedPlayer = false;
   // VideoContentExtractionService? _extractionService;
-  
+
   @override
   void initState() {
     super.initState();
     _initializePlayer();
   }
-  
+
   @override
   void dispose() {
     _cleanupPlayer();
     // _extractionService?.dispose();
     super.dispose();
   }
-  
+
   Future<void> _initializePlayer() async {
     try {
       setState(() {
         _isLoading = true;
         _hasError = false;
       });
-      
+
       // Generate unique container ID for web
       if (kIsWeb) {
-        _containerId = 'iframe_${widget.content.platform.name}_${widget.content.id.replaceAll('-', '_')}_${Random().nextInt(999999)}';
+        _containerId =
+            'iframe_${widget.content.platform.name}_${widget.content.id.replaceAll('-', '_')}_${Random().nextInt(999999)}';
       }
-      
+
       // Wait for widget to be built before creating player
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await _createPlayer();
@@ -89,7 +93,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       widget.onError?.call(error.toString());
     }
   }
-  
+
   Future<void> _createPlayer() async {
     try {
       // Try enhanced video extraction for YouTube content first
@@ -144,21 +148,21 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
   //   try {
   //     _extractionService = VideoContentExtractionService();
   //     await _extractionService!.initialize();
-  //     
+  //
   //     // Try to extract video content
   //     final extractedContent = await _extractionService!.extractVideoContent(
   //       widget.content.videoUrl ?? widget.content.embedUrl ?? '',
   //     );
-  //     
+  //
   //     if (extractedContent != null && extractedContent.streams.isNotEmpty) {
   //       setState(() {
   //         _useEnhancedPlayer = true;
   //         _isLoading = false;
   //         _hasError = false;
   //       });
-  //       
+  //
   //       widget.onPlayerReady?.call();
-  //       
+  //
   //       // Track successful enhanced extraction
   //       await AnalyticsService.instance.trackUserInteraction(
   //         action: 'enhanced_video_extraction_success',
@@ -183,7 +187,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
   //       },
   //     );
   //   }
-  //   
+  //
   //   // Fallback to standard iframe/external player
   //   if (kIsWeb && _containerId != null) {
   //     await _createWebIframe();
@@ -201,18 +205,18 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
   //     });
   //   }
   // }
-  
+
   Future<void> _createWebIframe() async {
     if (!kIsWeb || _containerId == null) return;
-    
+
     try {
       final embedUrl = _getEmbedUrl();
-      
+
       // Create iframe element
       // TODO: Implement proper iframe creation for web platform
       final iframe = null; // Simplified for mobile-first approach
       // Style properties removed - not applicable for mobile-first approach
-      
+
       // Register the view factory only if not already registered
       if (!_registeredViewFactories.contains(_containerId!)) {
         try {
@@ -223,7 +227,8 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
           _registeredViewFactories.add(_containerId!);
         } catch (e) {
           // If registration fails, try with a different container ID
-          _containerId = 'iframe_${widget.content.platform.name}_${widget.content.id.replaceAll('-', '_')}_${Random().nextInt(999999)}_retry';
+          _containerId =
+              'iframe_${widget.content.platform.name}_${widget.content.id.replaceAll('-', '_')}_${Random().nextInt(999999)}_retry';
           ui_web.platformViewRegistry.registerViewFactory(
             _containerId!,
             (int viewId) => iframe,
@@ -231,7 +236,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
           _registeredViewFactories.add(_containerId!);
         }
       }
-      
+
       setState(() {
         _playerResult = PlatformPlayerResult(
           success: true,
@@ -242,9 +247,9 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
         _isLoading = false;
         _hasError = false;
       });
-      
+
       widget.onPlayerReady?.call();
-      
+
       // Track successful player creation
       await AnalyticsService.instance.trackUserInteraction(
         action: '${widget.content.platform.name}_player_created',
@@ -265,18 +270,18 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       widget.onError?.call(error.toString());
     }
   }
-  
+
   bool _isSocialMediaPlatform(PlatformType platform) {
     return platform == PlatformType.instagram ||
-           platform == PlatformType.tiktok ||
-           platform == PlatformType.facebook;
+        platform == PlatformType.tiktok ||
+        platform == PlatformType.facebook;
   }
 
   Future<void> _createSocialMediaPlayer() async {
     try {
       // Initialize social media streaming service
       await SocialMediaStreamingService.instance.initialize();
-      
+
       setState(() {
         _playerResult = PlatformPlayerResult(
           success: true,
@@ -287,9 +292,9 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
         _isLoading = false;
         _hasError = false;
       });
-      
+
       widget.onPlayerReady?.call();
-      
+
       // Track successful player creation
       await AnalyticsService.instance.trackUserInteraction(
         action: '${widget.content.platform.name}_social_player_created',
@@ -323,20 +328,23 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
           'iv_load_policy': '3',
           'enablejsapi': '1',
         };
-        final queryString = params.entries.map((e) => '${e.key}=${e.value}').join('&');
+        final queryString = params.entries
+            .map((e) => '${e.key}=${e.value}')
+            .join('&');
         return 'https://www.youtube.com/embed/${widget.content.platformContentId}?$queryString';
       case PlatformType.instagram:
         return 'https://www.instagram.com/p/${widget.content.platformContentId}/embed/';
       case PlatformType.tiktok:
         return 'https://www.tiktok.com/embed/v2/${widget.content.platformContentId}';
       case PlatformType.facebook:
-        final videoUrl = 'https://www.facebook.com/video.php?v=${widget.content.platformContentId}';
+        final videoUrl =
+            'https://www.facebook.com/video.php?v=${widget.content.platformContentId}';
         return 'https://www.facebook.com/plugins/video.php?href=${Uri.encodeComponent(videoUrl)}&width=500&show_text=false';
       default:
         return '';
     }
   }
-  
+
   String _getPlatformUrl() {
     switch (widget.content.platform) {
       case PlatformType.youtube:
@@ -349,7 +357,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
         return 'https://www.facebook.com/video.php?v=${widget.content.platformContentId}';
     }
   }
-  
+
   void _cleanupPlayer() {
     if (kIsWeb && _containerId != null) {
       // TODO: Implement proper DOM cleanup for web platform
@@ -359,11 +367,11 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       // can be reused by other instances
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final aspectRatio = widget.aspectRatio ?? 16 / 9;
-    
+
     return AspectRatio(
       aspectRatio: aspectRatio,
       child: Container(
@@ -378,30 +386,31 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       ),
     );
   }
-  
+
   Widget _buildPlayerContent() {
     if (_isLoading) {
       return _buildLoadingState();
     }
-    
+
     if (_hasError || _showFallbackOptions) {
       return _buildErrorState();
     }
-    
+
     // Temporarily disable enhanced player for debugging
     // if (_useEnhancedPlayer && widget.content.platform == PlatformType.youtube) {
     //   return _buildEnhancedPlayer();
     // }
-    
+
     // Use social media video player for social media platforms
-    if (_isSocialMediaPlatform(widget.content.platform) && _playerResult?.success == true) {
+    if (_isSocialMediaPlatform(widget.content.platform) &&
+        _playerResult?.success == true) {
       return _buildSocialMediaPlayer();
     }
-    
+
     if (kIsWeb && _containerId != null && _playerResult?.isEmbedded == true) {
       return _buildWebPlayer();
     }
-    
+
     return _buildMobilePlayer();
   }
 
@@ -435,10 +444,12 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       autoPlay: widget.autoPlay,
       showControls: widget.showControls,
       showBranding: true,
-      onFullscreen: widget.allowFullscreen ? () {
-        // Handle fullscreen for social media player
-        _handleFullscreen();
-      } : null,
+      onFullscreen: widget.allowFullscreen
+          ? () {
+              // Handle fullscreen for social media player
+              _handleFullscreen();
+            }
+          : null,
       onError: (error) {
         setState(() {
           _hasError = true;
@@ -462,7 +473,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
         children: [
           // Thumbnail background
           _buildThumbnailBackground(),
-          
+
           // Loading overlay
           Positioned.fill(
             child: Container(
@@ -471,15 +482,14 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(_getPlatformColor()),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      _getPlatformColor(),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Loading ${_getPlatformName()} Player...',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
                   ),
                 ],
               ),
@@ -489,7 +499,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       ),
     );
   }
-  
+
   Widget _buildErrorState() {
     return Container(
       color: Colors.black,
@@ -497,7 +507,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
         children: [
           // Thumbnail background
           _buildThumbnailBackground(),
-          
+
           // Error overlay with options
           Positioned.fill(
             child: Container(
@@ -542,7 +552,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       ),
     );
   }
-  
+
   Widget _buildActionButtons() {
     return Column(
       children: [
@@ -559,9 +569,9 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           ),
         ),
-        
+
         const SizedBox(height: 12),
-        
+
         // Secondary action - Retry embed
         TextButton.icon(
           onPressed: _retryPlayer,
@@ -574,7 +584,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       ],
     );
   }
-  
+
   Widget _buildWebPlayer() {
     return Stack(
       children: [
@@ -587,7 +597,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
             },
           ),
         ),
-        
+
         // Fallback overlay if needed
         if (_showFallbackOptions)
           Positioned(
@@ -595,10 +605,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
             right: 8,
             child: IconButton(
               onPressed: _openInPlatform,
-              icon: const Icon(
-                Icons.open_in_new,
-                color: Colors.white,
-              ),
+              icon: const Icon(Icons.open_in_new, color: Colors.white),
               style: IconButton.styleFrom(
                 backgroundColor: Colors.black.withOpacity(0.7),
               ),
@@ -607,7 +614,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       ],
     );
   }
-  
+
   Widget _buildMobilePlayer() {
     return GestureDetector(
       onTap: _openInPlatform,
@@ -615,7 +622,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
         children: [
           // Thumbnail
           _buildThumbnailBackground(),
-          
+
           // Play button overlay
           Positioned.fill(
             child: Container(
@@ -629,7 +636,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
               ),
             ),
           ),
-          
+
           // Duration badge
           if (widget.content.durationSeconds != null)
             Positioned(
@@ -651,7 +658,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
                 ),
               ),
             ),
-          
+
           // Platform logo
           Positioned(
             top: 8,
@@ -676,10 +683,11 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       ),
     );
   }
-  
+
   Widget _buildThumbnailBackground() {
-    final thumbnailUrl = UniversalPlatformPlayerService.instance.getPlatformThumbnailUrl(widget.content);
-    
+    final thumbnailUrl = UniversalPlatformPlayerService.instance
+        .getPlatformThumbnailUrl(widget.content);
+
     return Positioned.fill(
       child: Image.network(
         thumbnailUrl,
@@ -694,7 +702,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       ),
     );
   }
-  
+
   Widget _buildThumbnailPlaceholder() {
     return Container(
       color: Colors.grey[900],
@@ -702,11 +710,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              _getPlatformIcon(),
-              color: _getPlatformColor(),
-              size: 48,
-            ),
+            Icon(_getPlatformIcon(), color: _getPlatformColor(), size: 48),
             const SizedBox(height: 8),
             Text(
               _getPlatformName(),
@@ -721,33 +725,36 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       ),
     );
   }
-  
+
   Future<void> _openInPlatform() async {
-    final success = await UniversalPlatformPlayerService.instance.openInPlatform(widget.content);
-    
+    final success = await UniversalPlatformPlayerService.instance
+        .openInPlatform(widget.content);
+
     if (!success) {
       // Show error message
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Unable to open ${_getPlatformName()}. Please try again.'),
+            content: Text(
+              'Unable to open ${_getPlatformName()}. Please try again.',
+            ),
             backgroundColor: _getPlatformColor(),
           ),
         );
       }
     }
   }
-  
+
   Future<void> _retryPlayer() async {
     setState(() {
       _isLoading = true;
       _hasError = false;
       _showFallbackOptions = false;
     });
-    
+
     await _createPlayer();
   }
-  
+
   // Helper methods for platform-specific styling
   Color _getPlatformColor() {
     switch (widget.content.platform) {
@@ -761,7 +768,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
         return const Color(0xFF1877F2);
     }
   }
-  
+
   IconData _getPlatformIcon() {
     switch (widget.content.platform) {
       case PlatformType.youtube:
@@ -774,7 +781,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
         return Icons.facebook;
     }
   }
-  
+
   String _getPlatformName() {
     switch (widget.content.platform) {
       case PlatformType.youtube:

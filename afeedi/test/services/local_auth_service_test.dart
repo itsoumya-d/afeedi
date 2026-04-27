@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive/hive.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/services.dart';
 
 void main() {
   late LocalAuthService authService;
@@ -23,6 +24,12 @@ void main() {
   });
 
   setUp(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    const MethodChannel channel = MethodChannel('plugins.flutter.io/path_provider');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+      return tempDir.path;
+    });
+
     SharedPreferences.setMockInitialValues({});
     await LocalStorageService.instance.initialize();
     await LocalStorageService.instance.clearAllData();
@@ -51,6 +58,8 @@ void main() {
       final credentials = jsonDecode(credentialsJson!);
       expect(credentials['password'], isNot(password), reason: 'Password should be hashed, not plain text');
       expect(credentials['password'].length, 64, reason: 'SHA-256 hash should be 64 characters long');
+      expect(credentials['salt'], isNotNull, reason: 'Salt should be generated and stored');
+      expect(credentials['salt'], isNotEmpty, reason: 'Salt should not be empty');
     });
 
     test('signIn works with correct password and fails with incorrect password', () async {
@@ -92,6 +101,20 @@ void main() {
       final creds2 = jsonDecode(prefs.getString('user_credentials_${user2!.id}')!);
 
       expect(creds1['password'], isNot(creds2['password']));
+    });
+
+    test('same password for different users results in different hashes due to salt', () async {
+      const password = 'SharedPassword123';
+
+      final user1 = await authService.signUp(email: 'user1@test.com', password: password);
+      final user2 = await authService.signUp(email: 'user2@test.com', password: password);
+
+      final prefs = await SharedPreferences.getInstance();
+      final creds1 = jsonDecode(prefs.getString('user_credentials_${user1!.id}')!);
+      final creds2 = jsonDecode(prefs.getString('user_credentials_${user2!.id}')!);
+
+      expect(creds1['salt'], isNot(creds2['salt']), reason: 'Salts should be unique for each user');
+      expect(creds1['password'], isNot(creds2['password']), reason: 'Hashes should differ even with same password due to unique salts');
     });
   });
 }

@@ -39,10 +39,7 @@ class GenreSelection extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.08),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.2),
-              width: 1,
-            ),
+            border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,10 +61,7 @@ class GenreSelection extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.2),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
       ),
       child: TextField(
         controller: searchController,
@@ -102,7 +96,7 @@ class GenreSelection extends StatelessWidget {
 
   Widget _buildGenreChip(Genre genre) {
     final isSelected = selectedGenres.contains(genre);
-    
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -112,12 +106,12 @@ class GenreSelection extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected 
+            color: isSelected
                 ? const Color(0xFF00D4FF).withOpacity(0.3)
                 : Colors.white.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected 
+              color: isSelected
                   ? const Color(0xFF00D4FF)
                   : Colors.white.withOpacity(0.3),
               width: 1.5,
@@ -126,10 +120,7 @@ class GenreSelection extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                genre.emoji,
-                style: const TextStyle(fontSize: 16),
-              ),
+              Text(genre.emoji, style: const TextStyle(fontSize: 16)),
               const SizedBox(width: 6),
               Text(
                 genre.name,
@@ -161,7 +152,7 @@ class GenreSelection extends StatelessWidget {
       child: ElevatedButton(
         onPressed: selectedGenres.isEmpty ? null : onContinue,
         style: ElevatedButton.styleFrom(
-          backgroundColor: selectedGenres.isEmpty 
+          backgroundColor: selectedGenres.isEmpty
               ? Colors.white.withOpacity(0.1)
               : const Color(0xFF00D4FF),
           foregroundColor: Colors.white,
@@ -174,10 +165,7 @@ class GenreSelection extends StatelessWidget {
           selectedGenres.isEmpty
               ? 'Select at least one genre'
               : 'Continue with ${selectedGenres.length} genre${selectedGenres.length == 1 ? '' : 's'} ✨',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );

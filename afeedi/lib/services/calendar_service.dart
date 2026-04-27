@@ -8,11 +8,11 @@ import 'analytics_service.dart';
 class CalendarService {
   static CalendarService? _instance;
   static CalendarService get instance => _instance ??= CalendarService._();
-  
+
   CalendarService._();
-  
+
   final _storage = LocalStorageService.instance;
-  
+
   // Schedule content for later viewing
   Future<ScheduledContent?> scheduleContent({
     required String contentId,
@@ -26,7 +26,7 @@ class CalendarService {
       if (user == null) {
         return null;
       }
-      
+
       final scheduledContent = ScheduledContent(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         userId: user.id,
@@ -39,9 +39,9 @@ class CalendarService {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
-      
+
       await _storage.saveScheduledContent(scheduledContent);
-      
+
       await AnalyticsService.instance.trackUserInteraction(
         userId: user.id,
         action: 'schedule_content',
@@ -51,7 +51,7 @@ class CalendarService {
           'is_recurring': isRecurring,
         },
       );
-      
+
       return scheduledContent;
     } catch (error) {
       if (kDebugMode) {
@@ -60,7 +60,7 @@ class CalendarService {
       return null;
     }
   }
-  
+
   // Get scheduled content for a user
   Future<List<ScheduledContent>> getScheduledContent({
     DateTime? startDate,
@@ -71,13 +71,13 @@ class CalendarService {
       if (user == null) {
         return [];
       }
-      
+
       final allScheduled = await _storage.getScheduledContentForUser(user.id);
-      
+
       if (startDate == null && endDate == null) {
         return allScheduled;
       }
-      
+
       return allScheduled.where((scheduled) {
         if (startDate != null && scheduled.scheduledFor.isBefore(startDate)) {
           return false;
@@ -94,28 +94,23 @@ class CalendarService {
       return [];
     }
   }
-  
+
   // Get today's scheduled content
   Future<List<ScheduledContent>> getTodaysScheduledContent() async {
     final now = DateTime.now();
     final startOfDay = DateTime(now.year, now.month, now.day);
     final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
-    
-    return await getScheduledContent(
-      startDate: startOfDay,
-      endDate: endOfDay,
-    );
+
+    return await getScheduledContent(startDate: startOfDay, endDate: endOfDay);
   }
-  
+
   // Get upcoming scheduled content
   Future<List<ScheduledContent>> getUpcomingScheduledContent() async {
     final now = DateTime.now();
-    
-    return await getScheduledContent(
-      startDate: now,
-    );
+
+    return await getScheduledContent(startDate: now);
   }
-  
+
   // Update scheduled content
   Future<ScheduledContent?> updateScheduledContent(
     String scheduledContentId, {
@@ -129,12 +124,12 @@ class CalendarService {
       if (user == null) {
         return null;
       }
-      
+
       final existing = await _storage.getScheduledContent(scheduledContentId);
       if (existing == null) {
         return null;
       }
-      
+
       final updated = existing.copyWith(
         scheduledFor: scheduledFor,
         notes: notes,
@@ -142,18 +137,16 @@ class CalendarService {
         recurrencePattern: recurrencePattern,
         updatedAt: DateTime.now(),
       );
-      
+
       await _storage.saveScheduledContent(updated);
-      
+
       await AnalyticsService.instance.trackUserInteraction(
         userId: user.id,
         action: 'update_scheduled_content',
         contentId: existing.contentId,
-        metadata: {
-          'scheduled_content_id': scheduledContentId,
-        },
+        metadata: {'scheduled_content_id': scheduledContentId},
       );
-      
+
       return updated;
     } catch (error) {
       if (kDebugMode) {
@@ -162,7 +155,7 @@ class CalendarService {
       return null;
     }
   }
-  
+
   // Cancel scheduled content
   Future<bool> cancelScheduledContent(String scheduledContentId) async {
     try {
@@ -170,17 +163,15 @@ class CalendarService {
       if (user == null) {
         return false;
       }
-      
+
       await _storage.deleteScheduledContent(scheduledContentId);
-      
+
       await AnalyticsService.instance.trackUserInteraction(
         userId: user.id,
         action: 'cancel_scheduled_content',
-        metadata: {
-          'scheduled_content_id': scheduledContentId,
-        },
+        metadata: {'scheduled_content_id': scheduledContentId},
       );
-      
+
       return true;
     } catch (error) {
       if (kDebugMode) {
@@ -189,7 +180,7 @@ class CalendarService {
       return false;
     }
   }
-  
+
   // Get calendar view data
   Future<Map<String, List<ScheduledContent>>> getCalendarViewData({
     DateTime? startDate,
@@ -199,22 +190,23 @@ class CalendarService {
       startDate: startDate,
       endDate: endDate,
     );
-    
+
     final calendarData = <String, List<ScheduledContent>>{};
-    
+
     for (final content in scheduledContent) {
-      final dateKey = '${content.scheduledFor.year}-${content.scheduledFor.month.toString().padLeft(2, '0')}-${content.scheduledFor.day.toString().padLeft(2, '0')}';
-      
+      final dateKey =
+          '${content.scheduledFor.year}-${content.scheduledFor.month.toString().padLeft(2, '0')}-${content.scheduledFor.day.toString().padLeft(2, '0')}';
+
       if (calendarData[dateKey] == null) {
         calendarData[dateKey] = [];
       }
-      
+
       calendarData[dateKey]!.add(content);
     }
-    
+
     return calendarData;
   }
-  
+
   // Check for conflicts when scheduling
   Future<bool> hasSchedulingConflict({
     required DateTime scheduledFor,
@@ -224,13 +216,14 @@ class CalendarService {
       startDate: scheduledFor.subtract(const Duration(minutes: 30)),
       endDate: scheduledFor.add(const Duration(minutes: 30)),
     );
-    
-    return existingScheduled.any((scheduled) => 
-      scheduled.id != excludeScheduledContentId &&
-      scheduled.scheduledFor.difference(scheduledFor).abs().inMinutes < 30
+
+    return existingScheduled.any(
+      (scheduled) =>
+          scheduled.id != excludeScheduledContentId &&
+          scheduled.scheduledFor.difference(scheduledFor).abs().inMinutes < 30,
     );
   }
-  
+
   // Create recurring schedule
   Future<List<ScheduledContent>> createRecurringSchedule({
     required String contentId,
@@ -244,16 +237,16 @@ class CalendarService {
       if (user == null) {
         return [];
       }
-      
+
       final scheduledContentList = <ScheduledContent>[];
-      
+
       // Generate recurring dates based on pattern
       final dates = _generateRecurringDates(
         startDate: startDate,
         pattern: recurrencePattern,
         maxOccurrences: maxOccurrences,
       );
-      
+
       for (final date in dates) {
         final scheduledContent = ScheduledContent(
           id: '${DateTime.now().millisecondsSinceEpoch}_${date.millisecondsSinceEpoch}',
@@ -267,20 +260,18 @@ class CalendarService {
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
-        
+
         await _storage.saveScheduledContent(scheduledContent);
         scheduledContentList.add(scheduledContent);
       }
-      
+
       await AnalyticsService.instance.trackUserInteraction(
         userId: user.id,
         action: 'create_recurring_schedule',
         contentId: contentId,
-        metadata: {
-          'occurrences_created': scheduledContentList.length,
-        },
+        metadata: {'occurrences_created': scheduledContentList.length},
       );
-      
+
       return scheduledContentList;
     } catch (error) {
       if (kDebugMode) {
@@ -289,7 +280,7 @@ class CalendarService {
       return [];
     }
   }
-  
+
   // Generate recurring dates based on pattern
   List<DateTime> _generateRecurringDates({
     required DateTime startDate,
@@ -299,12 +290,12 @@ class CalendarService {
     final dates = <DateTime>[];
     final frequency = pattern['frequency'] as String? ?? 'weekly';
     final interval = pattern['interval'] as int? ?? 1;
-    
+
     DateTime currentDate = startDate;
-    
+
     for (int i = 0; i < maxOccurrences; i++) {
       dates.add(currentDate);
-      
+
       switch (frequency) {
         case 'daily':
           currentDate = currentDate.add(Duration(days: interval));
@@ -332,10 +323,10 @@ class CalendarService {
           break;
       }
     }
-    
+
     return dates;
   }
-  
+
   // Get calendar statistics
   Future<Map<String, dynamic>> getCalendarStats() async {
     try {
@@ -343,14 +334,14 @@ class CalendarService {
       if (user == null) {
         return {};
       }
-      
+
       final allScheduled = await _storage.getScheduledContentForUser(user.id);
       final todaysContent = await getTodaysScheduledContent();
       final thisWeekContent = await getScheduledContent(
         startDate: DateTime.now(),
         endDate: DateTime.now().add(const Duration(days: 7)),
       );
-      
+
       return {
         'total_scheduled': allScheduled.length,
         'today_scheduled': todaysContent.length,

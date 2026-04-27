@@ -5,7 +5,7 @@ class UserPreferences {
   final int? age;
   final String? language;
   final String? timezone;
-  
+
   // Content Preferences
   final List<String> contentInterests;
   final List<String> contentTypes;
@@ -13,53 +13,59 @@ class UserPreferences {
   final List<String> preferredCreators;
   final Map<String, bool> contentFilters;
   final String? contentDiscoveryStyle; // trending, niche, balanced
-  
+
   // Viewing Habits
   final Map<String, dynamic> viewingHabits;
-  final List<String> preferredViewingTimes; // morning, afternoon, evening, night
+  final List<String>
+  preferredViewingTimes; // morning, afternoon, evening, night
   final String? averageSessionDuration; // short, medium, long
-  final Map<String, int> contentLengthPreferences; // short: 1-5min, medium: 5-20min, long: 20+min
-  final Map<String, double> timeOfDayContentPreferences; // morning: educational, evening: entertainment
+  final Map<String, int>
+  contentLengthPreferences; // short: 1-5min, medium: 5-20min, long: 20+min
+  final Map<String, double>
+  timeOfDayContentPreferences; // morning: educational, evening: entertainment
   final Map<String, int> weekdayPreferences; // weekday vs weekend preferences
-  
+
   // Platform-Specific Preferences
   final Map<String, double> platformPriorities; // ranked platforms
-  final Map<String, Map<String, dynamic>> platformSpecificSettings; // settings per platform
-  
+  final Map<String, Map<String, dynamic>>
+  platformSpecificSettings; // settings per platform
+
   // Content Consumption Patterns
   final Map<String, double> genreAffinityScores; // scores for different genres
   final Map<String, double> topicEngagementRates; // engagement rates for topics
-  final Map<String, int> contentCompletionRates; // completion rates by content type
-  final Map<String, String> contentMoodPreferences; // mood preferences for different times
-  
+  final Map<String, int>
+  contentCompletionRates; // completion rates by content type
+  final Map<String, String>
+  contentMoodPreferences; // mood preferences for different times
+
   // Entertainment Preferences
   final Map<String, dynamic> entertainmentPreferences;
-  
+
   // Personalization Settings
   final Map<String, dynamic> personalizationSettings;
   final bool? enableAIRecommendations;
   final double? diversityLevel; // 0.0 to 1.0
   final bool? crossPlatformRecommendations;
-  
+
   // Calendar Integration
   final Map<String, dynamic> calendarIntegration;
   final bool? calendarIntegrationEnabled;
   final Map<String, String> timeBasedPreferences;
   final bool? smartScheduling;
-  
+
   // App Customization
   final Map<String, dynamic> appCustomization;
   final String? theme;
   final String? feedLayout;
   final bool? compactMode;
-  
+
   // Privacy & Safety
   final bool dataCollection;
   final bool personalizedAds;
   final List<String> blockedPlatforms;
   final bool parentalControls;
   final int maxDailyWatchTime; // in minutes, 0 = unlimited
-  
+
   // Accessibility
   final bool subtitles;
   final bool audioDescriptions;
@@ -96,7 +102,12 @@ class UserPreferences {
     this.enableAIRecommendations,
     this.diversityLevel,
     this.crossPlatformRecommendations,
-    this.calendarIntegration = const {'enabled': false, 'recommendForFreeTime': true, 'eventRelatedContent': true, 'smartNotifications': false},
+    this.calendarIntegration = const {
+      'enabled': false,
+      'recommendForFreeTime': true,
+      'eventRelatedContent': true,
+      'smartNotifications': false,
+    },
     this.calendarIntegrationEnabled,
     this.timeBasedPreferences = const {},
     this.smartScheduling,
@@ -175,26 +186,39 @@ class UserPreferences {
       platformPreferences: platformPreferences ?? this.platformPreferences,
       preferredCreators: preferredCreators ?? this.preferredCreators,
       contentFilters: contentFilters ?? this.contentFilters,
-      contentDiscoveryStyle: contentDiscoveryStyle ?? this.contentDiscoveryStyle,
+      contentDiscoveryStyle:
+          contentDiscoveryStyle ?? this.contentDiscoveryStyle,
       viewingHabits: viewingHabits ?? this.viewingHabits,
-      preferredViewingTimes: preferredViewingTimes ?? this.preferredViewingTimes,
-      averageSessionDuration: averageSessionDuration ?? this.averageSessionDuration,
-      contentLengthPreferences: contentLengthPreferences ?? this.contentLengthPreferences,
-      timeOfDayContentPreferences: timeOfDayContentPreferences ?? this.timeOfDayContentPreferences,
+      preferredViewingTimes:
+          preferredViewingTimes ?? this.preferredViewingTimes,
+      averageSessionDuration:
+          averageSessionDuration ?? this.averageSessionDuration,
+      contentLengthPreferences:
+          contentLengthPreferences ?? this.contentLengthPreferences,
+      timeOfDayContentPreferences:
+          timeOfDayContentPreferences ?? this.timeOfDayContentPreferences,
       weekdayPreferences: weekdayPreferences ?? this.weekdayPreferences,
       platformPriorities: platformPriorities ?? this.platformPriorities,
-      platformSpecificSettings: platformSpecificSettings ?? this.platformSpecificSettings,
+      platformSpecificSettings:
+          platformSpecificSettings ?? this.platformSpecificSettings,
       genreAffinityScores: genreAffinityScores ?? this.genreAffinityScores,
       topicEngagementRates: topicEngagementRates ?? this.topicEngagementRates,
-      contentCompletionRates: contentCompletionRates ?? this.contentCompletionRates,
-      contentMoodPreferences: contentMoodPreferences ?? this.contentMoodPreferences,
-      entertainmentPreferences: entertainmentPreferences ?? this.entertainmentPreferences,
-      personalizationSettings: personalizationSettings ?? this.personalizationSettings,
-      enableAIRecommendations: enableAIRecommendations ?? this.enableAIRecommendations,
+      contentCompletionRates:
+          contentCompletionRates ?? this.contentCompletionRates,
+      contentMoodPreferences:
+          contentMoodPreferences ?? this.contentMoodPreferences,
+      entertainmentPreferences:
+          entertainmentPreferences ?? this.entertainmentPreferences,
+      personalizationSettings:
+          personalizationSettings ?? this.personalizationSettings,
+      enableAIRecommendations:
+          enableAIRecommendations ?? this.enableAIRecommendations,
       diversityLevel: diversityLevel ?? this.diversityLevel,
-      crossPlatformRecommendations: crossPlatformRecommendations ?? this.crossPlatformRecommendations,
+      crossPlatformRecommendations:
+          crossPlatformRecommendations ?? this.crossPlatformRecommendations,
       calendarIntegration: calendarIntegration ?? this.calendarIntegration,
-      calendarIntegrationEnabled: calendarIntegrationEnabled ?? this.calendarIntegrationEnabled,
+      calendarIntegrationEnabled:
+          calendarIntegrationEnabled ?? this.calendarIntegrationEnabled,
       timeBasedPreferences: timeBasedPreferences ?? this.timeBasedPreferences,
       smartScheduling: smartScheduling ?? this.smartScheduling,
       appCustomization: appCustomization ?? this.appCustomization,
@@ -274,56 +298,68 @@ class UserPreferences {
       timezone: json['timezone'],
       contentInterests: List<String>.from(json['contentInterests'] ?? []),
       contentTypes: List<String>.from(json['contentTypes'] ?? []),
-      platformPreferences: Map<String, double>.from(json['platformPreferences'] ?? {}),
+      platformPreferences: Map<String, double>.from(
+        json['platformPreferences'] ?? {},
+      ),
       preferredCreators: List<String>.from(json['preferredCreators'] ?? []),
       contentFilters: Map<String, bool>.from(json['contentFilters'] ?? {}),
       contentDiscoveryStyle: json['contentDiscoveryStyle'],
       viewingHabits: Map<String, dynamic>.from(json['viewingHabits'] ?? {}),
-      preferredViewingTimes: List<String>.from(json['preferredViewingTimes'] ?? []),
+      preferredViewingTimes: List<String>.from(
+        json['preferredViewingTimes'] ?? [],
+      ),
       averageSessionDuration: json['averageSessionDuration'],
-      contentLengthPreferences: json['contentLengthPreferences'] != null 
-        ? Map<String, int>.from(json['contentLengthPreferences']) 
-        : const {},
-      timeOfDayContentPreferences: json['timeOfDayContentPreferences'] != null 
-        ? Map<String, double>.from(json['timeOfDayContentPreferences']) 
-        : const {},
-      weekdayPreferences: json['weekdayPreferences'] != null 
-        ? Map<String, int>.from(json['weekdayPreferences']) 
-        : const {},
-      platformPriorities: json['platformPriorities'] != null 
-        ? Map<String, double>.from(json['platformPriorities']) 
-        : const {},
-      platformSpecificSettings: json['platformSpecificSettings'] != null 
-        ? Map<String, Map<String, dynamic>>.from(
-            json['platformSpecificSettings'].map((key, value) => 
-              MapEntry(key, Map<String, dynamic>.from(value))
+      contentLengthPreferences: json['contentLengthPreferences'] != null
+          ? Map<String, int>.from(json['contentLengthPreferences'])
+          : const {},
+      timeOfDayContentPreferences: json['timeOfDayContentPreferences'] != null
+          ? Map<String, double>.from(json['timeOfDayContentPreferences'])
+          : const {},
+      weekdayPreferences: json['weekdayPreferences'] != null
+          ? Map<String, int>.from(json['weekdayPreferences'])
+          : const {},
+      platformPriorities: json['platformPriorities'] != null
+          ? Map<String, double>.from(json['platformPriorities'])
+          : const {},
+      platformSpecificSettings: json['platformSpecificSettings'] != null
+          ? Map<String, Map<String, dynamic>>.from(
+              json['platformSpecificSettings'].map(
+                (key, value) => MapEntry(key, Map<String, dynamic>.from(value)),
+              ),
             )
-          ) 
-        : const {},
-      genreAffinityScores: json['genreAffinityScores'] != null 
-        ? Map<String, double>.from(json['genreAffinityScores']) 
-        : const {},
-      topicEngagementRates: json['topicEngagementRates'] != null 
-        ? Map<String, double>.from(json['topicEngagementRates']) 
-        : const {},
-      contentCompletionRates: json['contentCompletionRates'] != null 
-        ? Map<String, int>.from(json['contentCompletionRates']) 
-        : const {},
-      contentMoodPreferences: json['contentMoodPreferences'] != null 
-        ? Map<String, String>.from(json['contentMoodPreferences']) 
-        : const {},
-      entertainmentPreferences: Map<String, dynamic>.from(json['entertainmentPreferences'] ?? {}),
-      personalizationSettings: Map<String, dynamic>.from(json['personalizationSettings'] ?? {}),
+          : const {},
+      genreAffinityScores: json['genreAffinityScores'] != null
+          ? Map<String, double>.from(json['genreAffinityScores'])
+          : const {},
+      topicEngagementRates: json['topicEngagementRates'] != null
+          ? Map<String, double>.from(json['topicEngagementRates'])
+          : const {},
+      contentCompletionRates: json['contentCompletionRates'] != null
+          ? Map<String, int>.from(json['contentCompletionRates'])
+          : const {},
+      contentMoodPreferences: json['contentMoodPreferences'] != null
+          ? Map<String, String>.from(json['contentMoodPreferences'])
+          : const {},
+      entertainmentPreferences: Map<String, dynamic>.from(
+        json['entertainmentPreferences'] ?? {},
+      ),
+      personalizationSettings: Map<String, dynamic>.from(
+        json['personalizationSettings'] ?? {},
+      ),
       enableAIRecommendations: json['enableAIRecommendations'],
       diversityLevel: json['diversityLevel']?.toDouble(),
       crossPlatformRecommendations: json['crossPlatformRecommendations'],
-      calendarIntegration: Map<String, dynamic>.from(json['calendarIntegration'] ?? {}),
+      calendarIntegration: Map<String, dynamic>.from(
+        json['calendarIntegration'] ?? {},
+      ),
       calendarIntegrationEnabled: json['calendarIntegrationEnabled'],
-      timeBasedPreferences: json['timeBasedPreferences'] != null 
-        ? Map<String, String>.from(json['timeBasedPreferences']) 
-        : const {},
+      timeBasedPreferences: json['timeBasedPreferences'] != null
+          ? Map<String, String>.from(json['timeBasedPreferences'])
+          : const {},
       smartScheduling: json['smartScheduling'],
-      appCustomization: Map<String, dynamic>.from(json['appCustomization'] ?? {}),
+      appCustomization: Map<String, dynamic>.from(
+        json['appCustomization'] ?? {},
+      ),
       theme: json['theme'],
       feedLayout: json['feedLayout'],
       compactMode: json['compactMode'],
@@ -349,7 +385,7 @@ class OnboardingStepData {
   final Map<String, dynamic> data;
   final bool isCompleted;
   final DateTime? completedAt;
-  
+
   const OnboardingStepData({
     required this.stepId,
     required this.title,
@@ -358,7 +394,7 @@ class OnboardingStepData {
     this.isCompleted = false,
     this.completedAt,
   });
-  
+
   OnboardingStepData copyWith({
     String? stepId,
     String? title,

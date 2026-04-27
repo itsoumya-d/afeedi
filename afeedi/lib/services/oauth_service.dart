@@ -7,10 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class OAuthService {
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: [
-      'email',
-      'https://www.googleapis.com/auth/youtube.readonly',
-    ],
+    scopes: ['email', 'https://www.googleapis.com/auth/youtube.readonly'],
   );
 
   // Google Sign-In (for authentication)
@@ -41,10 +38,7 @@ class OAuthService {
     try {
       final result = await connectGoogle();
       if (result != null) {
-        return {
-          ...result,
-          'platform': 'youtube',
-        };
+        return {...result, 'platform': 'youtube'};
       }
     } catch (error) {
       debugPrint('YouTube OAuth Error: $error');
@@ -58,7 +52,7 @@ class OAuthService {
       final LoginResult result = await FacebookAuth.instance.login(
         permissions: ['instagram_basic', 'instagram_content_publish'],
       );
-      
+
       if (result.status == LoginStatus.success) {
         final userData = await FacebookAuth.instance.getUserData(
           fields: "name,email,picture",
@@ -81,12 +75,13 @@ class OAuthService {
     try {
       // Simulate OAuth flow with mock data for development
       await Future.delayed(const Duration(seconds: 2));
-      
+
       // Return mock successful connection
       return {
         'platform': 'tiktok',
         'authCode': 'mock_tiktok_code_${DateTime.now().millisecondsSinceEpoch}',
-        'accessToken': 'mock_tiktok_token_${DateTime.now().millisecondsSinceEpoch}',
+        'accessToken':
+            'mock_tiktok_token_${DateTime.now().millisecondsSinceEpoch}',
         'userId': 'mock_tiktok_user_${DateTime.now().millisecondsSinceEpoch}',
         'displayName': 'TikTok User',
         'connected_at': DateTime.now().toIso8601String(),
@@ -103,7 +98,7 @@ class OAuthService {
       final LoginResult result = await FacebookAuth.instance.login(
         permissions: ['email', 'public_profile', 'pages_read_engagement'],
       );
-      
+
       if (result.status == LoginStatus.success) {
         final userData = await FacebookAuth.instance.getUserData(
           fields: "name,email,picture",
@@ -130,7 +125,7 @@ class OAuthService {
           AppleIDAuthorizationScopes.fullName,
         ],
       );
-      
+
       return {
         'platform': 'apple',
         'userIdentifier': credential.userIdentifier,

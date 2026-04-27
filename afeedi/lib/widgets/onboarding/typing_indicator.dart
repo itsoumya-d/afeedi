@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 class TypingIndicator extends StatelessWidget {
   final Animation<double> typingAnimation;
 
-  const TypingIndicator({
-    super.key,
-    required this.typingAnimation,
-  });
+  const TypingIndicator({super.key, required this.typingAnimation});
 
   @override
   Widget build(BuildContext context) {
@@ -25,11 +22,7 @@ class TypingIndicator extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(
-              Icons.smart_toy,
-              color: Colors.white,
-              size: 18,
-            ),
+            child: const Icon(Icons.smart_toy, color: Colors.white, size: 18),
           ),
           const SizedBox(width: 12),
           Container(
@@ -70,7 +63,7 @@ class TypingIndicator extends StatelessWidget {
         final delay = index * 0.2;
         final progress = (typingAnimation.value + delay) % 1.0;
         final opacity = progress < 0.5 ? progress * 2 : (1 - progress) * 2;
-        
+
         return Container(
           width: 6,
           height: 6,

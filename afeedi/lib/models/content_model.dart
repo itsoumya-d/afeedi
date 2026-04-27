@@ -1,25 +1,8 @@
-enum PlatformType {
-  youtube,
-  instagram,
-  tiktok,
-  facebook,
-}
+enum PlatformType { youtube, instagram, tiktok, facebook }
 
-enum ContentType {
-  video,
-  short,
-  reel,
-  story,
-  post,
-}
+enum ContentType { video, short, reel, story, post }
 
-enum InteractionType {
-  view,
-  like,
-  save,
-  share,
-  schedule,
-}
+enum InteractionType { view, like, save, share, schedule }
 
 class Content {
   final String id;
@@ -200,7 +183,7 @@ class Content {
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
     final seconds = duration.inSeconds.remainder(60);
-    
+
     if (hours > 0) {
       return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
     } else {
@@ -228,9 +211,10 @@ class Content {
     }
   }
 
-  bool get isShortForm => contentType == ContentType.short || 
-                         contentType == ContentType.reel ||
-                         (durationSeconds != null && durationSeconds! <= 60);
+  bool get isShortForm =>
+      contentType == ContentType.short ||
+      contentType == ContentType.reel ||
+      (durationSeconds != null && durationSeconds! <= 60);
 
   @override
   bool operator ==(Object other) {
@@ -273,7 +257,9 @@ class ContentInteraction {
         (e) => e.name == json['interaction_type'],
         orElse: () => InteractionType.view,
       ),
-      interactionData: Map<String, dynamic>.from(json['interaction_data'] ?? {}),
+      interactionData: Map<String, dynamic>.from(
+        json['interaction_data'] ?? {},
+      ),
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
@@ -405,7 +391,8 @@ class Recommendation {
 
   bool get isExpired => expiresAt.isBefore(DateTime.now());
   bool get isHighScore => recommendationScore >= 0.8;
-  bool get isMediumScore => recommendationScore >= 0.5 && recommendationScore < 0.8;
+  bool get isMediumScore =>
+      recommendationScore >= 0.5 && recommendationScore < 0.8;
   bool get isLowScore => recommendationScore < 0.5;
 
   @override

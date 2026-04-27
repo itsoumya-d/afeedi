@@ -51,10 +51,11 @@ class _OAuthPlatformButtonState extends State<OAuthPlatformButton> {
       setState(() {
         _isLoading = true;
       });
-      
+
       try {
-        final success = await OAuthService.disconnectPlatform(widget.platform)
-            .timeout(const Duration(seconds: 10));
+        final success = await OAuthService.disconnectPlatform(
+          widget.platform,
+        ).timeout(const Duration(seconds: 10));
         if (success) {
           setState(() {
             _isConnected = false;
@@ -73,7 +74,7 @@ class _OAuthPlatformButtonState extends State<OAuthPlatformButton> {
           );
         }
       }
-      
+
       setState(() {
         _isLoading = false;
       });
@@ -85,29 +86,34 @@ class _OAuthPlatformButtonState extends State<OAuthPlatformButton> {
     });
 
     Map<String, dynamic>? result;
-    
+
     try {
       // Add timeout to prevent hanging
       switch (widget.platform.toLowerCase()) {
         case 'youtube':
-          result = await OAuthService.connectYouTube()
-              .timeout(const Duration(seconds: 30));
+          result = await OAuthService.connectYouTube().timeout(
+            const Duration(seconds: 30),
+          );
           break;
         case 'instagram':
-          result = await OAuthService.connectInstagram()
-              .timeout(const Duration(seconds: 30));
+          result = await OAuthService.connectInstagram().timeout(
+            const Duration(seconds: 30),
+          );
           break;
         case 'tiktok':
-          result = await OAuthService.connectTikTok()
-              .timeout(const Duration(seconds: 30));
+          result = await OAuthService.connectTikTok().timeout(
+            const Duration(seconds: 30),
+          );
           break;
         case 'facebook':
-          result = await OAuthService.connectFacebook()
-              .timeout(const Duration(seconds: 30));
+          result = await OAuthService.connectFacebook().timeout(
+            const Duration(seconds: 30),
+          );
           break;
         case 'apple':
-          result = await OAuthService.connectApple()
-              .timeout(const Duration(seconds: 30));
+          result = await OAuthService.connectApple().timeout(
+            const Duration(seconds: 30),
+          );
           break;
         default:
           throw Exception('Unsupported platform: ${widget.platform}');
@@ -118,7 +124,7 @@ class _OAuthPlatformButtonState extends State<OAuthPlatformButton> {
           _isConnected = true;
         });
         widget.onConnected(result);
-        
+
         // Show success message
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -134,7 +140,9 @@ class _OAuthPlatformButtonState extends State<OAuthPlatformButton> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to connect to ${widget.displayName}. Please try again.'),
+              content: Text(
+                'Failed to connect to ${widget.displayName}. Please try again.',
+              ),
               backgroundColor: Colors.red,
               duration: const Duration(seconds: 3),
             ),
@@ -142,12 +150,15 @@ class _OAuthPlatformButtonState extends State<OAuthPlatformButton> {
         }
       }
     } catch (e) {
-      if (e.toString().contains('timeout') || e.toString().contains('TimeoutException')) {
+      if (e.toString().contains('timeout') ||
+          e.toString().contains('TimeoutException')) {
         debugPrint('OAuth connection timeout for ${widget.platform}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Connection to ${widget.displayName} timed out. Please try again.'),
+              content: Text(
+                'Connection to ${widget.displayName} timed out. Please try again.',
+              ),
               backgroundColor: Colors.orange,
               duration: const Duration(seconds: 3),
             ),
@@ -158,7 +169,9 @@ class _OAuthPlatformButtonState extends State<OAuthPlatformButton> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error connecting to ${widget.displayName}. Please try again.'),
+              content: Text(
+                'Error connecting to ${widget.displayName}. Please try again.',
+              ),
               backgroundColor: Colors.red,
               duration: const Duration(seconds: 3),
             ),
@@ -204,13 +217,10 @@ class _OAuthPlatformButtonState extends State<OAuthPlatformButton> {
                   ),
                 )
               else
-                Icon(
-                  _isConnected ? Icons.check_circle : widget.icon,
-                  size: 20,
-                ),
+                Icon(_isConnected ? Icons.check_circle : widget.icon, size: 20),
               const SizedBox(width: 12),
               Text(
-                _isConnected 
+                _isConnected
                     ? 'Connected to ${widget.displayName}'
                     : 'Connect ${widget.displayName}',
                 style: const TextStyle(
@@ -218,8 +228,8 @@ class _OAuthPlatformButtonState extends State<OAuthPlatformButton> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-             ],
-           ),
+            ],
+          ),
         ),
       ),
     );
@@ -249,13 +259,13 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
     setState(() {
       // Remove existing connection for this platform
       _connectedPlatforms.removeWhere((p) => p['platform'] == platform);
-      
+
       // Add new connection if data is provided
       if (data != null) {
         _connectedPlatforms.add(data);
       }
     });
-    
+
     widget.onPlatformsConnected(_connectedPlatforms);
   }
 
@@ -269,11 +279,7 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
             color: const Color(0xFFFF0000),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(
-            Icons.play_arrow,
-            color: Colors.white,
-            size: 20,
-          ),
+          child: const Icon(Icons.play_arrow, color: Colors.white, size: 20),
         );
       case 'instagram':
         return Container(
@@ -287,11 +293,7 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
             ),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(
-            Icons.camera_alt,
-            color: Colors.white,
-            size: 18,
-          ),
+          child: const Icon(Icons.camera_alt, color: Colors.white, size: 18),
         );
       case 'tiktok':
         return Container(
@@ -301,11 +303,7 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
             color: const Color(0xFF000000),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(
-            Icons.music_note,
-            color: Colors.white,
-            size: 18,
-          ),
+          child: const Icon(Icons.music_note, color: Colors.white, size: 18),
         );
       case 'facebook':
         return Container(
@@ -315,11 +313,7 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
             color: const Color(0xFF1877F2),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(
-            Icons.facebook,
-            color: Colors.white,
-            size: 18,
-          ),
+          child: const Icon(Icons.facebook, color: Colors.white, size: 18),
         );
       default:
         return Container(
@@ -329,183 +323,199 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
             color: Colors.grey,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(
-            Icons.link,
-            color: Colors.white,
-            size: 18,
-          ),
+          child: const Icon(Icons.link, color: Colors.white, size: 18),
         );
     }
   }
 
-  Widget _buildPlatformCard(String platform, String displayName, Color primaryColor) {
-    final isConnected = _connectedPlatforms.any((p) => p['platform'] == platform);
-    
+  Widget _buildPlatformCard(
+    String platform,
+    String displayName,
+    Color primaryColor,
+  ) {
+    final isConnected = _connectedPlatforms.any(
+      (p) => p['platform'] == platform,
+    );
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isConnected ? [
-            primaryColor.withOpacity(0.15),
-            primaryColor.withOpacity(0.08),
-          ] : [
-            Colors.white.withOpacity(0.08),
-            Colors.white.withOpacity(0.04),
-          ],
+          colors: isConnected
+              ? [primaryColor.withOpacity(0.15), primaryColor.withOpacity(0.08)]
+              : [
+                  Colors.white.withOpacity(0.08),
+                  Colors.white.withOpacity(0.04),
+                ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isConnected ? primaryColor.withOpacity(0.6) : Colors.white.withOpacity(0.2),
+          color: isConnected
+              ? primaryColor.withOpacity(0.6)
+              : Colors.white.withOpacity(0.2),
           width: isConnected ? 2 : 1.5,
         ),
-        boxShadow: isConnected ? [
-          BoxShadow(
-            color: primaryColor.withOpacity(0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ] : [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: isConnected
+            ? [
+                BoxShadow(
+                  color: primaryColor.withOpacity(0.25),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Stack(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: _buildPlatformLogo(platform),
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            Stack(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  if (isConnected)
-                    Positioned(
-                      right: -2,
-                      top: -2,
-                      child: Container(
-                        width: 18,
-                        height: 18,
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.green.withOpacity(0.4),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.check,
-                          color: Colors.white,
-                          size: 10,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(width: 18),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            displayName,
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                              letterSpacing: 0.3,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (isConnected) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.green.withOpacity(0.3),
-                                  Colors.green.withOpacity(0.2),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: Colors.green.withOpacity(0.6)),
-                            ),
-                            child: const Text(
-                              'CONNECTED',
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: Colors.green,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
+                  child: _buildPlatformLogo(platform),
+                ),
+                if (isConnected)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                      width: 18,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.green.withOpacity(0.4),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
                           ),
                         ],
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      isConnected 
-                          ? 'Ready for personalized content recommendations' 
-                          : 'Tap to connect and unlock personalized recommendations',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: isConnected ? Colors.green.withOpacity(0.9) : Colors.white.withOpacity(0.75),
-                        fontWeight: FontWeight.w500,
-                        height: 1.3,
+                      ),
+                      child: const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 10,
                       ),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: Container(
-                  key: ValueKey(isConnected),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: isConnected ? Colors.green.withOpacity(0.2) : primaryColor.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isConnected ? Colors.green.withOpacity(0.5) : primaryColor.withOpacity(0.5),
+                  ),
+              ],
+            ),
+            const SizedBox(width: 18),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          displayName,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            letterSpacing: 0.3,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (isConnected) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.green.withOpacity(0.3),
+                                Colors.green.withOpacity(0.2),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: Colors.green.withOpacity(0.6),
+                            ),
+                          ),
+                          child: const Text(
+                            'CONNECTED',
+                            style: TextStyle(
+                              fontSize: 9,
+                              color: Colors.green,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    isConnected
+                        ? 'Ready for personalized content recommendations'
+                        : 'Tap to connect and unlock personalized recommendations',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isConnected
+                          ? Colors.green.withOpacity(0.9)
+                          : Colors.white.withOpacity(0.75),
+                      fontWeight: FontWeight.w500,
+                      height: 1.3,
                     ),
                   ),
-                  child: Icon(
-                    isConnected ? Icons.check_circle : Icons.add_circle_outline,
-                    color: isConnected ? Colors.green : primaryColor,
-                    size: 24,
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: Container(
+                key: ValueKey(isConnected),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isConnected
+                      ? Colors.green.withOpacity(0.2)
+                      : primaryColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isConnected
+                        ? Colors.green.withOpacity(0.5)
+                        : primaryColor.withOpacity(0.5),
                   ),
                 ),
+                child: Icon(
+                  isConnected ? Icons.check_circle : Icons.add_circle_outline,
+                  color: isConnected ? Colors.green : primaryColor,
+                  size: 24,
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
     );
   }
 
@@ -521,9 +531,7 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFF00D4FF).withOpacity(0.3),
-        ),
+        border: Border.all(color: const Color(0xFF00D4FF).withOpacity(0.3)),
       ),
       child: Column(
         children: [
@@ -545,11 +553,7 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.link,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                child: const Icon(Icons.link, color: Colors.white, size: 24),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -571,7 +575,10 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                         ),
                         const SizedBox(width: 6),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xFF00D4FF).withOpacity(0.2),
                             borderRadius: BorderRadius.circular(10),
@@ -605,38 +612,66 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
             ],
           ),
           const SizedBox(height: 24),
-          
+
           // Platform Cards
           GestureDetector(
-            onTap: () => _handlePlatformConnection('youtube', {'platform': 'youtube', 'name': 'YouTube'}),
-            child: _buildPlatformCard('youtube', 'YouTube', const Color(0xFFFF0000)),
+            onTap: () => _handlePlatformConnection('youtube', {
+              'platform': 'youtube',
+              'name': 'YouTube',
+            }),
+            child: _buildPlatformCard(
+              'youtube',
+              'YouTube',
+              const Color(0xFFFF0000),
+            ),
           ),
           GestureDetector(
-            onTap: () => _handlePlatformConnection('instagram', {'platform': 'instagram', 'name': 'Instagram'}),
-            child: _buildPlatformCard('instagram', 'Instagram', const Color(0xFFE4405F)),
+            onTap: () => _handlePlatformConnection('instagram', {
+              'platform': 'instagram',
+              'name': 'Instagram',
+            }),
+            child: _buildPlatformCard(
+              'instagram',
+              'Instagram',
+              const Color(0xFFE4405F),
+            ),
           ),
           GestureDetector(
-            onTap: () => _handlePlatformConnection('tiktok', {'platform': 'tiktok', 'name': 'TikTok'}),
-            child: _buildPlatformCard('tiktok', 'TikTok', const Color(0xFF000000)),
+            onTap: () => _handlePlatformConnection('tiktok', {
+              'platform': 'tiktok',
+              'name': 'TikTok',
+            }),
+            child: _buildPlatformCard(
+              'tiktok',
+              'TikTok',
+              const Color(0xFF000000),
+            ),
           ),
           GestureDetector(
-            onTap: () => _handlePlatformConnection('facebook', {'platform': 'facebook', 'name': 'Facebook'}),
-            child: _buildPlatformCard('facebook', 'Facebook', const Color(0xFF1877F2)),
+            onTap: () => _handlePlatformConnection('facebook', {
+              'platform': 'facebook',
+              'name': 'Facebook',
+            }),
+            child: _buildPlatformCard(
+              'facebook',
+              'Facebook',
+              const Color(0xFF1877F2),
+            ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Connection Status
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: _connectedPlatforms.isNotEmpty 
-                  ? Colors.green.withOpacity(0.2) 
+              color: _connectedPlatforms.isNotEmpty
+                  ? Colors.green.withOpacity(0.2)
                   : Colors.white.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: _connectedPlatforms.isNotEmpty 
-                    ? Colors.green.withOpacity(0.5) 
+                color: _connectedPlatforms.isNotEmpty
+                    ? Colors.green.withOpacity(0.5)
                     : Colors.white.withOpacity(0.2),
               ),
             ),
@@ -644,8 +679,12 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  _connectedPlatforms.isNotEmpty ? Icons.check_circle : Icons.info_outline,
-                  color: _connectedPlatforms.isNotEmpty ? Colors.green : Colors.white.withOpacity(0.7),
+                  _connectedPlatforms.isNotEmpty
+                      ? Icons.check_circle
+                      : Icons.info_outline,
+                  color: _connectedPlatforms.isNotEmpty
+                      ? Colors.green
+                      : Colors.white.withOpacity(0.7),
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -655,16 +694,18 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                       : '${_connectedPlatforms.length} platform${_connectedPlatforms.length == 1 ? '' : 's'} connected',
                   style: TextStyle(
                     fontSize: 14,
-                    color: _connectedPlatforms.isNotEmpty ? Colors.green : Colors.white.withOpacity(0.7),
+                    color: _connectedPlatforms.isNotEmpty
+                        ? Colors.green
+                        : Colors.white.withOpacity(0.7),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Action Buttons
           Container(
             padding: const EdgeInsets.all(16),
@@ -679,8 +720,12 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                 Row(
                   children: [
                     Icon(
-                      _connectedPlatforms.isNotEmpty ? Icons.check_circle : Icons.info_outline,
-                      color: _connectedPlatforms.isNotEmpty ? Colors.green : Colors.orange,
+                      _connectedPlatforms.isNotEmpty
+                          ? Icons.check_circle
+                          : Icons.info_outline,
+                      color: _connectedPlatforms.isNotEmpty
+                          ? Colors.green
+                          : Colors.orange,
                       size: 16,
                     ),
                     const SizedBox(width: 8),
@@ -690,7 +735,9 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                             ? 'Connect at least one platform to continue'
                             : '${_connectedPlatforms.length} platform${_connectedPlatforms.length > 1 ? 's' : ''} connected - Ready to proceed!',
                         style: TextStyle(
-                          color: _connectedPlatforms.isNotEmpty ? Colors.green : Colors.orange,
+                          color: _connectedPlatforms.isNotEmpty
+                              ? Colors.green
+                              : Colors.orange,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
@@ -734,7 +781,7 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    
+
                     // Connect and Continue
                     Expanded(
                       flex: 2,
@@ -744,7 +791,10 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                         decoration: BoxDecoration(
                           gradient: _connectedPlatforms.isNotEmpty
                               ? const LinearGradient(
-                                  colors: [Color(0xFF00D4FF), Color(0xFF0099CC)],
+                                  colors: [
+                                    Color(0xFF00D4FF),
+                                    Color(0xFF0099CC),
+                                  ],
                                 )
                               : LinearGradient(
                                   colors: [
@@ -756,7 +806,9 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                           boxShadow: _connectedPlatforms.isNotEmpty
                               ? [
                                   BoxShadow(
-                                    color: const Color(0xFF00D4FF).withOpacity(0.4),
+                                    color: const Color(
+                                      0xFF00D4FF,
+                                    ).withOpacity(0.4),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -764,7 +816,9 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                               : null,
                         ),
                         child: ElevatedButton(
-                          onPressed: _connectedPlatforms.isNotEmpty ? widget.onConnectAndContinue : null,
+                          onPressed: _connectedPlatforms.isNotEmpty
+                              ? widget.onConnectAndContinue
+                              : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             foregroundColor: Colors.white,
@@ -789,8 +843,8 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
-                                    color: _connectedPlatforms.isNotEmpty 
-                                        ? Colors.white 
+                                    color: _connectedPlatforms.isNotEmpty
+                                        ? Colors.white
                                         : Colors.white.withOpacity(0.5),
                                   ),
                                   overflow: TextOverflow.ellipsis,

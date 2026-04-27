@@ -25,7 +25,9 @@ class QuickReplyChips extends StatelessWidget {
           child: Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: quickReplies.map((reply) => _buildQuickReplyChip(reply)).toList(),
+            children: quickReplies
+                .map((reply) => _buildQuickReplyChip(reply))
+                .toList(),
           ),
         ),
       ),
@@ -37,9 +39,7 @@ class QuickReplyChips extends StatelessWidget {
       builder: (context, constraints) {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          constraints: BoxConstraints(
-            maxWidth: constraints.maxWidth * 0.9,
-          ),
+          constraints: BoxConstraints(maxWidth: constraints.maxWidth * 0.9),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
@@ -49,7 +49,10 @@ class QuickReplyChips extends StatelessWidget {
               highlightColor: const Color(0xFF00D4FF).withOpacity(0.1),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -61,16 +64,44 @@ class QuickReplyChips extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (text.contains(RegExp(r'[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]', unicode: true)))
+                    if (text.contains(
+                      RegExp(
+                        r'[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]',
+                        unicode: true,
+                      ),
+                    ))
                       Text(
-                        text.split(' ').firstWhere((part) => part.contains(RegExp(r'[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]', unicode: true)), orElse: () => ''),
+                        text
+                            .split(' ')
+                            .firstWhere(
+                              (part) => part.contains(
+                                RegExp(
+                                  r'[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]',
+                                  unicode: true,
+                                ),
+                              ),
+                              orElse: () => '',
+                            ),
                         style: const TextStyle(fontSize: 14),
                       ),
-                    if (text.contains(RegExp(r'[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]', unicode: true)))
+                    if (text.contains(
+                      RegExp(
+                        r'[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]',
+                        unicode: true,
+                      ),
+                    ))
                       const SizedBox(width: 6),
                     Flexible(
                       child: Text(
-                        text.replaceAll(RegExp(r'[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]', unicode: true), '').trim(),
+                        text
+                            .replaceAll(
+                              RegExp(
+                                r'[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]',
+                                unicode: true,
+                              ),
+                              '',
+                            )
+                            .trim(),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 15,

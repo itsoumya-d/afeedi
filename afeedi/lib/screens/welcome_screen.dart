@@ -33,21 +33,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
 
     // Start animations
     _fadeController.forward();
@@ -60,9 +53,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not launch $urlString')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not launch $urlString')));
       }
     }
   }
@@ -76,7 +69,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   Future<void> _handleGoogleSignIn() async {
     if (_isLoading) return;
-    
+
     setState(() {
       _isLoading = true;
     });
@@ -116,7 +109,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   Future<void> _handleAppleSignIn() async {
     if (_isLoading) return;
-    
+
     setState(() {
       _isLoading = true;
     });
@@ -179,10 +172,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF0D0B1E),
-              Color(0xFF2D1B69),
-            ],
+            colors: [Color(0xFF0D0B1E), Color(0xFF2D1B69)],
           ),
         ),
         child: Stack(
@@ -227,9 +217,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             // Backdrop filter for blur effect
             BackdropFilter(
               filter: ui.ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-              child: Container(
-                color: Colors.transparent,
-              ),
+              child: Container(color: Colors.transparent),
             ),
             // Main content
             SafeArea(
@@ -244,7 +232,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         opacity: _fadeAnimation,
                         child: TextButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, AppRoutes.onboardingChatbot);
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.onboardingChatbot,
+                            );
                           },
                           child: const Text(
                             'Skip',
@@ -325,14 +316,19 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               width: double.infinity,
                               height: 56,
                               child: OutlinedButton.icon(
-                                onPressed: _isLoading ? null : _handleGoogleSignIn,
+                                onPressed: _isLoading
+                                    ? null
+                                    : _handleGoogleSignIn,
                                 icon: _isLoading
                                     ? const SizedBox(
                                         width: 20,
                                         height: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
                                         ),
                                       )
                                     : const Icon(
@@ -341,7 +337,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                         size: 24,
                                       ),
                                 label: Text(
-                                  _isLoading ? 'Signing in...' : 'Continue with Google',
+                                  _isLoading
+                                      ? 'Signing in...'
+                                      : 'Continue with Google',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -365,14 +363,19 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               width: double.infinity,
                               height: 56,
                               child: OutlinedButton.icon(
-                                onPressed: _isLoading ? null : _handleAppleSignIn,
+                                onPressed: _isLoading
+                                    ? null
+                                    : _handleAppleSignIn,
                                 icon: _isLoading
                                     ? const SizedBox(
                                         width: 20,
                                         height: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
                                         ),
                                       )
                                     : const Icon(
@@ -381,7 +384,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                         size: 24,
                                       ),
                                 label: Text(
-                                  _isLoading ? 'Signing in...' : 'Continue with Apple',
+                                  _isLoading
+                                      ? 'Signing in...'
+                                      : 'Continue with Apple',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -406,7 +411,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               height: 56,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Navigator.pushNamed(context, AppRoutes.createAccount);
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.createAccount,
+                                  );
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF00D4FF),

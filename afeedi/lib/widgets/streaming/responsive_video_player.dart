@@ -19,7 +19,7 @@ class ResponsiveVideoPlayer extends StatefulWidget {
   final Function(double)? onProgress;
   final Function(String)? onQualityChanged;
   final EdgeInsets? padding;
-  
+
   const ResponsiveVideoPlayer({
     super.key,
     required this.content,
@@ -31,7 +31,7 @@ class ResponsiveVideoPlayer extends StatefulWidget {
     this.onQualityChanged,
     this.padding,
   });
-  
+
   @override
   State<ResponsiveVideoPlayer> createState() => _ResponsiveVideoPlayerState();
 }
@@ -43,42 +43,41 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
   String _errorMessage = '';
   bool _showControls = true;
   bool _isFullscreen = false;
-  
+
   late AnimationController _controlsAnimationController;
   late Animation<double> _controlsAnimation;
-  
+
   @override
   void initState() {
     super.initState();
     _initializeAnimations();
     _initializePlayer();
   }
-  
+
   @override
   void dispose() {
     _controlsAnimationController.dispose();
     super.dispose();
   }
-  
+
   void _initializeAnimations() {
     _controlsAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
-    _controlsAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controlsAnimationController,
-      curve: Curves.easeInOut,
-    ));
-    
+
+    _controlsAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controlsAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
     if (widget.showControls) {
       _controlsAnimationController.forward();
     }
   }
-  
+
   Future<void> _initializePlayer() async {
     try {
       setState(() {
@@ -86,7 +85,7 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
         _hasError = false;
         _errorMessage = '';
       });
-      
+
       // Track initialization start
       await AnalyticsService.instance.trackUserInteraction(
         action: 'video_player_initializing',
@@ -97,17 +96,16 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
           'content_type': widget.content.contentType.name,
         },
       );
-      
+
       // The UniversalPlatformPlayer will handle all initialization
       // No need to create a separate player here
-      
     } catch (error) {
       setState(() {
         _isLoading = false;
         _hasError = true;
         _errorMessage = error.toString();
       });
-      
+
       await AnalyticsService.instance.trackError(
         errorType: 'video_player_error',
         errorMessage: error.toString(),
@@ -115,27 +113,27 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
       );
     }
   }
-  
+
   // Player listeners are now handled by UniversalPlatformPlayer
-  
+
   void _toggleControls() {
     setState(() {
       _showControls = !_showControls;
     });
-    
+
     if (_showControls) {
       _controlsAnimationController.forward();
     } else {
       _controlsAnimationController.reverse();
     }
   }
-  
+
   void _toggleFullscreen() async {
     try {
       setState(() {
         _isFullscreen = !_isFullscreen;
       });
-      
+
       if (_isFullscreen) {
         // Enter fullscreen mode
         await SystemChrome.setEnabledSystemUIMode(
@@ -159,9 +157,9 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
           DeviceOrientation.landscapeRight,
         ]);
       }
-      
+
       widget.onFullscreen?.call();
-      
+
       AnalyticsService.instance.trackUserInteraction(
         action: _isFullscreen ? 'fullscreen_entered' : 'fullscreen_exited',
         screen: 'video_player',
@@ -179,7 +177,7 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
       );
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -187,7 +185,7 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
         final isTablet = constraints.maxWidth > 768;
         final isMobile = constraints.maxWidth <= 768;
         final aspectRatio = _getAspectRatio();
-        
+
         return Container(
           padding: widget.padding,
           child: AspectRatio(
@@ -210,21 +208,21 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
                   children: [
                     // Video player content
                     _buildPlayerContent(),
-                    
+
                     // Loading indicator
                     if (_isLoading) _buildLoadingIndicator(),
-                    
+
                     // Error display
                     if (_hasError) _buildErrorDisplay(),
-                    
+
                     // Platform branding
                     if (widget.showBranding && !_hasError)
                       _buildPlatformBranding(),
-                    
+
                     // Video controls
                     if (widget.showControls && !_isLoading && !_hasError)
                       _buildVideoControls(isMobile),
-                    
+
                     // Tap to toggle controls
                     _buildTapDetector(),
                   ],
@@ -236,7 +234,7 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
       },
     );
   }
-  
+
   Widget _buildPlayerContent() {
     return UniversalPlatformPlayer(
       content: widget.content,
@@ -246,7 +244,7 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
         setState(() {
           _isLoading = false;
         });
-        
+
         // Track successful player initialization
         AnalyticsService.instance.trackUserInteraction(
           action: 'universal_player_ready',
@@ -264,7 +262,7 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
           _errorMessage = error;
           _isLoading = false;
         });
-        
+
         // Track player error
         AnalyticsService.instance.trackError(
           errorType: 'universal_player_error',
@@ -278,22 +276,17 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
       },
     );
   }
-  
 
-  
   Widget _buildMobilePlayer() {
     // Implementation for mobile WebView player
     return Container(
       color: Colors.black,
       child: const Center(
-        child: Text(
-          'Mobile Player',
-          style: TextStyle(color: Colors.white),
-        ),
+        child: Text('Mobile Player', style: TextStyle(color: Colors.white)),
       ),
     );
   }
-  
+
   Widget _buildLoadingIndicator() {
     return Container(
       color: Colors.black.withOpacity(0.7),
@@ -307,17 +300,14 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
             SizedBox(height: 16),
             Text(
               'Loading video...',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.white, fontSize: 16),
             ),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildErrorDisplay() {
     return Container(
       color: Colors.black.withOpacity(0.8),
@@ -325,11 +315,7 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
             const Text(
               'Failed to load video',
@@ -358,7 +344,7 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
       ),
     );
   }
-  
+
   Widget _buildPlatformBranding() {
     return Positioned(
       top: 12,
@@ -369,7 +355,7 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
       ),
     );
   }
-  
+
   Widget _buildVideoControls(bool isMobile) {
     return AnimatedBuilder(
       animation: _controlsAnimation,
@@ -377,7 +363,8 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
         return Opacity(
           opacity: _controlsAnimation.value,
           child: VideoControlsWidget(
-            player: null, // Player controls now handled by UniversalPlatformPlayer
+            player:
+                null, // Player controls now handled by UniversalPlatformPlayer
             content: widget.content,
             isMobile: isMobile,
             onFullscreen: _toggleFullscreen,
@@ -388,7 +375,7 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
       },
     );
   }
-  
+
   Widget _buildTapDetector() {
     return Positioned.fill(
       child: GestureDetector(
@@ -396,13 +383,11 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
         onDoubleTap: () async {
           // Double-tap play/pause functionality now handled by UniversalPlatformPlayer
         },
-        child: Container(
-          color: Colors.transparent,
-        ),
+        child: Container(color: Colors.transparent),
       ),
     );
   }
-  
+
   double _getAspectRatio() {
     switch (widget.content.contentType) {
       case ContentType.short:
@@ -424,7 +409,7 @@ class ResponsiveVideoGrid extends StatelessWidget {
   final Function(Content)? onVideoTap;
   final bool autoPlay;
   final EdgeInsets? padding;
-  
+
   const ResponsiveVideoGrid({
     super.key,
     required this.contents,
@@ -432,14 +417,14 @@ class ResponsiveVideoGrid extends StatelessWidget {
     this.autoPlay = false,
     this.padding,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = _getCrossAxisCount(constraints.maxWidth);
         final childAspectRatio = _getChildAspectRatio(constraints.maxWidth);
-        
+
         return Padding(
           padding: padding ?? const EdgeInsets.all(16),
           child: GridView.builder(
@@ -467,14 +452,14 @@ class ResponsiveVideoGrid extends StatelessWidget {
       },
     );
   }
-  
+
   int _getCrossAxisCount(double width) {
     if (width > 1200) return 4; // Desktop
-    if (width > 768) return 3;  // Tablet
-    if (width > 480) return 2;  // Large mobile
+    if (width > 768) return 3; // Tablet
+    if (width > 480) return 2; // Large mobile
     return 1; // Small mobile
   }
-  
+
   double _getChildAspectRatio(double width) {
     if (width > 768) return 16 / 10; // Desktop/Tablet
     return 16 / 12; // Mobile
@@ -487,7 +472,7 @@ class ResponsiveVideoCarousel extends StatelessWidget {
   final Function(Content)? onVideoTap;
   final String? title;
   final EdgeInsets? padding;
-  
+
   const ResponsiveVideoCarousel({
     super.key,
     required this.contents,
@@ -495,7 +480,7 @@ class ResponsiveVideoCarousel extends StatelessWidget {
     this.title,
     this.padding,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -506,9 +491,9 @@ class ResponsiveVideoCarousel extends StatelessWidget {
             padding: padding ?? const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               title!,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
         const SizedBox(height: 12),

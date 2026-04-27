@@ -10,7 +10,7 @@ class EnhancedVideoPlayerWidget extends StatefulWidget {
   final StreamQuality quality;
   final VoidCallback? onError;
   final VoidCallback? onLoaded;
-  
+
   const EnhancedVideoPlayerWidget({
     super.key,
     required this.content,
@@ -19,9 +19,10 @@ class EnhancedVideoPlayerWidget extends StatefulWidget {
     this.onError,
     this.onLoaded,
   });
-  
+
   @override
-  State<EnhancedVideoPlayerWidget> createState() => _EnhancedVideoPlayerWidgetState();
+  State<EnhancedVideoPlayerWidget> createState() =>
+      _EnhancedVideoPlayerWidgetState();
 }
 
 class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
@@ -30,13 +31,13 @@ class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
   bool _isLoading = true;
   bool _hasError = false;
   String? _errorMessage;
-  
+
   @override
   void initState() {
     super.initState();
     _initializePlayer();
   }
-  
+
   Future<void> _initializePlayer() async {
     try {
       setState(() {
@@ -44,15 +45,16 @@ class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
         _hasError = false;
         _errorMessage = null;
       });
-      
-      if (widget.contentOnlyMode && widget.content.platform == PlatformType.youtube) {
+
+      if (widget.contentOnlyMode &&
+          widget.content.platform == PlatformType.youtube) {
         // Extract video content for content-only mode
         await _extractVideoContent();
       } else {
         // Fallback to standard embed mode
         await _initializeWebView();
       }
-      
+
       widget.onLoaded?.call();
     } catch (error) {
       setState(() {
@@ -60,9 +62,9 @@ class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
         _errorMessage = error.toString();
         _isLoading = false;
       });
-      
+
       widget.onError?.call();
-      
+
       await AnalyticsService.instance.trackError(
         errorType: 'enhanced_video_player_error',
         errorMessage: error.toString(),
@@ -70,17 +72,17 @@ class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
       );
     }
   }
-  
+
   Future<void> _extractVideoContent() async {
     try {
       final extractedContent = await VideoContentExtractionService.instance
           .extractVideoContent(widget.content);
-      
+
       setState(() {
         _extractedContent = extractedContent;
         _isLoading = false;
       });
-      
+
       // Initialize WebView with extracted stream
       await _initializeWebViewWithExtractedContent(extractedContent);
     } catch (error) {
@@ -89,22 +91,24 @@ class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
       await _initializeWebView();
     }
   }
-  
-  Future<void> _initializeWebViewWithExtractedContent(ExtractedVideoContent content) async {
+
+  Future<void> _initializeWebViewWithExtractedContent(
+    ExtractedVideoContent content,
+  ) async {
     final optimalStream = VideoContentExtractionService.instance
         .getOptimalStream(content, quality: widget.quality);
-    
+
     if (optimalStream == null) {
       throw Exception('No suitable video stream found');
     }
-    
+
     // Create HTML content with video player
     final htmlContent = _buildVideoPlayerHTML(
       streamUrl: optimalStream.url,
       title: content.title,
       thumbnailUrl: content.thumbnailUrl,
     );
-    
+
     _webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
@@ -127,10 +131,10 @@ class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
       )
       ..loadHtmlString(htmlContent);
   }
-  
+
   Future<void> _initializeWebView() async {
     final embedUrl = _buildEmbedUrl();
-    
+
     _webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
@@ -156,7 +160,7 @@ class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
       )
       ..loadRequest(Uri.parse(embedUrl));
   }
-  
+
   String _buildEmbedUrl() {
     switch (widget.content.platform) {
       case PlatformType.youtube:
@@ -169,10 +173,12 @@ class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
         // TikTok embed URL (simplified)
         return 'https://www.tiktok.com/embed/v2/${widget.content.platformContentId}';
       default:
-        throw UnsupportedError('Platform ${widget.content.platform} not supported for embed');
+        throw UnsupportedError(
+          'Platform ${widget.content.platform} not supported for embed',
+        );
     }
   }
-  
+
   String _buildVideoPlayerHTML({
     required String streamUrl,
     required String title,
@@ -320,7 +326,7 @@ class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
 </html>
 ''';
   }
-  
+
   @override
   Widget build(BuildContext context) {
     if (_hasError) {
@@ -334,11 +340,7 @@ class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.error_outline,
-                color: Colors.red[400],
-                size: 48,
-              ),
+              Icon(Icons.error_outline, color: Colors.red[400], size: 48),
               const SizedBox(height: 16),
               Text(
                 'Failed to load video',
@@ -352,10 +354,7 @@ class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
                 const SizedBox(height: 8),
                 Text(
                   _errorMessage!,
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -372,7 +371,7 @@ class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
         ),
       );
     }
-    
+
     if (_isLoading) {
       return Container(
         height: 200,
@@ -388,29 +387,24 @@ class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
               SizedBox(height: 16),
               Text(
                 'Loading video...',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 16,
-                ),
+                style: TextStyle(color: Colors.white70, fontSize: 16),
               ),
             ],
           ),
         ),
       );
     }
-    
+
     return Container(
       height: 200,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: WebViewWidget(controller: _webViewController),
       ),
     );
   }
-  
+
   @override
   void dispose() {
     super.dispose();

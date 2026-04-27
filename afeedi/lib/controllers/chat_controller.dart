@@ -5,6 +5,7 @@ import '../models/onboarding_step.dart';
 import '../services/onboarding_service.dart';
 import '../services/analytics_service.dart';
 import '../services/navigation_service.dart';
+import '../utils/debouncer.dart';
 
 class ChatController extends ChangeNotifier {
   final OnboardingService _onboardingService = OnboardingService();
@@ -13,6 +14,7 @@ class ChatController extends ChangeNotifier {
   final TextEditingController searchController = TextEditingController();
   final FocusNode textFocusNode = FocusNode();
   final FocusNode searchFocusNode = FocusNode();
+  final Debouncer _searchDebouncer = Debouncer(milliseconds: 300);
 
   List<ChatMessage> _messages = [];
   List<String> _quickReplies = [];
@@ -25,7 +27,7 @@ class ChatController extends ChangeNotifier {
     'Facebook': false,
     'Twitter': false,
   };
-  
+
   int _currentStep = 0;
   bool _showTyping = false;
   bool _showQuickReplies = false;
@@ -61,7 +63,7 @@ class ChatController extends ChangeNotifier {
     _onboardingSteps = _onboardingService.getOnboardingSteps();
     _allGenres = _onboardingService.getAllGenres();
     _filteredGenres = _allGenres;
-    
+
     _initializeAnalytics();
     startOnboarding();
   }
@@ -96,11 +98,9 @@ class ChatController extends ChangeNotifier {
 
     Future.delayed(const Duration(milliseconds: 1500), () {
       _showTyping = false;
-      _messages.add(ChatMessage(
-        text: message,
-        isBot: true,
-        timestamp: DateTime.now(),
-      ));
+      _messages.add(
+        ChatMessage(text: message, isBot: true, timestamp: DateTime.now()),
+      );
       notifyListeners();
       showStepOptions();
       scrollToBottom();
@@ -109,7 +109,7 @@ class ChatController extends ChangeNotifier {
 
   void showStepOptions() {
     final currentStepData = _onboardingSteps[_currentStep];
-    
+
     Future.delayed(const Duration(milliseconds: 500), () {
       if (currentStepData.isGenreSelection) {
         _showGenreSelection = true;
@@ -150,36 +150,32 @@ class ChatController extends ChangeNotifier {
 
   void updateSuggestions() {
     if (_currentStep >= _onboardingSteps.length) return;
-    
+
     switch (_currentStep) {
       case 0:
         _currentSuggestions = [
           'Hi there!',
           'Hello',
           'Let\'s get started',
-          'I\'m ready'
+          'I\'m ready',
         ];
         break;
       case 1:
-        _currentSuggestions = [
-          'My name is Alex',
-          'Call me Sam',
-          'I\'m Jordan'
-        ];
+        _currentSuggestions = ['My name is Alex', 'Call me Sam', 'I\'m Jordan'];
         break;
       case 2:
         _currentSuggestions = [
           'I love comedy videos',
           'I enjoy educational content',
           'I like music and entertainment',
-          'I prefer short funny clips'
+          'I prefer short funny clips',
         ];
         break;
       case 5:
         _currentSuggestions = [
           'Sounds great!',
           'I\'m excited to start',
-          'Let\'s do this'
+          'Let\'s do this',
         ];
         break;
       default:
@@ -189,11 +185,9 @@ class ChatController extends ChangeNotifier {
   }
 
   void addUserMessage(String text) {
-    _messages.add(ChatMessage(
-      text: text,
-      isBot: false,
-      timestamp: DateTime.now(),
-    ));
+    _messages.add(
+      ChatMessage(text: text, isBot: false, timestamp: DateTime.now()),
+    );
     _showQuickReplies = false;
     _showTextInput = false;
     _showGenreSelection = false;
@@ -212,8 +206,12 @@ class ChatController extends ChangeNotifier {
   }
 
   void handleGenreSearchChanged(String query) {
-    _filteredGenres = _onboardingService.filterGenres(_allGenres, query);
-    notifyListeners();
+    _searchDebouncer.run(() {
+      // BOLT OPTIMIZATION: Debounce search input to reduce unnecessary filtering and re-renders
+      // Expected impact: Smoother typing experience and reduced CPU usage during search.
+      _filteredGenres = _onboardingService.filterGenres(_allGenres, query);
+      notifyListeners();
+    });
   }
 
   void handleGenreContinue() {
@@ -237,11 +235,11 @@ class ChatController extends ChangeNotifier {
         .where((entry) => entry.value)
         .map((entry) => entry.key)
         .toList();
-    
+
     final message = connectedPlatforms.isNotEmpty
         ? 'Connected: ${connectedPlatforms.join(', ')}'
         : 'I\'ll connect platforms later';
-    
+
     addUserMessage(message);
     processUserInput('Platform selection completed');
   }
@@ -254,13 +252,17 @@ class ChatController extends ChangeNotifier {
     AnalyticsService.instance.trackOnboardingEvent(
       eventName: AnalyticsEvents.onboardingStepCompleted,
       stepNumber: _currentStep,
-      stepName: _currentStep < _onboardingSteps.length ? 'step_${_currentStep + 1}' : 'final_step',
+      stepName: _currentStep < _onboardingSteps.length
+          ? 'step_${_currentStep + 1}'
+          : 'final_step',
       additionalData: {
-        'user_input': input.length > 50 ? '${input.substring(0, 50)}...' : input,
+        'user_input': input.length > 50
+            ? '${input.substring(0, 50)}...'
+            : input,
         'input_length': input.length,
       },
     );
-    
+
     Future.delayed(const Duration(milliseconds: 500), () {
       _currentStep++;
       if (_currentStep < _onboardingSteps.length) {
@@ -278,7 +280,9 @@ class ChatController extends ChangeNotifier {
       stepName: 'completed',
       additionalData: {
         'total_steps': _onboardingSteps.length,
-        'connected_platforms': _platformConnections.values.where((v) => v).length,
+        'connected_platforms': _platformConnections.values
+            .where((v) => v)
+            .length,
         'selected_genres': _selectedGenres.length,
         'completion_time': DateTime.now().toIso8601String(),
         'user_name': _userName,
@@ -299,7 +303,7 @@ class ChatController extends ChangeNotifier {
     );
 
     showBotMessage(welcomeMessage);
-    
+
     _showFinalButton = true;
     notifyListeners();
   }
@@ -318,6 +322,7 @@ class ChatController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _searchDebouncer.cancel();
     scrollController.dispose();
     textController.dispose();
     searchController.dispose();

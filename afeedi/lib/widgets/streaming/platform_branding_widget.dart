@@ -6,7 +6,7 @@ class PlatformBrandingWidget extends StatelessWidget {
   final double size;
   final bool showLabel;
   final Color? backgroundColor;
-  
+
   const PlatformBrandingWidget({
     super.key,
     required this.platform,
@@ -14,11 +14,11 @@ class PlatformBrandingWidget extends StatelessWidget {
     this.showLabel = false,
     this.backgroundColor,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final platformData = _getPlatformData(platform);
-    
+
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
@@ -35,11 +35,7 @@ class PlatformBrandingWidget extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            platformData['icon'],
-            size: size,
-            color: Colors.white,
-          ),
+          Icon(platformData['icon'], size: size, color: Colors.white),
           if (showLabel) ...<Widget>[
             const SizedBox(width: 6),
             Text(
@@ -55,7 +51,7 @@ class PlatformBrandingWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Map<String, dynamic> _getPlatformData(PlatformType platform) {
     switch (platform) {
       case PlatformType.youtube:
@@ -91,18 +87,18 @@ class PlatformLogoWidget extends StatelessWidget {
   final PlatformType platform;
   final double size;
   final bool showBackground;
-  
+
   const PlatformLogoWidget({
     super.key,
     required this.platform,
     this.size = 40,
     this.showBackground = true,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final platformData = _getPlatformData(platform);
-    
+
     Widget logoWidget = Container(
       width: size,
       height: size,
@@ -116,10 +112,10 @@ class PlatformLogoWidget extends StatelessWidget {
         color: showBackground ? Colors.white : platformData['color'],
       ),
     );
-    
+
     return logoWidget;
   }
-  
+
   Map<String, dynamic> _getPlatformData(PlatformType platform) {
     switch (platform) {
       case PlatformType.youtube:
@@ -128,20 +124,11 @@ class PlatformLogoWidget extends StatelessWidget {
           'color': const Color(0xFFFF0000),
         };
       case PlatformType.instagram:
-        return {
-          'icon': Icons.camera_alt,
-          'color': const Color(0xFFE4405F),
-        };
+        return {'icon': Icons.camera_alt, 'color': const Color(0xFFE4405F)};
       case PlatformType.tiktok:
-        return {
-          'icon': Icons.music_note,
-          'color': const Color(0xFF000000),
-        };
+        return {'icon': Icons.music_note, 'color': const Color(0xFF000000)};
       case PlatformType.facebook:
-        return {
-          'icon': Icons.facebook,
-          'color': const Color(0xFF1877F2),
-        };
+        return {'icon': Icons.facebook, 'color': const Color(0xFF1877F2)};
     }
   }
 }
@@ -152,7 +139,7 @@ class PlatformAttributionWidget extends StatelessWidget {
   final String? creatorName;
   final String? creatorAvatar;
   final VoidCallback? onCreatorTap;
-  
+
   const PlatformAttributionWidget({
     super.key,
     required this.platform,
@@ -160,7 +147,7 @@ class PlatformAttributionWidget extends StatelessWidget {
     this.creatorAvatar,
     this.onCreatorTap,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -216,7 +203,7 @@ class PlatformAttributionWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   String _getPlatformName(PlatformType platform) {
     switch (platform) {
       case PlatformType.youtube:

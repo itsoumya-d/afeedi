@@ -4,67 +4,67 @@ import 'package:flutter/foundation.dart';
 class ContentItem {
   /// Unique identifier for the content item
   final String id;
-  
+
   /// Title of the content
   final String title;
-  
+
   /// Optional description of the content
   final String? description;
-  
+
   /// URL to the content (can be web URL or deep link)
   final String? url;
-  
+
   /// Platform where the content is hosted (e.g., YouTube, Instagram, TikTok)
   final String platform;
-  
+
   /// Type of content (e.g., video, article, image, podcast)
   final String contentType;
-  
+
   /// Creator or author of the content
   final String? creator;
-  
+
   /// URL to the thumbnail image
   final String? thumbnailUrl;
-  
+
   /// Duration of the content in seconds (for time-based content like videos)
   final int durationSeconds;
-  
+
   /// Publication or creation date
   final DateTime? publishedAt;
-  
+
   /// Tags or categories associated with the content
   final List<String> tags;
-  
+
   /// Category of the content
   final String category;
-  
+
   /// Engagement metrics (views, likes, comments, etc.)
   final Map<String, dynamic>? engagementMetrics;
-  
+
   /// Personalization score (how well it matches user preferences)
   final double personalizationScore;
-  
+
   /// Novelty score (how new/unique the content is)
   final double noveltyScore;
-  
+
   /// Relevance score (how relevant the content is to user interests)
   final double relevanceScore;
-  
+
   /// Reason why this content was recommended to the user
   String recommendationReason;
-  
+
   /// Contextual relevance (e.g., "morning content", "related to calendar event")
   final String? contextualRelevance;
-  
+
   /// Whether the content has been viewed by the user
   final bool isViewed;
-  
+
   /// Whether the content has been saved/bookmarked by the user
   final bool isSaved;
-  
+
   /// Whether the content is new/fresh for the user
   final bool isNew;
-  
+
   /// Additional platform-specific data
   final Map<String, dynamic>? platformData;
 
@@ -187,7 +187,8 @@ class ContentItem {
       tags: List<String>.from(map['tags'] ?? []),
       category: map['category'] as String? ?? 'Uncategorized',
       engagementMetrics: map['engagementMetrics'] as Map<String, dynamic>?,
-      personalizationScore: (map['personalizationScore'] as num?)?.toDouble() ?? 0.0,
+      personalizationScore:
+          (map['personalizationScore'] as num?)?.toDouble() ?? 0.0,
       noveltyScore: (map['noveltyScore'] as num?)?.toDouble() ?? 0.0,
       relevanceScore: (map['relevanceScore'] as num?)?.toDouble() ?? 0.0,
       recommendationReason: map['recommendationReason'] as String? ?? '',
@@ -198,7 +199,7 @@ class ContentItem {
       platformData: map['platformData'] as Map<String, dynamic>?,
     );
   }
-  
+
   /// Create ContentItem from a JSON map
   factory ContentItem.fromJson(Map<String, dynamic> json) {
     return ContentItem(
@@ -217,7 +218,8 @@ class ContentItem {
       tags: List<String>.from(json['tags'] ?? []),
       category: json['category'] as String? ?? 'Uncategorized',
       engagementMetrics: json['engagement_metrics'] as Map<String, dynamic>?,
-      personalizationScore: (json['personalization_score'] as num?)?.toDouble() ?? 0.0,
+      personalizationScore:
+          (json['personalization_score'] as num?)?.toDouble() ?? 0.0,
       noveltyScore: (json['novelty_score'] as num?)?.toDouble() ?? 0.0,
       relevanceScore: (json['relevance_score'] as num?)?.toDouble() ?? 0.0,
       recommendationReason: json['recommendation_reason'] as String? ?? '',
@@ -232,41 +234,49 @@ class ContentItem {
   /// Check if this content is part of a series (based on tags or title patterns)
   bool get isPartOfSeries {
     return tags.any((tag) => tag.toLowerCase().contains('series')) ||
-           tags.any((tag) => tag.toLowerCase().contains('episode')) ||
-           title.toLowerCase().contains('episode') ||
-           title.toLowerCase().contains('part');
+        tags.any((tag) => tag.toLowerCase().contains('episode')) ||
+        title.toLowerCase().contains('episode') ||
+        title.toLowerCase().contains('part');
   }
-  
+
   /// Check if this content is niche (based on category and engagement metrics)
   bool get isNiche {
     final views = engagementMetrics?['views'] as num? ?? 0;
     final likes = engagementMetrics?['likes'] as num? ?? 0;
-    
+
     // Consider content niche if it has low engagement or specific categories
-    return views < 10000 || 
-           likes < 100 ||
-           category.toLowerCase().contains('niche') ||
-           tags.any((tag) => ['specialized', 'advanced', 'expert', 'technical'].contains(tag.toLowerCase()));
+    return views < 10000 ||
+        likes < 100 ||
+        category.toLowerCase().contains('niche') ||
+        tags.any(
+          (tag) => [
+            'specialized',
+            'advanced',
+            'expert',
+            'technical',
+          ].contains(tag.toLowerCase()),
+        );
   }
-  
+
   /// Getter for popularity score based on engagement metrics
   double get popularityScore {
     if (engagementMetrics == null) return 0.0;
-    
+
     final views = (engagementMetrics!['views'] as num?)?.toDouble() ?? 0.0;
     final likes = (engagementMetrics!['likes'] as num?)?.toDouble() ?? 0.0;
-    final comments = (engagementMetrics!['comments'] as num?)?.toDouble() ?? 0.0;
+    final comments =
+        (engagementMetrics!['comments'] as num?)?.toDouble() ?? 0.0;
     final shares = (engagementMetrics!['shares'] as num?)?.toDouble() ?? 0.0;
-    
+
     // Calculate a normalized popularity score (0.0 to 1.0)
     // Using logarithmic scaling to handle large numbers
     double score = 0.0;
-    
+
     if (views > 0) score += (views.clamp(0, 1000000) / 1000000) * 0.4;
     if (likes > 0) score += (likes.clamp(0, 100000) / 100000) * 0.3;
     if (comments > 0) score += (comments.clamp(0, 10000) / 10000) * 0.2;
     if (shares > 0) score += (shares.clamp(0, 10000) / 10000) * 0.1;
-    
+
     return score.clamp(0.0, 1.0);
   }
 
@@ -278,19 +288,19 @@ class ContentItem {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-  
+
     return other is ContentItem &&
-      other.id == id &&
-      other.title == title &&
-      other.platform == platform &&
-      other.contentType == contentType;
+        other.id == id &&
+        other.title == title &&
+        other.platform == platform &&
+        other.contentType == contentType;
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
-      title.hashCode ^
-      platform.hashCode ^
-      contentType.hashCode;
+        title.hashCode ^
+        platform.hashCode ^
+        contentType.hashCode;
   }
 }

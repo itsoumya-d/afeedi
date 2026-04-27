@@ -8,9 +8,10 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateMixin {
+class _ProfileScreenState extends State<ProfileScreen>
+    with TickerProviderStateMixin {
   late TabController _tabController;
-  
+
   final Map<String, dynamic> _userProfile = {
     'name': 'Alex Johnson',
     'email': 'alex.johnson@email.com',
@@ -22,7 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     'videosWatched': 342,
     'streakDays': 28,
   };
-  
+
   final List<Map<String, dynamic>> _achievements = [
     {
       'id': 'early_bird',
@@ -61,7 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       'progress': 0.93,
     },
   ];
-  
+
   final List<Map<String, dynamic>> _viewingHistory = [
     {
       'id': '1',
@@ -103,7 +104,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -149,7 +150,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildAppBar() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -199,7 +200,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildProfileHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -212,10 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 height: 120,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppTheme.primaryCyan,
-                    width: 3,
-                  ),
+                  border: Border.all(color: AppTheme.primaryCyan, width: 3),
                   image: DecorationImage(
                     image: NetworkImage(_userProfile['avatar']),
                     fit: BoxFit.cover,
@@ -291,7 +289,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildStatsRow() {
     return Container(
       margin: const EdgeInsets.all(20),
@@ -334,8 +332,13 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
-  Widget _buildStatItem(String label, String value, IconData icon, Color color) {
+
+  Widget _buildStatItem(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Expanded(
       child: Column(
         children: [
@@ -345,11 +348,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
               color: color.withOpacity(0.2),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 20,
-            ),
+            child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(height: 8),
           Text(
@@ -372,7 +371,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildStatDivider() {
     return Container(
       width: 1,
@@ -381,7 +380,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       margin: const EdgeInsets.symmetric(horizontal: 8),
     );
   }
-  
+
   Widget _buildTabBar() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -398,10 +397,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         indicatorPadding: const EdgeInsets.all(4),
         labelColor: AppTheme.primaryCyan,
         unselectedLabelColor: Colors.white.withOpacity(0.7),
-        labelStyle: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
+        labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w400,
@@ -414,7 +410,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildAchievementsTab() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -433,20 +429,20 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildAchievementCard(Map<String, dynamic> achievement) {
     final isUnlocked = achievement['unlocked'];
     final progress = achievement['progress'];
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isUnlocked 
+        color: isUnlocked
             ? achievement['color'].withOpacity(0.1)
             : Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isUnlocked 
+          color: isUnlocked
               ? achievement['color'].withOpacity(0.5)
               : Colors.white.withOpacity(0.1),
         ),
@@ -465,20 +461,22 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                     value: progress,
                     strokeWidth: 3,
                     backgroundColor: Colors.white.withOpacity(0.2),
-                    valueColor: AlwaysStoppedAnimation<Color>(achievement['color']),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      achievement['color'],
+                    ),
                   ),
                 ),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isUnlocked 
+                  color: isUnlocked
                       ? achievement['color'].withOpacity(0.2)
                       : Colors.white.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   achievement['icon'],
-                  color: isUnlocked 
+                  color: isUnlocked
                       ? achievement['color']
                       : Colors.white.withOpacity(0.5),
                   size: 24,
@@ -490,9 +488,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           Text(
             achievement['title'],
             style: TextStyle(
-              color: isUnlocked 
-                  ? Colors.white
-                  : Colors.white.withOpacity(0.7),
+              color: isUnlocked ? Colors.white : Colors.white.withOpacity(0.7),
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
@@ -524,7 +520,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildHistoryTab() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -546,10 +542,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 onPressed: () => _showClearHistoryDialog(),
                 child: const Text(
                   'Clear All',
-                  style: TextStyle(
-                    color: AppTheme.primaryCyan,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: AppTheme.primaryCyan, fontSize: 14),
                 ),
               ),
             ],
@@ -568,12 +561,12 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildHistoryItem(Map<String, dynamic> item) {
     final completed = item['completed'];
     final watchedDuration = item['watchedDuration'];
     final totalDuration = item['duration'];
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -616,17 +609,17 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 bottom: 4,
                 right: 4,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.8),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     totalDuration,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 10),
                   ),
                 ),
               ),
@@ -659,9 +652,14 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
-                        color: _getPlatformColor(item['platform']).withOpacity(0.2),
+                        color: _getPlatformColor(
+                          item['platform'],
+                        ).withOpacity(0.2),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -687,25 +685,18 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                   const SizedBox(height: 8),
                   Text(
                     'Watched $watchedDuration of $totalDuration',
-                    style: TextStyle(
-                      color: AppTheme.primaryCyan,
-                      fontSize: 10,
-                    ),
+                    style: TextStyle(color: AppTheme.primaryCyan, fontSize: 10),
                   ),
                 ],
               ],
             ),
           ),
-          Icon(
-            Icons.more_vert,
-            color: Colors.white.withOpacity(0.5),
-            size: 20,
-          ),
+          Icon(Icons.more_vert, color: Colors.white.withOpacity(0.5), size: 20),
         ],
       ),
     );
   }
-  
+
   Widget _buildSubscriptionTab() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -715,13 +706,12 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           const SizedBox(height: 20),
           _buildSubscriptionFeatures(),
           const Spacer(),
-          if (!_userProfile['isPremium'])
-            _buildUpgradeButton(),
+          if (!_userProfile['isPremium']) _buildUpgradeButton(),
         ],
       ),
     );
   }
-  
+
   Widget _buildSubscriptionCard() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -777,10 +767,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
               ),
               child: const Text(
                 'Renews March 15, 2024',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.white, fontSize: 12),
               ),
             ),
           ],
@@ -788,7 +775,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildSubscriptionFeatures() {
     final features = [
       {
@@ -816,7 +803,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         'available': _userProfile['isPremium'],
       },
     ];
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -833,20 +820,20 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ],
     );
   }
-  
+
   Widget _buildFeatureItem(Map<String, dynamic> feature) {
     final available = feature['available'];
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: available 
+        color: available
             ? AppTheme.primaryCyan.withOpacity(0.1)
             : Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: available 
+          color: available
               ? AppTheme.primaryCyan.withOpacity(0.3)
               : Colors.white.withOpacity(0.1),
         ),
@@ -856,14 +843,14 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: available 
+              color: available
                   ? AppTheme.primaryCyan.withOpacity(0.2)
                   : Colors.white.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               feature['icon'],
-              color: available 
+              color: available
                   ? AppTheme.primaryCyan
                   : Colors.white.withOpacity(0.5),
               size: 20,
@@ -877,7 +864,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 Text(
                   feature['title'],
                   style: TextStyle(
-                    color: available 
+                    color: available
                         ? Colors.white
                         : Colors.white.withOpacity(0.7),
                     fontSize: 14,
@@ -897,7 +884,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           ),
           Icon(
             available ? Icons.check_circle : Icons.lock,
-            color: available 
+            color: available
                 ? AppTheme.primaryCyan
                 : Colors.white.withOpacity(0.3),
             size: 20,
@@ -906,7 +893,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildUpgradeButton() {
     return Container(
       width: double.infinity,
@@ -939,7 +926,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Color _getPlatformColor(String platform) {
     switch (platform.toLowerCase()) {
       case 'youtube':
@@ -954,7 +941,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         return AppTheme.primaryCyan;
     }
   }
-  
+
   // Dialog methods
   void _showEditProfileDialog() {
     showDialog(
@@ -981,7 +968,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   void _showClearHistoryDialog() {
     showDialog(
       context: context,
@@ -998,10 +985,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
             onPressed: () {
@@ -1010,16 +994,13 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 _viewingHistory.clear();
               });
             },
-            child: const Text(
-              'Clear',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Clear', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
   }
-  
+
   void _showUpgradeDialog() {
     showDialog(
       context: context,

@@ -15,7 +15,7 @@ class EnhancedYouTubePlayer extends StatefulWidget {
   final VoidCallback? onPlayerReady;
   final Function(String)? onError;
   final bool allowFullscreen;
-  
+
   const EnhancedYouTubePlayer({
     super.key,
     required this.content,
@@ -26,7 +26,7 @@ class EnhancedYouTubePlayer extends StatefulWidget {
     this.onError,
     this.allowFullscreen = true,
   });
-  
+
   @override
   State<EnhancedYouTubePlayer> createState() => _EnhancedYouTubePlayerState();
 }
@@ -38,19 +38,19 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
   YouTubePlayerResult? _playerResult;
   String? _containerId;
   bool _showFallbackOptions = false;
-  
+
   @override
   void initState() {
     super.initState();
     _initializePlayer();
   }
-  
+
   @override
   void dispose() {
     _cleanupPlayer();
     super.dispose();
   }
-  
+
   Future<void> _initializePlayer() async {
     if (widget.content.platform != PlatformType.youtube) {
       setState(() {
@@ -60,18 +60,18 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       });
       return;
     }
-    
+
     try {
       setState(() {
         _isLoading = true;
         _hasError = false;
       });
-      
+
       // Generate unique container ID for web
       if (kIsWeb) {
         _containerId = 'youtube-player-${Random().nextInt(999999)}';
       }
-      
+
       // Wait for widget to be built before creating player
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await _createPlayer();
@@ -85,7 +85,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       widget.onError?.call(error.toString());
     }
   }
-  
+
   Future<void> _createPlayer() async {
     try {
       final result = await YouTubePlayerService.instance.createPlayer(
@@ -94,7 +94,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
         autoplay: widget.autoPlay,
         showControls: widget.showControls,
       );
-      
+
       setState(() {
         _playerResult = result;
         _isLoading = false;
@@ -102,7 +102,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
         _errorMessage = result.errorMessage ?? '';
         _showFallbackOptions = !result.success;
       });
-      
+
       if (result.success) {
         widget.onPlayerReady?.call();
       } else {
@@ -118,18 +118,18 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       widget.onError?.call(error.toString());
     }
   }
-  
+
   void _cleanupPlayer() {
     if (kIsWeb && _containerId != null) {
       final container = html.document.getElementById(_containerId!);
       container?.children.clear();
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final aspectRatio = widget.aspectRatio ?? 16 / 9;
-    
+
     return AspectRatio(
       aspectRatio: aspectRatio,
       child: Container(
@@ -144,23 +144,23 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       ),
     );
   }
-  
+
   Widget _buildPlayerContent() {
     if (_isLoading) {
       return _buildLoadingState();
     }
-    
+
     if (_hasError || _showFallbackOptions) {
       return _buildErrorState();
     }
-    
+
     if (kIsWeb && _containerId != null) {
       return _buildWebPlayer();
     }
-    
+
     return _buildMobilePlayer();
   }
-  
+
   Widget _buildLoadingState() {
     return Container(
       color: Colors.black,
@@ -179,7 +179,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
             )
           else
             _buildThumbnailPlaceholder(),
-          
+
           // Loading overlay
           Positioned.fill(
             child: Container(
@@ -194,10 +194,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
                     SizedBox(height: 16),
                     Text(
                       'Loading YouTube Player...',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 14),
                     ),
                   ],
                 ),
@@ -208,7 +205,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       ),
     );
   }
-  
+
   Widget _buildErrorState() {
     return Container(
       color: Colors.black,
@@ -227,7 +224,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
             )
           else
             _buildThumbnailPlaceholder(),
-          
+
           // Error overlay with options
           Positioned.fill(
             child: Container(
@@ -272,7 +269,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       ),
     );
   }
-  
+
   Widget _buildActionButtons() {
     return Column(
       children: [
@@ -289,9 +286,9 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           ),
         ),
-        
+
         const SizedBox(height: 12),
-        
+
         // Secondary action - Retry embed
         TextButton.icon(
           onPressed: _retryPlayer,
@@ -304,7 +301,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       ],
     );
   }
-  
+
   Widget _buildWebPlayer() {
     return Stack(
       children: [
@@ -317,7 +314,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
             },
           ),
         ),
-        
+
         // Fallback overlay if needed
         if (_showFallbackOptions)
           Positioned(
@@ -325,10 +322,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
             right: 8,
             child: IconButton(
               onPressed: _openInYouTube,
-              icon: const Icon(
-                Icons.open_in_new,
-                color: Colors.white,
-              ),
+              icon: const Icon(Icons.open_in_new, color: Colors.white),
               style: IconButton.styleFrom(
                 backgroundColor: Colors.black.withOpacity(0.7),
               ),
@@ -337,7 +331,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       ],
     );
   }
-  
+
   Widget _buildMobilePlayer() {
     return GestureDetector(
       onTap: _openInYouTube,
@@ -356,7 +350,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
             )
           else
             _buildThumbnailPlaceholder(),
-          
+
           // Play button overlay
           Positioned.fill(
             child: Container(
@@ -370,7 +364,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
               ),
             ),
           ),
-          
+
           // Duration badge
           if (widget.content.durationSeconds != null)
             Positioned(
@@ -392,7 +386,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
                 ),
               ),
             ),
-          
+
           // YouTube logo
           Positioned(
             top: 8,
@@ -417,7 +411,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       ),
     );
   }
-  
+
   Widget _buildThumbnailPlaceholder() {
     return Container(
       color: Colors.grey[900],
@@ -425,11 +419,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.play_circle_outline,
-              color: Colors.red,
-              size: 48,
-            ),
+            Icon(Icons.play_circle_outline, color: Colors.red, size: 48),
             SizedBox(height: 8),
             Text(
               'YouTube',
@@ -444,10 +434,12 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       ),
     );
   }
-  
+
   Future<void> _openInYouTube() async {
-    final success = await YouTubePlayerService.instance.openInYouTube(widget.content);
-    
+    final success = await YouTubePlayerService.instance.openInYouTube(
+      widget.content,
+    );
+
     if (!success) {
       // Show error message
       if (mounted) {
@@ -460,14 +452,14 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       }
     }
   }
-  
+
   Future<void> _retryPlayer() async {
     setState(() {
       _isLoading = true;
       _hasError = false;
       _showFallbackOptions = false;
     });
-    
+
     await _createPlayer();
   }
 }

@@ -15,7 +15,7 @@ class Window {
 }
 
 class Location {
-    String get origin => "localhost";
+  String get origin => "localhost";
 }
 
 final Window window = Window();
@@ -42,34 +42,34 @@ class CanvasElement {
 }
 
 class IFrameElement {
-    set src(String? value) {}
-    String? get src => '';
-    final style = IFrameElementStyle();
-    set allowFullscreen(bool? value) {}
-    bool? get allowFullscreen => false;
-    void setAttribute(String name, String value) {}
+  set src(String? value) {}
+  String? get src => '';
+  final style = IFrameElementStyle();
+  set allowFullscreen(bool? value) {}
+  bool? get allowFullscreen => false;
+  void setAttribute(String name, String value) {}
 }
 
 class IFrameElementStyle {
-    set border(String? value) {}
-    String? get border => '';
-    set height(String? value) {}
-    String? get height => '';
-    set width(String? value) {}
-    String? get width => '';
+  set border(String? value) {}
+  String? get border => '';
+  set height(String? value) {}
+  String? get height => '';
+  set width(String? value) {}
+  String? get width => '';
 }
 
 class Document {
-    Element? getElementById(String id) => null;
-    HeadElement? get head => HeadElement();
+  Element? getElementById(String id) => null;
+  HeadElement? get head => HeadElement();
 }
 
 class HeadElement extends Element {
-    void append(Element element) {}
+  void append(Element element) {}
 }
 
 class Element {
-    List<Element> get children => [];
+  List<Element> get children => [];
 }
 
 final Document document = Document();

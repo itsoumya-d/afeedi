@@ -1,0 +1,4 @@
+## 2024-04-28 - [CRITICAL] Unsalted Password Hashing
+**Vulnerability:** The local authentication service (`LocalAuthService`) was hashing passwords using raw SHA-256 (`sha256.convert(utf8.encode(password))`) without applying a salt.
+**Learning:** Storing unsalted hashes makes the application highly vulnerable to rainbow table attacks and dictionary attacks, where an attacker can precompute hashes of common passwords or look them up in large databases to easily reverse the hashes back into plaintext passwords. Furthermore, users sharing the same password would have identical hash values, exposing password reuse.
+**Prevention:** Always generate a unique, cryptographically secure random salt (e.g., using `dart:math` `Random.secure()`) for each user during sign-up. Append or prepend this salt to the password before hashing it. The salt must be stored alongside the password hash so it can be retrieved and used during sign-in verification.

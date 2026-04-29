@@ -5,12 +5,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive/hive.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/services.dart';
 
 void main() {
   late LocalAuthService authService;
   late Directory tempDir;
 
+  TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (MethodCall methodCall) async {
+        return '.';
+      },
+    );
     // Setup Hive for testing
     tempDir = await Directory.systemTemp.createTemp('afeedi_test');
     Hive.init(tempDir.path);

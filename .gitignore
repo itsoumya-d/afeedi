@@ -1,0 +1,5 @@
+
+# Local database artifacts and mock telemetry
+*.hive
+*.lock
+analytics_events.json

@@ -15,7 +15,9 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
-  final RefreshController _refreshController = RefreshController(initialRefresh: false);
+  final RefreshController _refreshController = RefreshController(
+    initialRefresh: false,
+  );
   List<Content> _posts = [];
   bool _isLoading = true;
   List<PlatformType> _selectedPlatforms = PlatformType.values;
@@ -30,7 +32,7 @@ class _FeedScreenState extends State<FeedScreen> {
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       final feedContent = await ContentService.instance.getFeedContent();
       setState(() {
@@ -44,8 +46,6 @@ class _FeedScreenState extends State<FeedScreen> {
       print('Error loading feed: $e');
     }
   }
-
-
 
   Future<void> _onRefresh() async {
     try {
@@ -80,12 +80,11 @@ class _FeedScreenState extends State<FeedScreen> {
         title: const Text('Content Feed'),
         elevation: 0,
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.primaryGradient,
-          ),
+          decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
         ),
         actions: [
           IconButton(
+            tooltip: 'Filter Feed',
             icon: const Icon(Icons.filter_list),
             onPressed: () {
               _showFilterDialog();

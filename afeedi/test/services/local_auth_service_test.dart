@@ -5,12 +5,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive/hive.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/services.dart';
+
+// ignore_for_file: depend_on_referenced_packages
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late LocalAuthService authService;
   late Directory tempDir;
 
   setUpAll(() async {
+    // Setup path_provider mock
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'getApplicationDocumentsDirectory') {
+          return tempDir.path;
+        }
+        return null;
+      },
+    );
+
     // Setup Hive for testing
     tempDir = await Directory.systemTemp.createTemp('afeedi_test');
     Hive.init(tempDir.path);

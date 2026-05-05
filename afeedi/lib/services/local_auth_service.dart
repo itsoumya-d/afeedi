@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'dart:math';
 import 'package:crypto/crypto.dart';
 import '../models/user_model.dart';
 import '../core/storage/local_storage_service.dart';
@@ -57,11 +58,13 @@ class LocalAuthService {
       // Save user to storage
       await _storage.saveUser(user);
       
-      // Save credentials with hashed password
+      // Generate salt and save credentials with hashed password
+      final salt = _generateSalt();
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_credentials_${user.id}', jsonEncode({
         'email': email,
-        'password': _hashPassword(password),
+        'password': _hashPassword(password, salt),
+        'salt': salt,
       }));
       
       // Set as current user
@@ -103,7 +106,8 @@ class LocalAuthService {
       
       if (credentialsJson != null) {
         final credentials = jsonDecode(credentialsJson);
-        final hashedPassword = _hashPassword(password);
+        final salt = credentials['salt'] ?? ''; // Fallback to empty string for backward compatibility
+        final hashedPassword = _hashPassword(password, salt);
         if (credentials['password'] == hashedPassword) {
           // Set as current user
           await _setCurrentUser(user);
@@ -223,9 +227,16 @@ class LocalAuthService {
   // Check if user is authenticated
   bool get isAuthenticated => _currentUser != null;
   
-  // Hash password using SHA-256
-  String _hashPassword(String password) {
-    final bytes = utf8.encode(password);
+  // Generate secure random salt
+  String _generateSalt() {
+    final random = Random.secure();
+    final values = List<int>.generate(16, (i) => random.nextInt(256));
+    return base64UrlEncode(values);
+  }
+
+  // Hash password using SHA-256 with optional salt
+  String _hashPassword(String password, [String salt = '']) {
+    final bytes = utf8.encode(password + salt);
     final digest = sha256.convert(bytes);
     return digest.toString();
   }

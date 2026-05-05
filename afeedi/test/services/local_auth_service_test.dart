@@ -1,8 +1,10 @@
+// ignore_for_file: depend_on_referenced_packages
 import 'package:flutter_test/flutter_test.dart';
 import 'package:afeedi/services/local_auth_service.dart';
 import 'package:afeedi/core/storage/local_storage_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive/hive.dart';
+import 'package:flutter/services.dart';
 import 'dart:io';
 import 'dart:convert';
 
@@ -11,6 +13,20 @@ void main() {
   late Directory tempDir;
 
   setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+
+    // Mock path_provider
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'getApplicationDocumentsDirectory') {
+          return tempDir.path;
+        }
+        return null;
+      },
+    );
+
     // Setup Hive for testing
     tempDir = await Directory.systemTemp.createTemp('afeedi_test');
     Hive.init(tempDir.path);
@@ -92,6 +108,24 @@ void main() {
       final creds2 = jsonDecode(prefs.getString('user_credentials_${user2!.id}')!);
 
       expect(creds1['password'], isNot(creds2['password']));
+    });
+
+    test('same password results in different hashes for different users due to salt', () async {
+      const password = 'password123';
+
+      final user1 = await authService.signUp(email: 'user3@test.com', password: password);
+      final user2 = await authService.signUp(email: 'user4@test.com', password: password);
+
+      final prefs = await SharedPreferences.getInstance();
+      final creds1 = jsonDecode(prefs.getString('user_credentials_${user1!.id}')!);
+      final creds2 = jsonDecode(prefs.getString('user_credentials_${user2!.id}')!);
+
+      expect(creds1['password'], isNot(creds2['password']));
+      expect(creds1['salt'], isNotNull);
+      expect(creds1['salt'], isNotEmpty);
+      expect(creds2['salt'], isNotNull);
+      expect(creds2['salt'], isNotEmpty);
+      expect(creds1['salt'], isNot(creds2['salt']));
     });
   });
 }

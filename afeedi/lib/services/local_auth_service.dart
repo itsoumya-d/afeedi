@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'dart:math' as math;
 import '../models/user_model.dart';
 import '../core/storage/local_storage_service.dart';
 import 'analytics_service.dart';
@@ -57,11 +58,15 @@ class LocalAuthService {
       // Save user to storage
       await _storage.saveUser(user);
       
+      // Generate a unique salt
+      final salt = _generateSalt();
+
       // Save credentials with hashed password
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_credentials_${user.id}', jsonEncode({
         'email': email,
-        'password': _hashPassword(password),
+        'password': _hashPassword(password, salt),
+        'salt': salt,
       }));
       
       // Set as current user
@@ -103,7 +108,8 @@ class LocalAuthService {
       
       if (credentialsJson != null) {
         final credentials = jsonDecode(credentialsJson);
-        final hashedPassword = _hashPassword(password);
+        final salt = credentials['salt'] ?? '';
+        final hashedPassword = _hashPassword(password, salt);
         if (credentials['password'] == hashedPassword) {
           // Set as current user
           await _setCurrentUser(user);
@@ -223,11 +229,18 @@ class LocalAuthService {
   // Check if user is authenticated
   bool get isAuthenticated => _currentUser != null;
   
-  // Hash password using SHA-256
-  String _hashPassword(String password) {
-    final bytes = utf8.encode(password);
+  // Hash password using SHA-256 with salt
+  String _hashPassword(String password, [String salt = '']) {
+    final bytes = utf8.encode('$salt$password');
     final digest = sha256.convert(bytes);
     return digest.toString();
+  }
+
+  // Generate a random salt
+  String _generateSalt() {
+    final random = math.Random.secure();
+    final saltBytes = List<int>.generate(16, (_) => random.nextInt(256));
+    return base64Encode(saltBytes);
   }
 
   // Get user preferences

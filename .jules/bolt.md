@@ -1,0 +1,3 @@
+## 2024-05-24 - Dart Future.wait Optimization for Initialization
+**Learning:** Sequential `await` calls in Flutter/Dart initialization loops (like opening many `Hive` storage boxes sequentially) create hidden performance bottlenecks, particularly impactful during app startup or full data cleanup operations. Web environments in Flutter exacerbate the cost of these sequential context switches.
+**Action:** Always group independent `Future` operations (such as opening multiple database tables or clearing multiple storage buckets) into `Future.wait([...])` to run them concurrently. This pattern is easily implementable and offers a significant, measurable reduction in wall-clock time for large sets of independent async operations.

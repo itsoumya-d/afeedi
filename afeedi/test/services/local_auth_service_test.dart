@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:afeedi/services/local_auth_service.dart';
 import 'package:afeedi/core/storage/local_storage_service.dart';
+// ignore_for_file: depend_on_referenced_packages
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive/hive.dart';
 import 'dart:io';
@@ -11,6 +13,19 @@ void main() {
   late Directory tempDir;
 
   setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    // Setup path_provider mock for testing
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'getApplicationDocumentsDirectory') {
+          return '.';
+        }
+        return null;
+      },
+    );
+
     // Setup Hive for testing
     tempDir = await Directory.systemTemp.createTemp('afeedi_test');
     Hive.init(tempDir.path);

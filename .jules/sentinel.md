@@ -1,0 +1,4 @@
+## 2024-05-07 - Fix unsalted password hashes
+**Vulnerability:** Passwords were hashed using SHA-256 without a salt in `LocalAuthService` (`afeedi/lib/services/local_auth_service.dart`), making them vulnerable to rainbow table attacks.
+**Learning:** The previous implementation used a straightforward `sha256.convert(utf8.encode(password))` which is insecure as identical passwords result in identical hashes, and can easily be reversed using precomputed tables.
+**Prevention:** Always generate a unique cryptographic salt for each user upon registration and store it alongside the hashed password. Use this salt during authentication by prepending or appending it to the input password before hashing.

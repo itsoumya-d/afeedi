@@ -1,0 +1,3 @@
+## 2026-05-08 - Optimize Hive Box Opening and Clearing with Future.wait()
+**Learning:** Sequential `await` calls in Flutter/Dart, especially for asynchronous I/O operations like opening multiple Hive boxes, can cause a noticeable bottleneck during app initialization. Dart's event loop executes them one by one.
+**Action:** Always group independent, non-conflicting asynchronous operations (like `Hive.openBox()` and `Hive.box.clear()`) using `Future.wait()`. This allows the event loop to manage them concurrently, drastically reducing overall latency for startup and cleanup routines. This is a crucial pattern for mobile/web app performance.

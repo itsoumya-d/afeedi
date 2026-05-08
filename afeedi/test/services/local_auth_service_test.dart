@@ -5,14 +5,25 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive/hive.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/services.dart';
+
+// ignore_for_file: depend_on_referenced_packages
 
 void main() {
   late LocalAuthService authService;
   late Directory tempDir;
 
   setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+
     // Setup Hive for testing
     tempDir = await Directory.systemTemp.createTemp('afeedi_test');
+
+    // Mock path provider
+    const MethodChannel channel = MethodChannel('plugins.flutter.io/path_provider');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+      return tempDir.path;
+    });
     Hive.init(tempDir.path);
   });
 
@@ -51,6 +62,7 @@ void main() {
       final credentials = jsonDecode(credentialsJson!);
       expect(credentials['password'], isNot(password), reason: 'Password should be hashed, not plain text');
       expect(credentials['password'].length, 64, reason: 'SHA-256 hash should be 64 characters long');
+      expect(credentials.containsKey('salt'), isTrue, reason: 'Password should be salted');
     });
 
     test('signIn works with correct password and fails with incorrect password', () async {
@@ -80,9 +92,9 @@ void main() {
       expect(failedUser, isNull);
     });
 
-    test('different passwords result in different hashes', () async {
+    test('same passwords for different users result in different hashes due to salting', () async {
       const password1 = 'password123';
-      const password2 = 'password456';
+      const password2 = 'password123';
 
       final user1 = await authService.signUp(email: 'user1@test.com', password: password1);
       final user2 = await authService.signUp(email: 'user2@test.com', password: password2);

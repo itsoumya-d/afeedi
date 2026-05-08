@@ -1,0 +1,4 @@
+## 2026-05-08 - [Salted Password Hashing]
+**Vulnerability:** Passwords were hashed using SHA-256 without a unique salt per user, making them susceptible to rainbow table attacks and exposing identical passwords across different users.
+**Learning:** Even strong cryptographic hashing algorithms like SHA-256 are vulnerable to pre-computed attacks (rainbow tables) if they are not salted. The previous implementation fell back to an empty string salt for legacy compatibility, which correctly handles old passwords but does not provide adequate security for new ones.
+**Prevention:** Always generate a unique, cryptographically secure random salt for each user during password creation. Store this salt alongside the hashed password and use it during authentication to ensure identical passwords result in different hashes.

@@ -147,6 +147,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                       child: FadeTransition(
                         opacity: _fadeAnimation,
                         child: IconButton(
+                          tooltip: 'Back',
                           onPressed: () {
                             Navigator.pop(context);
                           },
@@ -262,6 +263,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                     hint: 'Create a strong password',
                                     obscureText: _obscurePassword,
                                     suffixIcon: IconButton(
+                                      tooltip: _obscurePassword ? 'Show password' : 'Hide password',
                                       onPressed: () {
                                         setState(() {
                                           _obscurePassword = !_obscurePassword;
@@ -290,6 +292,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                     hint: 'Confirm your password',
                                     obscureText: _obscureConfirmPassword,
                                     suffixIcon: IconButton(
+                                      tooltip: _obscureConfirmPassword ? 'Show password' : 'Hide password',
                                       onPressed: () {
                                         setState(() {
                                           _obscureConfirmPassword = !_obscureConfirmPassword;

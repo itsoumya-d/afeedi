@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:afeedi/services/local_auth_service.dart';
 import 'package:afeedi/core/storage/local_storage_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
+// ignore_for_file: depend_on_referenced_packages
 import 'package:hive/hive.dart';
 import 'dart:io';
 import 'dart:convert';
@@ -11,8 +13,16 @@ void main() {
   late Directory tempDir;
 
   setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
     // Setup Hive for testing
     tempDir = await Directory.systemTemp.createTemp('afeedi_test');
+
+    const channel = MethodChannel('plugins.flutter.io/path_provider');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+      return tempDir.path;
+    });
+
     Hive.init(tempDir.path);
   });
 

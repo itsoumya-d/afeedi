@@ -38,16 +38,28 @@ class LocalStorageService {
     await Hive.initFlutter();
     _prefs = await SharedPreferences.getInstance();
     
-    // Open all boxes
-    _userBoxInstance = await Hive.openBox<Map>(_userBox);
-    _contentBoxInstance = await Hive.openBox<Map>(_contentBox);
-    _scheduledContentBoxInstance = await Hive.openBox<Map>(_scheduledContentBox);
-    _userPreferencesBoxInstance = await Hive.openBox<Map>(_userPreferencesBox);
-    _platformConnectionsBoxInstance = await Hive.openBox<Map>(_platformConnectionsBox);
-    _recommendationsBoxInstance = await Hive.openBox<Map>(_recommendationsBox);
-    _analyticsBoxInstance = await Hive.openBox<Map>(_analyticsBox);
-    _contentInteractionsBoxInstance = await Hive.openBox<Map>(_contentInteractionsBox);
-    _contentCacheBoxInstance = await Hive.openBox<Map>(_contentCacheBox);
+    // Open all boxes concurrently for faster startup
+    final boxes = await Future.wait([
+      Hive.openBox<Map>(_userBox),
+      Hive.openBox<Map>(_contentBox),
+      Hive.openBox<Map>(_scheduledContentBox),
+      Hive.openBox<Map>(_userPreferencesBox),
+      Hive.openBox<Map>(_platformConnectionsBox),
+      Hive.openBox<Map>(_recommendationsBox),
+      Hive.openBox<Map>(_analyticsBox),
+      Hive.openBox<Map>(_contentInteractionsBox),
+      Hive.openBox<Map>(_contentCacheBox),
+    ]);
+
+    _userBoxInstance = boxes[0];
+    _contentBoxInstance = boxes[1];
+    _scheduledContentBoxInstance = boxes[2];
+    _userPreferencesBoxInstance = boxes[3];
+    _platformConnectionsBoxInstance = boxes[4];
+    _recommendationsBoxInstance = boxes[5];
+    _analyticsBoxInstance = boxes[6];
+    _contentInteractionsBoxInstance = boxes[7];
+    _contentCacheBoxInstance = boxes[8];
   }
 
   /// User Management
@@ -259,15 +271,18 @@ class LocalStorageService {
 
   /// Utility Methods
   Future<void> clearAllData() async {
-    await _userBoxInstance.clear();
-    await _contentBoxInstance.clear();
-    await _scheduledContentBoxInstance.clear();
-    await _userPreferencesBoxInstance.clear();
-    await _platformConnectionsBoxInstance.clear();
-    await _recommendationsBoxInstance.clear();
-    await _analyticsBoxInstance.clear();
-    await _contentInteractionsBoxInstance.clear();
-    await _contentCacheBoxInstance.clear();
+    // Clear all boxes concurrently for faster cleanup
+    await Future.wait([
+      _userBoxInstance.clear(),
+      _contentBoxInstance.clear(),
+      _scheduledContentBoxInstance.clear(),
+      _userPreferencesBoxInstance.clear(),
+      _platformConnectionsBoxInstance.clear(),
+      _recommendationsBoxInstance.clear(),
+      _analyticsBoxInstance.clear(),
+      _contentInteractionsBoxInstance.clear(),
+      _contentCacheBoxInstance.clear(),
+    ]);
     await _prefs.clear();
   }
 

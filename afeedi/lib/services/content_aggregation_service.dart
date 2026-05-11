@@ -42,8 +42,9 @@ class ContentAggregationService {
       
       final allContent = <Content>[];
       
-      // Aggregate content from each platform
-      for (final connection in filteredConnections) {
+      // OPTIMIZATION: Fetch content concurrently to minimize overall network latency.
+      // Expected impact: Faster load times when retrieving content from multiple platforms.
+      final fetchTasks = filteredConnections.map((connection) async {
         try {
           final platformContent = await _fetchPlatformContent(
             connection: connection,
@@ -51,7 +52,7 @@ class ContentAggregationService {
             categories: categories,
             searchQuery: searchQuery,
           );
-          allContent.addAll(platformContent);
+          return platformContent;
         } catch (error) {
           debugPrint('Error fetching content from ${connection.platform}: $error');
           await AnalyticsService.instance.trackError(
@@ -59,7 +60,13 @@ class ContentAggregationService {
             errorMessage: 'Failed to fetch from ${connection.platform}: $error',
             screen: 'content_aggregation',
           );
+          return <Content>[];
         }
+      });
+
+      final results = await Future.wait(fetchTasks);
+      for (final result in results) {
+        allContent.addAll(result);
       }
       
       // Sort by published date (newest first)

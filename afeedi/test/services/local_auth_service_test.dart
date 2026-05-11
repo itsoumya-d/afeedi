@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:afeedi/services/local_auth_service.dart';
 import 'package:afeedi/core/storage/local_storage_service.dart';
@@ -5,15 +6,29 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive/hive.dart';
 import 'dart:io';
 import 'dart:convert';
+// ignore_for_file: depend_on_referenced_packages
 
 void main() {
   late LocalAuthService authService;
   late Directory tempDir;
 
   setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
     // Setup Hive for testing
     tempDir = await Directory.systemTemp.createTemp('afeedi_test');
     Hive.init(tempDir.path);
+
+    // Mock path_provider channel
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'getApplicationDocumentsDirectory') {
+          return tempDir.path;
+        }
+        return null;
+      },
+    );
   });
 
   tearDownAll(() async {
@@ -51,6 +66,8 @@ void main() {
       final credentials = jsonDecode(credentialsJson!);
       expect(credentials['password'], isNot(password), reason: 'Password should be hashed, not plain text');
       expect(credentials['password'].length, 64, reason: 'SHA-256 hash should be 64 characters long');
+      expect(credentials['salt'], isNotNull, reason: 'Salt should be stored');
+      expect(credentials['salt'], isNotEmpty, reason: 'Salt should not be empty');
     });
 
     test('signIn works with correct password and fails with incorrect password', () async {
@@ -92,6 +109,20 @@ void main() {
       final creds2 = jsonDecode(prefs.getString('user_credentials_${user2!.id}')!);
 
       expect(creds1['password'], isNot(creds2['password']));
+    });
+
+    test('same password for different users results in different hashes due to salt', () async {
+      const password = 'SharedPassword123';
+
+      final user1 = await authService.signUp(email: 'user1@test.com', password: password);
+      final user2 = await authService.signUp(email: 'user2@test.com', password: password);
+
+      final prefs = await SharedPreferences.getInstance();
+      final creds1 = jsonDecode(prefs.getString('user_credentials_${user1!.id}')!);
+      final creds2 = jsonDecode(prefs.getString('user_credentials_${user2!.id}')!);
+
+      expect(creds1['salt'], isNot(creds2['salt']), reason: 'Salts must be unique');
+      expect(creds1['password'], isNot(creds2['password']), reason: 'Hashes must be unique even with the same password');
     });
   });
 }

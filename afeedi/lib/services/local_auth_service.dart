@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'dart:math';
 import 'package:crypto/crypto.dart';
 import '../models/user_model.dart';
 import '../core/storage/local_storage_service.dart';
@@ -57,11 +58,17 @@ class LocalAuthService {
       // Save user to storage
       await _storage.saveUser(user);
       
-      // Save credentials with hashed password
+      // Generate a secure salt
+      final random = Random.secure();
+      final salt = List<int>.generate(16, (_) => random.nextInt(256));
+      final saltString = base64Encode(salt);
+
+      // Save credentials with hashed password and salt
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_credentials_${user.id}', jsonEncode({
         'email': email,
-        'password': _hashPassword(password),
+        'password': _hashPassword(password, saltString),
+        'salt': saltString,
       }));
       
       // Set as current user
@@ -103,7 +110,9 @@ class LocalAuthService {
       
       if (credentialsJson != null) {
         final credentials = jsonDecode(credentialsJson);
-        final hashedPassword = _hashPassword(password);
+        // Fallback to empty string for backward compatibility with unsalted passwords
+        final salt = credentials['salt'] ?? '';
+        final hashedPassword = _hashPassword(password, salt);
         if (credentials['password'] == hashedPassword) {
           // Set as current user
           await _setCurrentUser(user);
@@ -223,9 +232,9 @@ class LocalAuthService {
   // Check if user is authenticated
   bool get isAuthenticated => _currentUser != null;
   
-  // Hash password using SHA-256
-  String _hashPassword(String password) {
-    final bytes = utf8.encode(password);
+  // Hash password using SHA-256 and an optional salt
+  String _hashPassword(String password, [String salt = '']) {
+    final bytes = utf8.encode(password + salt);
     final digest = sha256.convert(bytes);
     return digest.toString();
   }

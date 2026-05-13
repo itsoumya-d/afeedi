@@ -86,6 +86,7 @@ class _FeedScreenState extends State<FeedScreen> {
         ),
         actions: [
           IconButton(
+            tooltip: 'Filter',
             icon: const Icon(Icons.filter_list),
             onPressed: () {
               _showFilterDialog();

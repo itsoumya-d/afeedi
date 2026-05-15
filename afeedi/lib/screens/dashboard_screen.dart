@@ -173,6 +173,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
           // Action buttons
           IconButton(
+            tooltip: 'Search',
             onPressed: () {
               // Navigate to search
             },
@@ -183,6 +184,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             ),
           ),
           IconButton(
+            tooltip: 'Notifications',
             onPressed: () {
               // Navigate to notifications
             },

@@ -6,7 +6,10 @@ import 'package:hive/hive.dart';
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:flutter/services.dart';
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late LocalAuthService authService;
   late Directory tempDir;
 
@@ -14,6 +17,12 @@ void main() {
     // Setup Hive for testing
     tempDir = await Directory.systemTemp.createTemp('afeedi_test');
     Hive.init(tempDir.path);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('plugins.flutter.io/path_provider'), (MethodCall methodCall) async {
+      if (methodCall.method == 'getApplicationDocumentsDirectory') {
+        return tempDir.path;
+      }
+      return null;
+    });
   });
 
   tearDownAll(() async {

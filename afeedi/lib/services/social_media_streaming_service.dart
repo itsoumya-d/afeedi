@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 // import 'dart:html' as html;
 import '../models/content_model.dart';
+import '../core/storage/local_storage_service.dart';
 import '../services/analytics_service.dart';
 import '../utils/logger.dart';
 
@@ -533,8 +534,26 @@ class SocialMediaStreamingService {
   /// Private helper methods
   
   Future<void> _loadStoredTokens() async {
-    // TODO: Implement secure token storage/retrieval
-    // For now, tokens need to be set manually via setAccessToken
+    try {
+      final instagramToken = await LocalStorageService.instance.getSecureData('oauth_access_token_instagram');
+      if (instagramToken != null) {
+        _accessTokens['instagram'] = instagramToken;
+      }
+      final tiktokToken = await LocalStorageService.instance.getSecureData('oauth_access_token_tiktok');
+      if (tiktokToken != null) {
+        _accessTokens['tiktok'] = tiktokToken;
+      }
+      final facebookToken = await LocalStorageService.instance.getSecureData('oauth_access_token_facebook');
+      if (facebookToken != null) {
+        _accessTokens['facebook'] = facebookToken;
+      }
+      final youtubeToken = await LocalStorageService.instance.getSecureData('oauth_access_token_youtube');
+      if (youtubeToken != null) {
+        _accessTokens['youtube'] = youtubeToken;
+      }
+    } catch (e) {
+      Logger.error('Error loading stored tokens: $e');
+    }
   }
 
   Future<void> _initializePlatformConfigs() async {

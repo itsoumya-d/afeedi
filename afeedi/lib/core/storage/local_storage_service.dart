@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../models/user_model.dart';
 import '../../models/content_model.dart';
 import '../../models/platform_connection_model.dart';
@@ -32,6 +33,7 @@ class LocalStorageService {
   late Box<Map> _contentInteractionsBoxInstance;
   late Box<Map> _contentCacheBoxInstance;
   late SharedPreferences _prefs;
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   /// Initialize local storage
   Future<void> initialize() async {
@@ -255,6 +257,19 @@ class LocalStorageService {
   Future<void> clearAuthState() async {
     await _prefs.remove('current_user_id');
     await _prefs.remove('session_token');
+  }
+
+  /// Secure Storage Methods
+  Future<void> saveSecureData(String key, String value) async {
+    await _secureStorage.write(key: key, value: value);
+  }
+
+  Future<String?> getSecureData(String key) async {
+    return await _secureStorage.read(key: key);
+  }
+
+  Future<void> deleteSecureData(String key) async {
+    await _secureStorage.delete(key: key);
   }
 
   /// Utility Methods

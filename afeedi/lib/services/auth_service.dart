@@ -5,6 +5,7 @@ import '../models/platform_connection_model.dart';
 import '../models/content_model.dart';
 import 'oauth_service.dart';
 import 'analytics_service.dart';
+import '../core/storage/local_storage_service.dart';
 
 // Simple auth result class
 class AuthResult {
@@ -229,10 +230,10 @@ class AuthService {
       
       // Store OAuth tokens securely
       if (authData['accessToken'] != null) {
-        await prefs.setString('oauth_access_token_$provider', authData['accessToken']);
+        await LocalStorageService.instance.saveSecureData('oauth_access_token_$provider', authData['accessToken']);
       }
       if (authData['idToken'] != null) {
-        await prefs.setString('oauth_id_token_$provider', authData['idToken']);
+        await LocalStorageService.instance.saveSecureData('oauth_id_token_$provider', authData['idToken']);
       }
       
       _currentUser = user;

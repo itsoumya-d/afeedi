@@ -58,8 +58,7 @@ class LocalAuthService {
       await _storage.saveUser(user);
       
       // Save credentials with hashed password
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_credentials_${user.id}', jsonEncode({
+      await _storage.saveSecureData('user_credentials_${user.id}', jsonEncode({
         'email': email,
         'password': _hashPassword(password),
       }));
@@ -98,8 +97,17 @@ class LocalAuthService {
       );
       
       // Verify hashed password
+      String? credentialsJson = await _storage.getSecureData('user_credentials_${user.id}');
       final prefs = await SharedPreferences.getInstance();
-      final credentialsJson = prefs.getString('user_credentials_${user.id}');
+
+      // Migration: fallback to SharedPreferences if not in secure storage
+      if (credentialsJson == null) {
+        credentialsJson = prefs.getString('user_credentials_${user.id}');
+        if (credentialsJson != null) {
+          await _storage.saveSecureData('user_credentials_${user.id}', credentialsJson);
+          await prefs.remove('user_credentials_${user.id}');
+        }
+      }
       
       if (credentialsJson != null) {
         final credentials = jsonDecode(credentialsJson);
@@ -207,7 +215,9 @@ class LocalAuthService {
       await _storage.deleteUser(userId);
       
       // Clear credentials
+      await _storage.deleteSecureData('user_credentials_$userId');
       final prefs = await SharedPreferences.getInstance();
+      // Ensure legacy plaintext credentials are also removed
       await prefs.remove('user_credentials_$userId');
       await prefs.remove('current_user_id');
       

@@ -5,15 +5,49 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive/hive.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/services.dart';
 
 void main() {
   late LocalAuthService authService;
   late Directory tempDir;
 
   setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
     // Setup Hive for testing
     tempDir = await Directory.systemTemp.createTemp('afeedi_test');
     Hive.init(tempDir.path);
+    // Mock path_provider
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('plugins.flutter.io/path_provider'),
+        (MethodCall methodCall) async {
+      return tempDir.path;
+    });
+    // Mock flutter_secure_storage
+    Map<String, String> secureStorageData = {};
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+        (MethodCall methodCall) async {
+      if (methodCall.method == 'deleteAll') {
+        secureStorageData.clear();
+        return null;
+      }
+      if (methodCall.method == 'write') {
+        final key = methodCall.arguments['key'] as String;
+        final value = methodCall.arguments['value'] as String;
+        secureStorageData[key] = value;
+        return null;
+      }
+      if (methodCall.method == 'read') {
+        final key = methodCall.arguments['key'] as String;
+        return secureStorageData[key];
+      }
+      if (methodCall.method == 'delete') {
+        final key = methodCall.arguments['key'] as String;
+        secureStorageData.remove(key);
+        return null;
+      }
+      return null;
+    });
   });
 
   tearDownAll(() async {
@@ -44,8 +78,7 @@ void main() {
       expect(user!.email, email);
 
       // Verify that password is NOT stored as plain text in SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      final credentialsJson = prefs.getString('user_credentials_${user.id}');
+      final credentialsJson = await LocalStorageService.instance.getSecureData('user_credentials_${user.id}');
       expect(credentialsJson, isNotNull);
 
       final credentials = jsonDecode(credentialsJson!);
@@ -87,9 +120,10 @@ void main() {
       final user1 = await authService.signUp(email: 'user1@test.com', password: password1);
       final user2 = await authService.signUp(email: 'user2@test.com', password: password2);
 
-      final prefs = await SharedPreferences.getInstance();
-      final creds1 = jsonDecode(prefs.getString('user_credentials_${user1!.id}')!);
-      final creds2 = jsonDecode(prefs.getString('user_credentials_${user2!.id}')!);
+      final creds1Str = await LocalStorageService.instance.getSecureData('user_credentials_${user1!.id}');
+      final creds2Str = await LocalStorageService.instance.getSecureData('user_credentials_${user2!.id}');
+      final creds1 = jsonDecode(creds1Str!);
+      final creds2 = jsonDecode(creds2Str!);
 
       expect(creds1['password'], isNot(creds2['password']));
     });

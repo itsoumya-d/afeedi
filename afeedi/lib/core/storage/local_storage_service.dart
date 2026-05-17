@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../models/user_model.dart';
 import '../../models/content_model.dart';
 import '../../models/platform_connection_model.dart';
@@ -32,6 +33,7 @@ class LocalStorageService {
   late Box<Map> _contentInteractionsBoxInstance;
   late Box<Map> _contentCacheBoxInstance;
   late SharedPreferences _prefs;
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   /// Initialize local storage
   Future<void> initialize() async {
@@ -240,7 +242,7 @@ class LocalStorageService {
   Future<void> saveAuthState(String userId, String? sessionToken) async {
     await _prefs.setString('current_user_id', userId);
     if (sessionToken != null) {
-      await _prefs.setString('session_token', sessionToken);
+      await saveSecureData('session_token', sessionToken);
     }
   }
 
@@ -249,12 +251,37 @@ class LocalStorageService {
   }
 
   Future<String?> getSessionToken() async {
-    return _prefs.getString('session_token');
+    // Migration: Attempt to get from secure storage, fallback to SharedPreferences
+    String? token = await getSecureData('session_token');
+    if (token == null) {
+      token = _prefs.getString('session_token');
+      if (token != null) {
+        // Migrate to secure storage
+        await saveSecureData('session_token', token);
+        await _prefs.remove('session_token');
+      }
+    }
+    return token;
   }
 
   Future<void> clearAuthState() async {
     await _prefs.remove('current_user_id');
+    await deleteSecureData('session_token');
+    // Ensure legacy plaintext tokens are also removed during migration phase
     await _prefs.remove('session_token');
+  }
+
+  /// Secure Storage Methods
+  Future<void> saveSecureData(String key, String value) async {
+    await _secureStorage.write(key: key, value: value);
+  }
+
+  Future<String?> getSecureData(String key) async {
+    return await _secureStorage.read(key: key);
+  }
+
+  Future<void> deleteSecureData(String key) async {
+    await _secureStorage.delete(key: key);
   }
 
   /// Utility Methods
@@ -269,6 +296,7 @@ class LocalStorageService {
     await _contentInteractionsBoxInstance.clear();
     await _contentCacheBoxInstance.clear();
     await _prefs.clear();
+    await _secureStorage.deleteAll();
   }
 
   /// Export data for backup

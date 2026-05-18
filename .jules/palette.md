@@ -1,0 +1,3 @@
+## 2024-05-18 - Added Tooltips to Icon-Only Buttons
+**Learning:** In Flutter, all icon-only `IconButton` widgets must explicitly define a `tooltip` property. Without it, screen readers cannot vocalize the button's purpose, leading to severe accessibility issues, particularly on high-traffic screens like Login and Dashboard. Dynamic tooltips (e.g., swapping between 'Show password' and 'Hide password' based on state) provide even stronger context.
+**Action:** Always include the `tooltip` property when creating an `IconButton` that does not contain text. If the button toggles state, ensure the tooltip text updates dynamically to reflect the *action* that will occur upon tapping.

@@ -1,0 +1,3 @@
+## 2024-05-18 - Added Tooltips to IconButtons
+**Learning:** Icon-only buttons without tooltips lack semantic labels, making them inaccessible for screen readers and confusing for users trying to understand their purpose without text. In the `afeedi` app, Several `IconButton` widgets were missing tooltips. Adding tooltips instantly improves accessibility by providing an accessible label and offers visible hints on hover.
+**Action:** Always include a clear and descriptive `tooltip` property when creating icon-only `IconButton` widgets in Flutter to ensure basic accessibility and a more pleasant user experience.

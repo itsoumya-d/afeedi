@@ -1,0 +1,4 @@
+## 2024-05-21 - Securely store OAuth tokens
+**Vulnerability:** OAuth tokens (accessToken and idToken) were being stored insecurely in plaintext using `SharedPreferences`, which can be easily extracted from the device's local storage.
+**Learning:** For sensitive authentication artifacts like OAuth tokens, they must be stored using platform-specific secure storage mechanisms (e.g., Keychain on iOS, Keystore on Android).
+**Prevention:** Always use `flutter_secure_storage` or a similar secure key-value store for passwords, API keys, and auth tokens, and avoid `SharedPreferences` for sensitive data.

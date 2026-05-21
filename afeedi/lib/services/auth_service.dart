@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/user_model.dart';
 import '../models/platform_connection_model.dart';
-import '../models/content_model.dart';
 import 'oauth_service.dart';
 import 'analytics_service.dart';
 
@@ -22,6 +22,12 @@ class AuthService {
   AuthService._();
   
   User? _currentUser;
+  final _secureStorage = const FlutterSecureStorage();
+
+  @visibleForTesting
+  static void resetForTesting() {
+    _instance = null;
+  }
   
   // Get current user
   User? get currentUser => _currentUser;
@@ -35,13 +41,11 @@ class AuthService {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getString('user_id');
       final userEmail = prefs.getString('user_email');
-      final userName = prefs.getString('user_name');
       
       if (userId != null && userEmail != null) {
         _currentUser = User(
           id: userId,
           email: userEmail,
-          name: userName ?? 'User',
           role: UserRole.registered,
           isActive: true,
           createdAt: DateTime.now(),
@@ -59,7 +63,6 @@ class AuthService {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getString('user_id');
       final email = prefs.getString('user_email');
-      final name = prefs.getString('user_name');
       
       if (userId != null && email != null) {
          _currentUser = User(
@@ -169,6 +172,8 @@ class AuthService {
       await prefs.remove('user_email');
       await prefs.remove('user_name');
       
+      await _secureStorage.deleteAll();
+
       _currentUser = null;
       
       // Track analytics
@@ -214,7 +219,6 @@ class AuthService {
       final user = User(
          id: userId,
          email: email,
-         name: displayName,
          role: UserRole.registered,
          isActive: true,
          createdAt: DateTime.now(),
@@ -229,10 +233,10 @@ class AuthService {
       
       // Store OAuth tokens securely
       if (authData['accessToken'] != null) {
-        await prefs.setString('oauth_access_token_$provider', authData['accessToken']);
+        await _secureStorage.write(key: 'oauth_access_token_$provider', value: authData['accessToken']);
       }
       if (authData['idToken'] != null) {
-        await prefs.setString('oauth_id_token_$provider', authData['idToken']);
+        await _secureStorage.write(key: 'oauth_id_token_$provider', value: authData['idToken']);
       }
       
       _currentUser = user;
@@ -308,6 +312,7 @@ class AuthService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
+      await _secureStorage.deleteAll();
       _currentUser = null;
       
       return AuthResult(success: true);
@@ -316,6 +321,14 @@ class AuthService {
     }
   }
   
+  Future<String?> getOAuthAccessToken(String provider) async {
+    return await _secureStorage.read(key: 'oauth_access_token_$provider');
+  }
+
+  Future<String?> getOAuthIdToken(String provider) async {
+    return await _secureStorage.read(key: 'oauth_id_token_$provider');
+  }
+
   // Get platform connections for the current user
   Future<List<PlatformConnection>> getPlatformConnections() async {
     try {

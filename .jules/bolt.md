@@ -1,0 +1,3 @@
+## 2024-05-22 - Concurrent Platform Content Aggregation
+**Learning:** Sequential network calls inside a for loop in `ContentAggregationService.aggregateContent` create a significant bottleneck, multiplying latency by the number of connected platforms.
+**Action:** Use `Future.wait` with `.map(...).toList()` to fetch content concurrently across all platform connections, reducing total fetch time to the longest single request.

@@ -176,6 +176,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             onPressed: () {
               // Navigate to search
             },
+            tooltip: 'Search',
             icon: const Icon(
               Icons.search,
               color: Colors.white,
@@ -186,6 +187,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             onPressed: () {
               // Navigate to notifications
             },
+            tooltip: 'Notifications',
             icon: Stack(
               children: [
                 const Icon(

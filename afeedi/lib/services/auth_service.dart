@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/user_model.dart';
 import '../models/platform_connection_model.dart';
 import '../models/content_model.dart';
@@ -21,6 +22,7 @@ class AuthService {
   
   AuthService._();
   
+  final _secureStorage = const FlutterSecureStorage();
   User? _currentUser;
   
   // Get current user
@@ -168,6 +170,7 @@ class AuthService {
       await prefs.remove('user_id');
       await prefs.remove('user_email');
       await prefs.remove('user_name');
+      await _secureStorage.deleteAll();
       
       _currentUser = null;
       
@@ -229,10 +232,10 @@ class AuthService {
       
       // Store OAuth tokens securely
       if (authData['accessToken'] != null) {
-        await prefs.setString('oauth_access_token_$provider', authData['accessToken']);
+        await _secureStorage.write(key: 'oauth_access_token_$provider', value: authData['accessToken']);
       }
       if (authData['idToken'] != null) {
-        await prefs.setString('oauth_id_token_$provider', authData['idToken']);
+        await _secureStorage.write(key: 'oauth_id_token_$provider', value: authData['idToken']);
       }
       
       _currentUser = user;
@@ -303,11 +306,22 @@ class AuthService {
     }
   }
   
+  // Get OAuth access token
+  Future<String?> getOAuthAccessToken(String provider) async {
+    return await _secureStorage.read(key: 'oauth_access_token_$provider');
+  }
+
+  // Get OAuth ID token
+  Future<String?> getOAuthIdToken(String provider) async {
+    return await _secureStorage.read(key: 'oauth_id_token_$provider');
+  }
+
   // Delete account (simplified)
   Future<AuthResult> deleteAccount() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
+      await _secureStorage.deleteAll();
       _currentUser = null;
       
       return AuthResult(success: true);

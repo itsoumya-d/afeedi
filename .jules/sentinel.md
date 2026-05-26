@@ -1,0 +1,4 @@
+## 2024-05-26 - [Insecure storage of OAuth tokens]
+**Vulnerability:** OAuth access and ID tokens are stored securely in `SharedPreferences` as plain text instead of using secure storage, despite the comment claiming to "Store OAuth tokens securely".
+**Learning:** Even with good intentions and comments, tokens are saved using `SharedPreferences`, which is insecure on most platforms (stores data in plain text XML/plist files). Memory mentions this issue has been seen before: "OAuth tokens (such as access and ID tokens) in AuthService are securely stored and retrieved directly via flutter_secure_storage, replacing insecure SharedPreferences usage." Wait, this memory says it was replaced? But I see it right here in my current `auth_service.dart`.
+**Prevention:** Use `flutter_secure_storage` or similar secure key-value store to save sensitive tokens like `accessToken` and `idToken`. Never use `SharedPreferences` for sensitive data.

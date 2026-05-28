@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme/app_theme.dart';
+import '../services/local_auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -102,6 +104,32 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final user = LocalAuthService.instance.currentUser;
+    if (user == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('onboarding_user_name') ??
+        prefs.getString('user_name') ??
+        user.email.split('@').first;
+    final joinDate = '${_monthName(user.createdAt.month)} ${user.createdAt.year}';
+    if (mounted) {
+      setState(() {
+        _userProfile['name'] = name;
+        _userProfile['email'] = user.email;
+        _userProfile['joinDate'] = joinDate;
+      });
+    }
+  }
+
+  String _monthName(int month) {
+    const months = [
+      '', 'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[month];
   }
   
   @override

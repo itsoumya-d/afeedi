@@ -12,16 +12,7 @@ import '../screens/interest_form_screen.dart';
 import '../screens/source_preference_screen.dart';
 import '../screens/calendar_customization_screen.dart';
 import '../screens/personalized_home_screen.dart';
-// TODO: Create missing screens
-// import '../screens/calendar_screen.dart';
-// import '../screens/search_screen.dart';
-// import '../screens/create_content_screen.dart';
-// import '../screens/notifications_screen.dart';
-// import '../screens/settings_screen.dart';
-// import '../screens/admin/admin_panel_screen.dart';
-// import '../screens/admin/user_management_screen.dart';
-// import '../screens/admin/content_moderation_screen.dart';
-// import '../screens/admin/analytics_screen.dart';
+import '../screens/placeholder_screen.dart';
 
 class NavigationService {
   static NavigationService? _instance;
@@ -121,18 +112,12 @@ class AppRoutes {
         AppRoutes.dashboard: (context) => const DashboardScreen(),
         AppRoutes.feed: (context) => const FeedScreen(),
         AppRoutes.profile: (context) => const ProfileScreen(),
-        // TODO: Create remaining screens
-        // AppRoutes.calendar: (context) => const CalendarScreen(),
-        // AppRoutes.search: (context) => const SearchScreen(),
-        // AppRoutes.createContent: (context) => const CreateContentScreen(),
-        // AppRoutes.notifications: (context) => const NotificationsScreen(),
-        // AppRoutes.settings: (context) => const SettingsScreen(),
-        
-        // Admin routes
-        // TODO: Create admin screens
-        // AppRoutes.adminPanel: (context) => const AdminPanelScreen(),
-        // AppRoutes.adminUsers: (context) => const UserManagementScreen(),
-        // AppRoutes.adminContent: (context) => const ContentModerationScreen(),
-        // AppRoutes.adminAnalytics: (context) => const AnalyticsScreen(),
+        AppRoutes.calendar: (_) => const PlaceholderScreen(title: 'Calendar', icon: Icons.calendar_today),
+        AppRoutes.search: (_) => const PlaceholderScreen(title: 'Search', icon: Icons.search),
+        AppRoutes.createContent: (_) => const PlaceholderScreen(title: 'Create', icon: Icons.add_circle_outline),
+        AppRoutes.notifications: (_) => const PlaceholderScreen(title: 'Notifications', icon: Icons.notifications),
+        AppRoutes.settings: (_) => const PlaceholderScreen(title: 'Settings', icon: Icons.settings),
+        '/player': (_) => const PlaceholderScreen(title: 'Player', icon: Icons.play_circle_filled),
+        '/onboarding': (_) => const PlaceholderScreen(title: 'Onboarding', icon: Icons.start),
       };
 }

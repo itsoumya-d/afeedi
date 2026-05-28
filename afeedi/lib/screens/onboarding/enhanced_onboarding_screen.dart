@@ -195,7 +195,7 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
       
       // Navigate to home screen
       if (mounted) {
-        NavigationService.instance.navigateToHome(context);
+        NavigationService.navigateToHome();
       }
     } catch (e) {
       // Handle error
@@ -279,7 +279,7 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
               );
               
               if (mounted) {
-                NavigationService.instance.navigateToHome(context);
+                NavigationService.navigateToHome();
               }
             },
             child: const Text('Skip'),

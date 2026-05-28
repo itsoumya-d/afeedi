@@ -5,6 +5,8 @@ import '../services/navigation_service.dart';
 import '../services/oauth_service.dart';
 import '../services/auth_service.dart';
 import '../services/analytics_service.dart';
+import '../services/local_auth_service.dart';
+import '../services/onboarding_service.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -54,6 +56,19 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     Future.delayed(const Duration(milliseconds: 300), () {
       _slideController.forward();
     });
+    _checkAuthAndRedirect();
+  }
+
+  Future<void> _checkAuthAndRedirect() async {
+    if (LocalAuthService.instance.currentUser != null) {
+      final isOnboarded = await OnboardingService.instance.isOnboardingCompleted();
+      if (mounted) {
+        Navigator.pushReplacementNamed(
+          context,
+          isOnboarded ? AppRoutes.dashboard : AppRoutes.onboardingChatbot,
+        );
+      }
+    }
   }
 
   Future<void> _launchUrl(String urlString) async {

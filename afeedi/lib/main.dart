@@ -53,18 +53,56 @@ void main() async {
   runApp(const ProviderScope(child: AfeediApp()));
 }
 
-class AfeediApp extends StatelessWidget {
+class AfeediApp extends StatefulWidget {
   const AfeediApp({super.key});
 
   @override
+  State<AfeediApp> createState() => _AfeediAppState();
+}
+
+class _AfeediAppState extends State<AfeediApp> {
+  String _initialRoute = AppRoutes.welcome;
+  bool _ready = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _determineInitialRoute();
+  }
+
+  Future<void> _determineInitialRoute() async {
+    try {
+      final isLoggedIn = LocalAuthService.instance.currentUser != null;
+      if (isLoggedIn) {
+        final onboarded = await OnboardingService.instance.isOnboardingCompleted();
+        _initialRoute = onboarded ? AppRoutes.dashboard : AppRoutes.onboardingChatbot;
+      } else {
+        _initialRoute = AppRoutes.welcome;
+      }
+    } catch (_) {
+      _initialRoute = AppRoutes.welcome;
+    }
+    if (mounted) setState(() => _ready = true);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (!_ready) {
+      return const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          backgroundColor: Color(0xFF1A1A2E),
+          body: Center(child: CircularProgressIndicator(color: Color(0xFF00D4FF))),
+        ),
+      );
+    }
     return MaterialApp(
       title: 'Afeedi - Social Media Aggregation',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       navigatorKey: NavigationService.navigatorKey,
-      initialRoute: AppRoutes.enhancedOnboarding,
+      initialRoute: _initialRoute,
       routes: AppRoutes.routes,
       debugShowCheckedModeBanner: false,
     );

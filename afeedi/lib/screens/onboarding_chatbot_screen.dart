@@ -72,11 +72,11 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
     _initializeAnimations();
     _initializeChatController();
     _preloadResources();
-    _startOnboarding();
   }
 
   void _initializeChatController() {
     _chatController = ChatController();
+    _chatController.initialize();
   }
 
   void _initializeData() {
@@ -461,15 +461,8 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
           ),
         ),
         child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(),
-              Expanded(
-                child: ChatInterface(
-                  controller: _chatController,
-                ),
-              ),
-            ],
+          child: ChatInterface(
+            controller: _chatController,
           ),
         ),
       ),

@@ -5,6 +5,7 @@ import '../models/platform_connection_model.dart';
 import '../models/content_model.dart';
 import 'oauth_service.dart';
 import 'analytics_service.dart';
+import 'local_auth_service.dart';
 
 // Simple auth result class
 class AuthResult {
@@ -124,37 +125,23 @@ class AuthService {
     required String password,
   }) async {
     try {
-      // Simulate sign in - in real app, this would validate credentials
-      final userId = DateTime.now().millisecondsSinceEpoch.toString();
-      
-      final user = User(
-         id: userId,
-         email: email,
-         role: UserRole.registered,
-         isActive: true,
-         createdAt: DateTime.now(),
-         updatedAt: DateTime.now(),
-       );
-      
-      // Save to local storage
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_id', userId);
-      await prefs.setString('user_email', email);
-      await prefs.setString('user_name', 'User');
-      
-      _currentUser = user;
-      
-      // Track analytics
-       AnalyticsService.instance.trackUserInteraction(
-         action: 'signin_success',
-         screen: 'auth',
-         additionalData: {
-           'method': 'email',
-           'user_id': userId,
-         },
-       );
-      
-      return AuthResult(success: true, user: user);
+      final user = await LocalAuthService.instance.signIn(
+        email: email,
+        password: password,
+      );
+      if (user != null) {
+        _currentUser = user;
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_id', user.id);
+        await prefs.setString('user_email', user.email);
+        AnalyticsService.instance.trackUserInteraction(
+          action: 'signin_success',
+          screen: 'auth',
+          additionalData: {'method': 'email', 'user_id': user.id},
+        );
+        return AuthResult(success: true, user: user);
+      }
+      return AuthResult(success: false, error: 'Invalid email or password');
     } catch (e) {
       return AuthResult(success: false, error: e.toString());
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
+import '../services/navigation_service.dart';
 import '../widgets/dashboard/home_tab.dart';
 import '../widgets/dashboard/videos_tab.dart';
 import '../screens/tabs/shorts_tab.dart';
@@ -174,7 +175,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           // Action buttons
           IconButton(
             onPressed: () {
-              // Navigate to search
+              Navigator.pushNamed(context, AppRoutes.search);
             },
             icon: const Icon(
               Icons.search,
@@ -184,7 +185,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
           IconButton(
             onPressed: () {
-              // Navigate to notifications
+              Navigator.pushNamed(context, AppRoutes.notifications);
             },
             icon: Stack(
               children: [

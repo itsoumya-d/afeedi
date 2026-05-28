@@ -33,6 +33,7 @@ class AppBarWithProfile extends StatelessWidget implements PreferredSizeWidget {
       ),
       leading: showBackButton
           ? IconButton(
+              tooltip: 'Back',
               icon: Icon(Icons.arrow_back),
               onPressed: () => Navigator.of(context).pop(),
             )
@@ -40,6 +41,7 @@ class AppBarWithProfile extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         if (actions != null) ...actions!,
         IconButton(
+          tooltip: 'Profile',
           icon: CircleAvatar(
             backgroundColor: AppColors.primary,
             child: Icon(

@@ -5,9 +5,11 @@ import '../../models/chat_message.dart';
 import '../../services/analytics_service.dart';
 import '../../services/smart_suggestions_service.dart';
 import '../../utils/constants.dart';
+import '../../utils/debouncer.dart';
 
 class ChatController extends ChangeNotifier {
   final List<OnboardingStep> onboardingSteps;
+  final Debouncer _debouncer = Debouncer(milliseconds: 300);
   final List<Genre> allGenres;
   final Map<String, bool> platformConnections;
   final Function(int, String, Map<String, dynamic>)? onStepCompleted;
@@ -168,14 +170,16 @@ class ChatController extends ChangeNotifier {
   }
 
   void handleGenreSearchChanged(String query) {
-    if (query.isEmpty) {
-      _filteredGenres = allGenres;
-    } else {
-      _filteredGenres = allGenres
-          .where((genre) => genre.name.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-    }
-    notifyListeners();
+    _debouncer.run(() {
+      if (query.isEmpty) {
+        _filteredGenres = allGenres;
+      } else {
+        _filteredGenres = allGenres
+            .where((genre) => genre.name.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
+      notifyListeners();
+    });
   }
 
   void handleGenreContinue() {
@@ -241,6 +245,7 @@ class ChatController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _debouncer.dispose();
     super.dispose();
   }
 }

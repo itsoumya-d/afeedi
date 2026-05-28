@@ -106,13 +106,25 @@ class FeedPostCard extends StatelessWidget {
         color = const Color(0xFFFF0000);
         icon = Icons.play_circle_outline;
         break;
+      case 'instagram':
+        color = const Color(0xFFE4405F);
+        icon = Icons.camera_alt;
+        break;
+      case 'tiktok':
+        color = const Color(0xFF69C9D0);
+        icon = Icons.music_note;
+        break;
+      case 'facebook':
+        color = const Color(0xFF1877F2);
+        icon = Icons.facebook;
+        break;
+      case 'twitter':
+        color = const Color(0xFF1DA1F2);
+        icon = Icons.alternate_email;
+        break;
       case 'vimeo':
         color = const Color(0xFF1AB7EA);
         icon = Icons.videocam;
-        break;
-      case 'dailymotion':
-        color = const Color(0xFF0066CC);
-        icon = Icons.video_library;
         break;
       default:
         color = AppTheme.primaryCyan;

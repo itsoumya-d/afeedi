@@ -113,28 +113,70 @@ class _ChatInterfaceState extends State<ChatInterface>
   }
 
   Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          ),
-          const Expanded(
-            child: Text(
-              'Welcome to Afeedi',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
+    return AnimatedBuilder(
+      animation: widget.controller,
+      builder: (context, _) {
+        final totalSteps = widget.controller.onboardingSteps.isNotEmpty
+            ? widget.controller.onboardingSteps.length
+            : 4;
+        final currentStep = widget.controller.currentStep.clamp(0, totalSteps);
+        final progress = currentStep / totalSteps;
+
+        return Container(
+          padding: const EdgeInsets.fromLTRB(8, 12, 16, 8),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                  ),
+                  const Expanded(
+                    child: Text(
+                      'Set up your feed',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '$currentStep / $totalSteps',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
-            ),
+              const SizedBox(height: 6),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    backgroundColor: Colors.white.withOpacity(0.15),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF00D4FF)),
+                    minHeight: 4,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 48),
-        ],
-      ),
+        );
+      },
     );
   }
 

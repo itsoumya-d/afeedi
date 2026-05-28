@@ -339,7 +339,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
 
   Widget _buildQuickFilters() {
     final filters = [
-      {'name': 'All', 'platform': null, 'icon': Icons.apps},
+      {'name': 'For You', 'platform': null, 'icon': Icons.auto_awesome},
       {'name': 'YouTube', 'platform': PlatformType.youtube, 'icon': Icons.play_circle},
       {'name': 'Instagram', 'platform': PlatformType.instagram, 'icon': Icons.camera_alt},
       {'name': 'TikTok', 'platform': PlatformType.tiktok, 'icon': Icons.music_video},
@@ -347,7 +347,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     ];
     
     return SizedBox(
-      height: 32,
+      height: 38,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: filters.length,

@@ -47,6 +47,32 @@ class GenreSelection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Row(
+                children: [
+                  const Text(
+                    'Pick your interests',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    selectedGenres.length < 3
+                        ? 'Select ${3 - selectedGenres.length} more'
+                        : '${selectedGenres.length} selected ✓',
+                    style: TextStyle(
+                      color: selectedGenres.length >= 3
+                          ? const Color(0xFF00D4FF)
+                          : Colors.white54,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
               _buildSearchField(),
               const SizedBox(height: 16),
               _buildGenreGrid(),
@@ -110,7 +136,7 @@ class GenreSelection extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
           decoration: BoxDecoration(
             color: isSelected 
                 ? const Color(0xFF00D4FF).withOpacity(0.3)
@@ -159,9 +185,9 @@ class GenreSelection extends StatelessWidget {
       width: double.infinity,
       height: 48,
       child: ElevatedButton(
-        onPressed: selectedGenres.isEmpty ? null : onContinue,
+        onPressed: selectedGenres.length < 3 ? null : onContinue,
         style: ElevatedButton.styleFrom(
-          backgroundColor: selectedGenres.isEmpty 
+          backgroundColor: selectedGenres.length < 3
               ? Colors.white.withOpacity(0.1)
               : const Color(0xFF00D4FF),
           foregroundColor: Colors.white,
@@ -171,9 +197,9 @@ class GenreSelection extends StatelessWidget {
           elevation: 0,
         ),
         child: Text(
-          selectedGenres.isEmpty
-              ? 'Select at least one genre'
-              : 'Continue with ${selectedGenres.length} genre${selectedGenres.length == 1 ? '' : 's'} ✨',
+          selectedGenres.length < 3
+              ? 'Select at least 3 interests'
+              : 'Continue with ${selectedGenres.length} interests ✨',
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,

@@ -15,6 +15,7 @@ import '../widgets/onboarding/platform_connection.dart';
 import '../widgets/onboarding/text_input_widget.dart';
 import '../widgets/chat/chat_controller.dart';
 import '../widgets/chat/chat_interface.dart';
+import '../utils/debouncer.dart';
 
 class OnboardingChatbotScreen extends StatefulWidget {
   const OnboardingChatbotScreen({super.key});
@@ -28,6 +29,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+  final Debouncer _debouncer = Debouncer(milliseconds: 300);
   final OnboardingService _onboardingService = OnboardingService();
   late ChatController _chatController;
 
@@ -141,6 +143,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
 
   @override
   void dispose() {
+    _debouncer.dispose();
     _fadeController.dispose();
     _slideController.dispose();
     _typingController.dispose();
@@ -334,8 +337,10 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
   }
 
   void _handleGenreSearchChanged(String query) {
-    setState(() {
-      _filteredGenres = _onboardingService.filterGenres(_allGenres, query);
+    _debouncer.run(() {
+      setState(() {
+        _filteredGenres = _onboardingService.filterGenres(_allGenres, query);
+      });
     });
   }
 

@@ -5,9 +5,11 @@ import '../models/onboarding_step.dart';
 import '../services/onboarding_service.dart';
 import '../services/analytics_service.dart';
 import '../services/navigation_service.dart';
+import '../utils/debouncer.dart';
 
 class ChatController extends ChangeNotifier {
   final OnboardingService _onboardingService = OnboardingService();
+  final Debouncer _debouncer = Debouncer(milliseconds: 300);
   final ScrollController scrollController = ScrollController();
   final TextEditingController textController = TextEditingController();
   final TextEditingController searchController = TextEditingController();
@@ -212,8 +214,10 @@ class ChatController extends ChangeNotifier {
   }
 
   void handleGenreSearchChanged(String query) {
-    _filteredGenres = _onboardingService.filterGenres(_allGenres, query);
-    notifyListeners();
+    _debouncer.run(() {
+      _filteredGenres = _onboardingService.filterGenres(_allGenres, query);
+      notifyListeners();
+    });
   }
 
   void handleGenreContinue() {
@@ -318,6 +322,7 @@ class ChatController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _debouncer.dispose();
     scrollController.dispose();
     textController.dispose();
     searchController.dispose();

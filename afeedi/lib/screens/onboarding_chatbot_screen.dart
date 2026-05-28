@@ -13,7 +13,7 @@ import '../widgets/onboarding/quick_reply_chips.dart';
 import '../widgets/onboarding/genre_selection.dart';
 import '../widgets/onboarding/platform_connection.dart';
 import '../widgets/onboarding/text_input_widget.dart';
-import '../widgets/chat/chat_controller.dart';
+import '../controllers/chat_controller.dart' hide AnalyticsEvents;
 import '../widgets/chat/chat_interface.dart';
 
 class OnboardingChatbotScreen extends StatefulWidget {
@@ -27,6 +27,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
     with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _textController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   final OnboardingService _onboardingService = OnboardingService();
   late ChatController _chatController;
@@ -75,13 +76,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
   }
 
   void _initializeChatController() {
-    _chatController = ChatController(
-      onboardingSteps: _onboardingSteps,
-      allGenres: _allGenres,
-      platformConnections: _platformConnections,
-      onStepCompleted: _handleStepCompleted,
-      onOnboardingCompleted: _handleOnboardingCompleted,
-    );
+    _chatController = ChatController();
   }
 
   void _initializeData() {
@@ -146,6 +141,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
     _typingController.dispose();
     _scrollController.dispose();
     _searchController.dispose();
+    _textController.dispose();
     _searchFocusNode.dispose();
     _chatController.dispose();
     super.dispose();
@@ -226,10 +222,10 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {
-          if (currentStep.showGenreSelection) {
+          if (currentStep.isGenreSelection) {
             _showGenreSelection = true;
-            _showTextInput = false; // Hide text input during genre selection
-          } else if (currentStep.showPlatformSelection) {
+            _showTextInput = false;
+          } else if (currentStep.isPlatformSelection) {
             _showPlatformSelection = true;
             _showTextInput = false; // Hide text input during platform selection
           } else {
@@ -471,10 +467,6 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
               Expanded(
                 child: ChatInterface(
                   controller: _chatController,
-                  scrollController: _scrollController,
-                  fadeAnimation: _fadeAnimation,
-                  slideAnimation: _slideAnimation,
-                  typingAnimation: _typingAnimation,
                 ),
               ),
             ],

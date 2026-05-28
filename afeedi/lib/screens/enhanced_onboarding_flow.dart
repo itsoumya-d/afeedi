@@ -332,32 +332,29 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                     child: PageView.builder(
                       controller: _pageController,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: OnboardingService.onboardingFlow.length,
+                      itemCount: OnboardingService.instance.getOnboardingSteps().length,
                       itemBuilder: (context, index) {
-                        final step = OnboardingService.onboardingFlow[index];
+                        final step = OnboardingService.instance.getOnboardingSteps()[index];
                         return SingleChildScrollView(
                           child: Padding(
                             padding: const EdgeInsets.all(24.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Step title
                                 Text(
                                   step.stepTitle ?? 'Step ${index + 1}',
                                   style: AppTextStyles.heading2,
                                 ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
-                                
+
                                 const SizedBox(height: 8),
-                                
-                                // Step description
+
                                 Text(
                                   step.stepDescription ?? step.botMessage,
                                   style: AppTextStyles.bodyMedium.copyWith(color: Colors.black87),
                                 ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideY(begin: 0.1, end: 0),
-                                
+
                                 const SizedBox(height: 32),
-                                
-                                // Step content
+
                                 _buildStepContent(step),
                               ],
                             ),

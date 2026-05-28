@@ -39,6 +39,8 @@ class OnboardingService {
     },
   ];
 
+  Future<void> initialize() async {}
+
   // Onboarding steps configuration
   List<OnboardingStep> getOnboardingSteps() {
     return [
@@ -290,6 +292,8 @@ class OnboardingService {
   // Current step tracking
   int _currentStepIndex = 0;
   final List<bool> _completedSteps = [];
+
+  List<bool> get completedSteps => _completedSteps;
 
   // Get next onboarding step
   Map<String, dynamic>? getNextStep() {

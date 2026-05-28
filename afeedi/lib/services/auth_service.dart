@@ -41,7 +41,6 @@ class AuthService {
         _currentUser = User(
           id: userId,
           email: userEmail,
-          name: userName ?? 'User',
           role: UserRole.registered,
           isActive: true,
           createdAt: DateTime.now(),
@@ -214,7 +213,6 @@ class AuthService {
       final user = User(
          id: userId,
          email: email,
-         name: displayName,
          role: UserRole.registered,
          isActive: true,
          createdAt: DateTime.now(),

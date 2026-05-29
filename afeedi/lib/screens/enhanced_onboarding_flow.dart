@@ -541,10 +541,10 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
   Widget _buildPersonalInfoStep() {
     // Initialize controllers with existing values
     final nameController = TextEditingController(
-      text: _userPreferences.personalInfo?['name'] ?? '',
+      text: _userPreferences.personalInfo['name'] ?? '',
     );
     final ageController = TextEditingController(
-      text: _userPreferences.personalInfo?['age']?.toString() ?? '',
+      text: _userPreferences.personalInfo['age']?.toString() ?? '',
     );
     
     // Update preferences when text changes

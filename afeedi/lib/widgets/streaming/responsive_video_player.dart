@@ -396,7 +396,6 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
         return 9 / 16; // Vertical aspect ratio
       case ContentType.video:
       case ContentType.post:
-      default:
         return 16 / 9; // Horizontal aspect ratio
     }
   }

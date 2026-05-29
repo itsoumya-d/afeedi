@@ -85,7 +85,7 @@ class EnhancedRecommendationService {
       // Get available content
       final contentService = ContentAggregationService.instance;
       final availableContent = await contentService.aggregateContent(
-        platforms: userPreferences?.platformPriorities?.keys.map((p) => PlatformType.values.firstWhere((pt) => pt.name == p, orElse: () => PlatformType.youtube)).toList() ?? [PlatformType.youtube],
+        platforms: userPreferences?.platformPriorities.keys.map((p) => PlatformType.values.firstWhere((pt) => pt.name == p, orElse: () => PlatformType.youtube)).toList() ?? [PlatformType.youtube],
         categories: userPreferences?.contentInterests ?? [],
         limit: limit * 3, // Get more to filter from
       );

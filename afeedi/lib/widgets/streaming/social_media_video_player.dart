@@ -435,7 +435,7 @@ class CompactSocialMediaVideoPlayer extends StatelessWidget {
               ),
               
               // Duration badge (if available)
-              if (content.metadata?['duration'] != null)
+              if (content.metadata['duration'] != null)
                 Positioned(
                   bottom: 4,
                   right: 4,
@@ -449,7 +449,7 @@ class CompactSocialMediaVideoPlayer extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      _formatDuration(Duration(seconds: content.metadata?['duration'] ?? 0)),
+                      _formatDuration(Duration(seconds: content.metadata['duration'] ?? 0)),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,

@@ -124,18 +124,16 @@ class BrowserStreamingService {
     try {
       if (kIsWeb) {
         final connection = html.window.navigator.connection;
-        if (connection != null) {
-          final effectiveType = connection.effectiveType;
-          switch (effectiveType) {
-            case '4g':
-              return '1080p';
-            case '3g':
-              return '720p';
-            case '2g':
-              return '480p';
-            default:
-              return '720p';
-          }
+        final effectiveType = connection?.effectiveType;
+        switch (effectiveType) {
+          case '4g':
+            return '1080p';
+          case '3g':
+            return '720p';
+          case '2g':
+            return '480p';
+          default:
+            return '720p';
         }
       }
       

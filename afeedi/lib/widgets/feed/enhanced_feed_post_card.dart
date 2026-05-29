@@ -728,11 +728,9 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
         return const Color(0xFF000000);
       case PlatformType.facebook:
         return const Color(0xFF1877F2);
-      default:
-        return AppTheme.primaryCyan;
     }
   }
-  
+
   IconData _getPlatformIcon() {
     switch (widget.content.platform) {
       case PlatformType.youtube:
@@ -743,8 +741,6 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
         return Icons.music_video;
       case PlatformType.facebook:
         return Icons.facebook;
-      default:
-        return Icons.video_library;
     }
   }
   

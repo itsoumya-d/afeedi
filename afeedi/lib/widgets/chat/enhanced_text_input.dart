@@ -163,19 +163,6 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
     }
   }
 
-  void _handleSubmit() {
-    final text = _textController.text.trim();
-    if (text.isNotEmpty && widget.isEnabled) {
-      widget.onSubmit(text);
-      _textController.clear();
-      setState(() {
-        _showSuggestions = false;
-      });
-      _controller.reverse();
-      _updateSmartSuggestions();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(

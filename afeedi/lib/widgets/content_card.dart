@@ -130,13 +130,12 @@ class ContentCard extends StatelessWidget {
                   ),
                 
                 // Recommendation reason
-                if (showRecommendationReason && 
-                    item.recommendationReason != null && 
-                    item.recommendationReason!.isNotEmpty)
+                if (showRecommendationReason &&
+                    item.recommendationReason.isNotEmpty)
                   Padding(
                     padding: EdgeInsets.only(top: UIScaling.spacing(context, 0.5)),
                     child: Text(
-                      item.recommendationReason!,
+                      item.recommendationReason,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.primary,
                         fontStyle: FontStyle.italic,

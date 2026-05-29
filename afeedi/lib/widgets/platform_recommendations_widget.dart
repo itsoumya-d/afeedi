@@ -631,13 +631,13 @@ class _PlatformRecommendationsWidgetState
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (widget.showRecommendationReason &&
-                        item.recommendationReason != null)
+                        item.recommendationReason.isNotEmpty)
                       Padding(
                         padding: EdgeInsets.only(
                           top: UIScaling.spacing(context, 0.5),
                         ),
                         child: Text(
-                          item.recommendationReason!,
+                          item.recommendationReason,
                           style: AppTextStyles.recommendationReason,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

@@ -120,10 +120,10 @@ class MessageBubble extends StatelessWidget {
               height: 1.4,
             ),
           ),
-          if (message.timestamp != null) ...[
+          ...[
             const SizedBox(height: 4),
             Text(
-              _formatTimestamp(message.timestamp!),
+              _formatTimestamp(message.timestamp),
               style: TextStyle(
                 color: AppColors.textSecondary.withValues(alpha: 0.6),
                 fontSize: 12,

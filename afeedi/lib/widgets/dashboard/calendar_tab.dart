@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
-import '../../models/content_model.dart';
 import '../../services/enhanced_calendar_service.dart';
 import '../../services/analytics_service.dart';
-import '../../widgets/streaming/responsive_video_player.dart';
 
 class CalendarTab extends StatefulWidget {
   const CalendarTab({super.key});
@@ -170,80 +168,6 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   
   void _onFilterChanged() {
     _loadContentForSelectedDate();
-  }
-  
-  void _showVideoPlayer(Content content) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      useSafeArea: true,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.9,
-        decoration: const BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          children: [
-            // Drag handle
-            Container(
-              margin: const EdgeInsets.only(top: 8),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            // Header
-            Container(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      content.title ?? 'Video Content',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.white.withValues(alpha: 0.1),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Video Player with proper centering
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: ResponsiveVideoPlayer(
-                      content: content,
-                      autoPlay: true,
-                      showControls: true,
-                      showBranding: true,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
   
   final List<Map<String, dynamic>> _aiRecommendations = [

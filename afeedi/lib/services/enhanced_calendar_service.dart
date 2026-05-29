@@ -231,8 +231,6 @@ class EnhancedCalendarService {
         return 'entertainment';
       case PlatformType.facebook:
         return 'entertainment';
-      default:
-        return 'entertainment';
     }
   }
   

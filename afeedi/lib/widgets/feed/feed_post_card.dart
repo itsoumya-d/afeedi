@@ -296,8 +296,6 @@ class FeedPostCard extends StatelessWidget {
         return const Color(0xFF010101);
       case PlatformType.facebook:
         return const Color(0xFF1877F2);
-      default:
-        return AppTheme.primaryCyan;
     }
   }
 

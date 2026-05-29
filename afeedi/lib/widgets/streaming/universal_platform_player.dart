@@ -4,10 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'dart:math';
 import '../../models/content_model.dart';
 import '../../services/universal_platform_player_service.dart';
-import '../../services/social_media_streaming_service.dart';
 // import '../../services/video_content_extraction_service.dart';
 import '../../services/analytics_service.dart';
 import 'social_media_video_player.dart';
+import 'youtube_player_widget.dart';
 // import '../enhanced_video_player_widget.dart';
 
 // Conditional imports for web
@@ -47,6 +47,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
   PlatformPlayerResult? _playerResult;
   String? _containerId;
   bool _showFallbackOptions = false;
+  bool _useYouTubePlayer = false;
   // bool _useEnhancedPlayer = false;
   // VideoContentExtractionService? _extractionService;
   
@@ -98,16 +99,10 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
           await _createWebIframe();
         } else {
           setState(() {
-            _playerResult = PlatformPlayerResult(
-              success: false,
-              playerId: null,
-              platform: widget.content.platform,
-              fallbackUrl: _getPlatformUrl(),
-              errorMessage: 'Mobile playback requires external app',
-            );
+            _useYouTubePlayer = true;
             _isLoading = false;
-            _showFallbackOptions = true;
           });
+          widget.onPlayerReady?.call();
         }
       } else if (_isSocialMediaPlatform(widget.content.platform)) {
         // Instagram/TikTok/Facebook require OAuth tokens for embedding.
@@ -301,11 +296,9 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       case PlatformType.facebook:
         final videoUrl = 'https://www.facebook.com/video.php?v=${widget.content.platformContentId}';
         return 'https://www.facebook.com/plugins/video.php?href=${Uri.encodeComponent(videoUrl)}&width=500&show_text=false';
-      default:
-        return '';
     }
   }
-  
+
   String _getPlatformUrl() {
     switch (widget.content.platform) {
       case PlatformType.youtube:
@@ -370,7 +363,17 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
     if (kIsWeb && _containerId != null && _playerResult?.isEmbedded == true) {
       return _buildWebPlayer();
     }
-    
+
+    if (_useYouTubePlayer && widget.content.platform == PlatformType.youtube) {
+      return YouTubePlayerWidget(
+        content: widget.content,
+        autoPlay: widget.autoPlay,
+        showControls: widget.showControls,
+        onReady: widget.onPlayerReady,
+        onError: widget.onError,
+      );
+    }
+
     return _buildMobilePlayer();
   }
 

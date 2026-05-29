@@ -356,6 +356,7 @@ class _ContentRow extends StatelessWidget {
                     width: 56,
                     height: 56,
                     fit: BoxFit.cover,
+                    semanticLabel: content.title ?? 'Video thumbnail',
                     errorBuilder: (_, __, ___) => _placeholder(),
                   )
                 : _placeholder(),

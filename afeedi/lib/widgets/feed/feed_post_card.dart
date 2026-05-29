@@ -275,13 +275,16 @@ class _FeedPostCardState extends State<FeedPostCard> {
                   ),
                 ),
                 child: widget.content.thumbnailUrl != null
-                    ? CachedNetworkImage(
-                        imageUrl: widget.content.thumbnailUrl!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: 200,
-                        placeholder: (_, __) => const SizedBox.shrink(),
-                        errorWidget: (_, __, ___) => const SizedBox.shrink(),
+                    ? Semantics(
+                        label: widget.content.title ?? 'Video thumbnail',
+                        child: CachedNetworkImage(
+                          imageUrl: widget.content.thumbnailUrl!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: 200,
+                          placeholder: (_, __) => const SizedBox.shrink(),
+                          errorWidget: (_, __, ___) => const SizedBox.shrink(),
+                        ),
                       )
                     : null,
               ),

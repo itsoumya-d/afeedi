@@ -249,6 +249,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                         width: 100,
                         height: 64,
                         fit: BoxFit.cover,
+                        semanticLabel: content.title ?? 'Video thumbnail',
                         errorBuilder: (_, __, ___) => _thumbnailFallback(),
                       )
                     : _thumbnailFallback(),

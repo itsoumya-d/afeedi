@@ -706,6 +706,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                   width: 80,
                   height: 60,
                   fit: BoxFit.cover,
+                  semanticLabel: item['title'] ?? 'Video thumbnail',
                 ),
               ),
               if (completed)

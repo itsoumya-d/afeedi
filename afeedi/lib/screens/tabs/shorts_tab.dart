@@ -252,6 +252,7 @@ class _ShortsTabState extends State<ShortsTab> {
                 ? Image.network(
                     content.thumbnailUrl!,
                     fit: BoxFit.cover,
+                    semanticLabel: content.title ?? 'Short video thumbnail',
                     errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                   )
                 : null,

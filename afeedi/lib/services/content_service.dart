@@ -863,7 +863,7 @@ class ContentService {
       
       return filteredContent.take(limit).toList();
     } catch (e) {
-      print('Error getting preference filtered content: $e');
+      debugPrint('Error getting preference filtered content: $e');
       // Fallback to regular filtered content
       return getVideos(platform: platform, category: category, limit: limit);
     }
@@ -893,7 +893,7 @@ class ContentService {
       
       await enhancedService.trackContentInteraction(interaction.toJson());
     } catch (e) {
-      print('Error tracking content interaction: $e');
+      debugPrint('Error tracking content interaction: $e');
     }
   }
 
@@ -916,7 +916,7 @@ class ContentService {
       // Convert recommendations to content objects
       return recommendations.map((rec) => rec.content).toList();
     } catch (e) {
-      print('Error getting time-based recommendations: $e');
+      debugPrint('Error getting time-based recommendations: $e');
       return getFeedContent(limit: limit);
     }
   }

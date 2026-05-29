@@ -16,6 +16,9 @@ import '../screens/search_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/notifications_screen.dart';
 import '../screens/placeholder_screen.dart';
+import '../screens/calendar_screen.dart';
+import '../screens/create_content_screen.dart';
+import '../screens/player_screen.dart';
 
 class NavigationService {
   static NavigationService? _instance;
@@ -115,12 +118,17 @@ class AppRoutes {
         AppRoutes.dashboard: (context) => const DashboardScreen(),
         AppRoutes.feed: (context) => const FeedScreen(),
         AppRoutes.profile: (context) => const ProfileScreen(),
-        AppRoutes.calendar: (_) => const PlaceholderScreen(title: 'Calendar', icon: Icons.calendar_today),
+        AppRoutes.calendar: (_) => const CalendarScreen(),
         AppRoutes.search: (_) => const SearchScreen(),
-        AppRoutes.createContent: (_) => const PlaceholderScreen(title: 'Create', icon: Icons.add_circle_outline),
+        AppRoutes.createContent: (_) => const CreateContentScreen(),
         AppRoutes.notifications: (_) => const NotificationsScreen(),
         AppRoutes.settings: (_) => const SettingsScreen(),
-        '/player': (_) => const PlaceholderScreen(title: 'Player', icon: Icons.play_circle_filled),
+        '/player': (ctx) {
+          final content = ModalRoute.of(ctx)?.settings.arguments;
+          return content != null
+              ? PlayerScreen(content: content as dynamic)
+              : const PlaceholderScreen(title: 'Player', icon: Icons.play_circle_filled);
+        },
         '/onboarding': (_) => const PlaceholderScreen(title: 'Onboarding', icon: Icons.start),
       };
 }

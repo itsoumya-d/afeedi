@@ -6,6 +6,7 @@ import '../../services/content_service.dart';
 import '../../services/analytics_service.dart';
 import '../../services/onboarding_service.dart';
 import '../../services/auth_service.dart';
+import '../../services/connectivity_service.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -31,6 +32,19 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     super.initState();
     _loadInitialPosts();
     _scrollController.addListener(_onScroll);
+    _checkConnectivity();
+  }
+
+  Future<void> _checkConnectivity() async {
+    final connected = await ConnectivityService.instance.isConnected();
+    if (!connected && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No internet connection - showing cached content'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   @override
@@ -442,22 +456,21 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.video_library_outlined, size: 64, color: Colors.white.withValues(alpha: 0.3)),
+            const Icon(Icons.video_library_outlined, size: 64, color: Colors.white24),
             const SizedBox(height: 16),
-            Text(
-              'No content yet',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 18, fontWeight: FontWeight.w600),
+            const Text(
+              'No content available',
+              style: TextStyle(color: Colors.white54, fontSize: 18),
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               'Pull down to refresh',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 14),
+              style: TextStyle(color: Colors.white38, fontSize: 14),
             ),
             const SizedBox(height: 24),
-            TextButton.icon(
-              onPressed: _refreshPosts,
-              icon: Icon(Icons.refresh, color: AppTheme.primaryCyan),
-              label: Text('Refresh', style: TextStyle(color: AppTheme.primaryCyan)),
+            ElevatedButton(
+              onPressed: _loadInitialPosts,
+              child: const Text('Refresh'),
             ),
           ],
         ),

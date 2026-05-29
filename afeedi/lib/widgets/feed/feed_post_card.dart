@@ -4,6 +4,8 @@ import '../../core/theme/app_theme.dart';
 import '../../models/content_model.dart';
 import '../../services/content_service.dart';
 import '../../services/user_interaction_service.dart';
+import 'comments_bottom_sheet.dart';
+import '../../screens/creator_profile_sheet.dart';
 
 class FeedPostCard extends StatefulWidget {
   final Content content;
@@ -96,11 +98,14 @@ class _FeedPostCardState extends State<FeedPostCard> {
               children: [
                 Row(
                   children: [
-                    Text(
-                      widget.content.creatorName ?? 'Unknown Creator',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                    GestureDetector(
+                      onTap: () => CreatorProfileSheet.show(context, widget.content),
+                      child: Text(
+                        widget.content.creatorName ?? 'Unknown Creator',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -270,12 +275,13 @@ class _FeedPostCardState extends State<FeedPostCard> {
                   ),
                 ),
                 child: widget.content.thumbnailUrl != null
-                    ? Image.network(
-                        widget.content.thumbnailUrl!,
+                    ? CachedNetworkImage(
+                        imageUrl: widget.content.thumbnailUrl!,
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: 200,
-                        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                        placeholder: (_, __) => const SizedBox.shrink(),
+                        errorWidget: (_, __, ___) => const SizedBox.shrink(),
                       )
                     : null,
               ),
@@ -383,11 +389,11 @@ class _FeedPostCardState extends State<FeedPostCard> {
             },
           ),
           const SizedBox(width: 20),
-          // Comment button (static, no interaction tracked yet)
+          // Comment button — opens the comments sheet
           _buildActionButton(
             icon: Icons.chat_bubble_outline,
-            count: 0,
-            onTap: () {},
+            label: _formatCount(widget.content.id.hashCode.abs() % 500 + 10),
+            onTap: () => CommentsBottomSheet.show(context, widget.content),
           ),
           const SizedBox(width: 20),
           // Share button

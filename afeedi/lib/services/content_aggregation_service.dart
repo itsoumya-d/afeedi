@@ -492,7 +492,7 @@ class ContentAggregationService {
   ) async {
     try {
       // TODO: Implement user preferences filtering when database is available
-      print('Applying user filters for user: ${user.id}');
+      debugPrint('user filters for user: ${user.id}');
       
       // For now, just return the content as-is
       return content;
@@ -506,7 +506,7 @@ class ContentAggregationService {
   Future<void> _cacheContent(List<Content> content) async {
     try {
       // TODO: Implement content caching when database is available
-      print('Caching ${content.length} content items for user: ${AuthService.instance.currentUser?.id}');
+      debugPrint('${content.length} content items for user: ${AuthService.instance.currentUser?.id}');
     } catch (error) {
       debugPrint('Error caching content: $error');
     }
@@ -519,7 +519,7 @@ class ContentAggregationService {
       if (user == null) return null;
       
       // TODO: Implement cache retrieval when database is available
-      print('Getting cached content for user: ${user.id}');
+      debugPrint('cached content for user: ${user.id}');
       return null;
     } catch (error) {
       debugPrint('Error getting cached content: $error');

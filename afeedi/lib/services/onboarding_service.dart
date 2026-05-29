@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/onboarding_step.dart';
 import '../models/genre.dart';
@@ -322,7 +323,7 @@ class OnboardingService {
       _currentStepIndex = stepId + 1;
       
       // TODO: Save step data
-      print('Completed step $stepId with data: $data');
+      debugPrint('step $stepId with data: $data');
     }
   }
 
@@ -330,7 +331,7 @@ class OnboardingService {
   Future<void> skipStep(int stepId) async {
     if (stepId >= 0 && stepId < getOnboardingSteps().length) {
       _currentStepIndex = stepId + 1;
-      print('Skipped step $stepId');
+      debugPrint('step $stepId');
     }
   }
 

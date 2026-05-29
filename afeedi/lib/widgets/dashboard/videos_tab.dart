@@ -67,7 +67,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
       setState(() {
         _isLoading = false;
       });
-      print('Error loading videos: $e');
+      debugPrint('Error loading videos: $e');
     }
   }
   

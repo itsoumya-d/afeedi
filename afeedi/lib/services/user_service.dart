@@ -58,7 +58,7 @@ class UserService extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      print('Error signing in: $e');
+      debugPrint('signing in: $e');
       return false;
     }
   }
@@ -83,7 +83,7 @@ class UserService extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      print('Error updating profile: $e');
+      debugPrint('updating profile: $e');
       return false;
     }
   }
@@ -105,7 +105,7 @@ class UserService extends ChangeNotifier {
       
       return true;
     } catch (e) {
-      print('Error updating preferences: $e');
+      debugPrint('updating preferences: $e');
       return false;
     }
   }

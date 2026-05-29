@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+import '../services/local_auth_service.dart';
+import '../services/navigation_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen>
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _rememberMe = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -310,15 +313,24 @@ class _LoginScreenState extends State<LoginScreen>
                                     width: double.infinity,
                                     height: 52,
                                     child: ElevatedButton(
-                                      onPressed: () {
-                                        if (_formKey.currentState!.validate()) {
-                                          // TODO: Implement login
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Login successful!'),
-                                              backgroundColor: Color(0xFF00D4FF),
-                                            ),
+                                      onPressed: _isLoading ? null : () async {
+                                        if (!_formKey.currentState!.validate()) return;
+                                        setState(() => _isLoading = true);
+                                        try {
+                                          final user = await LocalAuthService.instance.signIn(
+                                            email: _emailController.text.trim(),
+                                            password: _passwordController.text,
                                           );
+                                          if (!mounted) return;
+                                          if (user != null) {
+                                            NavigationService.navigateToHome();
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(content: Text('Invalid email or password'), backgroundColor: Colors.red),
+                                            );
+                                          }
+                                        } finally {
+                                          if (mounted) setState(() => _isLoading = false);
                                         }
                                       },
                                       style: ElevatedButton.styleFrom(
@@ -329,13 +341,9 @@ class _LoginScreenState extends State<LoginScreen>
                                         ),
                                         elevation: 0,
                                       ),
-                                      child: const Text(
-                                        'Log In',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                      child: _isLoading
+                                          ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0D0B1E)))
+                                          : const Text('Log In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                     ),
                                   ),
                                   const SizedBox(height: 24),

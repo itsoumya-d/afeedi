@@ -1,0 +1,170 @@
+import 'package:flutter/material.dart';
+import '../models/content_model.dart';
+import '../services/user_interaction_service.dart';
+import '../widgets/streaming/youtube_player_widget.dart';
+import '../widgets/streaming/social_media_video_player.dart';
+
+class PlayerScreen extends StatefulWidget {
+  final Content content;
+
+  const PlayerScreen({super.key, required this.content});
+
+  @override
+  State<PlayerScreen> createState() => _PlayerScreenState();
+}
+
+class _PlayerScreenState extends State<PlayerScreen> {
+  late bool _isLiked;
+  late bool _isSaved;
+
+  @override
+  void initState() {
+    super.initState();
+    final svc = UserInteractionService.instance;
+    _isLiked = svc.isLiked(widget.content.id);
+    _isSaved = svc.isSaved(widget.content.id);
+  }
+
+  String _formatCount(int count) {
+    if (count >= 1000000) return '${(count / 1000000).toStringAsFixed(1)}M';
+    if (count >= 1000) return '${(count / 1000).toStringAsFixed(1)}K';
+    return count.toString();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // App bar row
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const Spacer(),
+                ],
+              ),
+            ),
+            // Video player
+            Expanded(
+              child: widget.content.platform == PlatformType.youtube
+                  ? YouTubePlayerWidget(content: widget.content, autoPlay: true)
+                  : SocialMediaVideoPlayer(content: widget.content, autoPlay: true),
+            ),
+            // Info section
+            Container(
+              color: const Color(0xFF0D0B1E),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.content.title ?? 'Untitled',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    widget.content.creatorName ?? 'Unknown Creator',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      // Like button
+                      _ActionButton(
+                        icon: _isLiked ? Icons.favorite : Icons.favorite_border,
+                        color: _isLiked ? Colors.red : Colors.white,
+                        label: _formatCount(
+                          UserInteractionService.instance.getLikeCount(
+                            widget.content.id,
+                            baseCount: widget.content.likeCount,
+                          ),
+                        ),
+                        onTap: () async {
+                          final next = await UserInteractionService.instance.toggleLike(
+                            widget.content.id,
+                            baseCount: widget.content.likeCount,
+                          );
+                          setState(() => _isLiked = next);
+                        },
+                      ),
+                      const SizedBox(width: 20),
+                      // Save button
+                      _ActionButton(
+                        icon: _isSaved ? Icons.bookmark : Icons.bookmark_border,
+                        color: _isSaved ? Colors.cyan : Colors.white,
+                        label: _isSaved ? 'Saved' : 'Save',
+                        onTap: () async {
+                          final next = await UserInteractionService.instance.toggleSave(
+                            widget.content.id,
+                          );
+                          setState(() => _isSaved = next);
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ActionButton({
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 22),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

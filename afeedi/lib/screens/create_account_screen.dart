@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+import '../services/local_auth_service.dart';
+import '../services/navigation_service.dart'; // provides AppRoutes
 
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({super.key});
@@ -23,6 +25,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _agreeToTerms = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -361,15 +364,25 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                     width: double.infinity,
                                     height: 52,
                                     child: ElevatedButton(
-                                      onPressed: _agreeToTerms ? () {
-                                        if (_formKey.currentState!.validate()) {
-                                          // TODO: Implement account creation
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Account created successfully!'),
-                                              backgroundColor: Color(0xFF00D4FF),
-                                            ),
+                                      onPressed: (_agreeToTerms && !_isLoading) ? () async {
+                                        if (!_formKey.currentState!.validate()) return;
+                                        setState(() => _isLoading = true);
+                                        try {
+                                          final user = await LocalAuthService.instance.signUp(
+                                            email: _emailController.text.trim(),
+                                            password: _passwordController.text,
+                                            fullName: _nameController.text.trim(),
                                           );
+                                          if (!mounted) return;
+                                          if (user != null) {
+                                            Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(content: Text('Account creation failed. Email may already be in use.'), backgroundColor: Colors.red),
+                                            );
+                                          }
+                                        } finally {
+                                          if (mounted) setState(() => _isLoading = false);
                                         }
                                       } : null,
                                       style: ElevatedButton.styleFrom(
@@ -381,13 +394,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                         ),
                                         elevation: 0,
                                       ),
-                                      child: const Text(
-                                        'Create Account',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                      child: _isLoading
+                                          ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0D0B1E)))
+                                          : const Text('Create Account', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                     ),
                                   ),
                                   const SizedBox(height: 24),

@@ -510,21 +510,25 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   }
   
   Widget _buildAchievementsTab() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 1,
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(child: _buildEngagementScore()),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => _buildAchievementCard(_achievements[index]),
+              childCount: _achievements.length,
+            ),
+          ),
         ),
-        itemCount: _achievements.length,
-        itemBuilder: (context, index) {
-          final achievement = _achievements[index];
-          return _buildAchievementCard(achievement);
-        },
-      ),
+      ],
     );
   }
   
@@ -1157,6 +1161,64 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildEngagementScore() {
+    final videos = _userProfile['videosWatched'] as int? ?? 0;
+    final streak = _userProfile['streakDays'] as int? ?? 0;
+    final saved = _userProfile['savedCount'] as int? ?? 0;
+    final score = ((videos * 2) + (streak * 5) + (saved * 3)).clamp(0, 999);
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: [
+          AppTheme.primaryCyan.withValues(alpha: 0.15),
+          AppTheme.primaryPink.withValues(alpha: 0.15),
+        ]),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.primaryCyan.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Engagement Score', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                const SizedBox(height: 4),
+                Text('$score pts', style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text(
+                  '${(score / 10).clamp(0, 100).toInt()}% of max — keep watching!',
+                  style: TextStyle(color: AppTheme.primaryCyan, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            children: [
+              _miniStat('$videos', 'Watched'),
+              const SizedBox(height: 8),
+              _miniStat('${streak}d', 'Streak'),
+              const SizedBox(height: 8),
+              _miniStat('$saved', 'Saved'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _miniStat(String value, String label) {
+    return Column(
+      children: [
+        Text(value, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+        Text(label, style: const TextStyle(color: Colors.white54, fontSize: 10)),
+      ],
     );
   }
 }

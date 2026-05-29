@@ -155,6 +155,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       });
     } else if (mounted) {
       setState(() => _gcalConnecting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not connect — check permissions and try again.')),
+      );
     }
   }
 
@@ -281,11 +284,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        const Text(
-          'Connect your Google Calendar to see upcoming events alongside your content schedule.',
-          style: TextStyle(color: Colors.white54, fontSize: 13),
-        ),
+        const SizedBox(height: 12),
+        _buildConnectStep(Icons.lock_outline, 'Read-only access', 'We only read events, never modify them'),
+        _buildConnectStep(Icons.event, 'See events in-app', 'Your calendar appears alongside your content schedule'),
+        _buildConnectStep(Icons.privacy_tip_outlined, 'Private & local', 'Data stays on-device; we never share it'),
         const SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
@@ -294,7 +296,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             icon: _gcalConnecting
                 ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                 : const Icon(Icons.login, size: 18),
-            label: Text(_gcalConnecting ? 'Connecting...' : 'Connect Google Calendar'),
+            label: Text(_gcalConnecting ? 'Connecting...' : 'Connect with Google'),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF4285F4),
               foregroundColor: Colors.white,
@@ -304,6 +306,28 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildConnectStep(IconData icon, String title, String subtitle) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color(0xFF4285F4), size: 16),
+          const SizedBox(width: 8),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(text: '$title  ', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                  TextSpan(text: subtitle, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -324,7 +348,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             ),
             TextButton(
               onPressed: _disconnectGoogleCalendar,
-              child: const Text('Disconnect', style: TextStyle(color: Colors.white38, fontSize: 12)),
+              child: const Text('Disconnect', style: TextStyle(color: Colors.white70, fontSize: 12)),
             ),
           ],
         ),

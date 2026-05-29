@@ -388,6 +388,44 @@ class AnalyticsService {
     }
   }
 
+  // Record a daily app open for D1/D7/D30 retention tracking
+  Future<void> recordAppOpen() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!prefs.containsKey('install_date')) {
+      await prefs.setString('install_date', DateTime.now().toIso8601String());
+    }
+    final today = DateTime.now().toIso8601String().split('T').first;
+    final activeDays = prefs.getStringList('active_days') ?? [];
+    if (!activeDays.contains(today)) {
+      activeDays.add(today);
+      await prefs.setStringList('active_days', activeDays);
+    }
+  }
+
+  Future<Map<String, dynamic>> getRetentionStats() async {
+    final prefs = await SharedPreferences.getInstance();
+    final installStr = prefs.getString('install_date');
+    if (installStr == null) {
+      return {'d1': false, 'd7': false, 'd30': false, 'total_active_days': 0};
+    }
+    final installDate = DateTime.parse(installStr);
+    final activeDays = prefs.getStringList('active_days') ?? [];
+    final now = DateTime.now();
+
+    bool returnedOnDay(int n) {
+      final target = installDate.add(Duration(days: n)).toIso8601String().split('T').first;
+      return activeDays.contains(target);
+    }
+
+    return {
+      'd1': returnedOnDay(1),
+      'd7': returnedOnDay(7),
+      'd30': returnedOnDay(30),
+      'total_active_days': activeDays.length,
+      'days_since_install': now.difference(installDate).inDays,
+    };
+  }
+
   // Generic event tracking method for all types of events
   Future<void> trackEvent({
     required String eventName,

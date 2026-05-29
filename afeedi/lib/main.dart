@@ -51,7 +51,8 @@ Future<void> _appMain() async {
     
     // Initialize Analytics Service
     await AnalyticsService.instance.initialize();
-    
+    await AnalyticsService.instance.recordAppOpen();
+
     // Initialize Onboarding Service
     await OnboardingService.instance.initialize();
     

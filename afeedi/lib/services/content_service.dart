@@ -22,9 +22,8 @@ class ContentService {
       title: 'Flutter Tutorial - Build Beautiful Apps',
       description: 'Learn how to build beautiful mobile apps with Flutter',
       videoUrl: 'https://www.youtube.com/embed/1ukSR1GRtMU',
-      thumbnailUrl: 'https://img.youtube.com/vi/1ukSR1GRtMU/maxresdefault.jpg',
+      thumbnailUrl: 'https://img.youtube.com/vi/1ukSR1GRtMU/mqdefault.jpg',
       creatorName: 'Flutter',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
       durationSeconds: 930,
       viewCount: 1250000,
       likeCount: 45000,
@@ -41,9 +40,8 @@ class ContentService {
       title: 'React Native vs Flutter Comparison',
       description: 'Detailed comparison between React Native and Flutter frameworks',
       videoUrl: 'https://www.youtube.com/embed/X8ipUgXH6jw',
-      thumbnailUrl: 'https://img.youtube.com/vi/X8ipUgXH6jw/maxresdefault.jpg',
+      thumbnailUrl: 'https://img.youtube.com/vi/X8ipUgXH6jw/mqdefault.jpg',
       creatorName: 'Tech Explained',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
       durationSeconds: 1335,
       viewCount: 890000,
       likeCount: 32000,
@@ -60,9 +58,8 @@ class ContentService {
       title: 'JavaScript ES6 Features Explained',
       description: 'Modern JavaScript features every developer should know',
       videoUrl: 'https://www.youtube.com/embed/NCwa_xi0Uuc',
-      thumbnailUrl: 'https://img.youtube.com/vi/NCwa_xi0Uuc/maxresdefault.jpg',
+      thumbnailUrl: 'https://img.youtube.com/vi/NCwa_xi0Uuc/mqdefault.jpg',
       creatorName: 'JavaScript Mastery',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
       durationSeconds: 1125,
       viewCount: 567000,
       likeCount: 28000,
@@ -79,9 +76,8 @@ class ContentService {
       title: 'Python Data Science Tutorial',
       description: 'Complete guide to data science with Python and pandas',
       videoUrl: 'https://www.youtube.com/embed/vmEHCJofslg',
-      thumbnailUrl: 'https://img.youtube.com/vi/vmEHCJofslg/maxresdefault.jpg',
+      thumbnailUrl: 'https://img.youtube.com/vi/vmEHCJofslg/mqdefault.jpg',
       creatorName: 'Data Science Pro',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
       durationSeconds: 2120,
       viewCount: 1100000,
       likeCount: 52000,
@@ -98,9 +94,8 @@ class ContentService {
       title: 'Web Development Roadmap 2024',
       description: 'Complete roadmap for becoming a web developer in 2024',
       videoUrl: 'https://www.youtube.com/embed/ysEN5RaKOlA',
-      thumbnailUrl: 'https://img.youtube.com/vi/ysEN5RaKOlA/maxresdefault.jpg',
+      thumbnailUrl: 'https://img.youtube.com/vi/ysEN5RaKOlA/mqdefault.jpg',
       creatorName: 'Web Dev Simplified',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
       durationSeconds: 1690,
       viewCount: 750000,
       likeCount: 38000,
@@ -119,9 +114,8 @@ class ContentService {
       title: 'Amazing Sunset Photography',
       description: 'Captured this beautiful sunset at the beach today! 🌅 #photography #sunset #nature',
       videoUrl: 'https://www.instagram.com/p/C8vQJ2nL9Kx/',
-      thumbnailUrl: 'https://scontent.cdninstagram.com/v/t51.2885-15/example.jpg',
+      thumbnailUrl: null,
       creatorName: 'photography_pro',
-      creatorAvatarUrl: 'https://scontent.cdninstagram.com/v/t51.2885-19/example_avatar.jpg',
       durationSeconds: 30,
       viewCount: 125000,
       likeCount: 8500,
@@ -138,9 +132,8 @@ class ContentService {
       title: 'Quick Recipe: Pasta Carbonara',
       description: 'Easy 15-minute pasta carbonara recipe! 🍝 Perfect for busy weeknights #cooking #recipe #pasta',
       videoUrl: 'https://www.instagram.com/p/C9aB3dE4fG5/',
-      thumbnailUrl: 'https://scontent.cdninstagram.com/v/t51.2885-15/cooking_example.jpg',
+      thumbnailUrl: null,
       creatorName: 'chef_maria',
-      creatorAvatarUrl: 'https://scontent.cdninstagram.com/v/t51.2885-19/chef_avatar.jpg',
       durationSeconds: 45,
       viewCount: 89000,
       likeCount: 6200,
@@ -159,9 +152,8 @@ class ContentService {
       title: 'Dance Challenge Compilation',
       description: 'Latest dance trends compilation! Which one is your favorite? 💃 #dance #trending #fyp',
       videoUrl: 'https://www.tiktok.com/@user/video/7234567890123456789',
-      thumbnailUrl: 'https://p16-sign-va.tiktokcdn.com/example_thumbnail.jpg',
+      thumbnailUrl: null,
       creatorName: 'dance_moves',
-      creatorAvatarUrl: 'https://p16-sign-va.tiktokcdn.com/example_avatar.jpg',
       durationSeconds: 60,
       viewCount: 2100000,
       likeCount: 156000,
@@ -178,9 +170,8 @@ class ContentService {
       title: 'Life Hacks You Need to Know',
       description: 'Mind-blowing life hacks that will change your daily routine! 🤯 #lifehacks #tips #viral',
       videoUrl: 'https://www.tiktok.com/@user/video/7345678901234567890',
-      thumbnailUrl: 'https://p16-sign-va.tiktokcdn.com/lifehacks_thumbnail.jpg',
+      thumbnailUrl: null,
       creatorName: 'life_hacker',
-      creatorAvatarUrl: 'https://p16-sign-va.tiktokcdn.com/hacker_avatar.jpg',
       durationSeconds: 45,
       viewCount: 890000,
       likeCount: 67000,
@@ -199,9 +190,8 @@ class ContentService {
       title: 'Travel Vlog: Exploring Japan',
       description: 'Join me on an incredible journey through Japan! From Tokyo to Kyoto, experiencing the culture, food, and beautiful landscapes.',
       videoUrl: 'https://www.facebook.com/video.php?v=1234567890123456',
-      thumbnailUrl: 'https://scontent.xx.fbcdn.net/v/t15.5256-10/japan_travel.jpg',
+      thumbnailUrl: null,
       creatorName: 'Travel Adventures',
-      creatorAvatarUrl: 'https://scontent.xx.fbcdn.net/v/t1.30497-1/travel_avatar.jpg',
       durationSeconds: 1200,
       viewCount: 450000,
       likeCount: 23000,
@@ -218,9 +208,8 @@ class ContentService {
       title: 'Tech News Weekly Roundup',
       description: 'This week in tech: AI breakthroughs, new smartphone releases, and the latest in sustainable technology innovations.',
       videoUrl: 'https://www.facebook.com/video.php?v=2345678901234567',
-      thumbnailUrl: 'https://scontent.xx.fbcdn.net/v/t15.5256-10/tech_news.jpg',
+      thumbnailUrl: null,
       creatorName: 'Tech Today',
-      creatorAvatarUrl: 'https://scontent.xx.fbcdn.net/v/t1.30497-1/tech_avatar.jpg',
       durationSeconds: 900,
       viewCount: 320000,
       likeCount: 18500,
@@ -237,9 +226,8 @@ class ContentService {
       title: 'Machine Learning Basics',
       description: 'Introduction to machine learning concepts and algorithms',
       videoUrl: 'https://www.youtube.com/embed/ukzFI9rgwfU',
-      thumbnailUrl: 'https://img.youtube.com/vi/ukzFI9rgwfU/maxresdefault.jpg',
+      thumbnailUrl: 'https://img.youtube.com/vi/ukzFI9rgwfU/mqdefault.jpg',
       creatorName: 'AI Academy',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
       durationSeconds: 2550,
       viewCount: 1800000,
       likeCount: 67000,
@@ -249,16 +237,141 @@ class ContentService {
       createdAt: DateTime.now().subtract(Duration(days: 8)),
       updatedAt: DateTime.now().subtract(Duration(days: 8)),
     ),
+    // YouTube Shorts
+    Content(
+      id: 'yt_short_1',
+      platform: PlatformType.youtube,
+      platformContentId: 'dQw4w9WgXcQ',
+      title: 'Rick Astley - Never Gonna Give You Up',
+      description: 'The classic Rick Roll — one of the most iconic videos on YouTube.',
+      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
+      creatorName: 'Rick Astley',
+      durationSeconds: 53,
+      viewCount: 1400000000,
+      likeCount: 15000000,
+      publishedAt: DateTime.now().subtract(Duration(days: 365 * 10)),
+      tags: ['music', 'pop', 'classic', 'trending'],
+      contentType: ContentType.short,
+      createdAt: DateTime.now().subtract(Duration(days: 365 * 10)),
+      updatedAt: DateTime.now().subtract(Duration(days: 1)),
+    ),
+    Content(
+      id: 'yt_short_2',
+      platform: PlatformType.youtube,
+      platformContentId: 'jNQXAC9IVRw',
+      title: 'Me at the zoo',
+      description: 'The very first video ever uploaded to YouTube. Featuring co-founder Jawed Karim at the San Diego Zoo.',
+      videoUrl: 'https://www.youtube.com/embed/jNQXAC9IVRw',
+      thumbnailUrl: 'https://img.youtube.com/vi/jNQXAC9IVRw/mqdefault.jpg',
+      creatorName: 'jawed',
+      durationSeconds: 19,
+      viewCount: 280000000,
+      likeCount: 3500000,
+      publishedAt: DateTime.now().subtract(Duration(days: 365 * 19)),
+      tags: ['classic', 'youtube', 'history', 'zoo'],
+      contentType: ContentType.short,
+      createdAt: DateTime.now().subtract(Duration(days: 365 * 19)),
+      updatedAt: DateTime.now().subtract(Duration(days: 2)),
+    ),
+    Content(
+      id: 'yt_short_3',
+      platform: PlatformType.youtube,
+      platformContentId: '9bZkp7q19f0',
+      title: 'PSY - GANGNAM STYLE',
+      description: 'The video that broke the YouTube view counter. A global music phenomenon.',
+      videoUrl: 'https://www.youtube.com/embed/9bZkp7q19f0',
+      thumbnailUrl: 'https://img.youtube.com/vi/9bZkp7q19f0/mqdefault.jpg',
+      creatorName: 'officialpsy',
+      durationSeconds: 58,
+      viewCount: 5000000000,
+      likeCount: 25000000,
+      publishedAt: DateTime.now().subtract(Duration(days: 365 * 12)),
+      tags: ['music', 'kpop', 'dance', 'trending', 'viral'],
+      contentType: ContentType.short,
+      createdAt: DateTime.now().subtract(Duration(days: 365 * 12)),
+      updatedAt: DateTime.now().subtract(Duration(days: 1)),
+    ),
+    Content(
+      id: 'yt_short_4',
+      platform: PlatformType.youtube,
+      platformContentId: 'JGwWNGJdvx8',
+      title: 'Ed Sheeran - Shape of You',
+      description: 'Official music video for Ed Sheeran\'s hit single Shape of You.',
+      videoUrl: 'https://www.youtube.com/embed/JGwWNGJdvx8',
+      thumbnailUrl: 'https://img.youtube.com/vi/JGwWNGJdvx8/mqdefault.jpg',
+      creatorName: 'Ed Sheeran',
+      durationSeconds: 54,
+      viewCount: 6000000000,
+      likeCount: 28000000,
+      publishedAt: DateTime.now().subtract(Duration(days: 365 * 7)),
+      tags: ['music', 'pop', 'edsheeran', 'official'],
+      contentType: ContentType.short,
+      createdAt: DateTime.now().subtract(Duration(days: 365 * 7)),
+      updatedAt: DateTime.now().subtract(Duration(days: 1)),
+    ),
+    Content(
+      id: 'yt_short_5',
+      platform: PlatformType.youtube,
+      platformContentId: 'kJQP7kiw5Fk',
+      title: 'Luis Fonsi - Despacito',
+      description: 'Official music video for Despacito, the most-streamed song of all time.',
+      videoUrl: 'https://www.youtube.com/embed/kJQP7kiw5Fk',
+      thumbnailUrl: 'https://img.youtube.com/vi/kJQP7kiw5Fk/mqdefault.jpg',
+      creatorName: 'Luis Fonsi',
+      durationSeconds: 55,
+      viewCount: 8400000000,
+      likeCount: 50000000,
+      publishedAt: DateTime.now().subtract(Duration(days: 365 * 7)),
+      tags: ['music', 'latin', 'pop', 'despacito', 'viral'],
+      contentType: ContentType.short,
+      createdAt: DateTime.now().subtract(Duration(days: 365 * 7)),
+      updatedAt: DateTime.now().subtract(Duration(days: 1)),
+    ),
+    // More TikTok-style shorts
+    Content(
+      id: 'tt_3',
+      platform: PlatformType.tiktok,
+      platformContentId: '7456789012345678901',
+      title: 'Cooking Hack: Perfect Pasta Every Time',
+      description: 'This simple trick makes perfect pasta every time! 🍝 #cooking #foodhack #pasta #viral',
+      videoUrl: 'https://www.tiktok.com/@cookingpro/video/7456789012345678901',
+      thumbnailUrl: null,
+      creatorName: 'cooking_pro',
+      durationSeconds: 30,
+      viewCount: 3200000,
+      likeCount: 245000,
+      publishedAt: DateTime.now().subtract(Duration(hours: 5)),
+      tags: ['cooking', 'food', 'hack', 'pasta'],
+      contentType: ContentType.short,
+      createdAt: DateTime.now().subtract(Duration(hours: 5)),
+      updatedAt: DateTime.now().subtract(Duration(hours: 5)),
+    ),
+    Content(
+      id: 'ig_3',
+      platform: PlatformType.instagram,
+      platformContentId: 'C9xYz1aB2cD',
+      title: 'Morning Workout Routine',
+      description: '5-minute morning workout to start your day! 💪 No equipment needed. #fitness #workout #morning',
+      videoUrl: 'https://www.instagram.com/p/C9xYz1aB2cD/',
+      thumbnailUrl: null,
+      creatorName: 'fit_daily',
+      durationSeconds: 47,
+      viewCount: 156000,
+      likeCount: 12000,
+      publishedAt: DateTime.now().subtract(Duration(hours: 8)),
+      tags: ['fitness', 'workout', 'morning', 'health'],
+      contentType: ContentType.reel,
+      createdAt: DateTime.now().subtract(Duration(hours: 8)),
+      updatedAt: DateTime.now().subtract(Duration(hours: 8)),
+    ),
   ];
 
-  // Simulate API call with delay
   Future<List<Content>> getVideos({
     PlatformType? platform,
     String? category,
     int limit = 10,
   }) async {
-    // Simulate network delay
-    await Future.delayed(Duration(milliseconds: 500));
     
     List<Content> filteredVideos = List.from(_sampleVideos);
     
@@ -281,9 +394,7 @@ class ContentService {
     return filteredVideos.take(limit).toList();
   }
 
-  // Get trending videos
   Future<List<Content>> getTrendingVideos({int limit = 5}) async {
-    await Future.delayed(Duration(milliseconds: 300));
     
     // Sort by views and likes for trending
     List<Content> trending = List.from(_sampleVideos);
@@ -297,9 +408,7 @@ class ContentService {
     return getVideos(category: category, limit: limit);
   }
 
-  // Search videos
   Future<List<Content>> searchVideos(String query, {int limit = 10}) async {
-    await Future.delayed(Duration(milliseconds: 400));
     
     if (query.isEmpty) return [];
     
@@ -313,9 +422,7 @@ class ContentService {
     return searchResults.take(limit).toList();
   }
 
-  // Get video by ID
   Future<Content?> getVideoById(String id) async {
-    await Future.delayed(Duration(milliseconds: 200));
     
     try {
       return _sampleVideos.firstWhere((video) => video.id == id);
@@ -324,9 +431,7 @@ class ContentService {
     }
   }
 
-  // Get recommended videos based on a video
   Future<List<Content>> getRecommendedVideos(String videoId, {int limit = 5}) async {
-    await Future.delayed(Duration(milliseconds: 300));
     
     Content? currentVideo = await getVideoById(videoId);
     if (currentVideo == null) return [];
@@ -350,9 +455,7 @@ class ContentService {
     return recommended.take(limit).toList();
   }
 
-  // Get feed content (mixed content for feed screen)
   Future<List<Content>> getFeedContent({int limit = 10}) async {
-    await Future.delayed(Duration(milliseconds: 600));
     
     List<Content> feedContent = List.from(_sampleVideos);
     feedContent.shuffle(Random());
@@ -360,9 +463,7 @@ class ContentService {
     return feedContent.take(limit).toList();
   }
 
-  // Load more content (pagination simulation)
   Future<List<Content>> loadMoreContent(int offset, {int limit = 10}) async {
-    await Future.delayed(Duration(milliseconds: 500));
     
     // Simulate pagination by cycling through content
     List<Content> allContent = List.from(_sampleVideos);

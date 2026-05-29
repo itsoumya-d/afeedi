@@ -29,11 +29,24 @@ class FeedPostCard extends StatelessWidget {
     );
   }
 
+  String _formatCount(int count) {
+    if (count >= 1000000000) return '${(count / 1000000000).toStringAsFixed(1)}B';
+    if (count >= 1000000) return '${(count / 1000000).toStringAsFixed(1)}M';
+    if (count >= 1000) return '${(count / 1000).toStringAsFixed(1)}K';
+    return count.toString();
+  }
+
   String _formatTimeAgo(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
-    
-    if (difference.inDays > 0) {
+
+    if (difference.inDays >= 365) {
+      final years = (difference.inDays / 365).floor();
+      return '${years}y ago';
+    } else if (difference.inDays >= 30) {
+      final months = (difference.inDays / 30).floor();
+      return '${months}mo ago';
+    } else if (difference.inDays > 0) {
       return '${difference.inDays}d ago';
     } else if (difference.inHours > 0) {
       return '${difference.inHours}h ago';
@@ -214,7 +227,7 @@ class FeedPostCard extends StatelessWidget {
         children: [
           _buildActionButton(
             icon: Icons.favorite_border,
-            count: content.viewCount,
+            label: _formatCount(content.viewCount),
             onTap: () async {
               await ContentService.instance.trackContentInteraction(
                 contentId: content.id,
@@ -270,9 +283,11 @@ class FeedPostCard extends StatelessWidget {
 
   Widget _buildActionButton({
     required IconData icon,
-    required int count,
+    String? label,
+    int count = 0,
     required VoidCallback onTap,
   }) {
+    final displayLabel = label ?? (count > 0 ? _formatCount(count) : '0');
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -284,7 +299,7 @@ class FeedPostCard extends StatelessWidget {
             Icon(icon, size: 18),
             const SizedBox(width: 3),
             Text(
-              count.toString(),
+              displayLabel,
               style: const TextStyle(fontSize: 12),
             ),
           ],

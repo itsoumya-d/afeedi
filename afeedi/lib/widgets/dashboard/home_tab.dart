@@ -345,7 +345,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       {'name': 'TikTok', 'platform': PlatformType.tiktok, 'icon': Icons.music_video},
       {'name': 'Facebook', 'platform': PlatformType.facebook, 'icon': Icons.facebook},
     ];
-    
+
     return SizedBox(
       height: 38,
       child: ListView.builder(
@@ -354,35 +354,44 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         itemBuilder: (context, index) {
           final filter = filters[index];
           final isSelected = _selectedPlatform == filter['platform'];
-          
+
           return Container(
             margin: const EdgeInsets.only(right: 8),
-            child: FilterChip(
-              avatar: Icon(
-                filter['icon'] as IconData,
-                size: 16,
-                color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
-              ),
-              label: Text(
-                filter['name'] as String,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
-                  fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            child: GestureDetector(
+              onTap: () => _handlePlatformFilter(filter['platform'] as PlatformType?),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppTheme.primaryCyan.withOpacity(0.3)
+                      : Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppTheme.primaryCyan
+                        : Colors.white.withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      filter['icon'] as IconData,
+                      size: 14,
+                      color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      filter['name'] as String,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+                        fontSize: 12,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              selected: isSelected,
-              onSelected: (selected) {
-                _handlePlatformFilter(filter['platform'] as PlatformType?);
-              },
-              backgroundColor: Colors.white.withOpacity(0.1),
-              selectedColor: AppTheme.primaryCyan.withOpacity(0.3),
-              side: BorderSide(
-                color: isSelected 
-                    ? AppTheme.primaryCyan
-                    : Colors.white.withOpacity(0.3),
-              ),
-              showCheckmark: false,
             ),
           );
         },

@@ -65,21 +65,12 @@ class YouTubePlayerService {
     required Content content,
   }) async {
     try {
-      // Create iframe element for YouTube embed
-      // TODO: Implement proper iframe creation for web platform
-      final iframe = null; // Simplified for mobile-first approach
       final embedUrl = _buildEmbedUrl(
         videoId: videoId,
         autoplay: autoplay,
         showControls: showControls,
       );
-      
-      // Style properties removed - not applicable for mobile-first approach
-      
-      // Note: View factory registration is now handled by UniversalPlatformPlayer
-      // to avoid conflicts with multiple registrations
-      
-      // Track successful player creation
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'youtube_player_created',
         screen: 'video_player',
@@ -90,11 +81,11 @@ class YouTubePlayerService {
           'embed_mode': 'iframe',
         },
       );
-      
+
       return YouTubePlayerResult(
         success: true,
         playerId: containerId,
-        embedUrl: iframe.src,
+        embedUrl: embedUrl,
       );
     } catch (error) {
       return YouTubePlayerResult(

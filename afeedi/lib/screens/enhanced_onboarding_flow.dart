@@ -404,36 +404,34 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
         return _buildPersonalInfoStep();
       case 'content_interests':
         return InterestSelectionGrid(
-          selectedInterests: _userPreferences.contentInterests ?? [],
+          selectedInterests: _userPreferences.contentInterests,
           onInterestsChanged: (interests) => _updateUserPreferences('contentInterests', interests),
         );
       case 'content_types':
         return ContentTypeSelection(
-          selectedContentTypes: _userPreferences.contentTypes ?? [],
+          selectedContentTypes: _userPreferences.contentTypes,
           onContentTypesChanged: (types) => _updateUserPreferences('contentTypes', types),
         );
       case 'entertainment_preferences':
         return _buildEntertainmentPreferencesStep();
       case 'viewing_habits':
         return ViewingHabitsWidget(
-          viewingHabits: _userPreferences.viewingHabits ?? {},
+          viewingHabits: _userPreferences.viewingHabits,
           onViewingHabitsChanged: (habits) => _updateUserPreferences('viewingHabits', habits),
         );
       case 'platform_preferences':
         return PlatformSelectionWidget(
-          platformPriorities: _userPreferences.platformPriorities ?? {},
+          platformPriorities: _userPreferences.platformPriorities,
           onPlatformPrioritiesChanged: (prefs) => _updateUserPreferences('platformPreferences', prefs),
         );
       case 'personalization_settings':
         return PersonalizationSettingsWidget(
-          personalizationSettings: _userPreferences.personalizationSettings ?? {},
+          personalizationSettings: _userPreferences.personalizationSettings,
           onPersonalizationSettingsChanged: (settings) => 
               _updateUserPreferences('personalizationSettings', settings),
         );
       case 'calendar_integration':
         return _buildCalendarIntegrationStep();
-      case 'welcome':
-        return _buildWelcomeStep();
       default:
         return const Center(child: Text('Step content not implemented'));
     }
@@ -551,7 +549,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
     
     // Update preferences when text changes
     void updatePersonalInfo() {
-      final personalInfo = _userPreferences.personalInfo ?? {};
+      final personalInfo = _userPreferences.personalInfo;
       personalInfo['name'] = nameController.text;
       
       final age = int.tryParse(ageController.text);
@@ -626,7 +624,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
   }
 
   Widget _buildEntertainmentPreferencesStep() {
-    final entertainmentPrefs = _userPreferences.entertainmentPreferences ?? {};
+    final entertainmentPrefs = _userPreferences.entertainmentPreferences;
     
     // Content mood preferences
     final List<Map<String, dynamic>> moodOptions = [
@@ -821,7 +819,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
   }
 
   Widget _buildCalendarIntegrationStep() {
-    final calendarIntegration = _userPreferences.calendarIntegration ?? {};
+    final calendarIntegration = _userPreferences.calendarIntegration;
     final isEnabled = calendarIntegration['enabled'] ?? false;
     
     void toggleCalendarIntegration(bool value) {

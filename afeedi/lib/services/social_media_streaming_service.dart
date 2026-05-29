@@ -439,24 +439,6 @@ class SocialMediaStreamingService {
     return null;
   }
 
-  /// Create Instagram web embed element (disabled)
-  dynamic _createInstagramWebElement(SocialMediaEmbedResult embedResult) {
-    Logger.info('Instagram web embed not implemented');
-    return null;
-  }
-
-  /// Create TikTok web embed element (disabled)
-  dynamic _createTikTokWebElement(SocialMediaEmbedResult embedResult) {
-    Logger.info('TikTok web embed not implemented');
-    return null;
-  }
-
-  /// Create Facebook web embed element (disabled)
-  dynamic _createFacebookWebElement(SocialMediaEmbedResult embedResult) {
-    Logger.info('Facebook web embed not implemented');
-    return null;
-  }
-
   /// Extract platform and content ID from social media URL
   SocialMediaUrlInfo? parseUrl(String url) {
     try {

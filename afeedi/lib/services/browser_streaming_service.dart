@@ -156,16 +156,14 @@ class BrowserStreamingService {
       
       // Check for modern browser features
       final hasVideoSupport = html.VideoElement().canPlayType('video/mp4') != '';
-      final hasWebMSupport = html.VideoElement().canPlayType('video/webm') != '';
-      final hasHLSSupport = _checkHLSSupport();
-      
+
       // Check browser versions
       final isChrome = userAgent.contains('chrome') && !userAgent.contains('edge');
       final isFirefox = userAgent.contains('firefox');
       final isSafari = userAgent.contains('safari') && !userAgent.contains('chrome');
       final isEdge = userAgent.contains('edge');
       
-      return hasVideoSupport && (isChrome || isFirefox || isSafari || isEdge);
+      return hasVideoSupport && (isChrome || isFirefox || isSafari || isEdge); // ignore: dead_code
     } catch (error) {
       debugPrint('Error checking browser support: $error');
       return false;
@@ -374,7 +372,6 @@ class StreamingPlayer {
   final Map<String, dynamic> options;
   
   html.VideoElement? _videoElement;
-  WebViewController? _webViewController;
   bool _isInitialized = false;
   bool _isPlaying = false;
   double _currentTime = 0.0;
@@ -526,7 +523,6 @@ class StreamingPlayer {
         _videoElement = null;
       }
       
-      _webViewController = null;
       _isInitialized = false;
       _isPlaying = false;
       
@@ -579,8 +575,7 @@ class StreamingPlayer {
     // Initialize WebView for mobile platforms
     if (content.embedUrl != null) {
       final embedUrl = BrowserStreamingService.instance.createEmbedUrl(content);
-      
-      _webViewController = WebViewController()
+      WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..loadRequest(Uri.parse(embedUrl));
     }

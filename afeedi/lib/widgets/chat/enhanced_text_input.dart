@@ -163,25 +163,6 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
     }
   }
 
-  void _handleSuggestionTap(String suggestion) {
-    _textController.text = suggestion;
-    _textController.selection = TextSelection.fromPosition(
-      TextPosition(offset: suggestion.length),
-    );
-    setState(() {
-      _showSuggestions = false;
-    });
-    _controller.reverse();
-    
-    // Auto-submit if it's a complete thought
-    if (suggestion.endsWith('!') || suggestion.endsWith('.') || 
-        suggestion.length > 20) {
-      Future.delayed(const Duration(milliseconds: 500), () {
-        _handleSubmit();
-      });
-    }
-  }
-
   void _handleSubmit() {
     final text = _textController.text.trim();
     if (text.isNotEmpty && widget.isEnabled) {
@@ -320,10 +301,6 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
         ),
       ],
     );
-  }
-
-  List<String> _getFilteredSuggestions() {
-    return _filteredSuggestions;
   }
 
   void _onSuggestionTap(String suggestion) {

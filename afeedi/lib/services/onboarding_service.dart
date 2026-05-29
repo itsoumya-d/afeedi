@@ -284,11 +284,11 @@ class OnboardingService {
     await prefs.setString('onboarding_user_name', preferences.name ?? '');
     await prefs.setString(
       'onboarding_selected_genres',
-      jsonEncode(preferences.contentInterests ?? []),
+      jsonEncode(preferences.contentInterests),
     );
     await prefs.setString(
       'onboarding_platform_connections',
-      jsonEncode(preferences.platformPriorities?.map((k, v) => MapEntry(k, v > 0)) ?? {}),
+      jsonEncode(preferences.platformPriorities.map((k, v) => MapEntry(k, v > 0))),
     );
   }
 

@@ -293,7 +293,7 @@ class ContentAggregationService {
       }
       
       // Sort by engagement for better discovery
-      tiktokContent.sort((a, b) => (b.viewCount ?? 0).compareTo(a.viewCount ?? 0));
+      tiktokContent.sort((a, b) => b.viewCount.compareTo(a.viewCount));
       
       return tiktokContent;
     } catch (error) {

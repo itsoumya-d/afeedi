@@ -35,8 +35,7 @@ class AuthService {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getString('user_id');
       final userEmail = prefs.getString('user_email');
-      final userName = prefs.getString('user_name');
-      
+
       if (userId != null && userEmail != null) {
         _currentUser = User(
           id: userId,
@@ -58,8 +57,7 @@ class AuthService {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getString('user_id');
       final email = prefs.getString('user_email');
-      final name = prefs.getString('user_name');
-      
+
       if (userId != null && email != null) {
          _currentUser = User(
            id: userId,

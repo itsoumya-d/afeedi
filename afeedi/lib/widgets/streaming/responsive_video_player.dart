@@ -182,7 +182,6 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isTablet = constraints.maxWidth > 768;
         final isMobile = constraints.maxWidth <= 768;
         final aspectRatio = _getAspectRatio();
         
@@ -278,19 +277,6 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
   }
   
 
-  
-  Widget _buildMobilePlayer() {
-    // Implementation for mobile WebView player
-    return Container(
-      color: Colors.black,
-      child: const Center(
-        child: Text(
-          'Mobile Player',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-    );
-  }
   
   Widget _buildLoadingIndicator() {
     return Container(

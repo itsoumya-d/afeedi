@@ -168,31 +168,8 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     }
   }
   
-  void _onDateSelected(DateTime selectedDate) {
-    setState(() {
-      _selectedDate = selectedDate;
-    });
-    _loadContentForSelectedDate();
-  }
-  
   void _onFilterChanged() {
     _loadContentForSelectedDate();
-  }
-  
-  void _onContentSelected(Content content) {
-    // Show video player modal
-    _showVideoPlayer(content);
-    
-    // Track content selection from calendar
-    AnalyticsService.instance.trackUserInteraction(
-      action: 'calendar_content_selected',
-      screen: 'calendar',
-      additionalData: {
-        'content_id': content.id,
-        'platform': content.platform.name,
-        'selected_date': _selectedDate.toIso8601String(),
-      },
-    );
   }
   
   void _showVideoPlayer(Content content) {
@@ -267,23 +244,6 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         ),
       ),
     );
-  }
-  
-  Future<void> _scheduleContent(Content content, DateTime scheduledTime) async {
-    final success = await EnhancedCalendarService.instance.scheduleContent(
-      content,
-      scheduledTime,
-    );
-    
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Content scheduled for ${scheduledTime.hour}:${scheduledTime.minute.toString().padLeft(2, '0')}'),
-          backgroundColor: AppTheme.primaryCyan,
-        ),
-      );
-      _loadContentForSelectedDate();
-    }
   }
   
   final List<Map<String, dynamic>> _aiRecommendations = [
@@ -1217,15 +1177,6 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     });
   }
   
-  void _togglePercentageFilter() {
-    setState(() {
-      _isPercentageFilterActive = !_isPercentageFilterActive;
-      if (_isPercentageFilterActive) {
-        _selectedFilter = 'all'; // Reset category filter when using percentage
-      }
-    });
-  }
-  
   Color _getCategoryColor(dynamic input) {
     try {
       if (input is DateTime) {
@@ -1664,18 +1615,6 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         duration: const Duration(seconds: 2),
       ),
     );
-  }
-  
-  IconData _getCategoryIcon(String? category) {
-    switch (category?.toLowerCase()) {
-      case 'education':
-        return Icons.school;
-      case 'study':
-        return Icons.book;
-      case 'entertainment':
-      default:
-        return Icons.movie;
-    }
   }
   
   Widget _buildAIRecommendations() {

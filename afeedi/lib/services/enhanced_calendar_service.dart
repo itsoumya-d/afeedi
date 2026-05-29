@@ -239,8 +239,6 @@ class EnhancedCalendarService {
   List<Content> _applyPercentageFilter(List<Content> content, double educationPercentage, double entertainmentPercentage) {
     final educationContent = content.where((c) => _getContentCategory(c) == 'education').toList();
     final entertainmentContent = content.where((c) => _getContentCategory(c) == 'entertainment').toList();
-    final studyContent = content.where((c) => _getContentCategory(c) == 'study').toList();
-    
     final totalDesired = 20; // Target number of items
     final educationCount = ((educationPercentage / 100) * totalDesired).round();
     final entertainmentCount = ((entertainmentPercentage / 100) * totalDesired).round();

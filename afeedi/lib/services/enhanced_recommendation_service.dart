@@ -324,33 +324,4 @@ class EnhancedRecommendationService {
     }
   }
   
-  // Get user behavior insights (simplified)
-  Future<UserBehaviorInsight?> _getUserBehaviorInsights(String userId) async {
-    try {
-      // Return a basic insight for now
-      return UserBehaviorInsight(
-        userId: userId,
-        engagementScore: 0.7,
-        interactionCount: 10,
-        additionalMetrics: {
-          'category_preferences': {'tech': 5, 'entertainment': 3},
-          'platform_preferences': {'youtube': 8, 'instagram': 2},
-        },
-        lastUpdated: DateTime.now(),
-      );
-    } catch (error) {
-      debugPrint('Error getting user behavior insights: $error');
-      return null;
-    }
-  }
-  
-  // Helper method to save a single recommendation to the database
-  Future<void> _saveRecommendation(Recommendation recommendation) async {
-    try {
-      // Save to local storage instead of Supabase
-      debugPrint('Saving recommendation: ${recommendation.id}');
-    } catch (error) {
-      debugPrint('Error saving recommendation: $error');
-    }
-  }
 }

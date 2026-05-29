@@ -267,57 +267,17 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
     } catch (error) {
       setState(() {
         _hasError = true;
-        _errorMessage = error.toString();
         _isLoading = false;
         _showFallbackOptions = true;
       });
       widget.onError?.call(error.toString());
     }
   }
-  
+
   bool _isSocialMediaPlatform(PlatformType platform) {
     return platform == PlatformType.instagram ||
            platform == PlatformType.tiktok ||
            platform == PlatformType.facebook;
-  }
-
-  Future<void> _createSocialMediaPlayer() async {
-    try {
-      // Initialize social media streaming service
-      await SocialMediaStreamingService.instance.initialize();
-      
-      setState(() {
-        _playerResult = PlatformPlayerResult(
-          success: true,
-          playerId: 'social_media_${widget.content.id}',
-          platform: widget.content.platform,
-          embedUrl: widget.content.videoUrl ?? widget.content.embedUrl,
-        );
-        _isLoading = false;
-        _hasError = false;
-      });
-      
-      widget.onPlayerReady?.call();
-      
-      // Track successful player creation
-      await AnalyticsService.instance.trackUserInteraction(
-        action: '${widget.content.platform.name}_social_player_created',
-        screen: 'video_player',
-        additionalData: {
-          'content_id': widget.content.id,
-          'platform': widget.content.platform.name,
-          'embed_mode': 'social_media_streaming',
-        },
-      );
-    } catch (error) {
-      setState(() {
-        _hasError = true;
-        _errorMessage = error.toString();
-        _isLoading = false;
-        _showFallbackOptions = true;
-      });
-      widget.onError?.call(error.toString());
-    }
   }
 
   String _getEmbedUrl() {
@@ -451,7 +411,6 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       onError: (error) {
         setState(() {
           _hasError = true;
-          _errorMessage = error;
           _showFallbackOptions = true;
         });
         widget.onError?.call(error);

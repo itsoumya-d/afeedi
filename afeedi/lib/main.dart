@@ -9,6 +9,7 @@ import 'services/onboarding_service.dart';
 import 'services/recommendation_integration_service.dart';
 import 'services/platform_view_registration_service.dart';
 import 'services/local_auth_service.dart';
+import 'services/content_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/storage/local_storage_service.dart';
 
@@ -36,6 +37,11 @@ void main() async {
 
     // Initialize User Interaction Service (Phase 4: like, save, share, follow)
     await UserInteractionService.instance.initialize();
+
+    // Initialize ContentService — fetches real YouTube content in background
+    // (non-blocking: failure falls back to seed data silently)
+    ContentService.instance.initialize().catchError(
+        (e) => debugPrint('ContentService background init error: $e'));
     
     // Initialize Platform View Registration Service for web
     if (kIsWeb) {

@@ -5,6 +5,7 @@ import '../models/content_model.dart';
 import 'enhanced_recommendation_service.dart';
 import 'onboarding_service.dart';
 import 'auth_service.dart';
+import 'youtube_live_content_service.dart';
 
 class ContentService {
   static final ContentService _instance = ContentService._internal();
@@ -624,6 +625,34 @@ class ContentService {
     ),
   ];
 
+  // Live content fetched from YouTube (primary source)
+  List<Content> _liveContent = [];
+
+  /// Call once at app startup. Fetches real YouTube content; falls back to
+  /// seed data silently if offline or YouTube is unavailable.
+  Future<void> initialize() async {
+    try {
+      _liveContent = await YouTubeLiveContentService.instance.getContent();
+      debugPrint('ContentService: ${_liveContent.length} live items loaded');
+    } catch (e) {
+      debugPrint('ContentService initialize error (using seeds): $e');
+    }
+  }
+
+  /// Force-refresh live content (call from pull-to-refresh).
+  Future<void> refreshContent() async {
+    try {
+      _liveContent =
+          await YouTubeLiveContentService.instance.getContent(forceRefresh: true);
+    } catch (e) {
+      debugPrint('ContentService refresh error: $e');
+    }
+  }
+
+  /// Primary pool: live data when available, seed data otherwise.
+  List<Content> get _allContent =>
+      _liveContent.isNotEmpty ? _liveContent : _sampleVideos;
+
   // Ensure every content item has a creatorId for follow functionality
   List<Content> _withCreatorIds(List<Content> items) {
     return items.map((c) {
@@ -638,8 +667,8 @@ class ContentService {
     String? category,
     int limit = 10,
   }) async {
-    
-    List<Content> filteredVideos = List.from(_sampleVideos);
+
+    List<Content> filteredVideos = List.from(_allContent);
     
     // Filter by platform if specified
     if (platform != null) {
@@ -661,9 +690,8 @@ class ContentService {
   }
 
   Future<List<Content>> getTrendingVideos({int limit = 5}) async {
-    
-    // Sort by views and likes for trending
-    List<Content> trending = List.from(_sampleVideos);
+
+    List<Content> trending = List.from(_allContent);
     trending.sort((a, b) => (b.viewCount + b.likeCount).compareTo(a.viewCount + a.likeCount));
     
     return _withCreatorIds(trending.take(limit).toList());
@@ -675,64 +703,77 @@ class ContentService {
   }
 
   Future<List<Content>> searchVideos(String query, {int limit = 10}) async {
-    
+
     if (query.isEmpty) return [];
-    
-    List<Content> searchResults = _sampleVideos.where((video) => 
-      video.title?.toLowerCase().contains(query.toLowerCase()) == true ||
-      video.description?.toLowerCase().contains(query.toLowerCase()) == true ||
-      video.creatorName?.toLowerCase().contains(query.toLowerCase()) == true ||
-      video.tags.any((tag) => tag.toLowerCase().contains(query.toLowerCase()))
-    ).toList();
-    
-    return _withCreatorIds(searchResults.take(limit).toList());
+
+    // First check local content
+    final q = query.toLowerCase();
+    List<Content> localResults = _allContent.where((video) =>
+        video.title?.toLowerCase().contains(q) == true ||
+        video.description?.toLowerCase().contains(q) == true ||
+        video.creatorName?.toLowerCase().contains(q) == true ||
+        video.tags.any((tag) => tag.toLowerCase().contains(q))).toList();
+
+    if (localResults.length >= limit) {
+      return _withCreatorIds(localResults.take(limit).toList());
+    }
+
+    // Supplement with live YouTube search if local results are thin
+    try {
+      final liveResults = await YouTubeLiveContentService.instance
+          .searchLive(query, limit: limit - localResults.length);
+      final existingIds = localResults.map((c) => c.platformContentId).toSet();
+      final newItems =
+          liveResults.where((c) => !existingIds.contains(c.platformContentId));
+      localResults = [...localResults, ...newItems];
+    } catch (e) {
+      debugPrint('ContentService live search error: $e');
+    }
+
+    return _withCreatorIds(localResults.take(limit).toList());
   }
 
   Future<Content?> getVideoById(String id) async {
-    
+
     try {
-      return _sampleVideos.firstWhere((video) => video.id == id);
+      return _allContent.firstWhere((video) => video.id == id);
     } catch (e) {
       return null;
     }
   }
 
   Future<List<Content>> getRecommendedVideos(String videoId, {int limit = 5}) async {
-    
+
     Content? currentVideo = await getVideoById(videoId);
     if (currentVideo == null) return [];
-    
-    // Find videos with similar tags
-    List<Content> recommended = _sampleVideos.where((video) => 
-      video.id != videoId &&
-      video.tags.any((tag) => currentVideo.tags.contains(tag))
-    ).toList();
-    
-    // If not enough similar videos, add random ones
+
+    List<Content> recommended = _allContent.where((video) =>
+        video.id != videoId &&
+        video.tags.any((tag) => currentVideo.tags.contains(tag))).toList();
+
     if (recommended.length < limit) {
-      List<Content> remaining = _sampleVideos.where((video) => 
-        video.id != videoId && !recommended.contains(video)
-      ).toList();
+      List<Content> remaining = _allContent
+          .where((video) => video.id != videoId && !recommended.contains(video))
+          .toList();
       remaining.shuffle(Random());
       recommended.addAll(remaining.take(limit - recommended.length));
     }
-    
+
     recommended.shuffle(Random());
     return recommended.take(limit).toList();
   }
 
   Future<List<Content>> getFeedContent({int limit = 10}) async {
-    
-    List<Content> feedContent = List.from(_sampleVideos);
+
+    List<Content> feedContent = List.from(_allContent);
     feedContent.shuffle(Random());
 
     return _withCreatorIds(feedContent.take(limit).toList());
   }
 
   Future<List<Content>> loadMoreContent(int offset, {int limit = 10}) async {
-    
-    // Simulate pagination by cycling through content
-    List<Content> allContent = List.from(_sampleVideos);
+
+    List<Content> allContent = List.from(_allContent);
     List<Content> moreContent = [];
     
     for (int i = 0; i < limit; i++) {
@@ -827,7 +868,7 @@ class ContentService {
       final onboardingService = OnboardingService();
       final preferences = await onboardingService.getCurrentPreferences();
       
-      List<Content> filteredContent = List.from(_sampleVideos);
+      List<Content> filteredContent = List.from(_allContent);
       
       // Apply platform preferences if available
       if (preferences != null && preferences.platformPriorities.isNotEmpty) {

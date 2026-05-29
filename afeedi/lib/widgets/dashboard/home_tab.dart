@@ -187,6 +187,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       _allPosts.clear();
       _hasMore = true;
     });
+    // Trigger a live refresh from YouTube so pull-to-refresh fetches new data
+    await ContentService.instance.refreshContent();
     await _loadInitialPosts();
   }
   

@@ -366,37 +366,74 @@ class _ShortsTabState extends State<ShortsTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '@${content.creatorName ?? 'Unknown'}',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+        // Creator name + Follow button (Instagram Reels / YouTube Shorts pattern)
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              '@${content.creatorName ?? 'Unknown'}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 10),
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.white, width: 1.5),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  'Follow',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         if (content.title != null)
           Text(
             content.title!,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 14,
+              fontSize: 13,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
         if (content.description != null) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: 3),
           Text(
             content.description!,
             style: const TextStyle(
               color: Colors.white70,
-              fontSize: 12,
+              fontSize: 11,
             ),
-            maxLines: 3,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
         ],
+        // Music info line (Instagram Reels pattern)
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            const Icon(Icons.music_note, color: Colors.white70, size: 12),
+            const SizedBox(width: 4),
+            Text(
+              '${content.creatorName ?? 'Original'} · Original Audio',
+              style: const TextStyle(color: Colors.white70, fontSize: 11),
+            ),
+          ],
+        ),
       ],
     );
   }

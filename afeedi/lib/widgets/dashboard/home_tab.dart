@@ -21,6 +21,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   bool _isLoading = false;
   bool _hasMore = true;
   PlatformType? _selectedPlatform;
+  bool _showFollowing = false;
   
   @override
   bool get wantKeepAlive => true;
@@ -227,38 +228,66 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Your Feed',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Personalized content from your favorite platforms',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              _buildQuickStats(),
-            ],
-          ),
+          // For You / Following tab switch (YouTube/TikTok/Twitter pattern)
+          _buildFeedTabSwitch(),
           const SizedBox(height: 12),
           _buildTrendingTopics(),
           const SizedBox(height: 12),
           _buildQuickFilters(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeedTabSwitch() {
+    return Row(
+      children: [
+        Expanded(
+          child: Row(
+            children: [
+              _buildFeedTab('For You', !_showFollowing),
+              const SizedBox(width: 24),
+              _buildFeedTab('Following', _showFollowing),
+            ],
+          ),
+        ),
+        _buildQuickStats(),
+      ],
+    );
+  }
+
+  Widget _buildFeedTab(String label, bool isActive) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _showFollowing = label == 'Following';
+        });
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: isActive ? Colors.white : Colors.white.withOpacity(0.45),
+              fontSize: 18,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.w400,
+            ),
+          ),
+          const SizedBox(height: 4),
+          if (isActive)
+            Container(
+              height: 3,
+              width: label.length * 10.0,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppTheme.primaryCyan, AppTheme.primaryPink],
+                ),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            )
+          else
+            const SizedBox(height: 3),
         ],
       ),
     );

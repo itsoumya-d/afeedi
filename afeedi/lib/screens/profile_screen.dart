@@ -229,110 +229,143 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   }
   
   Widget _buildProfileHeader() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        children: [
-          Stack(
-            children: [
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppTheme.primaryCyan,
-                    width: 3,
-                  ),
-                  gradient: const LinearGradient(
-                    colors: [AppTheme.primaryCyan, AppTheme.primaryPink],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+    final name = _userProfile['name'] as String;
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : 'A';
+
+    return Column(
+      children: [
+        // Banner / cover photo (TikTok/YouTube Channel pattern)
+        Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.bottomCenter,
+          children: [
+            // Banner gradient
+            Container(
+              height: 100,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.primaryCyan.withOpacity(0.7),
+                    AppTheme.primaryPink.withOpacity(0.7),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                child: Center(
-                  child: Text(
-                    (_userProfile['name'] as String).isNotEmpty
-                        ? (_userProfile['name'] as String)[0].toUpperCase()
-                        : 'A',
-                    style: const TextStyle(
+              ),
+              child: Opacity(
+                opacity: 0.15,
+                child: GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
+                  itemCount: 80,
+                  itemBuilder: (_, __) => Container(
+                    margin: const EdgeInsets.all(1),
+                    decoration: BoxDecoration(
                       color: Colors.white,
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ),
               ),
-              if (_userProfile['isPremium'])
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
+            ),
+            // Avatar overlaid on banner bottom (offset 50% below)
+            Positioned(
+              bottom: -50,
+              child: Stack(
+                children: [
+                  Container(
+                    width: 100,
+                    height: 100,
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryPink,
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppTheme.darkPrimary, width: 2),
+                      border: Border.all(color: AppTheme.darkPrimary, width: 4),
+                      gradient: const LinearGradient(
+                        colors: [AppTheme.primaryCyan, AppTheme.primaryPink],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.star,
-                      color: Colors.white,
-                      size: 16,
+                    child: Center(
+                      child: Text(
+                        initial,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
+                  if (_userProfile['isPremium'])
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryPink,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppTheme.darkPrimary, width: 2),
+                        ),
+                        child: const Icon(Icons.star, color: Colors.white, size: 14),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 60), // Space for avatar overflow
+        Text(
+          _userProfile['name'],
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _userProfile['email'],
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.7),
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryCyan.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppTheme.primaryCyan.withOpacity(0.5)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.calendar_today,
+                color: AppTheme.primaryCyan,
+                size: 16,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Joined ${_userProfile['joinDate']}',
+                style: TextStyle(
+                  color: AppTheme.primaryCyan,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                 ),
+              ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            _userProfile['name'],
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _userProfile['email'],
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryCyan.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppTheme.primaryCyan.withOpacity(0.5)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.calendar_today,
-                  color: AppTheme.primaryCyan,
-                  size: 16,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'Joined ${_userProfile['joinDate']}',
-                  style: TextStyle(
-                    color: AppTheme.primaryCyan,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 8),
+      ],
     );
   }
-  
+
   Widget _buildStatsRow() {
     return Container(
       margin: const EdgeInsets.all(20),

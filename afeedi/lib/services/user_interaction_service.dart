@@ -40,6 +40,12 @@ class UserInteractionService {
     final prefs = _prefs;
     if (prefs == null) return;
 
+    // Clear in-memory caches before reloading so stale values don't persist
+    _likeCache.clear();
+    _saveCache.clear();
+    _followCache.clear();
+    _countsCache.clear();
+
     // Load liked / saved / followed from all stored keys
     for (final key in prefs.getKeys()) {
       if (key.startsWith('liked_')) {

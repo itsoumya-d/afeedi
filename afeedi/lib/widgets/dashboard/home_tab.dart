@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_theme.dart';
 import '../feed/feed_post_card.dart';
 import '../../models/content_model.dart';
@@ -54,8 +55,14 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   }
   
   void _onScroll() {
-    if (_scrollController.position.pixels >= 
-        _scrollController.position.maxScrollExtent - 200) {
+    final pos = _scrollController.position;
+    // Preload thumbnails for the items roughly 2 screen-heights ahead
+    if (_posts.isNotEmpty) {
+      final approxItemHeight = 320.0;
+      final currentIndex = (pos.pixels / approxItemHeight).floor();
+      _preloadThumbnails(currentIndex + 3);
+    }
+    if (pos.pixels >= pos.maxScrollExtent - 200) {
       _loadMorePosts();
     }
   }
@@ -104,6 +111,10 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         _allPosts = mixedContent;
         _posts = List.from(_allPosts);
         _isLoading = false;
+      });
+      // Preload the first 5 thumbnails immediately after load
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _preloadThumbnails(0, count: 5);
       });
       
       // Track successful content load with personalization info
@@ -190,6 +201,18 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     // Trigger a live refresh from YouTube so pull-to-refresh fetches new data
     await ContentService.instance.refreshContent();
     await _loadInitialPosts();
+  }
+
+  /// Preload thumbnails for the next [count] posts beyond [startIndex].
+  /// Runs in the background — no await needed at call site.
+  void _preloadThumbnails(int startIndex, {int count = 5}) {
+    final end = (startIndex + count).clamp(0, _posts.length);
+    for (int i = startIndex; i < end; i++) {
+      final url = _posts[i].thumbnailUrl;
+      if (url != null && url.isNotEmpty) {
+        precacheImage(CachedNetworkImageProvider(url), context);
+      }
+    }
   }
   
   void _handlePlatformFilter(PlatformType? platform) {
@@ -487,6 +510,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         controller: _scrollController,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         itemCount: _posts.length + (_isLoading ? 1 : 0),
+        addRepaintBoundaries: false, // we add our own RepaintBoundary per card
+        addAutomaticKeepAlives: false,
         itemBuilder: (context, index) {
           if (index >= _posts.length) {
             return const Padding(
@@ -500,10 +525,10 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           }
           
           final post = _posts[index];
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: FeedPostCard(
-              content: post,
+          return RepaintBoundary(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: FeedPostCard(content: post),
             ),
           );
         },

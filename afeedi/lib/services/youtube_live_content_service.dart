@@ -100,22 +100,30 @@ class YouTubeLiveContentService {
 
     try {
       for (final topic in _searchTopics) {
-        try {
-          final videos = await yt.search.getVideos(topic);
-          int added = 0;
-          for (final v in videos) {
-            if (added >= 8) break;
-            if (seenIds.contains(v.id.value)) continue;
-            final tags = topic.split(' ').take(3).toList();
-            final c = _videoToContent(v, tags: tags);
-            if (c != null) {
-              fetched.add(c);
-              seenIds.add(v.id.value);
-              added++;
+        // Retry each topic up to 2 times with exponential backoff
+        for (int attempt = 0; attempt < 2; attempt++) {
+          try {
+            final videos = await yt.search.getVideos(topic);
+            int added = 0;
+            for (final v in videos) {
+              if (added >= 8) break;
+              if (seenIds.contains(v.id.value)) continue;
+              final tags = topic.split(' ').take(3).toList();
+              final c = _videoToContent(v, tags: tags);
+              if (c != null) {
+                fetched.add(c);
+                seenIds.add(v.id.value);
+                added++;
+              }
+            }
+            break; // success — skip retry
+          } catch (e) {
+            if (attempt == 0) {
+              await Future.delayed(const Duration(seconds: 2));
+            } else {
+              debugPrint('YouTubeLiveContentService topic "$topic" failed: $e');
             }
           }
-        } catch (e) {
-          debugPrint('YouTubeLiveContentService topic "$topic" error: $e');
         }
       }
     } finally {

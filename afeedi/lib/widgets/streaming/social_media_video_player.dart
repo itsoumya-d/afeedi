@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/content_model.dart';
 import '../../services/social_media_streaming_service.dart';
 import '../../services/analytics_service.dart';
@@ -350,11 +351,14 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
     }
   }
 
-  void _openInBrowser(String url) {
-    // For mobile platforms, use url_launcher
-    // This would require adding url_launcher dependency
-    debugPrint('URL: $url');
-    Logger.info('Would open URL in browser: $url');
+  Future<void> _openInBrowser(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return;
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      Logger.error('Could not launch URL: $url');
+    }
   }
 
   @override

@@ -247,7 +247,7 @@ class ChatController extends ChangeNotifier {
   }
 
   void processUserInput(String input) {
-    if (_currentStep == 1 && input.isNotEmpty) {
+    if (_currentStep == 3 && input.isNotEmpty) {
       _userName = input;
     }
 

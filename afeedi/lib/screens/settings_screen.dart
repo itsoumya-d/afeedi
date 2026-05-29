@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/local_auth_service.dart';
 import '../services/navigation_service.dart';
+import '../main.dart' show themeModeNotifier;
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -111,7 +112,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: 'Dark Mode',
             subtitle: 'Use dark theme throughout the app',
             value: _darkMode,
-            onChanged: (v) { setState(() => _darkMode = v); _saveBool('setting_dark_mode', v); },
+            onChanged: (v) {
+              setState(() => _darkMode = v);
+              _saveBool('setting_dark_mode', v);
+              themeModeNotifier.value = v ? ThemeMode.dark : ThemeMode.light;
+            },
           ),
           _dropdownTile(
             icon: Icons.language,

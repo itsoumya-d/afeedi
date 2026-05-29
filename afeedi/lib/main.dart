@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'services/analytics_service.dart';
 import 'services/content_service.dart';
 import 'services/error_reporting_service.dart';
@@ -14,6 +15,9 @@ import 'services/recommendation_integration_service.dart';
 import 'services/user_interaction_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/storage/local_storage_service.dart';
+
+/// Global theme mode notifier — updated by SettingsScreen, observed by AfeediApp.
+final themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
 
 void main() {
   // Wrap in runZonedGuarded so uncaught async errors are captured by
@@ -95,6 +99,7 @@ class _AfeediAppState extends State<AfeediApp> {
   void initState() {
     super.initState();
     _determineInitialRoute();
+    _loadThemeSetting();
   }
 
   Future<void> _determineInitialRoute() async {
@@ -112,6 +117,16 @@ class _AfeediAppState extends State<AfeediApp> {
     if (mounted) setState(() => _ready = true);
   }
 
+  Future<void> _loadThemeSetting() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final isDark = prefs.getBool('setting_dark_mode');
+      if (isDark != null && mounted) {
+        themeModeNotifier.value = isDark ? ThemeMode.dark : ThemeMode.light;
+      }
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_ready) {
@@ -123,15 +138,18 @@ class _AfeediAppState extends State<AfeediApp> {
         ),
       );
     }
-    return MaterialApp(
-      title: 'Afeedi - Social Media Aggregation',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      navigatorKey: NavigationService.navigatorKey,
-      initialRoute: _initialRoute,
-      routes: AppRoutes.routes,
-      debugShowCheckedModeBanner: false,
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeModeNotifier,
+      builder: (_, themeMode, __) => MaterialApp(
+        title: 'Afeedi - Social Media Aggregation',
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: themeMode,
+        navigatorKey: NavigationService.navigatorKey,
+        initialRoute: _initialRoute,
+        routes: AppRoutes.routes,
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/analytics_service.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -79,6 +80,71 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     AnalyticsService.instance.trackUserInteraction(action: 'screen_view', screen: 'notifications');
+    _injectDynamicNotifications();
+  }
+
+  Future<void> _injectDynamicNotifications() async {
+    final prefs = await SharedPreferences.getInstance();
+    final dynamicItems = <Map<String, dynamic>>[];
+
+    // Real: saved content count (check SharedPreferences for keys starting with 'saved_')
+    final allKeys = prefs.getKeys().where((k) => k.startsWith('saved_')).toList();
+    final savedCount = allKeys.where((k) => prefs.getBool(k) == true).length;
+    if (savedCount > 0) {
+      dynamicItems.add({
+        'id': 'dyn_saved',
+        'type': 'recommendation',
+        'title': 'Your library',
+        'body': 'You have $savedCount saved video${savedCount == 1 ? '' : 's'} waiting for you.',
+        'time': 'Just now',
+        'read': false,
+        'icon': Icons.bookmark,
+        'color': const Color(0xFF00D4FF),
+      });
+    }
+
+    // Real: onboarding complete
+    final onboarded = prefs.getBool('onboarding_completed') ?? false;
+    if (onboarded) {
+      final name = prefs.getString('onboarding_user_name') ?? '';
+      dynamicItems.add({
+        'id': 'dyn_onboard',
+        'type': 'system',
+        'title': name.isNotEmpty ? 'Welcome, $name!' : 'Your feed is ready',
+        'body': 'Your content feed is personalized based on your interests.',
+        'time': 'Today',
+        'read': true,
+        'icon': Icons.celebration,
+        'color': const Color(0xFF7B61FF),
+      });
+    }
+
+    // Real: videos watched
+    final watched = prefs.getInt('stat_videos_watched') ?? 0;
+    if (watched >= 3) {
+      dynamicItems.add({
+        'id': 'dyn_watched',
+        'type': 'achievement',
+        'title': 'Keep watching!',
+        'body': 'You\'ve watched $watched video${watched == 1 ? '' : 's'} so far. Keep it up!',
+        'time': 'Today',
+        'read': false,
+        'icon': Icons.emoji_events,
+        'color': const Color(0xFFFFD700),
+      });
+    }
+
+    if (dynamicItems.isNotEmpty && mounted) {
+      setState(() {
+        // Prepend dynamic notifications before static ones, dedup by id
+        final ids = _notifications.map((n) => n['id']).toSet();
+        for (final n in dynamicItems.reversed) {
+          if (!ids.contains(n['id'])) {
+            _notifications.insert(0, n);
+          }
+        }
+      });
+    }
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/content_model.dart';
 import '../services/user_interaction_service.dart';
 import '../widgets/streaming/youtube_player_widget.dart';
@@ -16,6 +17,7 @@ class PlayerScreen extends StatefulWidget {
 class _PlayerScreenState extends State<PlayerScreen> {
   late bool _isLiked;
   late bool _isSaved;
+  late DateTime _watchStartTime;
 
   @override
   void initState() {
@@ -23,6 +25,28 @@ class _PlayerScreenState extends State<PlayerScreen> {
     final svc = UserInteractionService.instance;
     _isLiked = svc.isLiked(widget.content.id);
     _isSaved = svc.isSaved(widget.content.id);
+    _watchStartTime = DateTime.now();
+    _incrementVideoCount();
+  }
+
+  Future<void> _incrementVideoCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final count = (prefs.getInt('stat_videos_watched') ?? 0) + 1;
+    await prefs.setInt('stat_videos_watched', count);
+  }
+
+  @override
+  void dispose() {
+    _saveWatchTime();
+    super.dispose();
+  }
+
+  Future<void> _saveWatchTime() async {
+    final elapsed = DateTime.now().difference(_watchStartTime).inSeconds;
+    if (elapsed < 5) return; // ignore accidental opens
+    final prefs = await SharedPreferences.getInstance();
+    final minutes = prefs.getInt('stat_watch_minutes') ?? 0;
+    await prefs.setInt('stat_watch_minutes', minutes + (elapsed ~/ 60));
   }
 
   String _formatCount(int count) {

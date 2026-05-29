@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/content_model.dart';
 import '../services/content_service.dart';
+import '../services/navigation_service.dart';
 import '../widgets/common/loading_shimmer.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -18,6 +21,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   bool _hasSearched = false;
   String _query = '';
   late TabController _tabController;
+  List<String> _recentSearches = [];
 
   final List<String> _trendingTopics = [
     'Flutter', 'JavaScript', 'Python', 'React', 'AI', 'Machine Learning',
@@ -31,6 +35,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
     super.initState();
     _tabController = TabController(length: _categories.length, vsync: this);
     _loadContent();
+    _loadRecentSearches();
   }
 
   @override
@@ -45,9 +50,28 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
     if (mounted) setState(() => _allContent = content);
   }
 
+  Future<void> _loadRecentSearches() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString('recent_searches');
+    if (raw != null && mounted) {
+      final list = List<String>.from(jsonDecode(raw) as List);
+      setState(() => _recentSearches = list);
+    }
+  }
+
+  Future<void> _saveRecentSearch(String query) async {
+    if (query.isEmpty) return;
+    _recentSearches.remove(query);
+    _recentSearches.insert(0, query);
+    if (_recentSearches.length > 10) _recentSearches = _recentSearches.take(10).toList();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('recent_searches', jsonEncode(_recentSearches));
+  }
+
   void _search(String query) {
+    final trimmed = query.trim();
     setState(() {
-      _query = query.trim();
+      _query = trimmed;
       _hasSearched = _query.isNotEmpty;
       if (_query.isEmpty) {
         _results = [];
@@ -61,6 +85,10 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
             c.tags.any((t) => t.toLowerCase().contains(q));
       }).toList();
     });
+    if (trimmed.isNotEmpty) {
+      _saveRecentSearch(trimmed);
+      setState(() => _recentSearches = _recentSearches);
+    }
   }
 
   List<Content> get _filteredResults {
@@ -204,7 +232,11 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () {},
+        onTap: () => Navigator.pushNamed(
+          context,
+          AppRoutes.player,
+          arguments: content,
+        ),
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Row(
@@ -359,9 +391,13 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
             style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          _buildRecentSearchItem('flutter tutorial'),
-          _buildRecentSearchItem('machine learning'),
-          _buildRecentSearchItem('web development 2024'),
+          if (_recentSearches.isEmpty)
+            const Text(
+              'No recent searches yet',
+              style: TextStyle(color: Colors.white38, fontSize: 13),
+            )
+          else
+            ..._recentSearches.take(5).map(_buildRecentSearchItem),
         ],
       ),
     );

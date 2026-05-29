@@ -95,20 +95,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         feedContent = await ContentService.instance.getTrendingVideos(limit: 15);
       }
       
-      // Ensure we have YouTube content for proper video playback
-      final youtubeContent = feedContent.where((content) => 
-        content.platform == PlatformType.youtube
-      ).toList();
-      
-      // Mix YouTube content with other platforms for better variety
-      final mixedContent = <Content>[];
-      mixedContent.addAll(youtubeContent.take(8)); // Prioritize YouTube for video playback
-      mixedContent.addAll(feedContent.where((content) => 
-        content.platform != PlatformType.youtube
-      ).take(7));
-      
       setState(() {
-        _allPosts = mixedContent;
+        _allPosts = feedContent;
         _posts = List.from(_allPosts);
         _isLoading = false;
       });
@@ -122,8 +110,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         action: 'home_content_loaded',
         screen: 'home',
         additionalData: {
-          'total_content': mixedContent.length,
-          'youtube_content': youtubeContent.length,
+          'total_content': feedContent.length,
           'is_personalized': user != null && await onboardingService.isOnboardingCompleted(),
           'user_authenticated': user != null,
         },

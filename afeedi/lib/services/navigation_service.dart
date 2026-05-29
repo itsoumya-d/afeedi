@@ -92,7 +92,8 @@ class AppRoutes {
   static const String createContent = '/create';
   static const String notifications = '/notifications';
   static const String settings = '/settings';
-  
+  static const String player = '/player';
+
   // Admin routes
   static const String adminPanel = '/admin';
   static const String adminUsers = '/admin/users';

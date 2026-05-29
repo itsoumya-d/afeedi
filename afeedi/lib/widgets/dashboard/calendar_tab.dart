@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/enhanced_calendar_service.dart';
 import '../../services/analytics_service.dart';
+import '../../services/google_calendar_service.dart';
+import '../../models/calendar_event.dart';
 
 class CalendarTab extends StatefulWidget {
   const CalendarTab({super.key});
@@ -21,6 +23,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   List<String> _filterOrder = ['all', 'entertainment', 'education', 'study'];
+
+  // Google Calendar state
+  bool _gcalConnecting = false;
+  List<CalendarEvent> _gcalEvents = [];
   
   // Enhanced calendar functionality (fields removed - unused)
   
@@ -99,6 +105,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   @override
   void initState() {
     super.initState();
+    _initGoogleCalendar();
     _loadContentForSelectedDate();
     _calendarAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
@@ -129,6 +136,33 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     super.dispose();
   }
   
+  Future<void> _initGoogleCalendar() async {
+    await GoogleCalendarService.instance.initialize();
+    if (GoogleCalendarService.instance.isConnected && mounted) {
+      final events = await GoogleCalendarService.instance.getUpcomingEvents();
+      if (mounted) setState(() => _gcalEvents = events);
+    }
+  }
+
+  Future<void> _connectGoogleCalendar() async {
+    setState(() => _gcalConnecting = true);
+    final connected = await GoogleCalendarService.instance.connect();
+    if (connected && mounted) {
+      final events = await GoogleCalendarService.instance.getUpcomingEvents();
+      setState(() {
+        _gcalEvents = events;
+        _gcalConnecting = false;
+      });
+    } else if (mounted) {
+      setState(() => _gcalConnecting = false);
+    }
+  }
+
+  Future<void> _disconnectGoogleCalendar() async {
+    await GoogleCalendarService.instance.disconnect();
+    if (mounted) setState(() => _gcalEvents = []);
+  }
+
   // Enhanced calendar methods
   Future<void> _loadContentForSelectedDate() async {
     try {
@@ -200,6 +234,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     return SingleChildScrollView(
       child: Column(
         children: [
+          _buildGoogleCalendarSection(),
           _buildHeader(),
           if (_isFilterExpanded) _buildFilterCategories(),
           _buildViewModeSelector(),
@@ -210,6 +245,136 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     );
   }
   
+  Widget _buildGoogleCalendarSection() {
+    final isConnected = GoogleCalendarService.instance.isConnected;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [const Color(0xFF1A2A4A), const Color(0xFF1A1A2E)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isConnected
+              ? const Color(0xFF00D4FF).withValues(alpha: 0.4)
+              : Colors.white.withValues(alpha: 0.12),
+        ),
+      ),
+      child: isConnected
+          ? _buildConnectedCalendar()
+          : _buildConnectButton(),
+    );
+  }
+
+  Widget _buildConnectButton() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.calendar_today, color: Color(0xFF4285F4), size: 20),
+            const SizedBox(width: 10),
+            const Text(
+              'Google Calendar',
+              style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Connect your Google Calendar to see upcoming events alongside your content schedule.',
+          style: TextStyle(color: Colors.white54, fontSize: 13),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: _gcalConnecting ? null : _connectGoogleCalendar,
+            icon: _gcalConnecting
+                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : const Icon(Icons.login, size: 18),
+            label: Text(_gcalConnecting ? 'Connecting...' : 'Connect Google Calendar'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4285F4),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConnectedCalendar() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.calendar_today, color: Color(0xFF4285F4), size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Google Calendar • ${GoogleCalendarService.instance.userEmail ?? ""}',
+                style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            TextButton(
+              onPressed: _disconnectGoogleCalendar,
+              child: const Text('Disconnect', style: TextStyle(color: Colors.white38, fontSize: 12)),
+            ),
+          ],
+        ),
+        if (_gcalEvents.isEmpty)
+          const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text('No upcoming events', style: TextStyle(color: Colors.white38, fontSize: 13)),
+          )
+        else ...[
+          const SizedBox(height: 10),
+          ..._gcalEvents.take(5).map((event) => _buildCalendarEventTile(event)),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildCalendarEventTile(CalendarEvent event) {
+    final time = event.isAllDay
+        ? 'All day'
+        : '${event.start.hour.toString().padLeft(2, '0')}:${event.start.minute.toString().padLeft(2, '0')}';
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 50,
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(time, style: const TextStyle(color: Color(0xFF00D4FF), fontSize: 12, fontWeight: FontWeight.w500)),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  event.title,
+                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (event.location != null)
+                  Text(event.location!, style: const TextStyle(color: Colors.white38, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFilterCategories() {
     return AnimatedBuilder(
       animation: _filterAnimation,

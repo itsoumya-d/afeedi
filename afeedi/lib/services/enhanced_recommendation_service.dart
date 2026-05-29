@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/user_preferences.dart' as preferences;
 import '../models/content_model.dart';
+import '../models/genre.dart';
 import 'auth_service.dart';
 import 'content_aggregation_service.dart';
 import 'onboarding_service.dart';
@@ -202,22 +203,106 @@ class EnhancedRecommendationService {
     debugPrint('interaction tracked: $interaction');
   }
   
-  // Get personalized recommendations
+  // Get personalized recommendations using onboarding genre preferences
   Future<List<Recommendation>> getPersonalizedRecommendations({
     required String userId,
     int limit = 10,
   }) async {
-    // For now, return time-based recommendations
-    return getTimeBasedRecommendations(userId: userId, limit: limit);
+    return _getPreferenceBasedRecommendations(userId: userId, limit: limit);
   }
-  
-  // Get onboarding-based recommendations
+
+  // Get onboarding-based recommendations (same algorithm as personalized)
   Future<List<Recommendation>> getOnboardingBasedRecommendations({
     required String userId,
     int limit = 10,
   }) async {
-    // For now, return time-based recommendations
-    return getTimeBasedRecommendations(userId: userId, limit: limit);
+    return _getPreferenceBasedRecommendations(userId: userId, limit: limit);
+  }
+
+  Future<List<Recommendation>> _getPreferenceBasedRecommendations({
+    required String userId,
+    int limit = 10,
+  }) async {
+    try {
+      final user = AuthService.instance.currentUser;
+      if (user == null) return [];
+
+      final userPreferences = await OnboardingService.instance.getCurrentPreferences();
+      if (userPreferences == null || userPreferences.contentInterests.isEmpty) {
+        return getTimeBasedRecommendations(userId: userId, limit: limit);
+      }
+
+      // Build keyword set from selected genre preferences
+      final allGenres = OnboardingService.instance.getAllGenres();
+      final selectedKeywords = <String>{};
+      for (final interest in userPreferences.contentInterests) {
+        selectedKeywords.add(interest.toLowerCase());
+        try {
+          final Genre genre = allGenres.firstWhere(
+            (g) => g.name.toLowerCase() == interest.toLowerCase(),
+          );
+          selectedKeywords.addAll(genre.keywords.map((k) => k.toLowerCase()));
+          selectedKeywords.add(genre.category.toLowerCase());
+        } catch (_) {}
+      }
+
+      // Get content pool using preferred platforms (or YouTube as default)
+      final platforms = userPreferences.platformPriorities.entries
+          .where((e) => e.value > 0)
+          .map((e) => PlatformType.values.firstWhere(
+                (pt) => pt.name == e.key,
+                orElse: () => PlatformType.youtube,
+              ))
+          .toList();
+
+      final contentService = ContentAggregationService.instance;
+      final availableContent = await contentService.aggregateContent(
+        platforms: platforms.isEmpty ? [PlatformType.youtube] : platforms,
+        categories: userPreferences.contentInterests,
+        limit: limit * 3,
+      );
+
+      // Score content: keyword match is primary, time-of-day is a minor bonus
+      final currentHour = DateTime.now().hour;
+      final timeContext = _getTimeContext(currentHour);
+      final scored = <MapEntry<Content, double>>[];
+
+      for (final content in availableContent) {
+        final searchable = [
+          content.title ?? '',
+          content.description ?? '',
+          content.creatorName ?? '',
+          ...content.tags,
+          ...content.categories,
+        ].join(' ').toLowerCase();
+
+        double score = 0.0;
+        for (final kw in selectedKeywords) {
+          if (searchable.contains(kw)) score += 1.0;
+        }
+        // Add small time-of-day bonus so tie-breaks still respect time
+        score += _calculateTimeScore(content, timeContext, currentHour) * 0.3;
+        scored.add(MapEntry(content, score));
+      }
+
+      scored.sort((a, b) => b.value.compareTo(a.value));
+      final top = scored.take(limit).toList();
+
+      return List.generate(top.length, (i) => Recommendation(
+        id: 'pref_${DateTime.now().millisecondsSinceEpoch}_$i',
+        userId: user.id,
+        contentId: top[i].key.id,
+        content: top[i].key,
+        score: top[i].value,
+        reason: 'Personalized based on your interests',
+        algorithmVersion: '2.0.0',
+        createdAt: DateTime.now(),
+        expiresAt: DateTime.now().add(const Duration(hours: 6)),
+      ));
+    } catch (error) {
+      debugPrint('Error in preference-based recommendations: $error');
+      return getTimeBasedRecommendations(userId: userId, limit: limit);
+    }
   }
   
   // Generate viewing habits recommendations

@@ -7,6 +7,7 @@ import '../../widgets/onboarding/genre_selection.dart';
 import '../../widgets/onboarding/platform_connection.dart';
 import '../../widgets/onboarding/text_input_widget.dart';
 import '../../services/navigation_service.dart';
+import '../../services/onboarding_service.dart';
 
 class ChatInterface extends StatefulWidget {
   final ChatController controller;
@@ -70,10 +71,11 @@ class _ChatInterfaceState extends State<ChatInterface>
       _fadeController.forward();
     }
     
-    if (widget.controller.showQuickReplies || 
+    if (widget.controller.showQuickReplies ||
         widget.controller.showTextInput ||
         widget.controller.showGenreSelection ||
-        widget.controller.showPlatformSelection) {
+        widget.controller.showPlatformSelection ||
+        widget.controller.showFinalButton) {
       _slideController.forward();
     } else {
       _fadeController.reset();
@@ -273,8 +275,15 @@ class _ChatInterfaceState extends State<ChatInterface>
         child: Container(
           margin: const EdgeInsets.all(16),
           child: ElevatedButton(
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+            onPressed: () async {
+              await OnboardingService.instance.markOnboardingComplete();
+              if (context.mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  AppRoutes.dashboard,
+                  (_) => false,
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF00D4FF),

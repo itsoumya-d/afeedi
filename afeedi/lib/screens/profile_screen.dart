@@ -14,91 +14,57 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   late TabController _tabController;
   
   final Map<String, dynamic> _userProfile = {
-    'name': 'Alex Johnson',
-    'email': 'alex.johnson@email.com',
-    'joinDate': 'January 2024',
-    'avatar': 'https://picsum.photos/120/120?random=user',
-    'isPremium': true,
-    'level': 15,
-    'totalWatchTime': '127 hours',
-    'videosWatched': 342,
-    'streakDays': 28,
+    'name': 'You',
+    'email': '',
+    'joinDate': 'Today',
+    'avatar': null,
+    'isPremium': false,
+    'level': 1,
+    'totalWatchTime': '0 min',
+    'videosWatched': 0,
+    'streakDays': 1,
   };
   
   final List<Map<String, dynamic>> _achievements = [
     {
-      'id': 'early_bird',
-      'title': 'Early Bird',
-      'description': 'Watch 10 videos before 9 AM',
-      'icon': Icons.wb_sunny,
+      'id': 'welcome',
+      'title': 'Welcome!',
+      'description': 'Create your Afeedi account',
+      'icon': Icons.celebration,
       'color': Color(0xFFFFE66D),
       'unlocked': true,
       'progress': 1.0,
     },
     {
-      'id': 'binge_watcher',
-      'title': 'Binge Watcher',
-      'description': 'Watch 5 hours in a single day',
+      'id': 'first_video',
+      'title': 'First Watch',
+      'description': 'Watch your first video',
       'icon': Icons.play_circle_filled,
       'color': Color(0xFFFF6B6B),
-      'unlocked': true,
-      'progress': 1.0,
+      'unlocked': false,
+      'progress': 0.0,
     },
     {
       'id': 'explorer',
       'title': 'Content Explorer',
-      'description': 'Watch videos from all 4 platforms',
+      'description': 'Watch videos from 3 platforms',
       'icon': Icons.explore,
       'color': Color(0xFF4ECDC4),
       'unlocked': false,
-      'progress': 0.75,
+      'progress': 0.0,
     },
     {
-      'id': 'streak_master',
-      'title': 'Streak Master',
-      'description': 'Maintain a 30-day viewing streak',
+      'id': 'streak_starter',
+      'title': 'Streak Starter',
+      'description': 'Maintain a 7-day viewing streak',
       'icon': Icons.local_fire_department,
       'color': Color(0xFFFF8A65),
       'unlocked': false,
-      'progress': 0.93,
+      'progress': 0.14,
     },
   ];
   
-  final List<Map<String, dynamic>> _viewingHistory = [
-    {
-      'id': '1',
-      'title': 'Flutter State Management Deep Dive',
-      'creator': 'CodeMaster',
-      'platform': 'YouTube',
-      'thumbnail': 'https://picsum.photos/120/80?random=1',
-      'watchedAt': '2 hours ago',
-      'duration': '45:30',
-      'watchedDuration': '45:30',
-      'completed': true,
-    },
-    {
-      'id': '2',
-      'title': 'Amazing Travel Vlog - Japan',
-      'creator': 'TravelBuddy',
-      'platform': 'Instagram',
-      'thumbnail': 'https://picsum.photos/120/80?random=2',
-      'watchedAt': '1 day ago',
-      'duration': '12:15',
-      'watchedDuration': '8:30',
-      'completed': false,
-    },
-    {
-      'id': '3',
-      'title': 'Quick Cooking Tips',
-      'creator': 'ChefLife',
-      'platform': 'TikTok',
-      'thumbnail': 'https://picsum.photos/120/80?random=3',
-      'watchedAt': '2 days ago',
-      'duration': '1:30',
-      'watchedDuration': '1:30',
-      'completed': true,
-    },
-  ];
+  final List<Map<String, dynamic>> _viewingHistory = [];
 
   @override
   void initState() {
@@ -109,17 +75,51 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
 
   Future<void> _loadUserData() async {
     final user = LocalAuthService.instance.currentUser;
-    if (user == null) return;
     final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString('onboarding_user_name') ??
-        prefs.getString('user_name') ??
-        user.email.split('@').first;
-    final joinDate = '${_monthName(user.createdAt.month)} ${user.createdAt.year}';
+
+    String name;
+    String email;
+    String joinDate;
+
+    if (user != null) {
+      name = prefs.getString('onboarding_user_name') ??
+          prefs.getString('user_name') ??
+          user.email.split('@').first;
+      email = user.email;
+      joinDate = '${_monthName(user.createdAt.month)} ${user.createdAt.year}';
+    } else {
+      name = prefs.getString('onboarding_user_name') ?? 'You';
+      email = '';
+      joinDate = 'Today';
+    }
+
+    // Load persisted stats (default to new-user values)
+    final videosWatched = prefs.getInt('stat_videos_watched') ?? 0;
+    final streakDays = prefs.getInt('stat_streak_days') ?? 1;
+    final watchMinutes = prefs.getInt('stat_watch_minutes') ?? 0;
+    final watchTimeStr = watchMinutes >= 60
+        ? '${watchMinutes ~/ 60}h ${watchMinutes % 60}m'
+        : '${watchMinutes}m';
+
+    // Update first achievement based on account creation
+    final firstAchievementUnlocked = user != null || name != 'You';
+    if (firstAchievementUnlocked) {
+      _achievements[0]['unlocked'] = true;
+    }
+    if (videosWatched > 0) {
+      _achievements[1]['unlocked'] = true;
+      _achievements[1]['progress'] = 1.0;
+    }
+
     if (mounted) {
       setState(() {
         _userProfile['name'] = name;
-        _userProfile['email'] = user.email;
+        _userProfile['email'] = email;
         _userProfile['joinDate'] = joinDate;
+        _userProfile['videosWatched'] = videosWatched;
+        _userProfile['streakDays'] = streakDays;
+        _userProfile['totalWatchTime'] = watchTimeStr;
+        _userProfile['level'] = (videosWatched ~/ 10) + 1;
       });
     }
   }
@@ -244,9 +244,22 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                     color: AppTheme.primaryCyan,
                     width: 3,
                   ),
-                  image: DecorationImage(
-                    image: NetworkImage(_userProfile['avatar']),
-                    fit: BoxFit.cover,
+                  gradient: const LinearGradient(
+                    colors: [AppTheme.primaryCyan, AppTheme.primaryPink],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    (_userProfile['name'] as String).isNotEmpty
+                        ? (_userProfile['name'] as String)[0].toUpperCase()
+                        : 'A',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -584,13 +597,32 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: ListView.builder(
-              itemCount: _viewingHistory.length,
-              itemBuilder: (context, index) {
-                final item = _viewingHistory[index];
-                return _buildHistoryItem(item);
-              },
-            ),
+            child: _viewingHistory.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.history, size: 56, color: Colors.white.withOpacity(0.2)),
+                        const SizedBox(height: 12),
+                        Text(
+                          'No history yet',
+                          style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Videos you watch will appear here',
+                          style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: _viewingHistory.length,
+                    itemBuilder: (context, index) {
+                      final item = _viewingHistory[index];
+                      return _buildHistoryItem(item);
+                    },
+                  ),
           ),
         ],
       ),

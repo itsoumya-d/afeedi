@@ -407,7 +407,34 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         ),
       );
     }
-    
+
+    if (!_isLoading && _posts.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.video_library_outlined, size: 64, color: Colors.white.withOpacity(0.3)),
+            const SizedBox(height: 16),
+            Text(
+              'No content yet',
+              style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Pull down to refresh',
+              style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 14),
+            ),
+            const SizedBox(height: 24),
+            TextButton.icon(
+              onPressed: _refreshPosts,
+              icon: Icon(Icons.refresh, color: AppTheme.primaryCyan),
+              label: Text('Refresh', style: TextStyle(color: AppTheme.primaryCyan)),
+            ),
+          ],
+        ),
+      );
+    }
+
     return RefreshIndicator(
       onRefresh: _refreshPosts,
       color: AppTheme.primaryCyan,

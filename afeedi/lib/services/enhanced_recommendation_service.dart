@@ -1,11 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'dart:math' as math;
-import '../models/content_item.dart';
-import '../models/user_model.dart';
 import '../models/user_preferences.dart' as preferences;
 import '../models/content_model.dart';
 import 'auth_service.dart';
-import 'analytics_service.dart';
 import 'content_aggregation_service.dart';
 import 'onboarding_service.dart';
 

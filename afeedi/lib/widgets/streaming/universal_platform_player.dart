@@ -7,7 +7,6 @@ import '../../services/universal_platform_player_service.dart';
 import '../../services/social_media_streaming_service.dart';
 // import '../../services/video_content_extraction_service.dart';
 import '../../services/analytics_service.dart';
-import '../../core/theme/app_theme.dart';
 import 'social_media_video_player.dart';
 // import '../enhanced_video_player_widget.dart';
 
@@ -45,7 +44,6 @@ class UniversalPlatformPlayer extends StatefulWidget {
 class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
   bool _isLoading = true;
   bool _hasError = false;
-  String _errorMessage = '';
   PlatformPlayerResult? _playerResult;
   String? _containerId;
   bool _showFallbackOptions = false;
@@ -84,13 +82,12 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
     } catch (error) {
       setState(() {
         _hasError = true;
-        _errorMessage = error.toString();
         _isLoading = false;
       });
       widget.onError?.call(error.toString());
     }
   }
-  
+
   Future<void> _createPlayer() async {
     try {
       // Try enhanced video extraction for YouTube content first
@@ -141,7 +138,6 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
     } catch (error) {
       setState(() {
         _hasError = true;
-        _errorMessage = error.toString();
         _isLoading = false;
         _showFallbackOptions = true;
       });

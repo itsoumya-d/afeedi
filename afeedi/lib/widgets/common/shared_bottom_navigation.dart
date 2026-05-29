@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
-import '../../screens/dashboard_screen.dart';
-import '../../widgets/dashboard/home_tab.dart';
-import '../../widgets/dashboard/videos_tab.dart';
-import '../../widgets/dashboard/calendar_tab.dart';
-import '../../screens/profile_screen.dart';
 
 class SharedBottomNavigation extends StatefulWidget {
   final int currentIndex;

@@ -24,11 +24,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   final TextEditingController _searchController = TextEditingController();
   List<String> _filterOrder = ['all', 'entertainment', 'education', 'study'];
   
-  // Enhanced calendar functionality
-  List<Content> _filteredContent = [];
-  List<ScheduledContentItem> _enhancedScheduledContent = [];
-  bool _isLoadingContent = false;
-  Content? _selectedContent;
+  // Enhanced calendar functionality (fields removed - unused)
   
   // Percentage-based filtering
   double _educationPercentage = 50.0;
@@ -36,9 +32,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   bool _isPercentageFilterActive = false;
   String _selectedPercentagePreset = 'custom'; // 'custom', '50-50', '80-20', '20-80'
   
-  // Advanced search categories
-  List<String> _selectedSearchCategories = ['all'];
-  bool _isAdvancedSearchExpanded = false;
+  // Advanced search categories (fields removed - unused)
   
   late AnimationController _calendarAnimationController;
   late Animation<double> _calendarAnimation;
@@ -139,10 +133,6 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   
   // Enhanced calendar methods
   Future<void> _loadContentForSelectedDate() async {
-    setState(() {
-      _isLoadingContent = true;
-    });
-    
     try {
       final content = await EnhancedCalendarService.instance.getContentForDate(
         _selectedDate,
@@ -150,17 +140,13 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         educationPercentage: _isPercentageFilterActive ? _educationPercentage : null,
         entertainmentPercentage: _isPercentageFilterActive ? _entertainmentPercentage : null,
       );
-      
+
       final scheduled = await EnhancedCalendarService.instance.getScheduledContent(
         _selectedDate,
         _selectedDate.add(const Duration(days: 1)),
       );
-      
-      setState(() {
-        _filteredContent = content;
-        _enhancedScheduledContent = scheduled;
-        _isLoadingContent = false;
-      });
+
+      setState(() {});
       
       // Track calendar date selection
       await AnalyticsService.instance.trackUserInteraction(
@@ -173,9 +159,6 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         },
       );
     } catch (error) {
-      setState(() {
-        _isLoadingContent = false;
-      });
       
       await AnalyticsService.instance.trackError(
         errorType: 'calendar_content_load_error',
@@ -197,10 +180,6 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   }
   
   void _onContentSelected(Content content) {
-    setState(() {
-      _selectedContent = content;
-    });
-    
     // Show video player modal
     _showVideoPlayer(content);
     

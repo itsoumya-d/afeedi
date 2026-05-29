@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui' as ui;
 import '../services/navigation_service.dart';
-import '../services/oauth_service.dart';
 import '../services/auth_service.dart';
 import '../services/analytics_service.dart';
 import '../services/local_auth_service.dart';
@@ -248,9 +247,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             ),
             // Main content
             SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(
                   children: [
                     // Skip button
                     Align(
@@ -272,7 +272,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         ),
                       ),
                     ),
-                    const Spacer(flex: 2),
+                    const SizedBox(height: 48),
                     // Logo and main content
                     SlideTransition(
                       position: _slideAnimation,
@@ -327,7 +327,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         ),
                       ),
                     ),
-                    const Spacer(flex: 3),
+                    const SizedBox(height: 64),
                     // Social login buttons
                     SlideTransition(
                       position: _slideAnimation,
@@ -516,6 +516,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 ),
               ),
             ),
+          ),
           ],
         ),
       ),

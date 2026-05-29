@@ -10,7 +10,6 @@ class NotificationsScreen extends StatefulWidget {
 
 class _NotificationsScreenState extends State<NotificationsScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _allRead = false;
 
   final List<Map<String, dynamic>> _notifications = [
     {

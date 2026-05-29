@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 import '../models/content_model.dart';
-import '../models/analytics_model.dart';
 import 'enhanced_recommendation_service.dart';
 import 'onboarding_service.dart';
 import 'auth_service.dart';

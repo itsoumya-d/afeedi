@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import '../src/stubs/ui.dart' if (dart.library.html) 'dart:ui' as ui;
 import '../src/stubs/html.dart' if (dart.library.html) 'dart:html' as html;
 import '../src/stubs/ui_web.dart' if (dart.library.html) 'dart:ui_web' as ui_web;
 

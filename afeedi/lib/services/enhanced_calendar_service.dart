@@ -1,9 +1,6 @@
-import 'package:flutter/foundation.dart';
 import '../models/content_model.dart';
-import '../models/user_model.dart';
 import 'content_service.dart';
 import 'analytics_service.dart';
-import 'auth_service.dart';
 
 class EnhancedCalendarService {
   static EnhancedCalendarService? _instance;

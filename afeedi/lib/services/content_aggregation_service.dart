@@ -1,7 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../core/config/supabase_config.dart';
 import '../models/content_model.dart';
 import '../models/platform_connection_model.dart';
 import '../models/user_model.dart';
@@ -14,8 +11,7 @@ class ContentAggregationService {
   
   ContentAggregationService._();
   
-  final _supabase = SupabaseConfig.client;
-  
+
   // Aggregate content from all connected platforms
   Future<List<Content>> aggregateContent({
     int limit = 50,

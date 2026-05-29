@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/onboarding_service.dart';
-import '../../models/user_preferences.dart';
 import '../../services/navigation_service.dart';
-import '../../services/analytics_service.dart';
 import 'widgets/onboarding_step_widget.dart';
 import 'widgets/progress_indicator_widget.dart';
 import 'widgets/step_navigation_widget.dart';

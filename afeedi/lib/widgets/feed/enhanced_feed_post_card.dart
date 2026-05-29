@@ -32,7 +32,6 @@ class EnhancedFeedPostCard extends StatefulWidget {
 class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
   bool _isLiked = false;
   bool _isSaved = false;
-  bool _showVideoPlayer = false;
   
   @override
   Widget build(BuildContext context) {
@@ -253,9 +252,6 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
   Widget _buildMediaContent() {
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _showVideoPlayer = true;
-        });
         _showVideoPlayerModal();
         widget.onTap?.call();
         

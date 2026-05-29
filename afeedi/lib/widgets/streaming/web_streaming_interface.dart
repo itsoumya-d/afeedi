@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import '../../models/content_model.dart';
-import '../../models/user_model.dart';
-import '../../services/browser_streaming_service.dart';
-import '../../services/opensource_integration_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/analytics_service.dart';
 import 'responsive_video_player.dart';

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class OAuthService {
   static final GoogleSignIn _googleSignIn = GoogleSignIn(

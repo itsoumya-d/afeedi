@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 /// Represents a content item from various platforms that can be recommended to users
 class ContentItem {
   /// Unique identifier for the content item

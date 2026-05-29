@@ -26,7 +26,6 @@ class EnhancedVideoPlayerWidget extends StatefulWidget {
 
 class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
   late WebViewController _webViewController;
-  ExtractedVideoContent? _extractedContent;
   bool _isLoading = true;
   bool _hasError = false;
   String? _errorMessage;
@@ -77,7 +76,6 @@ class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
           .extractVideoContent(widget.content);
       
       setState(() {
-        _extractedContent = extractedContent;
         _isLoading = false;
       });
       

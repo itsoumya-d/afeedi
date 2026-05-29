@@ -1,13 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 // import 'dart:html' as html;
-import 'dart:ui' as ui;
 import '../models/content_model.dart';
 import 'analytics_service.dart';
 import 'youtube_player_service.dart';
 
 // Conditional import for web
-import '../src/stubs/ui_web.dart' if (dart.library.html) 'dart:ui_web' as ui_web;
 
 class UniversalPlatformPlayerService {
   static UniversalPlatformPlayerService? _instance;

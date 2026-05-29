@@ -4,8 +4,6 @@ import '../../src/stubs/html.dart' if (dart.library.html) 'dart:html' as html;
 import 'dart:math';
 import '../../models/content_model.dart';
 import '../../services/youtube_player_service.dart';
-import '../../services/analytics_service.dart';
-import '../../core/theme/app_theme.dart';
 
 class EnhancedYouTubePlayer extends StatefulWidget {
   final Content content;
@@ -34,8 +32,6 @@ class EnhancedYouTubePlayer extends StatefulWidget {
 class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
   bool _isLoading = true;
   bool _hasError = false;
-  String _errorMessage = '';
-  YouTubePlayerResult? _playerResult;
   String? _containerId;
   bool _showFallbackOptions = false;
   
@@ -55,7 +51,6 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
     if (widget.content.platform != PlatformType.youtube) {
       setState(() {
         _hasError = true;
-        _errorMessage = 'Content is not from YouTube';
         _isLoading = false;
       });
       return;
@@ -79,13 +74,12 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
     } catch (error) {
       setState(() {
         _hasError = true;
-        _errorMessage = error.toString();
         _isLoading = false;
       });
       widget.onError?.call(error.toString());
     }
   }
-  
+
   Future<void> _createPlayer() async {
     try {
       final result = await YouTubePlayerService.instance.createPlayer(
@@ -96,10 +90,8 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       );
       
       setState(() {
-        _playerResult = result;
         _isLoading = false;
         _hasError = !result.success;
-        _errorMessage = result.errorMessage ?? '';
         _showFallbackOptions = !result.success;
       });
       
@@ -111,14 +103,13 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
     } catch (error) {
       setState(() {
         _hasError = true;
-        _errorMessage = error.toString();
         _isLoading = false;
         _showFallbackOptions = true;
       });
       widget.onError?.call(error.toString());
     }
   }
-  
+
   void _cleanupPlayer() {
     if (kIsWeb && _containerId != null) {
       final container = html.document.getElementById(_containerId!);

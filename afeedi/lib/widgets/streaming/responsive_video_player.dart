@@ -3,11 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import '../../models/content_model.dart';
-import '../../services/universal_platform_player_service.dart';
 import '../../services/analytics_service.dart';
 import 'platform_branding_widget.dart';
 import 'video_controls_widget.dart';
-import 'quality_selector_widget.dart';
 import 'universal_platform_player.dart';
 
 class ResponsiveVideoPlayer extends StatefulWidget {

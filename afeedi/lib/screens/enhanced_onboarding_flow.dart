@@ -7,7 +7,6 @@ import '../core/constants/app_colors.dart';
 import '../core/constants/app_text_styles.dart';
 import '../services/onboarding_service.dart';
 import '../services/analytics_service.dart';
-import '../services/user_service.dart';
 import '../models/user_preferences.dart';
 import '../models/onboarding_step.dart';
 import '../widgets/onboarding/interest_selection_grid.dart';
@@ -28,8 +27,6 @@ class EnhancedOnboardingFlow extends StatefulWidget {
 class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with SingleTickerProviderStateMixin {
   final OnboardingService _onboardingService = OnboardingService.instance;
   final AnalyticsService _analyticsService = AnalyticsService.instance;
-  final UserService _userService = UserService.instance;
-  
   late PageController _pageController;
   late ConfettiController _confettiController;
   late AnimationController _backgroundAnimationController;

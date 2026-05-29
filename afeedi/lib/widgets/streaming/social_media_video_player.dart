@@ -5,7 +5,6 @@ import '../../services/social_media_streaming_service.dart';
 import '../../services/analytics_service.dart';
 import '../../utils/logger.dart';
 import 'platform_branding_widget.dart';
-import 'video_controls_widget.dart';
 
 // Platform-specific imports - only for web
 // import 'dart:html' as html;
@@ -43,7 +42,6 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
   bool _hasError = false;
   String? _errorMessage;
   SocialMediaEmbedResult? _embedResult;
-  String? _webViewId;
 
   @override
   void initState() {

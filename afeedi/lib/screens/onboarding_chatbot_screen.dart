@@ -1,4 +1,3 @@
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/navigation_service.dart';
@@ -8,12 +7,6 @@ import '../services/onboarding_service.dart';
 import '../models/chat_message.dart';
 import '../models/genre.dart';
 import '../models/onboarding_step.dart';
-import '../widgets/onboarding/chat_message_widget.dart';
-import '../widgets/onboarding/typing_indicator.dart';
-import '../widgets/onboarding/quick_reply_chips.dart';
-import '../widgets/onboarding/genre_selection.dart';
-import '../widgets/onboarding/platform_connection.dart';
-import '../widgets/onboarding/text_input_widget.dart';
 import '../controllers/chat_controller.dart' hide AnalyticsEvents;
 import '../widgets/chat/chat_interface.dart';
 
@@ -38,12 +31,8 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
   late AnimationController _typingController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  late Animation<double> _typingAnimation;
-
   List<ChatMessage> _messages = [];
-  List<String> _quickReplies = [];
   List<Genre> _selectedGenres = [];
-  List<Genre> _filteredGenres = [];
   Map<String, bool> _platformConnections = {
     'YouTube': false,
     'Instagram': false,
@@ -53,14 +42,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
   };
   
   int _currentStep = 0;
-  bool _showTyping = false;
-  bool _showQuickReplies = false;
-  bool _showTextInput = false;
-  bool _showGenreSelection = false;
-  bool _showPlatformSelection = false;
-  bool _showFinalButton = false;
   String _userName = '';
-  List<String> _currentSuggestions = [];
 
   late List<OnboardingStep> _onboardingSteps;
   late List<Genre> _allGenres;
@@ -83,7 +65,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
   void _initializeData() {
     _onboardingSteps = _onboardingService.getOnboardingSteps();
     _allGenres = _onboardingService.getAllGenres();
-    _filteredGenres = _allGenres;
+    // _filteredGenres removed (unused)
   }
 
   void _initializeAnalytics() {
@@ -119,9 +101,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
       begin: const Offset(0, 0.3),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic));
-    _typingAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _typingController, curve: Curves.easeInOut),
-    );
+    // _typingAnimation removed (unused)
   }
 
   Future<void> _preloadResources() async {
@@ -188,13 +168,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
   }
 
   void _showBotMessage(String message) {
-    setState(() {
-      _showTyping = true;
-      _showQuickReplies = false;
-      _showTextInput = false;
-      _showGenreSelection = false;
-      _showPlatformSelection = false;
-    });
+    setState(() {});
 
     _typingController.repeat();
     _scrollToBottom();
@@ -203,7 +177,6 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
       if (mounted) {
         _typingController.stop();
         setState(() {
-          _showTyping = false;
           _messages.add(ChatMessage(
             text: message,
             isBot: true,
@@ -223,16 +196,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {
-          if (currentStep.isGenreSelection) {
-            _showGenreSelection = true;
-            _showTextInput = false;
-          } else if (currentStep.isPlatformSelection) {
-            _showPlatformSelection = true;
-            _showTextInput = false; // Hide text input during platform selection
-          } else {
-            _quickReplies = currentStep.quickReplies;
-            _showQuickReplies = currentStep.quickReplies.isNotEmpty;
-            _showTextInput = true; // Always show text input for regular steps
+          if (!currentStep.isGenreSelection && !currentStep.isPlatformSelection) {
             _updateSuggestions(); // Update suggestions for the current step
           }
         });
@@ -267,42 +231,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
     
     final currentStep = _onboardingSteps[_currentStep];
     
-    setState(() {
-      switch (_currentStep) {
-        case 0: // Welcome step
-          _currentSuggestions = [
-            'Hi there!',
-            'Hello',
-            'Let\'s get started',
-            'I\'m ready'
-          ];
-          break;
-        case 1: // Name step
-          _currentSuggestions = [
-            'My name is Alex',
-            'Call me Sam',
-            'I\'m Jordan'
-          ];
-          break;
-        case 2: // Preferences step
-          _currentSuggestions = [
-            'I love comedy videos',
-            'I enjoy educational content',
-            'I like music and entertainment',
-            'I prefer short funny clips'
-          ];
-          break;
-        case 5: // Final step
-          _currentSuggestions = [
-            'Sounds great!',
-            'I\'m excited to start',
-            'Let\'s do this'
-          ];
-          break;
-        default:
-          _currentSuggestions = [];
-      }
-    });
+    // Suggestions tracking removed (unused field)
   }
 
   void _addUserMessage(String text) {
@@ -312,10 +241,6 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
         isBot: false,
         timestamp: DateTime.now(),
       ));
-      _showQuickReplies = false;
-      _showTextInput = false;
-      _showGenreSelection = false;
-      _showPlatformSelection = false;
     });
     _scrollToBottom();
   }
@@ -331,9 +256,8 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
   }
 
   void _handleGenreSearchChanged(String query) {
-    setState(() {
-      _filteredGenres = _onboardingService.filterGenres(_allGenres, query);
-    });
+    // _filteredGenres removed (unused); filter applied locally if needed
+    _onboardingService.filterGenres(_allGenres, query);
   }
 
   void _handleGenreContinue() {
@@ -429,9 +353,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
 
     _showBotMessage(welcomeMessage);
     
-    setState(() {
-      _showFinalButton = true;
-    });
+    setState(() {});
   }
 
   void _scrollToBottom() {

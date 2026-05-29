@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 // Export the implementation based on platform
 export 'platform_view_registration_service_web.dart' if (dart.library.io) 'platform_view_registration_service_stub.dart';
 

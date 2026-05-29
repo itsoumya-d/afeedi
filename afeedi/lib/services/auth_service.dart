@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import '../models/platform_connection_model.dart';
-import '../models/content_model.dart';
 import 'oauth_service.dart';
 import 'analytics_service.dart';
 import 'local_auth_service.dart';

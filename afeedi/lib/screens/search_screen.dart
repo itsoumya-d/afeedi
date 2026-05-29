@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../core/theme/app_theme.dart';
 import '../models/content_model.dart';
 import '../services/content_service.dart';
 import '../widgets/common/loading_shimmer.dart';

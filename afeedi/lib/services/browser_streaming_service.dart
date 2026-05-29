@@ -2,9 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../src/stubs/html.dart' if (dart.library.html) 'dart:html' as html;
 import '../models/content_model.dart';
-import '../models/platform_connection_model.dart';
 import 'analytics_service.dart';
-import 'auth_service.dart';
 
 class BrowserStreamingService {
   static BrowserStreamingService? _instance;
@@ -375,8 +373,8 @@ class StreamingPlayer {
   final Map<String, dynamic> config;
   final Map<String, dynamic> options;
   
-  WebViewController? _webViewController;
   html.VideoElement? _videoElement;
+  WebViewController? _webViewController;
   bool _isInitialized = false;
   bool _isPlaying = false;
   double _currentTime = 0.0;

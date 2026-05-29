@@ -5,7 +5,6 @@ import '../src/stubs/js.dart' if (dart.library.js) 'dart:js' as js;
 import '../models/content_model.dart';
 import '../models/user_model.dart';
 import 'analytics_service.dart';
-import 'auth_service.dart';
 
 class OpenSourceIntegrationService {
   static OpenSourceIntegrationService? _instance;
@@ -107,8 +106,7 @@ class OpenSourceIntegrationService {
   
   // Loaded libraries tracking
   final Set<String> _loadedLibraries = {};
-  final Map<String, dynamic> _libraryInstances = {};
-  
+
   // Initialize open-source integration
   Future<void> initialize() async {
     try {

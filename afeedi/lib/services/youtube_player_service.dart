@@ -5,7 +5,6 @@ import '../models/content_model.dart';
 import 'analytics_service.dart';
 
 // Conditional import for web
-import '../src/stubs/ui_web.dart' if (dart.library.html) 'dart:ui_web' as ui_web;
 
 class YouTubePlayerService {
   static YouTubePlayerService? _instance;

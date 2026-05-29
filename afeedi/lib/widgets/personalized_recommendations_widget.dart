@@ -40,7 +40,6 @@ class _PersonalizedRecommendationsWidgetState extends State<PersonalizedRecommen
   final AnalyticsService _analyticsService = AnalyticsService.instance;
   
   late Future<List<ContentItem>> _recommendationsFuture;
-  bool _isRefreshing = false;
   
   @override
   bool get wantKeepAlive => true;
@@ -52,10 +51,6 @@ class _PersonalizedRecommendationsWidgetState extends State<PersonalizedRecommen
   }
   
   Future<void> _loadRecommendations() async {
-    setState(() {
-      _isRefreshing = true;
-    });
-    
     // Track recommendation request
     _analyticsService.trackEvent(
       eventName: 'recommendation_request',
@@ -91,11 +86,8 @@ class _PersonalizedRecommendationsWidgetState extends State<PersonalizedRecommen
     //   return _recommendationService.applyPersonalizationSettings(recommendations);
     // });
     
-    setState(() {
-      _isRefreshing = false;
-    });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -284,7 +276,6 @@ class PlatformRecommendationsWidget extends StatefulWidget {
 }
 
 class _PlatformRecommendationsWidgetState extends State<PlatformRecommendationsWidget> {
-  final RecommendationIntegrationService _recommendationService = RecommendationIntegrationService.instance;
   final AnalyticsService _analyticsService = AnalyticsService.instance;
   
   late Future<Map<String, List<ContentItem>>> _platformRecommendationsFuture;
@@ -517,7 +508,6 @@ class ContextualRecommendationsWidget extends StatefulWidget {
 }
 
 class _ContextualRecommendationsWidgetState extends State<ContextualRecommendationsWidget> {
-  final RecommendationIntegrationService _recommendationService = RecommendationIntegrationService.instance;
   
   late Future<List<ContentItem>> _recommendationsFuture;
   String _contextDescription = '';

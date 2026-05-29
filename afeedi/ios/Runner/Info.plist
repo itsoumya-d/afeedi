@@ -51,6 +51,8 @@
 	<string>Afeedi needs camera access to let you take a profile picture.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Afeedi needs microphone access for video recording features.</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Afeedi uses analytics to improve app performance and personalize your content feed. No personal data is shared with third parties for advertising.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

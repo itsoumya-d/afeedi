@@ -75,13 +75,41 @@ Future<void> _appMain() async {
       action: 'app_launch',
       screen: 'main',
     );
-    
+
+    // Update daily streak
+    _updateDailyStreak().catchError((e) => debugPrint('Streak update error: $e'));
+
   } catch (error) {
     // Handle initialization errors
     debugPrint('Initialization error: $error');
   }
   
   runApp(const ProviderScope(child: AfeediApp()));
+}
+
+Future<void> _updateDailyStreak() async {
+  final prefs = await SharedPreferences.getInstance();
+  final today = DateTime.now();
+  final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+  final lastDateStr = prefs.getString('stat_streak_last_date');
+  final currentStreak = prefs.getInt('stat_streak_days') ?? 0;
+
+  if (lastDateStr == null) {
+    await prefs.setInt('stat_streak_days', 1);
+    await prefs.setString('stat_streak_last_date', todayStr);
+    return;
+  }
+
+  if (lastDateStr == todayStr) return; // Already counted today
+
+  final lastDate = DateTime.parse(lastDateStr);
+  final diff = today.difference(lastDate).inDays;
+  if (diff == 1) {
+    await prefs.setInt('stat_streak_days', currentStreak + 1);
+  } else {
+    await prefs.setInt('stat_streak_days', 1);
+  }
+  await prefs.setString('stat_streak_last_date', todayStr);
 }
 
 class AfeediApp extends StatefulWidget {

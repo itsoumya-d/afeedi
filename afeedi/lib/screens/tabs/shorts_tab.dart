@@ -3,6 +3,7 @@ import '../../core/theme/app_theme.dart';
 import '../../models/content_model.dart';
 import '../../services/content_service.dart';
 import '../../services/analytics_service.dart';
+import '../../services/user_interaction_service.dart';
 
 class ShortsTab extends StatefulWidget {
   const ShortsTab({super.key});
@@ -17,6 +18,7 @@ class _ShortsTabState extends State<ShortsTab> {
   List<Content> _shortsContent = [];
   bool _isLoading = true;
   bool _hasError = false;
+  Set<String> _followedCreators = {};
 
   @override
   void initState() {
@@ -39,9 +41,11 @@ class _ShortsTabState extends State<ShortsTab> {
         (content.durationSeconds != null && content.durationSeconds! <= 180)
       ).toList();
       
+      final followed = UserInteractionService.instance.getFollowedCreatorIds().toSet();
       setState(() {
         _shortsContent = shorts;
         _isLoading = false;
+        _followedCreators = followed;
       });
       
       // Track shorts tab view
@@ -323,6 +327,38 @@ class _ShortsTabState extends State<ShortsTab> {
     );
   }
   
+  Widget _buildFollowButton(String creatorId) {
+    final isFollowed = _followedCreators.contains(creatorId);
+    return GestureDetector(
+      onTap: () async {
+        final next = await UserInteractionService.instance.toggleFollow(creatorId);
+        setState(() {
+          if (next) {
+            _followedCreators.add(creatorId);
+          } else {
+            _followedCreators.remove(creatorId);
+          }
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        decoration: BoxDecoration(
+          color: isFollowed ? Colors.white : Colors.transparent,
+          border: Border.all(color: Colors.white, width: 1.5),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          isFollowed ? 'Following' : 'Follow',
+          style: TextStyle(
+            color: isFollowed ? Colors.black : Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
   String _formatCount(int count) {
     if (count >= 1000000000) return '${(count / 1000000000).toStringAsFixed(1)}B';
     if (count >= 1000000) return '${(count / 1000000).toStringAsFixed(1)}M';
@@ -377,24 +413,7 @@ class _ShortsTabState extends State<ShortsTab> {
               ),
             ),
             const SizedBox(width: 10),
-            GestureDetector(
-              onTap: () {},
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white, width: 1.5),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Text(
-                  'Follow',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
+            _buildFollowButton(content.creatorName ?? content.id),
           ],
         ),
         const SizedBox(height: 6),

@@ -19,6 +19,7 @@ import '../screens/placeholder_screen.dart';
 import '../screens/calendar_screen.dart';
 import '../screens/create_content_screen.dart';
 import '../screens/player_screen.dart';
+import '../screens/privacy_policy_screen.dart';
 
 class NavigationService {
   static NavigationService? _instance;
@@ -94,6 +95,9 @@ class AppRoutes {
   static const String settings = '/settings';
   static const String player = '/player';
 
+  // Info routes
+  static const String privacyPolicy = '/privacy-policy';
+
   // Admin routes
   static const String adminPanel = '/admin';
   static const String adminUsers = '/admin/users';
@@ -131,5 +135,6 @@ class AppRoutes {
               : const PlaceholderScreen(title: 'Player', icon: Icons.play_circle_filled);
         },
         '/onboarding': (_) => const PlaceholderScreen(title: 'Onboarding', icon: Icons.start),
+        AppRoutes.privacyPolicy: (_) => const PrivacyPolicyScreen(),
       };
 }

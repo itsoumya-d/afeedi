@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/local_auth_service.dart';
 import '../services/navigation_service.dart';
 import '../main.dart' show themeModeNotifier;
@@ -180,12 +181,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _tappableTile(
             icon: Icons.privacy_tip_outlined,
             title: 'Privacy Policy',
-            onTap: () {},
+            onTap: () => Navigator.pushNamed(context, AppRoutes.privacyPolicy),
           ),
           _tappableTile(
             icon: Icons.description_outlined,
             title: 'Terms of Service',
-            onTap: () {},
+            onTap: () async {
+              final uri = Uri.parse('https://afeedi.com/terms');
+              if (await canLaunchUrl(uri)) launchUrl(uri, mode: LaunchMode.externalApplication);
+            },
           ),
           const SizedBox(height: 32),
         ],

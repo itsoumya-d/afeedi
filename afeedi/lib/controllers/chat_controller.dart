@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/chat_message.dart';
+import '../utils/debouncer.dart';
 import '../models/genre.dart';
 import '../models/onboarding_step.dart';
 import '../services/onboarding_service.dart';
@@ -13,6 +14,7 @@ class ChatController extends ChangeNotifier {
   final TextEditingController searchController = TextEditingController();
   final FocusNode textFocusNode = FocusNode();
   final FocusNode searchFocusNode = FocusNode();
+  final Debouncer _searchDebouncer = Debouncer(milliseconds: 300);
 
   List<ChatMessage> _messages = [];
   List<String> _quickReplies = [];
@@ -212,8 +214,10 @@ class ChatController extends ChangeNotifier {
   }
 
   void handleGenreSearchChanged(String query) {
-    _filteredGenres = _onboardingService.filterGenres(_allGenres, query);
-    notifyListeners();
+    _searchDebouncer.run(() {
+      _filteredGenres = _onboardingService.filterGenres(_allGenres, query);
+      notifyListeners();
+    });
   }
 
   void handleGenreContinue() {
@@ -323,6 +327,7 @@ class ChatController extends ChangeNotifier {
     searchController.dispose();
     textFocusNode.dispose();
     searchFocusNode.dispose();
+    _searchDebouncer.dispose();
     super.dispose();
   }
 }

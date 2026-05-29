@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
+import '../../utils/debouncer.dart';
 import '../../models/content_model.dart';
 import '../../services/enhanced_calendar_service.dart';
 import '../../services/analytics_service.dart';
@@ -22,6 +23,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   bool _isFilterExpanded = false;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  final _debouncer = Debouncer(milliseconds: 300);
   List<String> _filterOrder = ['all', 'entertainment', 'education', 'study'];
   
   // Enhanced calendar functionality
@@ -134,6 +136,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     _calendarAnimationController.dispose();
     _filterAnimationController.dispose();
     _searchController.dispose();
+    _debouncer.dispose();
     super.dispose();
   }
   
@@ -665,8 +668,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),
               onChanged: (value) {
-                setState(() {
-                  _searchQuery = value.toLowerCase();
+                _debouncer.run(() {
+                  setState(() {
+                    _searchQuery = value.toLowerCase();
+                  });
                 });
               },
             ),

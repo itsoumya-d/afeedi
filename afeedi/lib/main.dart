@@ -13,6 +13,7 @@ import 'services/onboarding_service.dart';
 import 'services/platform_view_registration_service.dart';
 import 'services/recommendation_integration_service.dart';
 import 'services/user_interaction_service.dart';
+import 'services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/storage/local_storage_service.dart';
 
@@ -78,6 +79,9 @@ Future<void> _appMain() async {
 
     // Update daily streak
     _updateDailyStreak().catchError((e) => debugPrint('Streak update error: $e'));
+
+    // Initialize notification service
+    await NotificationService.instance.initialize();
 
   } catch (error) {
     // Handle initialization errors

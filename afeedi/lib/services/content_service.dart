@@ -854,13 +854,10 @@ class ContentService {
       debugPrint('ContentService: local API unavailable ($e), trying YouTube');
     }
 
-    // 2. Fallback: youtube_explode_dart (real YouTube, no API key)
-    try {
-      _liveContent = await YouTubeLiveContentService.instance.getContent();
-      debugPrint('ContentService: ${_liveContent.length} items from YouTube');
-    } catch (e) {
-      debugPrint('ContentService initialize error (using seeds): $e');
-    }
+    // NOTE: youtube_explode_dart scraping is disabled — it violates YouTube's
+    // Developer ToS ("API Clients must not scrape YouTube Applications").
+    // Fall through to seed data until YouTube Data API v3 integration is complete.
+    debugPrint('ContentService: using seed data (YouTube Data API v3 not yet configured)');
   }
 
   /// Force-refresh live content (call from pull-to-refresh).
@@ -877,12 +874,7 @@ class ContentService {
     } catch (e) {
       debugPrint('ContentService refresh API error: $e');
     }
-    try {
-      _liveContent =
-          await YouTubeLiveContentService.instance.getContent(forceRefresh: true);
-    } catch (e) {
-      debugPrint('ContentService refresh error: $e');
-    }
+    // youtube_explode_dart disabled — see initialize() note above
   }
 
   /// Primary pool: live data when available, seed data otherwise.
@@ -964,15 +956,8 @@ class ContentService {
           ...localResults,
           ...apiResults.where((c) => !existingIds.contains(c.platformContentId)),
         ];
-      } else {
-        final liveResults = await YouTubeLiveContentService.instance
-            .searchLive(query, limit: limit - localResults.length);
-        final existingIds = localResults.map((c) => c.platformContentId).toSet();
-        localResults = [
-          ...localResults,
-          ...liveResults.where((c) => !existingIds.contains(c.platformContentId)),
-        ];
       }
+      // youtube_explode_dart search disabled — local seed results only
     } catch (e) {
       debugPrint('ContentService search supplement error: $e');
     }

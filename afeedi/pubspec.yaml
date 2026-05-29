@@ -67,6 +67,7 @@ dependencies:
   # Push Notifications
   firebase_core: ^2.31.0
   # firebase_messaging: ^14.9.2  # Keep disabled for now, only enable core for OAuth
+  flutter_local_notifications: ^18.0.1
   
   # Social Media APIs
   url_launcher: ^6.2.6

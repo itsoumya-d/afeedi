@@ -1,0 +1,14 @@
+# key.properties — COPY THIS FILE TO key.properties AND FILL IN YOUR VALUES
+# key.properties is in .gitignore and must NEVER be committed to git.
+#
+# storeFile: path to your .jks keystore, relative to android/app/ directory
+#   Examples:
+#     storeFile=../afeedi-release.jks          <- file at android/afeedi-release.jks
+#     storeFile=../../afeedi-release.jks       <- file at project root (safer, outside VCS)
+#
+# Keep the actual keystore file outside your repository entirely if possible.
+
+storeFile=../afeedi-release.jks
+storePassword=YOUR_STORE_PASSWORD
+keyAlias=afeedi
+keyPassword=YOUR_KEY_PASSWORD

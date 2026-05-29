@@ -8,6 +8,8 @@ import '../../services/analytics_service.dart';
 import '../../services/onboarding_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/connectivity_service.dart';
+import '../../services/user_interaction_service.dart';
+import '../../services/navigation_service.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -24,6 +26,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   bool _hasMore = true;
   PlatformType? _selectedPlatform;
   bool _showFollowing = false;
+  bool _showFollowSuggestion = false;
   
   @override
   bool get wantKeepAlive => true;
@@ -95,10 +98,12 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         feedContent = await ContentService.instance.getTrendingVideos(limit: 15);
       }
       
+      final followingCount = UserInteractionService.instance.getFollowedCreatorIds().length;
       setState(() {
         _allPosts = feedContent;
         _posts = List.from(_allPosts);
         _isLoading = false;
+        _showFollowSuggestion = followingCount == 0;
       });
       // Preload the first 5 thumbnails immediately after load
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -496,11 +501,17 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       child: ListView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: _posts.length + (_isLoading ? 1 : 0),
+        itemCount: _posts.length + (_isLoading ? 1 : 0) + (_showFollowSuggestion ? 1 : 0),
         addRepaintBoundaries: false, // we add our own RepaintBoundary per card
         addAutomaticKeepAlives: false,
         itemBuilder: (context, index) {
-          if (index >= _posts.length) {
+          // Insert follow suggestion banner after the 2nd post (YouTube/TikTok pattern)
+          if (_showFollowSuggestion && index == 2) {
+            return _buildFollowSuggestionBanner(context);
+          }
+          // Adjust index for the injected banner
+          final postIndex = _showFollowSuggestion && index > 2 ? index - 1 : index;
+          if (postIndex >= _posts.length) {
             return const Padding(
               padding: EdgeInsets.all(20),
               child: Center(
@@ -510,8 +521,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
               ),
             );
           }
-          
-          final post = _posts[index];
+
+          final post = _posts[postIndex];
           return RepaintBoundary(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 16),
@@ -519,6 +530,66 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildFollowSuggestionBanner(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF001A2E), Color(0xFF1A0A2E)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFF00D4FF).withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.people_outline, color: Color(0xFF00D4FF), size: 20),
+              SizedBox(width: 8),
+              Text(
+                'Discover creators to follow',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Follow creators to surface their content first in your feed. Tap Follow on any video.',
+            style: TextStyle(color: Colors.white54, fontSize: 12, height: 1.5),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  setState(() => _showFollowSuggestion = false);
+                  Navigator.pushNamed(context, AppRoutes.search);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00D4FF),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text('Find creators', style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
+                ),
+              ),
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: () => setState(() => _showFollowSuggestion = false),
+                child: const Text('Dismiss', style: TextStyle(color: Colors.white38, fontSize: 12)),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -5,6 +5,7 @@ import '../models/genre.dart';
 import 'auth_service.dart';
 import 'content_aggregation_service.dart';
 import 'onboarding_service.dart';
+import 'user_interaction_service.dart';
 
 // Simplified recommendation model
 class Recommendation {
@@ -262,7 +263,13 @@ class EnhancedRecommendationService {
         limit: limit * 3,
       );
 
-      // Score content: keyword match is primary, time-of-day is a minor bonus
+      // Load followed creators for feed ranking boost
+      final followedCreators = UserInteractionService.instance
+          .getFollowedCreatorIds()
+          .map((id) => id.toLowerCase())
+          .toSet();
+
+      // Score content: keyword match is primary, followed creators get 2x boost
       final currentHour = DateTime.now().hour;
       final timeContext = _getTimeContext(currentHour);
       final scored = <MapEntry<Content, double>>[];
@@ -280,6 +287,13 @@ class EnhancedRecommendationService {
         for (final kw in selectedKeywords) {
           if (searchable.contains(kw)) score += 1.0;
         }
+
+        // Followed creator boost — surfaces their content above keyword-matched strangers
+        final creatorKey = (content.creatorName ?? content.id).toLowerCase();
+        if (followedCreators.contains(creatorKey) || followedCreators.contains(content.id.toLowerCase())) {
+          score += 3.0;
+        }
+
         // Add small time-of-day bonus so tie-breaks still respect time
         score += _calculateTimeScore(content, timeContext, currentHour) * 0.3;
         scored.add(MapEntry(content, score));
@@ -288,14 +302,18 @@ class EnhancedRecommendationService {
       scored.sort((a, b) => b.value.compareTo(a.value));
       final top = scored.take(limit).toList();
 
+      final String reasonSuffix = followedCreators.isEmpty
+          ? 'Personalized based on your interests'
+          : 'Based on your interests and followed creators';
+
       return List.generate(top.length, (i) => Recommendation(
         id: 'pref_${DateTime.now().millisecondsSinceEpoch}_$i',
         userId: user.id,
         contentId: top[i].key.id,
         content: top[i].key,
         score: top[i].value,
-        reason: 'Personalized based on your interests',
-        algorithmVersion: '2.0.0',
+        reason: reasonSuffix,
+        algorithmVersion: '2.1.0',
         createdAt: DateTime.now(),
         expiresAt: DateTime.now().add(const Duration(hours: 6)),
       ));

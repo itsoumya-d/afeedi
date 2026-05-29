@@ -3,6 +3,7 @@ import '../../models/onboarding_step.dart';
 import '../../models/genre.dart';
 import '../../models/chat_message.dart';
 import '../../services/analytics_service.dart';
+import '../../models/analytics_events.dart';
 import '../../services/smart_suggestions_service.dart';
 
 class ChatController extends ChangeNotifier {

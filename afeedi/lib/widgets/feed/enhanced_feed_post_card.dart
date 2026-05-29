@@ -42,7 +42,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -68,7 +68,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             backgroundImage: widget.content.creatorAvatarUrl != null
                 ? NetworkImage(widget.content.creatorAvatarUrl!)
                 : null,
-            backgroundColor: AppTheme.primaryCyan.withOpacity(0.3),
+            backgroundColor: AppTheme.primaryCyan.withValues(alpha: 0.3),
             child: widget.content.creatorAvatarUrl == null
                 ? Text(
                     widget.content.creatorName?.substring(0, 1).toUpperCase() ?? 'U',
@@ -113,7 +113,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                     Text(
                       _getTimeAgo(),
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                         fontSize: 12,
                       ),
                     ),
@@ -122,13 +122,13 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                       Icon(
                         Icons.access_time,
                         size: 12,
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                       ),
                       const SizedBox(width: 4),
                       Text(
                         widget.content.formattedDuration,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
+                          color: Colors.white.withValues(alpha: 0.6),
                           fontSize: 12,
                         ),
                       ),
@@ -144,7 +144,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             onPressed: _showMoreOptions,
             icon: Icon(
               Icons.more_vert,
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -156,7 +156,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: _getPlatformColor().withOpacity(0.2),
+        color: _getPlatformColor().withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Icon(
@@ -171,10 +171,10 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: _getPlatformColor().withOpacity(0.2),
+        color: _getPlatformColor().withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _getPlatformColor().withOpacity(0.5),
+          color: _getPlatformColor().withValues(alpha: 0.5),
           width: 1,
         ),
       ),
@@ -227,7 +227,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             child: Text(
               widget.content.description!,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 14,
               ),
               maxLines: 3,
@@ -275,7 +275,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
         margin: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: Colors.black.withOpacity(0.3),
+          color: Colors.black.withValues(alpha: 0.3),
         ),
         child: Stack(
           children: [
@@ -301,7 +301,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
+                  color: Colors.black.withValues(alpha: 0.7),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -322,7 +322,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.8),
+                    color: Colors.black.withValues(alpha: 0.8),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -360,8 +360,8 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            _getPlatformColor().withOpacity(0.3),
-            _getPlatformColor().withOpacity(0.1),
+            _getPlatformColor().withValues(alpha: 0.3),
+            _getPlatformColor().withValues(alpha: 0.1),
           ],
         ),
       ),
@@ -371,13 +371,13 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
           Icon(
             _getPlatformIcon(),
             size: 48,
-            color: _getPlatformColor().withOpacity(0.7),
+            color: _getPlatformColor().withValues(alpha: 0.7),
           ),
           const SizedBox(height: 8),
           Text(
             widget.content.platform.name.toUpperCase(),
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
@@ -397,7 +397,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: AppTheme.primaryCyan.withOpacity(0.2),
+              color: AppTheme.primaryCyan.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -423,7 +423,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
           _buildInteractionButton(
             icon: _isLiked ? Icons.favorite : Icons.favorite_border,
             label: _formatCount(widget.content.likeCount),
-            color: _isLiked ? Colors.red : Colors.white.withOpacity(0.7),
+            color: _isLiked ? Colors.red : Colors.white.withValues(alpha: 0.7),
             onTap: () {
               setState(() {
                 _isLiked = !_isLiked;
@@ -447,7 +447,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
           _buildInteractionButton(
             icon: Icons.comment_outlined,
             label: _formatCount(widget.content.metadata['comments'] ?? 0),
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             onTap: () {
               widget.onComment?.call();
               _showCommentsModal();
@@ -469,7 +469,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
           _buildInteractionButton(
             icon: Icons.share_outlined,
             label: 'Share',
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             onTap: () {
               widget.onShare?.call();
               _showShareModal();
@@ -491,7 +491,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
           _buildInteractionButton(
             icon: _isSaved ? Icons.bookmark : Icons.bookmark_border,
             label: '',
-            color: _isSaved ? AppTheme.primaryCyan : Colors.white.withOpacity(0.7),
+            color: _isSaved ? AppTheme.primaryCyan : Colors.white.withValues(alpha: 0.7),
             onTap: () {
               setState(() {
                 _isSaved = !_isSaved;
@@ -560,7 +560,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -583,7 +583,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                   ),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: IconButton(
@@ -638,7 +638,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             Text(
               'Comments feature coming soon!',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 14,
               ),
             ),

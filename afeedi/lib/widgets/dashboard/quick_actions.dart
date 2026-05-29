@@ -41,7 +41,7 @@ class QuickActions extends StatelessWidget {
               title: 'Notifications',
               subtitle: 'Check updates',
               gradient: const LinearGradient(
-                colors: [AppTheme.primaryPink, AppTheme.accentOrange],
+                colors: [AppTheme.primaryPink, Color(0xFFFF7043)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -52,7 +52,7 @@ class QuickActions extends StatelessWidget {
               title: 'Schedule',
               subtitle: 'Plan your day',
               gradient: const LinearGradient(
-                colors: [AppTheme.accentOrange, AppTheme.accentPurple],
+                colors: [Color(0xFFFF7043), Color(0xFF7C4DFF)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -63,7 +63,7 @@ class QuickActions extends StatelessWidget {
               title: 'Settings',
               subtitle: 'Customize app',
               gradient: const LinearGradient(
-                colors: [AppTheme.accentPurple, AppTheme.primaryCyan],
+                colors: [Color(0xFF7C4DFF), AppTheme.primaryCyan],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),

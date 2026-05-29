@@ -221,19 +221,19 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-             color: AppColors.surface.withOpacity(0.9),
+             color: AppColors.surface.withValues(alpha: 0.9),
              borderRadius: BorderRadius.circular(24),
              border: Border.all(
                color: _hasFocus
-                   ? AppColors.primary.withOpacity(0.5)
-                   : AppColors.border.withOpacity(0.3),
+                   ? AppColors.primary.withValues(alpha: 0.5)
+                   : AppColors.border.withValues(alpha: 0.3),
                width: 1.5,
              ),
              boxShadow: [
                BoxShadow(
                  color: _hasFocus
-                     ? AppColors.primary.withOpacity(0.1)
-                     : Colors.black.withOpacity(0.05),
+                     ? AppColors.primary.withValues(alpha: 0.1)
+                     : Colors.black.withValues(alpha: 0.05),
                  blurRadius: _hasFocus ? 8 : 4,
                  offset: const Offset(0, 2),
                ),
@@ -253,7 +253,7 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
                   decoration: InputDecoration(
                     hintText: widget.hintText ?? 'Type your message...',
                     hintStyle: TextStyle(
-                       color: AppColors.textSecondary.withOpacity(0.6),
+                       color: AppColors.textSecondary.withValues(alpha: 0.6),
                        fontSize: 16,
                        fontWeight: FontWeight.w400,
                      ),
@@ -290,8 +290,8 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
                              )
                            : LinearGradient(
                                colors: [
-                                 AppColors.primary.withOpacity(0.3),
-                                 AppColors.secondary.withOpacity(0.3),
+                                 AppColors.primary.withValues(alpha: 0.3),
+                                 AppColors.secondary.withValues(alpha: 0.3),
                                ],
                                begin: Alignment.topLeft,
                                end: Alignment.bottomRight,
@@ -300,7 +300,7 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
                       boxShadow: _textController.text.trim().isNotEmpty && widget.isEnabled
                            ? [
                                BoxShadow(
-                                 color: AppColors.primary.withOpacity(0.3),
+                                 color: AppColors.primary.withValues(alpha: 0.3),
                                  blurRadius: 8,
                                  offset: const Offset(0, 2),
                                ),
@@ -337,7 +337,7 @@ class _EnhancedTextInputState extends State<EnhancedTextInput>
    void _onSubmit() {
      final text = _textController.text.trim();
      if (text.isNotEmpty && widget.isEnabled) {
-       widget.onMessageSent?.call(text);
+       widget.onSubmit(text);
        _textController.clear();
        _updateFilteredSuggestions();
      }

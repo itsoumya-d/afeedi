@@ -239,7 +239,7 @@ class _ShortsTabState extends State<ShortsTab> {
               gradient: LinearGradient(
                 colors: [
                   Colors.black,
-                  platformColor.withOpacity(0.4),
+                  platformColor.withValues(alpha: 0.4),
                   Colors.black,
                 ],
                 begin: Alignment.topCenter,
@@ -261,7 +261,7 @@ class _ShortsTabState extends State<ShortsTab> {
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
+                colors: [Colors.transparent, Colors.black.withValues(alpha: 0.7)],
                 begin: Alignment.center,
                 end: Alignment.bottomCenter,
               ),
@@ -298,9 +298,9 @@ class _ShortsTabState extends State<ShortsTab> {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.6), width: 2),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 2),
               ),
               child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 40),
             ),
@@ -510,8 +510,8 @@ class _ShortsTabState extends State<ShortsTab> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withOpacity(0.3),
-                Colors.black.withOpacity(0.7),
+                Colors.black.withValues(alpha: 0.3),
+                Colors.black.withValues(alpha: 0.7),
               ],
             ),
           ),
@@ -520,7 +520,7 @@ class _ShortsTabState extends State<ShortsTab> {
               width: double.infinity,
               height: double.infinity,
               decoration: BoxDecoration(
-                color: AppTheme.primaryCyan.withOpacity(0.1),
+                color: AppTheme.primaryCyan.withValues(alpha: 0.1),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -528,7 +528,7 @@ class _ShortsTabState extends State<ShortsTab> {
                   Icon(
                     Icons.play_circle_outline,
                     size: 80,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -659,13 +659,13 @@ class _ShortsTabState extends State<ShortsTab> {
                   Icon(
                     Icons.access_time,
                     size: 14,
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                   ),
                   const SizedBox(width: 4),
                   Text(
                     shortData['duration'],
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 12,
                     ),
                   ),
@@ -696,7 +696,7 @@ class _ShortsTabState extends State<ShortsTab> {
                             decoration: BoxDecoration(
                               color: index <= _currentIndex
                                   ? Colors.white
-                                  : Colors.white.withOpacity(0.3),
+                                  : Colors.white.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(1),
                             ),
                           ),
@@ -710,7 +710,7 @@ class _ShortsTabState extends State<ShortsTab> {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withValues(alpha: 0.5),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -741,7 +741,7 @@ class _ShortsTabState extends State<ShortsTab> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               shape: BoxShape.circle,
             ),
             child: Icon(

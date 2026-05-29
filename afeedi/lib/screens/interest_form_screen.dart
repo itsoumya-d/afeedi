@@ -152,7 +152,7 @@ class _InterestFormScreenState extends State<InterestFormScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -171,7 +171,7 @@ class _InterestFormScreenState extends State<InterestFormScreen>
           Container(
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(2),
             ),
             child: FractionallySizedBox(
@@ -201,7 +201,7 @@ class _InterestFormScreenState extends State<InterestFormScreen>
           Text(
             'Help us personalize your content experience',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontSize: 16,
             ),
             textAlign: TextAlign.center,
@@ -282,16 +282,16 @@ class _InterestFormScreenState extends State<InterestFormScreen>
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
             filled: true,
-            fillColor: Colors.white.withOpacity(0.1),
+            fillColor: Colors.white.withValues(alpha: 0.1),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
+              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -324,7 +324,7 @@ class _InterestFormScreenState extends State<InterestFormScreen>
         Text(
           'Select at least 3 categories to get personalized content',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
           ),
         ),
@@ -341,13 +341,13 @@ class _InterestFormScreenState extends State<InterestFormScreen>
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   color: isSelected 
-                      ? category['color'].withOpacity(0.2)
-                      : Colors.white.withOpacity(0.1),
+                      ? category['color'].withValues(alpha: 0.2)
+                      : Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(25),
                   border: Border.all(
                     color: isSelected 
                         ? category['color']
-                        : Colors.white.withOpacity(0.3),
+                        : Colors.white.withValues(alpha: 0.3),
                     width: isSelected ? 2 : 1,
                   ),
                 ),
@@ -379,9 +379,9 @@ class _InterestFormScreenState extends State<InterestFormScreen>
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppTheme.primaryCyan.withOpacity(0.1),
+              color: AppTheme.primaryCyan.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.primaryCyan.withOpacity(0.3)),
+              border: Border.all(color: AppTheme.primaryCyan.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
@@ -419,7 +419,7 @@ class _InterestFormScreenState extends State<InterestFormScreen>
         Text(
           'Choose your preferred language for content',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
           ),
         ),
@@ -427,16 +427,16 @@ class _InterestFormScreenState extends State<InterestFormScreen>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.2)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: _selectedLanguage,
               hint: Text(
                 'Select a language',
-                style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
               ),
               isExpanded: true,
               dropdownColor: const Color(0xFF2D1B69),
@@ -473,7 +473,7 @@ class _InterestFormScreenState extends State<InterestFormScreen>
               style: ElevatedButton.styleFrom(
                 backgroundColor: _isFormValid 
                     ? AppTheme.primaryCyan 
-                    : Colors.grey.withOpacity(0.3),
+                    : Colors.grey.withValues(alpha: 0.3),
                 foregroundColor: Colors.white,
                 elevation: _isFormValid ? 4 : 0,
                 shape: RoundedRectangleBorder(
@@ -498,7 +498,7 @@ class _InterestFormScreenState extends State<InterestFormScreen>
             child: Text(
               'Skip for now',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 16,
               ),
             ),

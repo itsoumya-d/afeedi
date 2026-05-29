@@ -71,4 +71,11 @@ class UIScaling {
     if (width < 1800) return 5; // Small desktops
     return 6; // Large desktops
   }
+
+  static double radius(BuildContext context, [double base = 12.0]) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < 360) return base * 0.85;
+    if (width > 900) return base * 1.25;
+    return base;
+  }
 }

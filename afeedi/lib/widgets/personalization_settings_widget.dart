@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_text_styles.dart';
-import '../core/services/analytics_service.dart';
+import '../services/analytics_service.dart';
+import '../models/analytics_events.dart';
 
 class PersonalizationSettingsWidget extends StatefulWidget {
   final Map<String, dynamic>? initialSettings;
@@ -210,7 +211,7 @@ class _PersonalizationSettingsWidgetState extends State<PersonalizationSettingsW
     )
     .animate()
     .fadeIn(duration: 300.ms)
-    .scale(begin: 0.95, end: 1.0, duration: 300.ms, curve: Curves.easeOut);
+    .scale(begin: const Offset(0.95, 0.95), end: const Offset(1.0, 1.0), duration: 300.ms, curve: Curves.easeOut);
   }
   
   Widget _buildSwitchSetting(String key, bool value, Function(bool) onChanged) {
@@ -290,7 +291,7 @@ class _PersonalizationSettingsWidgetState extends State<PersonalizationSettingsW
     )
     .animate()
     .fadeIn(duration: 300.ms, delay: 100.ms)
-    .scale(begin: 0.95, end: 1.0, duration: 300.ms, curve: Curves.easeOut);
+    .scale(begin: const Offset(0.95, 0.95), end: const Offset(1.0, 1.0), duration: 300.ms, curve: Curves.easeOut);
   }
   
   Widget _buildDropdownSetting(String title, String value, List<String> options, Function(String) onChanged) {
@@ -441,3 +442,4 @@ class _PersonalizationSettingsWidgetState extends State<PersonalizationSettingsW
       ),
     );
   }
+}

@@ -307,12 +307,12 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                         IconButton(
                           icon: const Icon(Icons.arrow_back),
                           onPressed: _currentStep > 0 ? _previousStep : null,
-                          color: _currentStep > 0 ? Colors.black87 : Colors.grey.withOpacity(0.5),
+                          color: _currentStep > 0 ? Colors.black87 : Colors.grey.withValues(alpha: 0.5),
                         ),
                         Expanded(
                           child: LinearProgressIndicator(
                             value: (_currentStep + 1) / OnboardingService.onboardingFlow.length,
-                            backgroundColor: Colors.grey.withOpacity(0.3),
+                            backgroundColor: Colors.grey.withValues(alpha: 0.3),
                             valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                             minHeight: 8,
                             borderRadius: BorderRadius.circular(4),
@@ -468,11 +468,11 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -516,7 +516,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: AppColors.primary),
@@ -580,7 +580,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             prefixIcon: const Icon(Icons.person_outline),
             filled: true,
-            fillColor: Colors.white.withOpacity(0.9),
+            fillColor: Colors.white.withValues(alpha: 0.9),
           ),
           textCapitalization: TextCapitalization.words,
         ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
@@ -596,7 +596,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             prefixIcon: const Icon(Icons.cake_outlined),
             filled: true,
-            fillColor: Colors.white.withOpacity(0.9),
+            fillColor: Colors.white.withValues(alpha: 0.9),
           ),
           keyboardType: TextInputType.number,
         ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideY(begin: 0.1, end: 0),
@@ -607,9 +607,9 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue.withOpacity(0.3)),
+            border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [
@@ -690,10 +690,10 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.secondary.withOpacity(0.1) : Colors.white.withOpacity(0.7),
+                  color: isSelected ? AppColors.secondary.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: isSelected ? AppColors.secondary : Colors.grey.withOpacity(0.3),
+                    color: isSelected ? AppColors.secondary : Colors.grey.withValues(alpha: 0.3),
                     width: isSelected ? 2 : 1,
                   ),
                 ),
@@ -758,7 +758,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.secondary.withOpacity(0.1) : Colors.transparent,
+                          color: isSelected ? AppColors.secondary.withValues(alpha: 0.1) : Colors.transparent,
                           borderRadius: BorderRadius.circular(20),
                           border: isSelected 
                               ? Border.all(color: AppColors.secondary, width: 2)
@@ -782,7 +782,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: Colors.grey.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -840,11 +840,11 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -857,7 +857,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
@@ -943,9 +943,9 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue.withOpacity(0.3)),
+            border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

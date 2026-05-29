@@ -90,7 +90,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
                 Text(
                   'Customize your Afeedi experience',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
                   ),
                 ),
@@ -107,7 +107,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -121,7 +121,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           Text(
             'Active',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 9,
             ),
           ),
@@ -328,9 +328,9 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Column(
         children: [
@@ -341,7 +341,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: iconColor.withOpacity(0.2),
+                    color: iconColor.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -394,7 +394,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
                 ),
@@ -405,9 +405,9 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             value: value,
             onChanged: onChanged,
             activeColor: AppTheme.primaryCyan,
-            activeTrackColor: AppTheme.primaryCyan.withOpacity(0.3),
-            inactiveThumbColor: Colors.white.withOpacity(0.5),
-            inactiveTrackColor: Colors.white.withOpacity(0.2),
+            activeTrackColor: AppTheme.primaryCyan.withValues(alpha: 0.3),
+            inactiveThumbColor: Colors.white.withValues(alpha: 0.5),
+            inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
           ),
         ],
       ),
@@ -429,7 +429,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           children: [
             Icon(
               icon,
-              color: iconColor ?? Colors.white.withOpacity(0.7),
+              color: iconColor ?? Colors.white.withValues(alpha: 0.7),
               size: 20,
             ),
             const SizedBox(width: 12),
@@ -449,7 +449,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 14,
                     ),
                   ),
@@ -459,7 +459,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             if (onTap != null)
               Icon(
                 Icons.chevron_right,
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withValues(alpha: 0.5),
                 size: 20,
               ),
           ],
@@ -480,7 +480,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         ),
         content: Text(
           'We\'ll prepare your data and send a download link to your email within 24 hours.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
@@ -516,7 +516,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         ),
         content: Text(
           'This action cannot be undone. All your data will be permanently deleted.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
@@ -552,7 +552,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         ),
         content: Text(
           'This will free up storage space but may slow down the app temporarily.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
@@ -588,7 +588,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         ),
         content: Text(
           'You will be redirected to change your password securely.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
@@ -656,7 +656,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           Text(
             isConnected ? 'Connected' : 'Not Connected',
             style: TextStyle(
-              color: isConnected ? AppTheme.primaryCyan : Colors.white.withOpacity(0.5),
+              color: isConnected ? AppTheme.primaryCyan : Colors.white.withValues(alpha: 0.5),
             ),
           ),
         ],
@@ -675,7 +675,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         ),
         content: Text(
           'For support, please email us at support@afeedi.com or visit our help center.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
@@ -701,7 +701,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         ),
         content: Text(
           'You will be redirected to our website to view the complete terms of service.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
@@ -737,7 +737,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         ),
         content: Text(
           'You will be redirected to our website to view the complete privacy policy.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(

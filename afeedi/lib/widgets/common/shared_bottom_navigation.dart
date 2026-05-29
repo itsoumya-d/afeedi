@@ -84,7 +84,7 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
             color: const Color(0xFF1A1A2E),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, -5),
               ),
@@ -176,7 +176,7 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
         decoration: BoxDecoration(
           color: isActive 
-              ? AppTheme.primaryCyan.withOpacity(0.2)
+              ? AppTheme.primaryCyan.withValues(alpha: 0.2)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
         ),
@@ -190,7 +190,7 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
                 key: ValueKey(isActive),
                 color: isActive 
                     ? AppTheme.primaryCyan
-                    : Colors.white.withOpacity(0.6),
+                    : Colors.white.withValues(alpha: 0.6),
                 size: 22,
               ),
             ),
@@ -200,7 +200,7 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
               style: TextStyle(
                 color: isActive 
                     ? AppTheme.primaryCyan
-                    : Colors.white.withOpacity(0.6),
+                    : Colors.white.withValues(alpha: 0.6),
                 fontSize: 10,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
               ),
@@ -256,7 +256,7 @@ class NavigationHelper {
                   margin: const EdgeInsets.all(8),
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(

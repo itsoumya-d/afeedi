@@ -130,9 +130,9 @@ class _PlatformSelectionWidgetState extends State<PlatformSelectionWidget> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue.withOpacity(0.3)),
+            border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [
@@ -171,7 +171,7 @@ class _PlatformSelectionWidgetState extends State<PlatformSelectionWidget> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
+                  color: color.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: color, size: 20),
@@ -187,7 +187,7 @@ class _PlatformSelectionWidgetState extends State<PlatformSelectionWidget> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _getPriorityColor(value).withOpacity(0.2),
+                  color: _getPriorityColor(value).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -205,9 +205,9 @@ class _PlatformSelectionWidgetState extends State<PlatformSelectionWidget> {
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: color,
-              inactiveTrackColor: Colors.grey.withOpacity(0.2),
+              inactiveTrackColor: Colors.grey.withValues(alpha: 0.2),
               thumbColor: color,
-              overlayColor: color.withOpacity(0.2),
+              overlayColor: color.withValues(alpha: 0.2),
               trackHeight: 4,
             ),
             child: Slider(

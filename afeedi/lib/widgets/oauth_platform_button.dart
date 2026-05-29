@@ -347,34 +347,34 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isConnected ? [
-            primaryColor.withOpacity(0.15),
-            primaryColor.withOpacity(0.08),
+            primaryColor.withValues(alpha: 0.15),
+            primaryColor.withValues(alpha: 0.08),
           ] : [
-            Colors.white.withOpacity(0.08),
-            Colors.white.withOpacity(0.04),
+            Colors.white.withValues(alpha: 0.08),
+            Colors.white.withValues(alpha: 0.04),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isConnected ? primaryColor.withOpacity(0.6) : Colors.white.withOpacity(0.2),
+          color: isConnected ? primaryColor.withValues(alpha: 0.6) : Colors.white.withValues(alpha: 0.2),
           width: isConnected ? 2 : 1.5,
         ),
         boxShadow: isConnected ? [
           BoxShadow(
-            color: primaryColor.withOpacity(0.25),
+            color: primaryColor.withValues(alpha: 0.25),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
         ] : [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -389,7 +389,7 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                   Container(
                     padding: const EdgeInsets.all(2),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: _buildPlatformLogo(platform),
@@ -407,7 +407,7 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                           border: Border.all(color: Colors.white, width: 2),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.green.withOpacity(0.4),
+                              color: Colors.green.withValues(alpha: 0.4),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),
@@ -448,12 +448,12 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  Colors.green.withOpacity(0.3),
-                                  Colors.green.withOpacity(0.2),
+                                  Colors.green.withValues(alpha: 0.3),
+                                  Colors.green.withValues(alpha: 0.2),
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: Colors.green.withOpacity(0.6)),
+                              border: Border.all(color: Colors.green.withValues(alpha: 0.6)),
                             ),
                             child: const Text(
                               'CONNECTED',
@@ -475,7 +475,7 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                           : 'Tap to connect and unlock personalized recommendations',
                       style: TextStyle(
                         fontSize: 13,
-                        color: isConnected ? Colors.green.withOpacity(0.9) : Colors.white.withOpacity(0.75),
+                        color: isConnected ? Colors.green.withValues(alpha: 0.9) : Colors.white.withValues(alpha: 0.75),
                         fontWeight: FontWeight.w500,
                         height: 1.3,
                       ),
@@ -490,10 +490,10 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                   key: ValueKey(isConnected),
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: isConnected ? Colors.green.withOpacity(0.2) : primaryColor.withOpacity(0.2),
+                    color: isConnected ? Colors.green.withValues(alpha: 0.2) : primaryColor.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isConnected ? Colors.green.withOpacity(0.5) : primaryColor.withOpacity(0.5),
+                      color: isConnected ? Colors.green.withValues(alpha: 0.5) : primaryColor.withValues(alpha: 0.5),
                     ),
                   ),
                   child: Icon(
@@ -516,13 +516,13 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF00D4FF).withOpacity(0.1),
-            const Color(0xFF0099CC).withOpacity(0.1),
+            const Color(0xFF00D4FF).withValues(alpha: 0.1),
+            const Color(0xFF0099CC).withValues(alpha: 0.1),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFF00D4FF).withOpacity(0.3),
+          color: const Color(0xFF00D4FF).withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -539,7 +539,7 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF00D4FF).withOpacity(0.3),
+                      color: const Color(0xFF00D4FF).withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -573,10 +573,10 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF00D4FF).withOpacity(0.2),
+                            color: const Color(0xFF00D4FF).withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: const Color(0xFF00D4FF).withOpacity(0.5),
+                              color: const Color(0xFF00D4FF).withValues(alpha: 0.5),
                             ),
                           ),
                           child: const Text(
@@ -595,7 +595,7 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                       'Choose platforms to get personalized recommendations',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -631,13 +631,13 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: _connectedPlatforms.isNotEmpty 
-                  ? Colors.green.withOpacity(0.2) 
-                  : Colors.white.withOpacity(0.1),
+                  ? Colors.green.withValues(alpha: 0.2) 
+                  : Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: _connectedPlatforms.isNotEmpty 
-                    ? Colors.green.withOpacity(0.5) 
-                    : Colors.white.withOpacity(0.2),
+                    ? Colors.green.withValues(alpha: 0.5) 
+                    : Colors.white.withValues(alpha: 0.2),
               ),
             ),
             child: Row(
@@ -645,7 +645,7 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
               children: [
                 Icon(
                   _connectedPlatforms.isNotEmpty ? Icons.check_circle : Icons.info_outline,
-                  color: _connectedPlatforms.isNotEmpty ? Colors.green : Colors.white.withOpacity(0.7),
+                  color: _connectedPlatforms.isNotEmpty ? Colors.green : Colors.white.withValues(alpha: 0.7),
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -655,7 +655,7 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                       : '${_connectedPlatforms.length} platform${_connectedPlatforms.length == 1 ? '' : 's'} connected',
                   style: TextStyle(
                     fontSize: 14,
-                    color: _connectedPlatforms.isNotEmpty ? Colors.green : Colors.white.withOpacity(0.7),
+                    color: _connectedPlatforms.isNotEmpty ? Colors.green : Colors.white.withValues(alpha: 0.7),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -669,9 +669,9 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: Column(
               children: [
@@ -707,7 +707,7 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                         height: 48,
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
+                            color: Colors.white.withValues(alpha: 0.3),
                             width: 1.5,
                           ),
                           borderRadius: BorderRadius.circular(24),
@@ -748,15 +748,15 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                                 )
                               : LinearGradient(
                                   colors: [
-                                    Colors.grey.withOpacity(0.3),
-                                    Colors.grey.withOpacity(0.2),
+                                    Colors.grey.withValues(alpha: 0.3),
+                                    Colors.grey.withValues(alpha: 0.2),
                                   ],
                                 ),
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: _connectedPlatforms.isNotEmpty
                               ? [
                                   BoxShadow(
-                                    color: const Color(0xFF00D4FF).withOpacity(0.4),
+                                    color: const Color(0xFF00D4FF).withValues(alpha: 0.4),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -791,7 +791,7 @@ class _OAuthPlatformGridState extends State<OAuthPlatformGrid> {
                                     fontWeight: FontWeight.w600,
                                     color: _connectedPlatforms.isNotEmpty 
                                         ? Colors.white 
-                                        : Colors.white.withOpacity(0.5),
+                                        : Colors.white.withValues(alpha: 0.5),
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),

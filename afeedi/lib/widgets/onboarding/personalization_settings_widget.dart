@@ -99,9 +99,9 @@ class _PersonalizationSettingsWidgetState extends State<PersonalizationSettingsW
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.purple.withOpacity(0.1),
+            color: Colors.purple.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.purple.withOpacity(0.3)),
+            border: Border.all(color: Colors.purple.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [
@@ -168,10 +168,10 @@ class _PersonalizationSettingsWidgetState extends State<PersonalizationSettingsW
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.secondary.withOpacity(0.1) : Colors.grey.withOpacity(0.05),
+                color: isSelected ? AppColors.secondary.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected ? AppColors.secondary : Colors.grey.withOpacity(0.2),
+                  color: isSelected ? AppColors.secondary : Colors.grey.withValues(alpha: 0.2),
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -180,7 +180,7 @@ class _PersonalizationSettingsWidgetState extends State<PersonalizationSettingsW
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppColors.secondary.withOpacity(0.2) : Colors.grey.withOpacity(0.1),
+                      color: isSelected ? AppColors.secondary.withValues(alpha: 0.2) : Colors.grey.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
@@ -248,9 +248,9 @@ class _PersonalizationSettingsWidgetState extends State<PersonalizationSettingsW
         SliderTheme(
           data: SliderThemeData(
             activeTrackColor: AppColors.secondary,
-            inactiveTrackColor: Colors.grey.withOpacity(0.3),
+            inactiveTrackColor: Colors.grey.withValues(alpha: 0.3),
             thumbColor: AppColors.secondary,
-            overlayColor: AppColors.secondary.withOpacity(0.2),
+            overlayColor: AppColors.secondary.withValues(alpha: 0.2),
             trackHeight: 4.0,
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12.0),
             overlayShape: const RoundSliderOverlayShape(overlayRadius: 20.0),
@@ -339,12 +339,12 @@ class _PersonalizationSettingsWidgetState extends State<PersonalizationSettingsW
       padding: const EdgeInsets.only(bottom: 16),
       child: Container(
         decoration: BoxDecoration(
-          color: value ? AppColors.secondary.withOpacity(0.05) :
-          Colors.grey.withOpacity(0.05),
+          color: value ? AppColors.secondary.withValues(alpha: 0.05) :
+          Colors.grey.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: value ? AppColors.secondary.withOpacity(0.3) :
-            Colors.grey.withOpacity(0.2),
+            color: value ? AppColors.secondary.withValues(alpha: 0.3) :
+            Colors.grey.withValues(alpha: 0.2),
           ),
         ),
         child: SwitchListTile(

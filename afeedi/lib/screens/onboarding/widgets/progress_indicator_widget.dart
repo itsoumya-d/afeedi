@@ -76,7 +76,7 @@ class _ProgressIndicatorWidgetState extends State<ProgressIndicatorWidget>
         color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).shadowColor.withOpacity(0.1),
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -194,7 +194,7 @@ class _ProgressIndicatorWidgetState extends State<ProgressIndicatorWidget>
               color: isCompleted
                   ? Theme.of(context).colorScheme.primary
                   : isCurrent
-                      ? Theme.of(context).colorScheme.primary.withOpacity(0.5)
+                      ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)
                       : Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(2),
             ),

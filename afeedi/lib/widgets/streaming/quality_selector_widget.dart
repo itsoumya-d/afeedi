@@ -18,11 +18,11 @@ class QualitySelectorWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.9),
+        color: Colors.black.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -37,7 +37,7 @@ class QualitySelectorWidget extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   width: 1,
                 ),
               ),
@@ -82,7 +82,7 @@ class QualitySelectorWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.red.withOpacity(0.2) : Colors.transparent,
+          color: isSelected ? Colors.red.withValues(alpha: 0.2) : Colors.transparent,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -95,7 +95,7 @@ class QualitySelectorWidget extends StatelessWidget {
                 color: isSelected ? Colors.red : Colors.transparent,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                   width: 1,
                 ),
               ),
@@ -120,7 +120,7 @@ class QualitySelectorWidget extends StatelessWidget {
                   Text(
                     qualityData['bitrate'],
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 12,
                     ),
                   ),
@@ -235,7 +235,7 @@ class CompactQualitySelector extends StatelessWidget {
     return Container(
       height: 40,
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.8),
+        color: Colors.black.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(20),
       ),
       child: ListView.builder(
@@ -258,7 +258,7 @@ class CompactQualitySelector extends StatelessWidget {
                 color: isSelected ? Colors.red : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected ? Colors.red : Colors.white.withOpacity(0.3),
+                  color: isSelected ? Colors.red : Colors.white.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -266,7 +266,7 @@ class CompactQualitySelector extends StatelessWidget {
                 child: Text(
                   quality,
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white.withOpacity(0.8),
+                    color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.8),
                     fontSize: 12,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
@@ -300,7 +300,7 @@ class QualityIndicatorWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.7),
+        color: Colors.black.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Row(

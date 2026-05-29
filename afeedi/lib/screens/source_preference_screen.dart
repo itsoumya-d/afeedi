@@ -137,7 +137,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -156,7 +156,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
           Container(
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(2),
             ),
             child: FractionallySizedBox(
@@ -186,7 +186,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
           Text(
             'Customize your content mix from different platforms',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontSize: 16,
             ),
             textAlign: TextAlign.center,
@@ -212,7 +212,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
         Text(
           'Adjust how much content you want from each platform',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
           ),
         ),
@@ -229,9 +229,9 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -240,7 +240,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: platform['color'].withOpacity(0.2),
+                  color: platform['color'].withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -265,7 +265,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
                     Text(
                       platform['description'],
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 14,
                       ),
                     ),
@@ -275,7 +275,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: platform['color'].withOpacity(0.2),
+                  color: platform['color'].withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -293,9 +293,9 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: platform['color'],
-              inactiveTrackColor: Colors.white.withOpacity(0.2),
+              inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
               thumbColor: platform['color'],
-              overlayColor: platform['color'].withOpacity(0.2),
+              overlayColor: platform['color'].withValues(alpha: 0.2),
               trackHeight: 6,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
             ),
@@ -332,7 +332,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
         Text(
           'Configure how creator information is displayed',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
           ),
         ),
@@ -382,9 +382,9 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -403,7 +403,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
                 ),
@@ -414,9 +414,9 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
             value: value,
             onChanged: onChanged,
             activeColor: AppTheme.primaryCyan,
-            activeTrackColor: AppTheme.primaryCyan.withOpacity(0.3),
+            activeTrackColor: AppTheme.primaryCyan.withValues(alpha: 0.3),
             inactiveThumbColor: Colors.grey,
-            inactiveTrackColor: Colors.grey.withOpacity(0.3),
+            inactiveTrackColor: Colors.grey.withValues(alpha: 0.3),
           ),
         ],
       ),
@@ -433,13 +433,13 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: isSelected 
-                ? AppTheme.primaryCyan.withOpacity(0.2)
-                : Colors.white.withOpacity(0.1),
+                ? AppTheme.primaryCyan.withValues(alpha: 0.2)
+                : Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isSelected 
                   ? AppTheme.primaryCyan
-                  : Colors.white.withOpacity(0.3),
+                  : Colors.white.withValues(alpha: 0.3),
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -473,7 +473,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
         Text(
           'See how content will appear with your settings',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
           ),
         ),
@@ -481,9 +481,9 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
         Container(
           height: 200,
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.2)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
           ),
           child: Stack(
             children: [
@@ -495,8 +495,8 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.blue.withOpacity(0.3),
-                      Colors.purple.withOpacity(0.3),
+                      Colors.blue.withValues(alpha: 0.3),
+                      Colors.purple.withValues(alpha: 0.3),
                     ],
                   ),
                 ),
@@ -521,7 +521,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
     Widget attributionWidget = Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.7),
+        color: Colors.black.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -609,7 +609,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
             child: Text(
               'Use default settings',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 16,
               ),
             ),

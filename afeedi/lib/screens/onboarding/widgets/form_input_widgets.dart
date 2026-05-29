@@ -110,15 +110,17 @@ class _OnboardingTextInputState extends State<OnboardingTextInput>
       maxLines: widget.maxLines,
       maxLength: widget.maxLength,
       inputFormatters: widget.inputFormatters,
-      onFocusChange: (focused) {
+      onTap: () {
         setState(() {
-          _isFocused = focused;
+          _isFocused = true;
         });
-        if (focused) {
-          _animationController.forward();
-        } else {
-          _animationController.reverse();
-        }
+        _animationController.forward();
+      },
+      onEditingComplete: () {
+        setState(() {
+          _isFocused = false;
+        });
+        _animationController.reverse();
       },
       decoration: InputDecoration(
         hintText: widget.hint,
@@ -132,8 +134,8 @@ class _OnboardingTextInputState extends State<OnboardingTextInput>
             : null,
         filled: true,
         fillColor: _isFocused
-            ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1)
-            : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+            ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1)
+            : Theme.of(context).colorScheme.surfaceVariant.withValues(alpha: 0.3),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -236,7 +238,7 @@ class _OnboardingMultiSelectState extends State<OnboardingMultiSelect>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildHeader(),
-        if (widget.description != null) ..[
+        if (widget.description != null) ...[
           const SizedBox(height: 4),
           _buildDescription(),
         ],
@@ -459,7 +461,7 @@ class _OnboardingSingleSelectState extends State<OnboardingSingleSelect>
                     )
                   : null,
               filled: true,
-              fillColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+              fillColor: Theme.of(context).colorScheme.surfaceVariant.withValues(alpha: 0.3),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -544,12 +546,12 @@ class _OnboardingTimePickerState extends State<OnboardingTimePicker> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+          color: Theme.of(context).colorScheme.surfaceVariant.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
-            if (widget.prefixIcon != null) ..[
+            if (widget.prefixIcon != null) ...[
               Icon(
                 widget.prefixIcon,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,

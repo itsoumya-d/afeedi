@@ -109,7 +109,7 @@ class _ContentCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryCyan.withOpacity(0.1),
+                  color: AppTheme.primaryCyan.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(

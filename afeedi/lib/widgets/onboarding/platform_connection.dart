@@ -28,10 +28,10 @@ class PlatformConnection extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
+            color: Colors.white.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -79,13 +79,13 @@ class PlatformConnection extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: isConnected 
-                  ? color.withOpacity(0.2)
-                  : Colors.white.withOpacity(0.05),
+                  ? color.withValues(alpha: 0.2)
+                  : Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isConnected 
-                    ? color.withOpacity(0.5)
-                    : Colors.white.withOpacity(0.2),
+                    ? color.withValues(alpha: 0.5)
+                    : Colors.white.withValues(alpha: 0.2),
                 width: 1.5,
               ),
             ),
@@ -95,7 +95,7 @@ class PlatformConnection extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.2),
+                    color: color.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -122,7 +122,7 @@ class PlatformConnection extends StatelessWidget {
                         style: TextStyle(
                           color: isConnected 
                               ? color
-                              : Colors.white.withOpacity(0.7),
+                              : Colors.white.withValues(alpha: 0.7),
                           fontSize: 14,
                         ),
                       ),
@@ -137,7 +137,7 @@ class PlatformConnection extends StatelessWidget {
                     color: isConnected ? color : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isConnected ? color : Colors.white.withOpacity(0.5),
+                      color: isConnected ? color : Colors.white.withValues(alpha: 0.5),
                       width: 2,
                     ),
                   ),
@@ -192,11 +192,11 @@ class PlatformConnection extends StatelessWidget {
           child: TextButton(
             onPressed: onSkip,
             style: TextButton.styleFrom(
-              foregroundColor: Colors.white.withOpacity(0.8),
+              foregroundColor: Colors.white.withValues(alpha: 0.8),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
-                  color: Colors.white.withOpacity(0.3),
+                  color: Colors.white.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),

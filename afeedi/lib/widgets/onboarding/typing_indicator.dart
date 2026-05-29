@@ -35,7 +35,7 @@ class TypingIndicator extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(4),
                 topRight: Radius.circular(16),
@@ -43,7 +43,7 @@ class TypingIndicator extends StatelessWidget {
                 bottomRight: Radius.circular(16),
               ),
               border: Border.all(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -75,7 +75,7 @@ class TypingIndicator extends StatelessWidget {
           width: 6,
           height: 6,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.3 + opacity * 0.7),
+            color: Colors.white.withValues(alpha: 0.3 + opacity * 0.7),
             borderRadius: BorderRadius.circular(3),
           ),
         );

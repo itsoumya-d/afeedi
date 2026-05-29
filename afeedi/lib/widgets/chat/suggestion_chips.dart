@@ -31,7 +31,7 @@ class SuggestionChips extends StatelessWidget {
           Text(
             'Quick replies:',
             style: TextStyle(
-              color: AppColors.textSecondary.withOpacity(0.8),
+              color: AppColors.textSecondary.withValues(alpha: 0.8),
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
@@ -180,16 +180,16 @@ class _SuggestionChipState extends State<_SuggestionChip>
                 gradient: _isPressed
                     ? LinearGradient(
                         colors: [
-                          AppColors.primary.withOpacity(0.3),
-                          AppColors.secondary.withOpacity(0.3),
+                          AppColors.primary.withValues(alpha: 0.3),
+                          AppColors.secondary.withValues(alpha: 0.3),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       )
                     : LinearGradient(
                         colors: [
-                          AppColors.primary.withOpacity(0.1),
-                          AppColors.secondary.withOpacity(0.1),
+                          AppColors.primary.withValues(alpha: 0.1),
+                          AppColors.secondary.withValues(alpha: 0.1),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -197,21 +197,21 @@ class _SuggestionChipState extends State<_SuggestionChip>
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: _isPressed
-                      ? AppColors.primary.withOpacity(0.5)
-                      : AppColors.primary.withOpacity(0.3),
+                      ? AppColors.primary.withValues(alpha: 0.5)
+                      : AppColors.primary.withValues(alpha: 0.3),
                   width: 1,
                 ),
                 boxShadow: _isPressed
                     ? [
                         BoxShadow(
-                          color: AppColors.primary.withOpacity(0.2),
+                          color: AppColors.primary.withValues(alpha: 0.2),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
                       ]
                     : [
                         BoxShadow(
-                          color: AppColors.primary.withOpacity(0.1),
+                          color: AppColors.primary.withValues(alpha: 0.1),
                           blurRadius: 4,
                           offset: const Offset(0, 1),
                         ),
@@ -240,7 +240,7 @@ class _SuggestionChipState extends State<_SuggestionChip>
                     size: 12,
                     color: _isPressed
                         ? AppColors.primary
-                        : AppColors.textSecondary.withOpacity(0.6),
+                        : AppColors.textSecondary.withValues(alpha: 0.6),
                   ),
                 ],
               ),
@@ -392,10 +392,10 @@ class _QuickReplyChipState extends State<_QuickReplyChip>
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.surface.withOpacity(0.8),
+                    color: AppColors.surface.withValues(alpha: 0.8),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: AppColors.primary.withOpacity(0.3),
+                      color: AppColors.primary.withValues(alpha: 0.3),
                       width: 1,
                     ),
                   ),

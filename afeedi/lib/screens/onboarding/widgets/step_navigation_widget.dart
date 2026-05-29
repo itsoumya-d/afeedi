@@ -97,7 +97,7 @@ class _StepNavigationWidgetState extends State<StepNavigationWidget>
             color: Theme.of(context).colorScheme.surface,
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context).shadowColor.withOpacity(0.1),
+                color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
                 blurRadius: 16,
                 offset: const Offset(0, -4),
               ),
@@ -211,7 +211,7 @@ class _StepNavigationWidgetState extends State<StepNavigationWidget>
           backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
           elevation: 2,
-          shadowColor: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+          shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -250,7 +250,7 @@ class _StepNavigationWidgetState extends State<StepNavigationWidget>
           backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
           elevation: 4,
-          shadowColor: Theme.of(context).colorScheme.primary.withOpacity(0.4),
+          shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -372,7 +372,7 @@ class _OnboardingActionButtonState extends State<OnboardingActionButton>
         backgroundColor: widget.backgroundColor ?? Theme.of(context).colorScheme.primary,
         foregroundColor: widget.foregroundColor ?? Theme.of(context).colorScheme.onPrimary,
         elevation: 2,
-        shadowColor: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+        shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),

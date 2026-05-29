@@ -183,7 +183,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
           // Loading overlay
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.7),
+              color: Colors.black.withValues(alpha: 0.7),
               child: const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -231,7 +231,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
           // Error overlay with options
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.8),
+              color: Colors.black.withValues(alpha: 0.8),
               padding: const EdgeInsets.all(16),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -257,7 +257,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
                   Text(
                     'Tap to watch on YouTube',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 14,
                     ),
                     textAlign: TextAlign.center,
@@ -295,10 +295,10 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
         // Secondary action - Retry embed
         TextButton.icon(
           onPressed: _retryPlayer,
-          icon: Icon(Icons.refresh, color: Colors.white.withOpacity(0.8)),
+          icon: Icon(Icons.refresh, color: Colors.white.withValues(alpha: 0.8)),
           label: Text(
             'Try Again',
-            style: TextStyle(color: Colors.white.withOpacity(0.8)),
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
           ),
         ),
       ],
@@ -330,7 +330,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
                 color: Colors.white,
               ),
               style: IconButton.styleFrom(
-                backgroundColor: Colors.black.withOpacity(0.7),
+                backgroundColor: Colors.black.withValues(alpha: 0.7),
               ),
             ),
           ),
@@ -360,7 +360,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
           // Play button overlay
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               child: const Center(
                 child: Icon(
                   Icons.play_circle_filled,
@@ -379,7 +379,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.8),
+                  color: Colors.black.withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(

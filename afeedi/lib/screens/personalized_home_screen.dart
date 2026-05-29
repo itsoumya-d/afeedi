@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/content_item.dart';
 import '../services/recommendation_integration_service.dart';
 import '../services/analytics_service.dart';
+import '../models/analytics_events.dart';
 import '../services/onboarding_service.dart';
 import '../widgets/personalized_recommendations_widget.dart';
 import '../widgets/app_bar_with_profile.dart';

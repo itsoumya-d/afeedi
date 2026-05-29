@@ -198,7 +198,7 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withValues(alpha: 0.3),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -296,7 +296,7 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
   
   Widget _buildLoadingIndicator() {
     return Container(
-      color: Colors.black.withOpacity(0.7),
+      color: Colors.black.withValues(alpha: 0.7),
       child: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -320,7 +320,7 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
   
   Widget _buildErrorDisplay() {
     return Container(
-      color: Colors.black.withOpacity(0.8),
+      color: Colors.black.withValues(alpha: 0.8),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -343,7 +343,7 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
             Text(
               _errorMessage,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 14,
               ),
               textAlign: TextAlign.center,

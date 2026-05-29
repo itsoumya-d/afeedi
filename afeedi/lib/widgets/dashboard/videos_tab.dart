@@ -110,7 +110,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
           Text(
             'Discover amazing content from all platforms',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 13,
             ),
           ),
@@ -142,13 +142,13 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 color: isSelected 
-                    ? category['color'].withOpacity(0.2)
-                    : Colors.white.withOpacity(0.1),
+                    ? category['color'].withValues(alpha: 0.2)
+                    : Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(25),
                 border: Border.all(
                   color: isSelected 
                       ? category['color']
-                      : Colors.white.withOpacity(0.3),
+                      : Colors.white.withValues(alpha: 0.3),
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -159,7 +159,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                     category['icon'],
                     color: isSelected 
                         ? category['color']
-                        : Colors.white.withOpacity(0.7),
+                        : Colors.white.withValues(alpha: 0.7),
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -168,7 +168,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                     style: TextStyle(
                       color: isSelected 
                           ? category['color']
-                          : Colors.white.withOpacity(0.7),
+                          : Colors.white.withValues(alpha: 0.7),
                       fontSize: 14,
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                     ),
@@ -201,13 +201,13 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
             Icon(
               Icons.video_library_outlined,
               size: 64,
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
               'No videos in this category',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 16,
               ),
             ),
@@ -239,9 +239,9 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withOpacity(0.2)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,7 +264,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
+                          color: Colors.black.withValues(alpha: 0.7),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -281,7 +281,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.8),
+                          color: Colors.black.withValues(alpha: 0.8),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -301,7 +301,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: _getPlatformColor(video.platform.name).withOpacity(0.9),
+                          color: _getPlatformColor(video.platform.name).withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -340,7 +340,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                     Text(
                       video.creatorName ?? 'Unknown Creator',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 12,
                       ),
                       maxLines: 1,
@@ -353,13 +353,13 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                         Icon(
                           Icons.visibility,
                           size: 12,
-                          color: Colors.white.withOpacity(0.6),
+                          color: Colors.white.withValues(alpha: 0.6),
                         ),
                         const SizedBox(width: 2),
                         Text(
                           _formatCount(video.viewCount),
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withValues(alpha: 0.6),
                             fontSize: 10,
                           ),
                         ),
@@ -367,13 +367,13 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                         Icon(
                           Icons.favorite,
                           size: 12,
-                          color: Colors.white.withOpacity(0.6),
+                          color: Colors.white.withValues(alpha: 0.6),
                         ),
                         const SizedBox(width: 2),
                         Text(
                           _formatCount(video.likeCount),
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withValues(alpha: 0.6),
                             fontSize: 10,
                           ),
                         ),
@@ -383,7 +383,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                     Text(
                       video.publishedAt != null ? _formatTimeAgo(video.publishedAt!) : '',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                         fontSize: 9,
                       ),
                     ),
@@ -448,7 +448,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -481,7 +481,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                           color: Colors.white,
                         ),
                         style: IconButton.styleFrom(
-                          backgroundColor: Colors.white.withOpacity(0.1),
+                          backgroundColor: Colors.white.withValues(alpha: 0.1),
                         ),
                       ),
                     ],

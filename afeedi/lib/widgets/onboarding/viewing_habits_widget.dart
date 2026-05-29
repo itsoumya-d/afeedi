@@ -140,9 +140,9 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue.withOpacity(0.3)),
+            border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [
@@ -188,10 +188,10 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+              color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(30),
               border: Border.all(
-                color: isSelected ? AppColors.primary : Colors.grey.withOpacity(0.3),
+                color: isSelected ? AppColors.primary : Colors.grey.withValues(alpha: 0.3),
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -227,11 +227,11 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
               side: BorderSide(
-                color: isSelected ? AppColors.primary : Colors.grey.withOpacity(0.3),
+                color: isSelected ? AppColors.primary : Colors.grey.withValues(alpha: 0.3),
                 width: isSelected ? 2 : 1,
               ),
             ),
-            tileColor: isSelected ? AppColors.primary.withOpacity(0.05) : null,
+            tileColor: isSelected ? AppColors.primary.withValues(alpha: 0.05) : null,
           ),
         ).animate().fadeIn(duration: 300.ms, delay: (50 * index).ms).slideY(begin: 0.05, end: 0);
       }).toList(),
@@ -257,11 +257,11 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
               side: BorderSide(
-                color: isSelected ? AppColors.primary : Colors.grey.withOpacity(0.3),
+                color: isSelected ? AppColors.primary : Colors.grey.withValues(alpha: 0.3),
                 width: isSelected ? 2 : 1,
               ),
             ),
-            tileColor: isSelected ? AppColors.primary.withOpacity(0.05) : null,
+            tileColor: isSelected ? AppColors.primary.withValues(alpha: 0.05) : null,
           ),
         ).animate().fadeIn(duration: 300.ms, delay: (50 * index).ms).slideY(begin: 0.05, end: 0);
       }).toList(),
@@ -283,10 +283,10 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.grey.withOpacity(0.05),
+                color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : Colors.grey.withOpacity(0.2),
+                  color: isSelected ? AppColors.primary : Colors.grey.withValues(alpha: 0.2),
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -295,7 +295,7 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppColors.primary.withOpacity(0.2) : Colors.grey.withOpacity(0.1),
+                      color: isSelected ? AppColors.primary.withValues(alpha: 0.2) : Colors.grey.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(

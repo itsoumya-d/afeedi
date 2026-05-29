@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_text_styles.dart';
 import '../services/analytics_service.dart';
+import '../models/analytics_events.dart';
 import '../models/viewing_habit.dart';
 
 class ViewingHabitsWidget extends StatefulWidget {

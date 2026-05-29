@@ -91,8 +91,8 @@ class MessageBubble extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: message.isBot
-            ? AppColors.surface.withOpacity(0.8)
-            : AppColors.primary.withOpacity(0.1),
+            ? AppColors.surface.withValues(alpha: 0.8)
+            : AppColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(message.isBot ? 4 : 20),
           topRight: Radius.circular(message.isBot ? 20 : 4),
@@ -101,8 +101,8 @@ class MessageBubble extends StatelessWidget {
         ),
         border: Border.all(
           color: message.isBot
-              ? AppColors.primary.withOpacity(0.2)
-              : AppColors.primary.withOpacity(0.3),
+              ? AppColors.primary.withValues(alpha: 0.2)
+              : AppColors.primary.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -120,12 +120,12 @@ class MessageBubble extends StatelessWidget {
               height: 1.4,
             ),
           ),
-          if (message.timestamp != null) ..[
+          if (message.timestamp != null) ...[
             const SizedBox(height: 4),
             Text(
               _formatTimestamp(message.timestamp!),
               style: TextStyle(
-                color: AppColors.textSecondary.withOpacity(0.6),
+                color: AppColors.textSecondary.withValues(alpha: 0.6),
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
               ),
@@ -226,7 +226,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.surface.withOpacity(0.8),
+              color: AppColors.surface.withValues(alpha: 0.8),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(4),
                 topRight: Radius.circular(20),
@@ -234,7 +234,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
                 bottomRight: Radius.circular(20),
               ),
               border: Border.all(
-                color: AppColors.primary.withOpacity(0.2),
+                color: AppColors.primary.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -254,7 +254,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
                           width: 6,
                           height: 6,
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.7),
+                            color: AppColors.primary.withValues(alpha: 0.7),
                             shape: BoxShape.circle,
                           ),
                         ),

@@ -72,4 +72,12 @@ class AppColors {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
+
+  // Common color aliases
+  static const Color white = Colors.white;
+  static const Color black = Colors.black;
+  static const Color cardBackground = Color(0xFF1A1A2E);
+  static const Color shadow = Color(0x33000000);
+  static const Color shimmerBase = Color(0xFF252545);
+  static const Color shimmerHighlight = Color(0xFF353565);
 }

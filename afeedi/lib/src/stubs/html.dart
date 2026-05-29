@@ -73,3 +73,17 @@ class Element {
 }
 
 final Document document = Document();
+
+class ScriptElement extends Element {
+  String src = '';
+  String type = '';
+  bool async = false;
+  Stream<dynamic> get onLoad => Stream.empty();
+  Stream<dynamic> get onError => Stream.empty();
+}
+
+class LinkElement extends Element {
+  String rel = '';
+  String type = '';
+  String href = '';
+}

@@ -30,4 +30,21 @@ class AnalyticsEvents {
   
   /// Events related to search actions.
   static const String search = 'search';
+
+  // Specific onboarding event names
+  static const String onboardingStarted = 'onboarding_started';
+  static const String onboardingStepCompleted = 'onboarding_step_completed';
+  static const String onboardingCompleted = 'onboarding_completed';
+  static const String onboardingAbandoned = 'onboarding_abandoned';
+
+  // OAuth event names
+  static const String oauthConnectAttempt = 'oauth_connect_attempt';
+  static const String oauthConnectSuccess = 'oauth_connect_success';
+  static const String oauthConnectError = 'oauth_connect_error';
+  static const String oauthDisconnect = 'oauth_disconnect';
+
+  // UI interaction event names
+  static const String buttonTap = 'button_tap';
+  static const String genreSelection = 'genre_selection';
+  static const String platformSelection = 'platform_selection';
 }

@@ -97,8 +97,8 @@ class _LoginScreenState extends State<LoginScreen>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      const Color(0xFF00D4FF).withOpacity(0.3),
-                      const Color(0xFF00D4FF).withOpacity(0.1),
+                      const Color(0xFF00D4FF).withValues(alpha: 0.3),
+                      const Color(0xFF00D4FF).withValues(alpha: 0.1),
                       Colors.transparent,
                     ],
                   ),
@@ -115,8 +115,8 @@ class _LoginScreenState extends State<LoginScreen>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      const Color(0xFFFF3C7E).withOpacity(0.2),
-                      const Color(0xFFFF3C7E).withOpacity(0.05),
+                      const Color(0xFFFF3C7E).withValues(alpha: 0.2),
+                      const Color(0xFFFF3C7E).withValues(alpha: 0.05),
                       Colors.transparent,
                     ],
                   ),
@@ -396,7 +396,7 @@ class _LoginScreenState extends State<LoginScreen>
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(26),
                                         ),
-                                        backgroundColor: Colors.white.withOpacity(0.1),
+                                        backgroundColor: Colors.white.withValues(alpha: 0.1),
                                       ),
                                     ),
                                   ),
@@ -429,7 +429,7 @@ class _LoginScreenState extends State<LoginScreen>
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(26),
                                         ),
-                                        backgroundColor: Colors.white.withOpacity(0.1),
+                                        backgroundColor: Colors.white.withValues(alpha: 0.1),
                                       ),
                                     ),
                                   ),
@@ -504,7 +504,7 @@ class _LoginScreenState extends State<LoginScreen>
             ),
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: Colors.white.withOpacity(0.1),
+            fillColor: Colors.white.withValues(alpha: 0.1),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Colors.white24),
@@ -569,7 +569,7 @@ class _LoginScreenState extends State<LoginScreen>
                   hintText: 'Enter your email',
                   hintStyle: const TextStyle(color: Colors.white54),
                   filled: true,
-                  fillColor: Colors.white.withOpacity(0.1),
+                  fillColor: Colors.white.withValues(alpha: 0.1),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: const BorderSide(color: Colors.white24),

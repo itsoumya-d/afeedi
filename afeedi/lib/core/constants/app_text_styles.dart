@@ -146,4 +146,19 @@ class AppTextStyles {
     fontStyle: FontStyle.italic,
     height: 1.4,
   );
+
+  // Body text aliases (Material Design naming)
+  static const TextStyle body1 = TextStyle(
+    fontSize: 14.0,
+    fontWeight: FontWeight.normal,
+    color: AppColors.textPrimary,
+    height: 1.5,
+  );
+
+  static const TextStyle body2 = TextStyle(
+    fontSize: 12.0,
+    fontWeight: FontWeight.normal,
+    color: AppColors.textSecondary,
+    height: 1.4,
+  );
 }

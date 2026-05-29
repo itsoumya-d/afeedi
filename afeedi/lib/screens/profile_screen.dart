@@ -148,9 +148,9 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppTheme.primaryCyan.withOpacity(0.1),
+              AppTheme.primaryCyan.withValues(alpha: 0.1),
               AppTheme.darkPrimary,
-              AppTheme.primaryPink.withOpacity(0.1),
+              AppTheme.primaryPink.withValues(alpha: 0.1),
             ],
           ),
         ),
@@ -188,7 +188,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -213,7 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -246,8 +246,8 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppTheme.primaryCyan.withOpacity(0.7),
-                    AppTheme.primaryPink.withOpacity(0.7),
+                    AppTheme.primaryCyan.withValues(alpha: 0.7),
+                    AppTheme.primaryPink.withValues(alpha: 0.7),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -329,7 +329,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         Text(
           _userProfile['email'],
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             fontSize: 16,
           ),
         ),
@@ -337,9 +337,9 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: AppTheme.primaryCyan.withOpacity(0.2),
+            color: AppTheme.primaryCyan.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppTheme.primaryCyan.withOpacity(0.5)),
+            border: Border.all(color: AppTheme.primaryCyan.withValues(alpha: 0.5)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -371,9 +371,9 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       margin: const EdgeInsets.all(20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
@@ -416,7 +416,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -438,7 +438,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 12,
             ),
           ),
@@ -451,7 +451,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     return Container(
       width: 1,
       height: 40,
-      color: Colors.white.withOpacity(0.2),
+      color: Colors.white.withValues(alpha: 0.2),
       margin: const EdgeInsets.symmetric(horizontal: 8),
     );
   }
@@ -460,18 +460,18 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
       ),
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          color: AppTheme.primaryCyan.withOpacity(0.3),
+          color: AppTheme.primaryCyan.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(8),
         ),
         indicatorPadding: const EdgeInsets.all(4),
         labelColor: AppTheme.primaryCyan,
-        unselectedLabelColor: Colors.white.withOpacity(0.7),
+        unselectedLabelColor: Colors.white.withValues(alpha: 0.7),
         labelStyle: const TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
@@ -516,13 +516,13 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isUnlocked 
-            ? achievement['color'].withOpacity(0.1)
-            : Colors.white.withOpacity(0.05),
+            ? achievement['color'].withValues(alpha: 0.1)
+            : Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isUnlocked 
-              ? achievement['color'].withOpacity(0.5)
-              : Colors.white.withOpacity(0.1),
+              ? achievement['color'].withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -538,7 +538,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                   child: CircularProgressIndicator(
                     value: progress,
                     strokeWidth: 3,
-                    backgroundColor: Colors.white.withOpacity(0.2),
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
                     valueColor: AlwaysStoppedAnimation<Color>(achievement['color']),
                   ),
                 ),
@@ -546,15 +546,15 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: isUnlocked 
-                      ? achievement['color'].withOpacity(0.2)
-                      : Colors.white.withOpacity(0.1),
+                      ? achievement['color'].withValues(alpha: 0.2)
+                      : Colors.white.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   achievement['icon'],
                   color: isUnlocked 
                       ? achievement['color']
-                      : Colors.white.withOpacity(0.5),
+                      : Colors.white.withValues(alpha: 0.5),
                   size: 24,
                 ),
               ),
@@ -566,7 +566,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             style: TextStyle(
               color: isUnlocked 
                   ? Colors.white
-                  : Colors.white.withOpacity(0.7),
+                  : Colors.white.withValues(alpha: 0.7),
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
@@ -576,7 +576,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           Text(
             achievement['description'],
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               fontSize: 12,
             ),
             textAlign: TextAlign.center,
@@ -635,16 +635,16 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.history, size: 56, color: Colors.white.withOpacity(0.2)),
+                        Icon(Icons.history, size: 56, color: Colors.white.withValues(alpha: 0.2)),
                         const SizedBox(height: 12),
                         Text(
                           'No history yet',
-                          style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16),
+                          style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 16),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           'Videos you watch will appear here',
-                          style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 13),
+                          style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 13),
                         ),
                       ],
                     ),
@@ -671,9 +671,9 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
@@ -711,7 +711,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.8),
+                    color: Colors.black.withValues(alpha: 0.8),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -744,7 +744,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 Text(
                   item['creator'],
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
                   ),
                 ),
@@ -754,7 +754,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: _getPlatformColor(item['platform']).withOpacity(0.2),
+                        color: _getPlatformColor(item['platform']).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -770,7 +770,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                     Text(
                       item['watchedAt'],
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                         fontSize: 10,
                       ),
                     ),
@@ -791,7 +791,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           ),
           Icon(
             Icons.more_vert,
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withValues(alpha: 0.5),
             size: 20,
           ),
         ],
@@ -822,7 +822,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         gradient: LinearGradient(
           colors: _userProfile['isPremium']
               ? [AppTheme.primaryCyan, AppTheme.primaryPink]
-              : [Colors.white.withOpacity(0.1), Colors.white.withOpacity(0.05)],
+              : [Colors.white.withValues(alpha: 0.1), Colors.white.withValues(alpha: 0.05)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -830,7 +830,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         border: Border.all(
           color: _userProfile['isPremium']
               ? Colors.transparent
-              : Colors.white.withOpacity(0.2),
+              : Colors.white.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -855,7 +855,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 ? 'Enjoy unlimited access to all features'
                 : 'Upgrade to unlock premium features',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontSize: 14,
             ),
             textAlign: TextAlign.center,
@@ -865,7 +865,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Text(
@@ -935,13 +935,13 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: available 
-            ? AppTheme.primaryCyan.withOpacity(0.1)
-            : Colors.white.withOpacity(0.05),
+            ? AppTheme.primaryCyan.withValues(alpha: 0.1)
+            : Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: available 
-              ? AppTheme.primaryCyan.withOpacity(0.3)
-              : Colors.white.withOpacity(0.1),
+              ? AppTheme.primaryCyan.withValues(alpha: 0.3)
+              : Colors.white.withValues(alpha: 0.1),
         ),
       ),
       child: Row(
@@ -950,15 +950,15 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: available 
-                  ? AppTheme.primaryCyan.withOpacity(0.2)
-                  : Colors.white.withOpacity(0.1),
+                  ? AppTheme.primaryCyan.withValues(alpha: 0.2)
+                  : Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               feature['icon'],
               color: available 
                   ? AppTheme.primaryCyan
-                  : Colors.white.withOpacity(0.5),
+                  : Colors.white.withValues(alpha: 0.5),
               size: 20,
             ),
           ),
@@ -972,7 +972,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                   style: TextStyle(
                     color: available 
                         ? Colors.white
-                        : Colors.white.withOpacity(0.7),
+                        : Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -981,7 +981,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 Text(
                   feature['description'],
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 12,
                   ),
                 ),
@@ -992,7 +992,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             available ? Icons.check_circle : Icons.lock,
             color: available 
                 ? AppTheme.primaryCyan
-                : Colors.white.withOpacity(0.3),
+                : Colors.white.withValues(alpha: 0.3),
             size: 20,
           ),
         ],

@@ -66,7 +66,7 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
             end: Alignment.bottomCenter,
             colors: [
               Colors.transparent,
-              Colors.black.withOpacity(0.7),
+              Colors.black.withValues(alpha: 0.7),
             ],
           ),
         ),
@@ -94,9 +94,9 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
           thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
           overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
           activeTrackColor: Colors.red,
-          inactiveTrackColor: Colors.white.withOpacity(0.3),
+          inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
           thumbColor: Colors.red,
-          overlayColor: Colors.red.withOpacity(0.2),
+          overlayColor: Colors.red.withValues(alpha: 0.2),
         ),
         child: Slider(
           value: _duration > 0 ? _currentTime / _duration : 0.0,
@@ -172,7 +172,7 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha: 0.9),
           shape: BoxShape.circle,
         ),
         child: Icon(
@@ -229,7 +229,7 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
                 thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 4),
                 overlayShape: const RoundSliderOverlayShape(overlayRadius: 8),
                 activeTrackColor: Colors.white,
-                inactiveTrackColor: Colors.white.withOpacity(0.3),
+                inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
                 thumbColor: Colors.white,
               ),
               child: Slider(
@@ -260,7 +260,7 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -382,7 +382,7 @@ class MiniVideoControls extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.7),
+          color: Colors.black.withValues(alpha: 0.7),
           shape: BoxShape.circle,
         ),
         child: Icon(

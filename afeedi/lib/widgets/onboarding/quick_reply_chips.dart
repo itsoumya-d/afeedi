@@ -45,16 +45,16 @@ class QuickReplyChips extends StatelessWidget {
             child: InkWell(
               onTap: () => onReplyTap(text),
               borderRadius: BorderRadius.circular(24),
-              splashColor: const Color(0xFF00D4FF).withOpacity(0.3),
-              highlightColor: const Color(0xFF00D4FF).withOpacity(0.1),
+              splashColor: const Color(0xFF00D4FF).withValues(alpha: 0.3),
+              highlightColor: const Color(0xFF00D4FF).withValues(alpha: 0.1),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.24),
+                    color: Colors.white.withValues(alpha: 0.24),
                     width: 1,
                   ),
                 ),
@@ -85,7 +85,7 @@ class QuickReplyChips extends StatelessWidget {
                     const SizedBox(width: 6),
                     Icon(
                       Icons.arrow_forward_ios,
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       size: 10,
                     ),
                   ],

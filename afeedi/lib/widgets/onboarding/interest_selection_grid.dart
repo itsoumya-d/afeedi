@@ -107,7 +107,7 @@ class _InterestSelectionGridState extends State<InterestSelectionGrid> {
                   )
                 : null,
             filled: true,
-            fillColor: Colors.grey.withOpacity(0.1),
+            fillColor: Colors.grey.withValues(alpha: 0.1),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -174,8 +174,8 @@ class _InterestSelectionGridState extends State<InterestSelectionGrid> {
       child: Container(
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primaryLight.withOpacity(0.2)
-              : Colors.grey.withOpacity(0.1),
+              ? AppColors.primaryLight.withValues(alpha: 0.2)
+              : Colors.grey.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
@@ -216,7 +216,7 @@ class _InterestSelectionGridState extends State<InterestSelectionGrid> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.1),
+        color: Colors.grey.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(

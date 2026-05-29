@@ -213,8 +213,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      const Color(0xFF00D4FF).withOpacity(0.3),
-                      const Color(0xFF00D4FF).withOpacity(0.1),
+                      const Color(0xFF00D4FF).withValues(alpha: 0.3),
+                      const Color(0xFF00D4FF).withValues(alpha: 0.1),
                       Colors.transparent,
                     ],
                   ),
@@ -231,8 +231,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      const Color(0xFFFF6B9D).withOpacity(0.2),
-                      const Color(0xFFFF6B9D).withOpacity(0.05),
+                      const Color(0xFFFF6B9D).withValues(alpha: 0.2),
+                      const Color(0xFFFF6B9D).withValues(alpha: 0.05),
                       Colors.transparent,
                     ],
                   ),

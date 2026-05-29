@@ -153,7 +153,7 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
                       color: Colors.white,
                     ),
                     style: IconButton.styleFrom(
-                      backgroundColor: Colors.black.withOpacity(0.7),
+                      backgroundColor: Colors.black.withValues(alpha: 0.7),
                     ),
                   ),
                 ),
@@ -391,7 +391,7 @@ class CompactSocialMediaVideoPlayer extends StatelessWidget {
           color: Colors.black,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: Colors.grey.withOpacity(0.3),
+            color: Colors.grey.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -415,7 +415,7 @@ class CompactSocialMediaVideoPlayer extends StatelessWidget {
               // Play button overlay
               Positioned.fill(
                 child: Container(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: 0.3),
                   child: Center(
                     child: Icon(
                       Icons.play_circle_filled,
@@ -447,7 +447,7 @@ class CompactSocialMediaVideoPlayer extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
+                      color: Colors.black.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(

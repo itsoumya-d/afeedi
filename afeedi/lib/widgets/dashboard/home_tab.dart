@@ -269,7 +269,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           Text(
             label,
             style: TextStyle(
-              color: isActive ? Colors.white : Colors.white.withOpacity(0.45),
+              color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.45),
               fontSize: 18,
               fontWeight: isActive ? FontWeight.bold : FontWeight.w400,
             ),
@@ -297,7 +297,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -313,7 +313,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           Text(
             'New',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 10,
             ),
           ),
@@ -331,7 +331,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         Text(
           'Trending',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             fontSize: 12,
             fontWeight: FontWeight.w600,
           ),
@@ -347,7 +347,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                 margin: const EdgeInsets.only(right: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryPink.withOpacity(0.2),
+                  color: AppTheme.primaryPink.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -392,13 +392,13 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppTheme.primaryCyan.withOpacity(0.3)
-                      : Colors.white.withOpacity(0.1),
+                      ? AppTheme.primaryCyan.withValues(alpha: 0.3)
+                      : Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isSelected
                         ? AppTheme.primaryCyan
-                        : Colors.white.withOpacity(0.3),
+                        : Colors.white.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
@@ -407,13 +407,13 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                     Icon(
                       filter['icon'] as IconData,
                       size: 14,
-                      color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+                      color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.7),
                     ),
                     const SizedBox(width: 5),
                     Text(
                       filter['name'] as String,
                       style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+                        color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.7),
                         fontSize: 12,
                         fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                       ),
@@ -442,16 +442,16 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.video_library_outlined, size: 64, color: Colors.white.withOpacity(0.3)),
+            Icon(Icons.video_library_outlined, size: 64, color: Colors.white.withValues(alpha: 0.3)),
             const SizedBox(height: 16),
             Text(
               'No content yet',
-              style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 18, fontWeight: FontWeight.w600),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
               'Pull down to refresh',
-              style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 14),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 14),
             ),
             const SizedBox(height: 24),
             TextButton.icon(

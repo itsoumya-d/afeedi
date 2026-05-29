@@ -236,7 +236,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -261,7 +261,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close, color: Colors.white),
                     style: IconButton.styleFrom(
-                      backgroundColor: Colors.white.withOpacity(0.1),
+                      backgroundColor: Colors.white.withValues(alpha: 0.1),
                     ),
                   ),
                 ],
@@ -357,9 +357,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             margin: const EdgeInsets.symmetric(horizontal: 20),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,10 +392,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                           decoration: BoxDecoration(
-                            color: !_isPercentageFilterActive ? Colors.white.withOpacity(0.2) : Colors.transparent,
+                            color: !_isPercentageFilterActive ? Colors.white.withValues(alpha: 0.2) : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),
@@ -418,10 +418,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                           decoration: BoxDecoration(
-                            color: _isPercentageFilterActive ? Colors.white.withOpacity(0.2) : Colors.transparent,
+                            color: _isPercentageFilterActive ? Colors.white.withValues(alpha: 0.2) : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),
@@ -537,9 +537,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             SliderTheme(
               data: SliderTheme.of(context).copyWith(
                 activeTrackColor: Colors.white,
-                inactiveTrackColor: Colors.white.withOpacity(0.3),
+                inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
                 thumbColor: Colors.white,
-                overlayColor: Colors.white.withOpacity(0.2),
+                overlayColor: Colors.white.withValues(alpha: 0.2),
                 trackHeight: 2,
               ),
               child: Slider(
@@ -564,10 +564,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white.withOpacity(0.2) : Colors.transparent,
+            color: isSelected ? Colors.white.withValues(alpha: 0.2) : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
             border: Border.all(
-              color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
+              color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.3),
               width: 1,
             ),
           ),
@@ -599,13 +599,13 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected 
-              ? AppTheme.primaryCyan.withOpacity(0.3)
-              : Colors.white.withOpacity(0.1),
+              ? AppTheme.primaryCyan.withValues(alpha: 0.3)
+              : Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected 
                 ? AppTheme.primaryCyan
-                : Colors.white.withOpacity(0.3),
+                : Colors.white.withValues(alpha: 0.3),
           ),
         ),
         child: Row(
@@ -616,7 +616,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               size: 16,
               color: isSelected 
                   ? AppTheme.primaryCyan
-                  : Colors.white.withOpacity(0.7),
+                  : Colors.white.withValues(alpha: 0.7),
             ),
             const SizedBox(width: 6),
             Text(
@@ -624,7 +624,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               style: TextStyle(
                 color: isSelected 
                     ? AppTheme.primaryCyan
-                    : Colors.white.withOpacity(0.7),
+                    : Colors.white.withValues(alpha: 0.7),
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
@@ -639,15 +639,15 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
           Icon(
             Icons.search,
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withValues(alpha: 0.5),
             size: 20,
           ),
           const SizedBox(width: 8),
@@ -658,7 +658,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               decoration: InputDecoration(
                 hintText: 'Search content...',
                 hintStyle: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                   fontSize: 14,
                 ),
                 border: InputBorder.none,
@@ -698,7 +698,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                 Text(
                   'Your personalized content schedule',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
                   ),
                 ),
@@ -734,13 +734,13 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: _isFilterExpanded 
-              ? AppTheme.primaryCyan.withOpacity(0.2)
-              : Colors.white.withOpacity(0.1),
+              ? AppTheme.primaryCyan.withValues(alpha: 0.2)
+              : Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: _isFilterExpanded 
-                ? AppTheme.primaryCyan.withOpacity(0.5)
-                : Colors.white.withOpacity(0.2)
+                ? AppTheme.primaryCyan.withValues(alpha: 0.5)
+                : Colors.white.withValues(alpha: 0.2)
           ),
         ),
         child: Row(
@@ -772,7 +772,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Column(
@@ -788,7 +788,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           Text(
             'Today',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 9,
             ),
           ),
@@ -802,7 +802,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -829,7 +829,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: isSelected 
-                ? AppTheme.primaryCyan.withOpacity(0.3)
+                ? AppTheme.primaryCyan.withValues(alpha: 0.3)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
           ),
@@ -839,7 +839,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             style: TextStyle(
               color: isSelected 
                   ? AppTheme.primaryCyan
-                  : Colors.white.withOpacity(0.7),
+                  : Colors.white.withValues(alpha: 0.7),
               fontSize: 12,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
             ),
@@ -857,9 +857,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           margin: const EdgeInsets.all(20),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
           ),
           child: Column(
             children: [
@@ -916,12 +916,12 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               Icons.chevron_left,
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               size: 20,
             ),
           ),
@@ -959,12 +959,12 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               Icons.chevron_right,
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               size: 20,
             ),
           ),
@@ -1012,7 +1012,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                           day,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withValues(alpha: 0.6),
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.5,
@@ -1061,11 +1061,11 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                   duration: const Duration(milliseconds: 200),
                   decoration: BoxDecoration(
                     color: isSelected 
-                        ? AppTheme.primaryCyan.withOpacity(0.3)
+                        ? AppTheme.primaryCyan.withValues(alpha: 0.3)
                         : isToday
-                            ? AppTheme.primaryPink.withOpacity(0.2)
+                            ? AppTheme.primaryPink.withValues(alpha: 0.2)
                             : hasContent
-                                ? Colors.white.withOpacity(0.05)
+                                ? Colors.white.withValues(alpha: 0.05)
                                 : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                     border: isSelected
@@ -1073,7 +1073,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                         : isToday
                             ? Border.all(color: AppTheme.primaryPink, width: 1.5)
                             : hasContent
-                                ? Border.all(color: Colors.white.withOpacity(0.2))
+                                ? Border.all(color: Colors.white.withValues(alpha: 0.2))
                                 : null,
                   ),
                   child: Stack(
@@ -1086,7 +1086,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                                 ? AppTheme.primaryCyan
                                 : isToday
                                     ? AppTheme.primaryPink
-                                    : Colors.white.withOpacity(0.9),
+                                    : Colors.white.withValues(alpha: 0.9),
                             fontSize: 14,
                             fontWeight: isSelected || isToday
                                 ? FontWeight.w700
@@ -1310,9 +1310,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           padding: const EdgeInsets.all(12),
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
-            color: AppTheme.primaryCyan.withOpacity(0.1),
+            color: AppTheme.primaryCyan.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppTheme.primaryCyan.withOpacity(0.3)),
+            border: Border.all(color: AppTheme.primaryCyan.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [
@@ -1363,7 +1363,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                     : _selectedFilter == 'education'
                         ? Icons.school_outlined
                         : Icons.book_outlined,
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.white.withValues(alpha: 0.3),
             size: 48,
           ),
           const SizedBox(height: 16),
@@ -1372,7 +1372,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                 ? 'No content scheduled'
                 : 'No ${_selectedFilter} content',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
@@ -1381,7 +1381,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           Text(
             'Try selecting a different filter or date',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.4),
+              color: Colors.white.withValues(alpha: 0.4),
               fontSize: 12,
             ),
           ),
@@ -1427,9 +1427,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -1446,10 +1446,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                     return Container(
                       width: 50,
                       height: 50,
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       child: Icon(
                         Icons.image_not_supported,
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                         size: 20,
                       ),
                     );
@@ -1459,7 +1459,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                     return Container(
                       width: 50,
                       height: 50,
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       child: Center(
                         child: SizedBox(
                           width: 20,
@@ -1467,7 +1467,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white.withOpacity(0.5),
+                              Colors.white.withValues(alpha: 0.5),
                             ),
                           ),
                         ),
@@ -1499,10 +1499,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: _getCategoryColor(content['category']).withOpacity(0.2),
+                              color: _getCategoryColor(content['category']).withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: _getCategoryColor(content['category']).withOpacity(0.5),
+                                color: _getCategoryColor(content['category']).withValues(alpha: 0.5),
                                 width: 1,
                               ),
                             ),
@@ -1522,7 +1522,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                     Text(
                       content['creator']?.toString() ?? 'Unknown Creator',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 12,
                       ),
                     ),
@@ -1556,13 +1556,13 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                           return Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
+                              color: Colors.white.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               keyword,
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.6),
+                                color: Colors.white.withValues(alpha: 0.6),
                                 fontSize: 9,
                               ),
                             ),
@@ -1575,7 +1575,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               ),
               Icon(
                 Icons.more_vert,
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withValues(alpha: 0.5),
                 size: 20,
               ),
             ],
@@ -1588,7 +1588,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.2),
+                    color: Colors.blue.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -1629,7 +1629,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.2),
+                    color: Colors.orange.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -1681,7 +1681,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           'Moved "${draggedContent['title']}" near "${targetContent['title']}"',
           style: const TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.black.withOpacity(0.8),
+        backgroundColor: Colors.black.withValues(alpha: 0.8),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -1735,9 +1735,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppTheme.primaryPink.withOpacity(0.1),
+        color: AppTheme.primaryPink.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.primaryPink.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.primaryPink.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -1752,10 +1752,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                 return Container(
                   width: 40,
                   height: 40,
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   child: Icon(
                     Icons.auto_awesome,
-                    color: AppTheme.primaryPink.withOpacity(0.5),
+                    color: AppTheme.primaryPink.withValues(alpha: 0.5),
                     size: 16,
                   ),
                 );
@@ -1786,7 +1786,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                 Text(
                   'Suggested for ${recommendation['time']}',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
                   ),
                 ),
@@ -1796,7 +1796,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: AppTheme.primaryPink.withOpacity(0.2),
+              color: AppTheme.primaryPink.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(

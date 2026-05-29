@@ -48,7 +48,7 @@ class MetricsDisplay extends StatelessWidget {
                 value: '89%',
                 subtitle: '+5% from last week',
                 icon: Icons.trending_up_outlined,
-                color: AppTheme.accentOrange,
+                color: const Color(0xFFFF7043),
               ),
             ),
             const SizedBox(width: 12),
@@ -58,7 +58,7 @@ class MetricsDisplay extends StatelessWidget {
                 value: '5.4K',
                 subtitle: 'Total impressions',
                 icon: Icons.visibility_outlined,
-                color: AppTheme.accentPurple,
+                color: const Color(0xFF7C4DFF),
               ),
             ),
           ],
@@ -92,7 +92,7 @@ class _MetricCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: color.withOpacity(0.2),
+            color: color.withValues(alpha: 0.2),
             width: 1,
           ),
         ),

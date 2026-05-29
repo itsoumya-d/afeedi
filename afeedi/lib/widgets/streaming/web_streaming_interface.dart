@@ -116,7 +116,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
           end: Alignment.bottomCenter,
           colors: [
             Colors.black,
-            Colors.black.withOpacity(0.8),
+            Colors.black.withValues(alpha: 0.8),
           ],
         ),
       ),
@@ -157,10 +157,10 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
     return Container(
       height: 40,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.white.withOpacity(0.3),
+          color: Colors.white.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -169,11 +169,11 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
         decoration: InputDecoration(
           hintText: 'Search content...',
           hintStyle: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
           ),
           prefixIcon: Icon(
             Icons.search,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
           ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
@@ -205,7 +205,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
   Widget _buildViewModeToggle() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -239,12 +239,12 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withOpacity(0.2) : Colors.transparent,
+          color: isSelected ? Colors.white.withValues(alpha: 0.2) : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
         ),
         child: Icon(
           icon,
-          color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+          color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.7),
           size: 20,
         ),
       ),
@@ -285,7 +285,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.orange.withOpacity(0.2),
+          color: Colors.orange.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: Colors.orange,
@@ -353,13 +353,13 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: isSelected 
-                    ? Colors.white.withOpacity(0.2) 
+                    ? Colors.white.withValues(alpha: 0.2) 
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected 
                       ? Colors.white 
-                      : Colors.white.withOpacity(0.3),
+                      : Colors.white.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -377,7 +377,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
                     style: TextStyle(
                       color: isSelected 
                           ? Colors.white 
-                          : Colors.white.withOpacity(0.7),
+                          : Colors.white.withValues(alpha: 0.7),
                       fontSize: 14,
                       fontWeight: isSelected 
                           ? FontWeight.bold 
@@ -398,7 +398,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -407,7 +407,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
         controller: _tabController,
         indicatorColor: Colors.red,
         labelColor: Colors.white,
-        unselectedLabelColor: Colors.white.withOpacity(0.7),
+        unselectedLabelColor: Colors.white.withValues(alpha: 0.7),
         onTap: (index) {
           _filterContent();
           
@@ -468,10 +468,10 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -525,7 +525,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
                   Text(
                     content.creatorName ?? 'Unknown Creator',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 14,
                     ),
                   ),
@@ -540,7 +540,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
                       Text(
                         content.formattedViewCount,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                           fontSize: 12,
                         ),
                       ),
@@ -549,7 +549,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
                         Text(
                           content.formattedDuration,
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             fontSize: 12,
                           ),
                         ),
@@ -660,7 +660,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.black.withValues(alpha: 0.7),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
@@ -683,13 +683,13 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
           Icon(
             Icons.video_library_outlined,
             size: 64,
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
             'No content found',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -698,7 +698,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
           Text(
             'Try adjusting your filters or search terms',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
               fontSize: 14,
             ),
           ),

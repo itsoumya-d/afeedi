@@ -115,7 +115,7 @@ class _PersonalizedRecommendationsWidgetState extends State<PersonalizedRecommen
             Text(
               widget.subtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           SizedBox(height: UIScaling.spacing(context, 0.5)),
@@ -329,7 +329,7 @@ class _PlatformRecommendationsWidgetState extends State<PlatformRecommendationsW
             Text(
               widget.subtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           SizedBox(height: UIScaling.spacing(context, 0.5)),
@@ -563,7 +563,7 @@ class _ContextualRecommendationsWidgetState extends State<ContextualRecommendati
           Text(
             widget.subtitle.isNotEmpty ? widget.subtitle : _contextDescription,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
           SizedBox(height: UIScaling.spacing(context, 0.5)),

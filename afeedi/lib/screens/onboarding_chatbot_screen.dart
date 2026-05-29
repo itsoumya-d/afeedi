@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/navigation_service.dart';
 import '../services/analytics_service.dart';
+import '../models/analytics_events.dart';
 import '../services/onboarding_service.dart';
 import '../models/chat_message.dart';
 import '../models/genre.dart';

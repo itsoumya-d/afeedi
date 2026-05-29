@@ -1,7 +1,7 @@
+import 'dart:math' show pi;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-import 'package:lottie/lottie.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -9,18 +9,10 @@ import '../../models/user_preferences.dart';
 import '../../services/onboarding_service.dart';
 import '../../services/navigation_service.dart';
 import '../../services/analytics_service.dart';
-import '../../services/auth_service.dart';
-import '../../providers/theme_provider.dart';
 import '../../widgets/onboarding/interest_selection_grid.dart';
 import '../../widgets/onboarding/platform_selection_widget.dart';
 import '../../widgets/onboarding/content_type_selection.dart';
-import '../../widgets/onboarding/viewing_habits_selector.dart';
-import '../../widgets/onboarding/calendar_integration_widget.dart';
 import '../../widgets/onboarding/personalization_settings_widget.dart';
-import '../../widgets/common/gradient_button.dart';
-import '../../widgets/common/animated_background.dart';
-import '../../widgets/common/custom_text_field.dart';
-import '../../widgets/common/loading_indicator.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 
@@ -28,33 +20,34 @@ class EnhancedOnboardingScreen extends StatefulWidget {
   const EnhancedOnboardingScreen({Key? key}) : super(key: key);
 
   @override
-  State<EnhancedOnboardingScreen> createState() => _EnhancedOnboardingScreenState();
+  State<EnhancedOnboardingScreen> createState() =>
+      _EnhancedOnboardingScreenState();
 }
 
-class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> with TickerProviderStateMixin {
+class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
+    with TickerProviderStateMixin {
   final PageController _pageController = PageController();
-  final OnboardingService _onboardingService = OnboardingService.instance;
   final _formKey = GlobalKey<FormState>();
   late ConfettiController _confettiController;
   late AnimationController _animationController;
   late AnimationController _slideController;
-  
+
+  // Static flow from OnboardingService
+  final List<Map<String, dynamic>> _flow = OnboardingService.onboardingFlow;
+
   int _currentPageIndex = 0;
   bool _isLoading = false;
   bool _isLastStep = false;
-  UserPreferences _userPreferences = UserPreferences();
-  final List<FocusNode> _focusNodes = [];
-  
+  UserPreferences _userPreferences = const UserPreferences();
+
   // Controllers for text fields
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _ageController = TextEditingController();
-  final TextEditingController _locationController = TextEditingController();
-  
+
   @override
   void initState() {
     super.initState();
-    _initializeOnboarding();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 3));
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -63,40 +56,22 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    
-    // Initialize focus nodes for text fields
-    for (int i = 0; i < 5; i++) {
-      _focusNodes.add(FocusNode());
-    }
-    
-    // Load any existing preferences
+
     _loadExistingPreferences();
-    
-    // Track screen view
-    AnalyticsService.instance.trackScreenView('enhanced_onboarding_screen');
-  }
-  
-  Future<void> _initializeOnboarding() async {
-    // Check if user has partially completed onboarding
-    final currentStep = await _onboardingService.getCurrentStep();
-    if (currentStep > 0) {
-      setState(() {
-        _currentPageIndex = currentStep;
-      });
-      _pageController.jumpToPage(currentStep);
-    }
-    
     _animationController.forward();
+
+    AnalyticsService.instance.trackUserInteraction(
+      action: 'screen_view',
+      screen: 'enhanced_onboarding_screen',
+    );
   }
-  
+
   Future<void> _loadExistingPreferences() async {
-    final prefs = await _onboardingService.getUserPreferences();
-    if (prefs != null) {
+    final prefs = await OnboardingService.instance.getUserPreferences();
+    if (prefs != null && mounted) {
       setState(() {
         _userPreferences = prefs;
         _nameController.text = prefs.name ?? '';
-        _ageController.text = prefs.age?.toString() ?? '';
-        _locationController.text = prefs.location ?? '';
       });
     }
   }
@@ -108,24 +83,17 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
     _animationController.dispose();
     _slideController.dispose();
     _nameController.dispose();
-    _ageController.dispose();
-    _locationController.dispose();
-    for (final node in _focusNodes) {
-      node.dispose();
-    }
     super.dispose();
   }
 
   void _nextPage() {
-    if (_currentPageIndex == _onboardingService.onboardingFlow.length - 1) {
+    if (_currentPageIndex == _flow.length - 1) {
       _completeOnboarding();
       return;
     }
-    
-    // Save current step data
+
     _saveCurrentStepData();
-    
-    // Animate to next page
+
     _slideController.forward().then((_) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 500),
@@ -133,33 +101,29 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
       );
       _slideController.reset();
     });
-    
-    // Track progress
+
     AnalyticsService.instance.trackUserInteraction(
       action: 'onboarding_next_step',
       screen: 'enhanced_onboarding_screen',
       additionalData: {
         'step': _currentPageIndex,
-        'step_name': _onboardingService.onboardingFlow[_currentPageIndex].title,
+        'step_id': _flow[_currentPageIndex]['id'],
       },
     );
   }
 
   void _previousPage() {
     if (_currentPageIndex == 0) return;
-    
+
     _pageController.previousPage(
       duration: const Duration(milliseconds: 500),
       curve: Curves.easeInOut,
     );
-    
-    // Track interaction
+
     AnalyticsService.instance.trackUserInteraction(
       action: 'onboarding_previous_step',
       screen: 'enhanced_onboarding_screen',
-      additionalData: {
-        'step': _currentPageIndex,
-      },
+      additionalData: {'step': _currentPageIndex},
     );
   }
 
@@ -167,45 +131,37 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
-      // Save final step data
       _saveCurrentStepData();
-      
-      // Save all preferences
-      await _onboardingService.saveUserPreferences(_userPreferences);
-      await _onboardingService.markOnboardingComplete();
-      
-      // Play confetti animation
+
+      await OnboardingService.instance.savePreferences(_userPreferences);
+      await OnboardingService.instance.markOnboardingComplete();
+
       _confettiController.play();
-      
-      // Track completion
+
       AnalyticsService.instance.trackUserInteraction(
         action: 'onboarding_completed',
         screen: 'enhanced_onboarding_screen',
         additionalData: {
-          'total_steps': _onboardingService.onboardingFlow.length,
-          'interests_count': _userPreferences.interests.length,
+          'total_steps': _flow.length,
+          'interests_count': _userPreferences.contentInterests.length,
           'platforms_count': _userPreferences.platformPriorities.length,
         },
       );
-      
-      // Delay navigation to allow confetti to play
+
       await Future.delayed(const Duration(seconds: 2));
-      
-      // Navigate to home screen
+
       if (mounted) {
         NavigationService.navigateToHome();
       }
     } catch (e) {
-      // Handle error
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error completing onboarding: $e')),
         );
       }
-      
-      // Track error
+
       AnalyticsService.instance.trackError(
         errorType: 'onboarding_completion_error',
         errorMessage: e.toString(),
@@ -221,27 +177,13 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
   }
 
   void _saveCurrentStepData() {
-    final currentStep = _onboardingService.onboardingFlow[_currentPageIndex];
-    
-    switch (currentStep.id) {
-      case 'personal_info':
-        _userPreferences = _userPreferences.copyWith(
-          name: _nameController.text,
-          age: int.tryParse(_ageController.text),
-          location: _locationController.text,
-        );
-        break;
-      
-      // Other steps are handled by their respective widgets
-      // which update _userPreferences directly
-      
-      default:
-        // No specific handling needed
-        break;
+    final stepId = _flow[_currentPageIndex]['id'] as String?;
+
+    if (stepId == 'personal_info' || stepId == 'profile') {
+      _userPreferences = _userPreferences.copyWith(
+        name: _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
+      );
     }
-    
-    // Save current step progress
-    _onboardingService.saveCurrentStep(_currentPageIndex);
   }
 
   void _updatePreferences(UserPreferences updatedPreferences) {
@@ -257,7 +199,7 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
         title: const Text('Skip Onboarding?'),
         content: const Text(
           'Skipping onboarding will limit personalized recommendations. '
-          'Are you sure you want to continue?'
+          'Are you sure you want to continue?',
         ),
         actions: [
           TextButton(
@@ -267,17 +209,14 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              await _onboardingService.markOnboardingComplete();
-              
-              // Track skip action
+              await OnboardingService.instance.markOnboardingComplete();
+
               AnalyticsService.instance.trackUserInteraction(
                 action: 'onboarding_skipped',
                 screen: 'enhanced_onboarding_screen',
-                additionalData: {
-                  'step': _currentPageIndex,
-                },
+                additionalData: {'step': _currentPageIndex},
               );
-              
+
               if (mounted) {
                 NavigationService.navigateToHome();
               }
@@ -291,47 +230,47 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDarkMode = themeProvider.isDarkMode;
-    
     return Scaffold(
       body: Stack(
         children: [
-          // Animated background
-          AnimatedBackground(
-            color1: isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary,
-            color2: isDarkMode ? AppColors.darkAccent : AppColors.lightAccent,
+          // Gradient background
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primaryLight, AppColors.primaryDark],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
           ),
-          
+
           // Main content
           SafeArea(
             child: Column(
               children: [
                 // Progress indicator and skip button
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Progress indicator
                       Expanded(
                         child: LinearProgressIndicator(
-                          value: (_currentPageIndex + 1) / _onboardingService.onboardingFlow.length,
-                          backgroundColor: Colors.grey.withOpacity(0.3),
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            isDarkMode ? AppColors.darkAccent : AppColors.lightAccent,
+                          value: (_currentPageIndex + 1) / _flow.length,
+                          backgroundColor: Colors.white.withValues(alpha: 0.3),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Colors.white,
                           ),
                         ),
                       ),
-                      
-                      // Skip button (only show in first half of onboarding)
-                      if (_currentPageIndex < _onboardingService.onboardingFlow.length / 2)
+                      if (_currentPageIndex < _flow.length / 2)
                         TextButton(
                           onPressed: _skipOnboarding,
-                          child: Text(
+                          child: const Text(
                             'Skip',
                             style: TextStyle(
-                              color: isDarkMode ? Colors.white70 : Colors.black54,
+                              color: Colors.white70,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -339,7 +278,7 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
                     ],
                   ),
                 ),
-                
+
                 // Page content
                 Expanded(
                   child: PageView.builder(
@@ -348,14 +287,14 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
                     onPageChanged: (index) {
                       setState(() {
                         _currentPageIndex = index;
-                        _isLastStep = index == _onboardingService.onboardingFlow.length - 1;
+                        _isLastStep = index == _flow.length - 1;
                       });
                       HapticFeedback.lightImpact();
                     },
-                    itemCount: _onboardingService.onboardingFlow.length,
+                    itemCount: _flow.length,
                     itemBuilder: (context, index) {
-                      final step = _onboardingService.onboardingFlow[index];
-                      
+                      final step = _flow[index];
+
                       return SlideTransition(
                         position: Tween<Offset>(
                           begin: const Offset(0.05, 0),
@@ -373,7 +312,8 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
                             curve: Curves.easeOut,
                           )),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 24),
                             child: _buildStepContent(step, index),
                           ),
                         ),
@@ -381,43 +321,50 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
                     },
                   ),
                 ),
-                
+
                 // Navigation buttons
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24, vertical: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Back button
                       if (_currentPageIndex > 0)
                         IconButton(
                           onPressed: _previousPage,
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.arrow_back_rounded,
-                            color: isDarkMode ? Colors.white70 : Colors.black54,
+                            color: Colors.white70,
                             size: 28,
                           ),
                         )
                       else
                         const SizedBox(width: 48),
-                      
+
                       // Next/Finish button
-                      GradientButton(
-                        onPressed: _nextPage,
-                        width: 160,
-                        height: 50,
-                        gradient: LinearGradient(
-                          colors: [
-                            isDarkMode ? AppColors.darkAccent : AppColors.lightAccent,
-                            isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary,
-                          ],
+                      ElevatedButton(
+                        onPressed: _isLoading ? null : _nextPage,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppColors.primary,
+                          minimumSize: const Size(160, 50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
                         ),
                         child: _isLoading
-                            ? const LoadingIndicator(size: 24, color: Colors.white)
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.primary,
+                                ),
+                              )
                             : Text(
                                 _isLastStep ? 'Finish' : 'Next',
-                                style: AppTextStyles.buttonText.copyWith(
-                                  color: Colors.white,
+                                style: AppTextStyles.buttonMedium.copyWith(
+                                  color: AppColors.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -428,7 +375,7 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
               ],
             ),
           ),
-          
+
           // Confetti effect for completion
           Align(
             alignment: Alignment.topCenter,
@@ -455,67 +402,47 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
     );
   }
 
-  Widget _buildStepContent(OnboardingStep step, int index) {
+  Widget _buildStepContent(Map<String, dynamic> step, int index) {
+    final title = step['title'] as String? ?? 'Step ${index + 1}';
+    final type = step['type'] as String? ?? '';
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Step title
           Text(
-            step.title,
+            title,
             style: AppTextStyles.heading2.copyWith(
               fontSize: 28,
               fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
-          
-          const SizedBox(height: 8),
-          
-          // Step description
-          Text(
-            step.description,
-            style: AppTextStyles.bodyMedium.copyWith(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ).animate().fadeIn(duration: 500.ms, delay: 100.ms).slideY(begin: 0.1, end: 0),
-          
+
           const SizedBox(height: 24),
-          
-          // Step content
-          _buildStepSpecificContent(step),
+
+          _buildStepSpecificContent(step, type),
         ],
       ),
     );
   }
 
-  Widget _buildStepSpecificContent(OnboardingStep step) {
-    switch (step.id) {
+  Widget _buildStepSpecificContent(Map<String, dynamic> step, String type) {
+    final id = step['id'] as String? ?? type;
+
+    switch (id) {
       case 'welcome':
         return _buildWelcomeStep();
-      case 'personal_info':
-        return _buildPersonalInfoStep();
+      case 'genres':
       case 'content_interests':
         return InterestSelectionGrid(
-          selectedInterests: _userPreferences.interests,
+          selectedInterests: _userPreferences.contentInterests,
           onInterestsChanged: (interests) {
-            _updatePreferences(_userPreferences.copyWith(interests: interests));
+            _updatePreferences(
+                _userPreferences.copyWith(contentInterests: interests));
           },
         );
-      case 'content_types':
-        return ContentTypeSelection(
-          selectedContentTypes: _userPreferences.contentTypes,
-          onContentTypesChanged: (contentTypes) {
-            _updatePreferences(_userPreferences.copyWith(contentTypes: contentTypes));
-          },
-        );
-      case 'entertainment_preferences':
-        return _buildEntertainmentPreferencesStep();
-      case 'viewing_habits':
-        return ViewingHabitsSelector(
-          preferences: _userPreferences,
-          onPreferencesChanged: _updatePreferences,
-        );
+      case 'platforms':
       case 'platform_preferences':
         return PlatformSelectionWidget(
           platformPriorities: _userPreferences.platformPriorities,
@@ -525,19 +452,34 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
             ));
           },
         );
+      case 'profile':
+      case 'personal_info':
+        return _buildPersonalInfoStep();
+      case 'complete':
+      case 'completion':
+        return _buildCompletionStep();
+      case 'content_types':
+        return ContentTypeSelection(
+          selectedContentTypes: _userPreferences.contentTypes,
+          onContentTypesChanged: (contentTypes) {
+            _updatePreferences(
+                _userPreferences.copyWith(contentTypes: contentTypes));
+          },
+        );
       case 'personalization_settings':
         return PersonalizationSettingsWidget(
-          preferences: _userPreferences,
-          onPreferencesChanged: _updatePreferences,
-        );
-      case 'calendar_integration':
-        return CalendarIntegrationWidget(
-          preferences: _userPreferences,
-          onPreferencesChanged: _updatePreferences,
+          personalizationSettings: _userPreferences.personalizationSettings,
+          onPersonalizationSettingsChanged: (settings) {
+            _updatePreferences(
+                _userPreferences.copyWith(personalizationSettings: settings));
+          },
         );
       default:
-        return const Center(
-          child: Text('Step content not implemented'),
+        return Center(
+          child: Text(
+            'Setting up your experience...',
+            style: AppTextStyles.bodyMedium.copyWith(color: Colors.white70),
+          ),
         );
     }
   }
@@ -546,53 +488,48 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Welcome animation
-        Lottie.asset(
-          'assets/animations/welcome_animation.json',
-          height: 200,
-          width: 200,
-          fit: BoxFit.contain,
+        const Icon(
+          Icons.play_circle_fill_rounded,
+          size: 100,
+          color: Colors.white,
         ),
-        
+
         const SizedBox(height: 24),
-        
-        // Welcome message
+
         Text(
           'Welcome to Afeedi!',
           style: AppTextStyles.heading2.copyWith(
             fontSize: 24,
             fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
           textAlign: TextAlign.center,
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         Text(
-          'We'll help you discover content that matters to you across multiple platforms.',
-          style: AppTextStyles.bodyMedium.copyWith(fontSize: 16),
+          "We'll help you discover content that matters to you across multiple platforms.",
+          style: AppTextStyles.bodyMedium.copyWith(
+            fontSize: 16,
+            color: Colors.white70,
+          ),
           textAlign: TextAlign.center,
         ),
-        
+
         const SizedBox(height: 24),
-        
-        // Features list
+
         ..._buildFeatureItem(
           icon: Icons.recommend,
           title: 'Personalized Recommendations',
           description: 'Content tailored to your interests and preferences',
         ),
-        
-        ..._buildFeatureItem(
-          icon: Icons.calendar_today,
-          title: 'Calendar Integration',
-          description: 'Content recommendations based on your schedule',
-        ),
-        
+
         ..._buildFeatureItem(
           icon: Icons.devices,
           title: 'Multi-Platform Support',
-          description: 'Access content from YouTube, TikTok, Instagram, and more',
+          description:
+              'Access content from YouTube, TikTok, Instagram, and more',
         ),
       ],
     ).animate().fadeIn(duration: 600.ms, delay: 200.ms);
@@ -610,10 +547,10 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.lightAccent.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: AppColors.lightAccent),
+            child: Icon(icon, color: Colors.white),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -624,13 +561,14 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
                   title,
                   style: AppTextStyles.subtitle.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
                 Text(
                   description,
                   style: AppTextStyles.bodyMedium.copyWith(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: Colors.white70,
                   ),
                 ),
               ],
@@ -647,78 +585,59 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Name field
-          CustomTextField(
+          TextFormField(
             controller: _nameController,
-            focusNode: _focusNodes[0],
-            label: 'Name',
-            hint: 'Enter your name',
-            prefixIcon: Icons.person_outline,
-            textInputAction: TextInputAction.next,
-            onFieldSubmitted: (_) => _focusNodes[1].requestFocus(),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your name';
-              }
-              return null;
-            },
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Age field
-          CustomTextField(
-            controller: _ageController,
-            focusNode: _focusNodes[1],
-            label: 'Age',
-            hint: 'Enter your age',
-            prefixIcon: Icons.cake_outlined,
-            keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.next,
-            onFieldSubmitted: (_) => _focusNodes[2].requestFocus(),
-            validator: (value) {
-              if (value != null && value.isNotEmpty) {
-                final age = int.tryParse(value);
-                if (age == null || age < 13 || age > 120) {
-                  return 'Please enter a valid age (13-120)';
-                }
-              }
-              return null;
-            },
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Location field
-          CustomTextField(
-            controller: _locationController,
-            focusNode: _focusNodes[2],
-            label: 'Location',
-            hint: 'Enter your location (optional)',
-            prefixIcon: Icons.location_on_outlined,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              labelText: 'Name',
+              hintText: 'Enter your name',
+              labelStyle: const TextStyle(color: Colors.white70),
+              hintStyle: const TextStyle(color: Colors.white54),
+              prefixIcon:
+                  const Icon(Icons.person_outline, color: Colors.white70),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.white54),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.white),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide:
+                    BorderSide(color: AppColors.error),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide:
+                    BorderSide(color: AppColors.error),
+              ),
+            ),
             textInputAction: TextInputAction.done,
           ),
-          
+
           const SizedBox(height: 24),
-          
-          // Privacy note
+
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.withOpacity(0.2)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const Row(
                   children: [
-                    const Icon(Icons.privacy_tip_outlined, size: 20, color: Colors.grey),
-                    const SizedBox(width: 8),
+                    Icon(Icons.privacy_tip_outlined,
+                        size: 20, color: Colors.white70),
+                    SizedBox(width: 8),
                     Text(
                       'Privacy Note',
-                      style: AppTextStyles.subtitle.copyWith(
+                      style: TextStyle(
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -730,7 +649,7 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
                   'We respect your privacy and will never share your personal data with third parties.',
                   style: AppTextStyles.bodyMedium.copyWith(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: Colors.white70,
                   ),
                 ),
               ],
@@ -741,187 +660,39 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen> wit
     ).animate().fadeIn(duration: 600.ms, delay: 200.ms);
   }
 
-  Widget _buildEntertainmentPreferencesStep() {
-    final entertainmentPreferences = _userPreferences.entertainmentPreferences;
-    
+  Widget _buildCompletionStep() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Content length preferences
-        Text(
-          'Content Length Preferences',
-          style: AppTextStyles.subtitle.copyWith(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+        const Icon(
+          Icons.check_circle_rounded,
+          size: 100,
+          color: Colors.white,
         ),
-        
-        const SizedBox(height: 8),
-        
-        Text(
-          'How long do you prefer your content to be?',
-          style: AppTextStyles.bodyMedium.copyWith(
-            fontSize: 14,
-            color: Colors.grey[600],
-          ),
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // Content length sliders
-        _buildPreferenceSlider(
-          label: 'Short (< 1 min)',
-          value: _userPreferences.contentLengthPreferences['short'] ?? 50,
-          onChanged: (value) {
-            final updated = Map<String, double>.from(_userPreferences.contentLengthPreferences);
-            updated['short'] = value;
-            _updatePreferences(_userPreferences.copyWith(
-              contentLengthPreferences: updated,
-            ));
-          },
-        ),
-        
-        _buildPreferenceSlider(
-          label: 'Medium (1-10 min)',
-          value: _userPreferences.contentLengthPreferences['medium'] ?? 50,
-          onChanged: (value) {
-            final updated = Map<String, double>.from(_userPreferences.contentLengthPreferences);
-            updated['medium'] = value;
-            _updatePreferences(_userPreferences.copyWith(
-              contentLengthPreferences: updated,
-            ));
-          },
-        ),
-        
-        _buildPreferenceSlider(
-          label: 'Long (> 10 min)',
-          value: _userPreferences.contentLengthPreferences['long'] ?? 50,
-          onChanged: (value) {
-            final updated = Map<String, double>.from(_userPreferences.contentLengthPreferences);
-            updated['long'] = value;
-            _updatePreferences(_userPreferences.copyWith(
-              contentLengthPreferences: updated,
-            ));
-          },
-        ),
-        
+
         const SizedBox(height: 24),
-        
-        // Entertainment categories
+
         Text(
-          'Entertainment Categories',
-          style: AppTextStyles.subtitle.copyWith(
+          "You're all set!",
+          style: AppTextStyles.heading2.copyWith(
+            fontSize: 28,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            color: Colors.white,
           ),
+          textAlign: TextAlign.center,
         ),
-        
-        const SizedBox(height: 8),
-        
-        Text(
-          'Select your favorite entertainment categories',
-          style: AppTextStyles.bodyMedium.copyWith(
-            fontSize: 14,
-            color: Colors.grey[600],
-          ),
-        ),
-        
+
         const SizedBox(height: 16),
-        
-        // Entertainment category chips
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            _buildCategoryChip('Comedy', entertainmentPreferences),
-            _buildCategoryChip('Drama', entertainmentPreferences),
-            _buildCategoryChip('Action', entertainmentPreferences),
-            _buildCategoryChip('Documentary', entertainmentPreferences),
-            _buildCategoryChip('Music', entertainmentPreferences),
-            _buildCategoryChip('Gaming', entertainmentPreferences),
-            _buildCategoryChip('Sports', entertainmentPreferences),
-            _buildCategoryChip('News', entertainmentPreferences),
-            _buildCategoryChip('Science', entertainmentPreferences),
-            _buildCategoryChip('Technology', entertainmentPreferences),
-            _buildCategoryChip('Cooking', entertainmentPreferences),
-            _buildCategoryChip('Travel', entertainmentPreferences),
-          ],
+
+        Text(
+          "Your personalized feed is ready. Let's start discovering amazing content!",
+          style: AppTextStyles.bodyMedium.copyWith(
+            fontSize: 16,
+            color: Colors.white70,
+          ),
+          textAlign: TextAlign.center,
         ),
       ],
     ).animate().fadeIn(duration: 600.ms, delay: 200.ms);
   }
-
-  Widget _buildPreferenceSlider({
-    required String label,
-    required double value,
-    required Function(double) onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: AppTextStyles.bodyMedium.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            Text(
-              '${value.toInt()}%',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.lightAccent,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        Slider(
-          value: value,
-          min: 0,
-          max: 100,
-          divisions: 10,
-          activeColor: AppColors.lightAccent,
-          inactiveColor: Colors.grey.withOpacity(0.3),
-          onChanged: (newValue) {
-            onChanged(newValue);
-          },
-        ),
-        const SizedBox(height: 8),
-      ],
-    );
-  }
-
-  Widget _buildCategoryChip(String category, List<String> selectedCategories) {
-    final isSelected = selectedCategories.contains(category);
-    
-    return FilterChip(
-      label: Text(category),
-      selected: isSelected,
-      checkmarkColor: Colors.white,
-      selectedColor: AppColors.lightAccent,
-      backgroundColor: Colors.grey.withOpacity(0.1),
-      labelStyle: TextStyle(
-        color: isSelected ? Colors.white : Colors.black87,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-      ),
-      onSelected: (selected) {
-        final updated = List<String>.from(selectedCategories);
-        if (selected) {
-          updated.add(category);
-        } else {
-          updated.remove(category);
-        }
-        _updatePreferences(_userPreferences.copyWith(
-          entertainmentPreferences: updated,
-        ));
-      },
-    );
-  }
-}
-
-// Helper extension for math constants
-extension MathConstants on num {
-  static const double pi = 3.1415926535897932;
 }

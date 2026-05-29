@@ -411,27 +411,6 @@ class AnalyticsService {
   }
 }
 
-// Analytics event types for type safety
-class AnalyticsEvents {
-  // Onboarding events
-  static const String onboardingStarted = 'onboarding_started';
-  static const String onboardingStepCompleted = 'onboarding_step_completed';
-  static const String onboardingCompleted = 'onboarding_completed';
-  static const String onboardingAbandoned = 'onboarding_abandoned';
-
-  // OAuth events
-  static const String oauthConnectAttempt = 'oauth_connect_attempt';
-  static const String oauthConnectSuccess = 'oauth_connect_success';
-  static const String oauthConnectError = 'oauth_connect_error';
-  static const String oauthDisconnect = 'oauth_disconnect';
-
-  // User interaction events
-  static const String buttonTap = 'button_tap';
-  static const String screenView = 'screen_view';
-  static const String genreSelection = 'genre_selection';
-  static const String platformSelection = 'platform_selection';
-}
-
 // Analytics screens for consistency
 class AnalyticsScreens {
   static const String onboardingChatbot = 'onboarding_chatbot';

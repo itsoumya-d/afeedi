@@ -136,9 +136,9 @@ class _ContentTypeSelectionState extends State<ContentTypeSelection> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.amber.withOpacity(0.1),
+            color: Colors.amber.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.amber.withOpacity(0.3)),
+            border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [
@@ -177,13 +177,13 @@ class _ContentTypeSelectionState extends State<ContentTypeSelection> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.primaryLight.withOpacity(0.1)
-                : Colors.grey.withOpacity(0.05),
+                ? AppColors.primaryLight.withValues(alpha: 0.1)
+                : Colors.grey.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isSelected
                   ? AppColors.primaryLight
-                  : Colors.grey.withOpacity(0.2),
+                  : Colors.grey.withValues(alpha: 0.2),
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -193,8 +193,8 @@ class _ContentTypeSelectionState extends State<ContentTypeSelection> {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.primaryLight.withOpacity(0.2)
-                      : Colors.grey.withOpacity(0.1),
+                      ? AppColors.primaryLight.withValues(alpha: 0.2)
+                      : Colors.grey.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(

@@ -66,7 +66,7 @@ class FeedPostCard extends StatelessWidget {
             backgroundImage: content.thumbnailUrl != null 
                 ? CachedNetworkImageProvider(content.thumbnailUrl!)
                 : null,
-            backgroundColor: AppTheme.primaryCyan.withOpacity(0.1),
+            backgroundColor: AppTheme.primaryCyan.withValues(alpha: 0.1),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -146,9 +146,9 @@ class FeedPostCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -212,8 +212,8 @@ class FeedPostCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      platformColor.withOpacity(0.8),
-                      platformColor.withOpacity(0.4),
+                      platformColor.withValues(alpha: 0.8),
+                      platformColor.withValues(alpha: 0.4),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -234,7 +234,7 @@ class FeedPostCard extends StatelessWidget {
                 height: 200,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.transparent, Colors.black.withOpacity(0.3)],
+                    colors: [Colors.transparent, Colors.black.withValues(alpha: 0.3)],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
@@ -247,7 +247,7 @@ class FeedPostCard extends StatelessWidget {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -266,7 +266,7 @@ class FeedPostCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.75),
+                      color: Colors.black.withValues(alpha: 0.75),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(

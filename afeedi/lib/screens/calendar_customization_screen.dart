@@ -198,7 +198,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -217,7 +217,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
           Container(
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(2),
             ),
             child: FractionallySizedBox(
@@ -247,7 +247,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
           Text(
             'Set up your personalized viewing schedule',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontSize: 16,
             ),
             textAlign: TextAlign.center,
@@ -273,7 +273,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
         Text(
           'When do you typically watch content?',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
           ),
         ),
@@ -331,19 +331,19 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
                 decoration: BoxDecoration(
                   color: isActive 
                       ? AppTheme.primaryCyan
-                      : Colors.white.withOpacity(0.1),
+                      : Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isActive 
                         ? AppTheme.primaryCyan
-                        : Colors.white.withOpacity(0.3),
+                        : Colors.white.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Center(
                   child: Text(
                     _weekDays[index],
                     style: TextStyle(
-                      color: isActive ? Colors.white : Colors.white.withOpacity(0.7),
+                      color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.7),
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
@@ -368,9 +368,9 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withOpacity(0.2)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
         ),
         child: Column(
           children: [
@@ -383,7 +383,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
             Text(
               label,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 14,
               ),
             ),
@@ -418,7 +418,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
         Text(
           'What type of content do you want scheduled?',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
           ),
         ),
@@ -447,13 +447,13 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: isSelected 
-                      ? option['color'].withOpacity(0.2)
-                      : Colors.white.withOpacity(0.1),
+                      ? option['color'].withValues(alpha: 0.2)
+                      : Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected 
                         ? option['color']
-                        : Colors.white.withOpacity(0.2),
+                        : Colors.white.withValues(alpha: 0.2),
                     width: isSelected ? 2 : 1,
                   ),
                 ),
@@ -462,7 +462,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
                   children: [
                     Icon(
                       option['icon'],
-                      color: isSelected ? option['color'] : Colors.white.withOpacity(0.7),
+                      color: isSelected ? option['color'] : Colors.white.withValues(alpha: 0.7),
                       size: 32,
                     ),
                     const SizedBox(height: 8),
@@ -479,7 +479,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
                     Text(
                       option['description'],
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                         fontSize: 10,
                       ),
                       textAlign: TextAlign.center,
@@ -512,7 +512,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
         Text(
           'Get notified about your scheduled content',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
           ),
         ),
@@ -546,13 +546,13 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
                         color: isSelected 
-                            ? AppTheme.primaryCyan.withOpacity(0.2)
-                            : Colors.white.withOpacity(0.1),
+                            ? AppTheme.primaryCyan.withValues(alpha: 0.2)
+                            : Colors.white.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: isSelected 
                               ? AppTheme.primaryCyan
-                              : Colors.white.withOpacity(0.3),
+                              : Colors.white.withValues(alpha: 0.3),
                         ),
                       ),
                       child: Text(
@@ -591,7 +591,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
         Text(
           'Let AI optimize your viewing experience',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
           ),
         ),
@@ -641,9 +641,9 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -662,7 +662,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
                 ),
@@ -673,9 +673,9 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
             value: value,
             onChanged: onChanged,
             activeColor: AppTheme.primaryCyan,
-            activeTrackColor: AppTheme.primaryCyan.withOpacity(0.3),
+            activeTrackColor: AppTheme.primaryCyan.withValues(alpha: 0.3),
             inactiveThumbColor: Colors.grey,
-            inactiveTrackColor: Colors.grey.withOpacity(0.3),
+            inactiveTrackColor: Colors.grey.withValues(alpha: 0.3),
           ),
         ],
       ),
@@ -692,13 +692,13 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: isSelected 
-                ? AppTheme.primaryCyan.withOpacity(0.2)
-                : Colors.white.withOpacity(0.1),
+                ? AppTheme.primaryCyan.withValues(alpha: 0.2)
+                : Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isSelected 
                   ? AppTheme.primaryCyan
-                  : Colors.white.withOpacity(0.3),
+                  : Colors.white.withValues(alpha: 0.3),
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -752,7 +752,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
             child: Text(
               'Skip customization',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 16,
               ),
             ),

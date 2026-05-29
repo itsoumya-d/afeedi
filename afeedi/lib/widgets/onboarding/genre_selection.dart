@@ -37,10 +37,10 @@ class GenreSelection extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
+            color: Colors.white.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -88,10 +88,10 @@ class GenreSelection extends StatelessWidget {
   Widget _buildSearchField() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -103,14 +103,14 @@ class GenreSelection extends StatelessWidget {
         decoration: InputDecoration(
           hintText: 'Search interests...',
           hintStyle: TextStyle(
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withValues(alpha: 0.6),
             fontSize: 14,
           ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 16),
           prefixIcon: Icon(
             Icons.search,
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withValues(alpha: 0.6),
             size: 20,
           ),
         ),
@@ -139,13 +139,13 @@ class GenreSelection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
           decoration: BoxDecoration(
             color: isSelected 
-                ? const Color(0xFF00D4FF).withOpacity(0.3)
-                : Colors.white.withOpacity(0.1),
+                ? const Color(0xFF00D4FF).withValues(alpha: 0.3)
+                : Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isSelected 
                   ? const Color(0xFF00D4FF)
-                  : Colors.white.withOpacity(0.3),
+                  : Colors.white.withValues(alpha: 0.3),
               width: 1.5,
             ),
           ),
@@ -188,7 +188,7 @@ class GenreSelection extends StatelessWidget {
         onPressed: selectedGenres.length < 3 ? null : onContinue,
         style: ElevatedButton.styleFrom(
           backgroundColor: selectedGenres.length < 3
-              ? Colors.white.withOpacity(0.1)
+              ? Colors.white.withValues(alpha: 0.1)
               : const Color(0xFF00D4FF),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(

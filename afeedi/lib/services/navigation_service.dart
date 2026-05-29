@@ -12,6 +12,9 @@ import '../screens/interest_form_screen.dart';
 import '../screens/source_preference_screen.dart';
 import '../screens/calendar_customization_screen.dart';
 import '../screens/personalized_home_screen.dart';
+import '../screens/search_screen.dart';
+import '../screens/settings_screen.dart';
+import '../screens/notifications_screen.dart';
 import '../screens/placeholder_screen.dart';
 
 class NavigationService {
@@ -113,10 +116,10 @@ class AppRoutes {
         AppRoutes.feed: (context) => const FeedScreen(),
         AppRoutes.profile: (context) => const ProfileScreen(),
         AppRoutes.calendar: (_) => const PlaceholderScreen(title: 'Calendar', icon: Icons.calendar_today),
-        AppRoutes.search: (_) => const PlaceholderScreen(title: 'Search', icon: Icons.search),
+        AppRoutes.search: (_) => const SearchScreen(),
         AppRoutes.createContent: (_) => const PlaceholderScreen(title: 'Create', icon: Icons.add_circle_outline),
-        AppRoutes.notifications: (_) => const PlaceholderScreen(title: 'Notifications', icon: Icons.notifications),
-        AppRoutes.settings: (_) => const PlaceholderScreen(title: 'Settings', icon: Icons.settings),
+        AppRoutes.notifications: (_) => const NotificationsScreen(),
+        AppRoutes.settings: (_) => const SettingsScreen(),
         '/player': (_) => const PlaceholderScreen(title: 'Player', icon: Icons.play_circle_filled),
         '/onboarding': (_) => const PlaceholderScreen(title: 'Onboarding', icon: Icons.start),
       };

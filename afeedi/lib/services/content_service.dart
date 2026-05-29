@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import '../models/content_model.dart';
 import 'enhanced_recommendation_service.dart';
 import 'onboarding_service.dart';
@@ -364,7 +365,273 @@ class ContentService {
       createdAt: DateTime.now().subtract(Duration(hours: 8)),
       updatedAt: DateTime.now().subtract(Duration(hours: 8)),
     ),
+
+    // Additional YouTube educational & entertainment content
+    Content(
+      id: 'yt_7',
+      platform: PlatformType.youtube,
+      platformContentId: 'aircAruvnKk',
+      title: 'But what is a neural network?',
+      description: 'The math of deep learning visualized — neurons, layers, and activation functions.',
+      videoUrl: 'https://www.youtube.com/embed/aircAruvnKk',
+      thumbnailUrl: 'https://img.youtube.com/vi/aircAruvnKk/mqdefault.jpg',
+      creatorName: '3Blue1Brown',
+      durationSeconds: 1918,
+      viewCount: 15000000,
+      likeCount: 410000,
+      publishedAt: DateTime.now().subtract(Duration(days: 365 * 6)),
+      tags: ['ai', 'neural-networks', 'deep-learning', 'math'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 365 * 6)),
+      updatedAt: DateTime.now().subtract(Duration(days: 30)),
+    ),
+    Content(
+      id: 'yt_8',
+      platform: PlatformType.youtube,
+      platformContentId: 'DHjqpvDnNGE',
+      title: 'JavaScript in 100 Seconds',
+      description: 'Quick visual tour of JavaScript — the language of the web.',
+      videoUrl: 'https://www.youtube.com/embed/DHjqpvDnNGE',
+      thumbnailUrl: 'https://img.youtube.com/vi/DHjqpvDnNGE/mqdefault.jpg',
+      creatorName: 'Fireship',
+      durationSeconds: 120,
+      viewCount: 4800000,
+      likeCount: 195000,
+      publishedAt: DateTime.now().subtract(Duration(days: 365 * 3)),
+      tags: ['javascript', 'programming', 'web', '100seconds'],
+      contentType: ContentType.short,
+      createdAt: DateTime.now().subtract(Duration(days: 365 * 3)),
+      updatedAt: DateTime.now().subtract(Duration(days: 14)),
+    ),
+    Content(
+      id: 'yt_9',
+      platform: PlatformType.youtube,
+      platformContentId: 'x7X9w_GIm1s',
+      title: 'Python in 100 Seconds',
+      description: 'Everything you need to know about Python in under 2 minutes.',
+      videoUrl: 'https://www.youtube.com/embed/x7X9w_GIm1s',
+      thumbnailUrl: 'https://img.youtube.com/vi/x7X9w_GIm1s/mqdefault.jpg',
+      creatorName: 'Fireship',
+      durationSeconds: 115,
+      viewCount: 3900000,
+      likeCount: 162000,
+      publishedAt: DateTime.now().subtract(Duration(days: 365 * 3)),
+      tags: ['python', 'programming', '100seconds', 'beginner'],
+      contentType: ContentType.short,
+      createdAt: DateTime.now().subtract(Duration(days: 365 * 3)),
+      updatedAt: DateTime.now().subtract(Duration(days: 10)),
+    ),
+    Content(
+      id: 'yt_10',
+      platform: PlatformType.youtube,
+      platformContentId: 'Tn6-PIqc4UM',
+      title: 'React in 100 Seconds',
+      description: 'Everything important about React packed into 100 seconds.',
+      videoUrl: 'https://www.youtube.com/embed/Tn6-PIqc4UM',
+      thumbnailUrl: 'https://img.youtube.com/vi/Tn6-PIqc4UM/mqdefault.jpg',
+      creatorName: 'Fireship',
+      durationSeconds: 105,
+      viewCount: 2700000,
+      likeCount: 98000,
+      publishedAt: DateTime.now().subtract(Duration(days: 365 * 2)),
+      tags: ['react', 'javascript', 'frontend', '100seconds'],
+      contentType: ContentType.short,
+      createdAt: DateTime.now().subtract(Duration(days: 365 * 2)),
+      updatedAt: DateTime.now().subtract(Duration(days: 7)),
+    ),
+    Content(
+      id: 'yt_11',
+      platform: PlatformType.youtube,
+      platformContentId: 'vIRkjTMhFvs',
+      title: 'Why Planes Don\'t Fly Over the Pacific',
+      description: 'The surprising reason why transpacific flights avoid a straight path over the ocean.',
+      videoUrl: 'https://www.youtube.com/embed/vIRkjTMhFvs',
+      thumbnailUrl: 'https://img.youtube.com/vi/vIRkjTMhFvs/mqdefault.jpg',
+      creatorName: 'Wendover Productions',
+      durationSeconds: 912,
+      viewCount: 10500000,
+      likeCount: 287000,
+      publishedAt: DateTime.now().subtract(Duration(days: 365 * 5)),
+      tags: ['science', 'aviation', 'geography', 'education'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 365 * 5)),
+      updatedAt: DateTime.now().subtract(Duration(days: 60)),
+    ),
+    Content(
+      id: 'yt_12',
+      platform: PlatformType.youtube,
+      platformContentId: 'e-P5IFTqB98',
+      title: 'Genetic Engineering Will Change Everything Forever',
+      description: 'How CRISPR gene editing could eliminate disease and change what it means to be human.',
+      videoUrl: 'https://www.youtube.com/embed/e-P5IFTqB98',
+      thumbnailUrl: 'https://img.youtube.com/vi/e-P5IFTqB98/mqdefault.jpg',
+      creatorName: 'Kurzgesagt',
+      durationSeconds: 1623,
+      viewCount: 24000000,
+      likeCount: 680000,
+      publishedAt: DateTime.now().subtract(Duration(days: 365 * 7)),
+      tags: ['science', 'genetics', 'crispr', 'biology', 'education'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 365 * 7)),
+      updatedAt: DateTime.now().subtract(Duration(days: 45)),
+    ),
+    Content(
+      id: 'yt_13',
+      platform: PlatformType.youtube,
+      platformContentId: 'wjZofJX0v4M',
+      title: 'The Entire History of the Universe',
+      description: 'From the Big Bang to today — 13.8 billion years in one video.',
+      videoUrl: 'https://www.youtube.com/embed/wjZofJX0v4M',
+      thumbnailUrl: 'https://img.youtube.com/vi/wjZofJX0v4M/mqdefault.jpg',
+      creatorName: 'Kurzgesagt',
+      durationSeconds: 1920,
+      viewCount: 18000000,
+      likeCount: 520000,
+      publishedAt: DateTime.now().subtract(Duration(days: 365 * 4)),
+      tags: ['science', 'space', 'universe', 'education', 'history'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 365 * 4)),
+      updatedAt: DateTime.now().subtract(Duration(days: 20)),
+    ),
+    Content(
+      id: 'yt_14',
+      platform: PlatformType.youtube,
+      platformContentId: 'ZHwVBirqD2s',
+      title: 'Advanced Flutter State Management',
+      description: 'A deep dive into Riverpod, Bloc, and Provider patterns for large-scale Flutter apps.',
+      videoUrl: 'https://www.youtube.com/embed/ZHwVBirqD2s',
+      thumbnailUrl: 'https://img.youtube.com/vi/ZHwVBirqD2s/mqdefault.jpg',
+      creatorName: 'Flutter Dev',
+      durationSeconds: 2790,
+      viewCount: 340000,
+      likeCount: 18000,
+      publishedAt: DateTime.now().subtract(Duration(days: 90)),
+      tags: ['flutter', 'state-management', 'riverpod', 'bloc'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 90)),
+      updatedAt: DateTime.now().subtract(Duration(days: 5)),
+    ),
+    Content(
+      id: 'yt_15',
+      platform: PlatformType.youtube,
+      platformContentId: 'rdSJBd4YhA4',
+      title: 'Glitter Bomb 5.0 vs Package Thieves',
+      description: 'The fifth generation glitter bomb package designed to catch porch pirates.',
+      videoUrl: 'https://www.youtube.com/embed/rdSJBd4YhA4',
+      thumbnailUrl: 'https://img.youtube.com/vi/rdSJBd4YhA4/mqdefault.jpg',
+      creatorName: 'Mark Rober',
+      durationSeconds: 1020,
+      viewCount: 38000000,
+      likeCount: 900000,
+      publishedAt: DateTime.now().subtract(Duration(days: 365 * 2)),
+      tags: ['engineering', 'comedy', 'viral', 'invention'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 365 * 2)),
+      updatedAt: DateTime.now().subtract(Duration(days: 10)),
+    ),
+    // Additional Instagram reels
+    Content(
+      id: 'ig_4',
+      platform: PlatformType.instagram,
+      platformContentId: 'CAbC4dEf5gH',
+      title: 'Travel Guide: Hidden Gems in Bali',
+      description: 'Secret spots in Bali that tourists never find 🌴✨ #bali #travel #hidden',
+      videoUrl: 'https://www.instagram.com/p/CAbC4dEf5gH/',
+      thumbnailUrl: null,
+      creatorName: 'wanderlust_vibes',
+      durationSeconds: 60,
+      viewCount: 420000,
+      likeCount: 31000,
+      publishedAt: DateTime.now().subtract(Duration(hours: 14)),
+      tags: ['travel', 'bali', 'indonesia', 'hidden-gems'],
+      contentType: ContentType.reel,
+      createdAt: DateTime.now().subtract(Duration(hours: 14)),
+      updatedAt: DateTime.now().subtract(Duration(hours: 14)),
+    ),
+    Content(
+      id: 'ig_5',
+      platform: PlatformType.instagram,
+      platformContentId: 'CBdE5fGh6iJ',
+      title: 'Beginner Photography Tips',
+      description: '5 camera settings that instantly improve your photos 📸 #photography #tips #beginner',
+      videoUrl: 'https://www.instagram.com/p/CBdE5fGh6iJ/',
+      thumbnailUrl: null,
+      creatorName: 'photo_academy',
+      durationSeconds: 55,
+      viewCount: 280000,
+      likeCount: 22000,
+      publishedAt: DateTime.now().subtract(Duration(days: 2)),
+      tags: ['photography', 'camera', 'tips', 'beginner'],
+      contentType: ContentType.reel,
+      createdAt: DateTime.now().subtract(Duration(days: 2)),
+      updatedAt: DateTime.now().subtract(Duration(days: 2)),
+    ),
+    // Additional TikTok shorts
+    Content(
+      id: 'tt_4',
+      platform: PlatformType.tiktok,
+      platformContentId: '7567890123456789012',
+      title: 'Study Hack: 20-Minute Focus Sessions',
+      description: 'The Pomodoro technique changed my grades! 📚⏱️ #studyhack #pomodoro #student #fyp',
+      videoUrl: 'https://www.tiktok.com/@studytips/video/7567890123456789012',
+      thumbnailUrl: null,
+      creatorName: 'study_pro',
+      durationSeconds: 35,
+      viewCount: 1800000,
+      likeCount: 142000,
+      publishedAt: DateTime.now().subtract(Duration(hours: 20)),
+      tags: ['study', 'productivity', 'pomodoro', 'student'],
+      contentType: ContentType.short,
+      createdAt: DateTime.now().subtract(Duration(hours: 20)),
+      updatedAt: DateTime.now().subtract(Duration(hours: 20)),
+    ),
+    Content(
+      id: 'tt_5',
+      platform: PlatformType.tiktok,
+      platformContentId: '7678901234567890123',
+      title: 'DIY Home Decor on a Budget',
+      description: 'Thrift store flip that cost me £8 and looks amazing! 🏠✨ #diy #homeDecor #thrift',
+      videoUrl: 'https://www.tiktok.com/@diy_home/video/7678901234567890123',
+      thumbnailUrl: null,
+      creatorName: 'diy_crafts',
+      durationSeconds: 42,
+      viewCount: 950000,
+      likeCount: 78000,
+      publishedAt: DateTime.now().subtract(Duration(days: 1, hours: 4)),
+      tags: ['diy', 'home-decor', 'budget', 'thrift'],
+      contentType: ContentType.short,
+      createdAt: DateTime.now().subtract(Duration(days: 1, hours: 4)),
+      updatedAt: DateTime.now().subtract(Duration(days: 1, hours: 4)),
+    ),
+    // Facebook videos
+    Content(
+      id: 'fb_3',
+      platform: PlatformType.facebook,
+      platformContentId: '3456789012345678',
+      title: 'Electric Vehicle Myths Debunked',
+      description: 'Are EVs actually good for the environment? We look at the real data on battery lifecycle, charging infrastructure, and emissions comparison.',
+      videoUrl: 'https://www.facebook.com/video.php?v=3456789012345678',
+      thumbnailUrl: null,
+      creatorName: 'Science Explained',
+      durationSeconds: 780,
+      viewCount: 215000,
+      likeCount: 11500,
+      publishedAt: DateTime.now().subtract(Duration(days: 9)),
+      tags: ['ev', 'electric-vehicles', 'environment', 'science'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 9)),
+      updatedAt: DateTime.now().subtract(Duration(days: 9)),
+    ),
   ];
+
+  // Ensure every content item has a creatorId for follow functionality
+  List<Content> _withCreatorIds(List<Content> items) {
+    return items.map((c) {
+      if (c.creatorId != null) return c;
+      final id = c.creatorName?.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_') ?? 'unknown';
+      return c.copyWith(creatorId: id);
+    }).toList();
+  }
 
   Future<List<Content>> getVideos({
     PlatformType? platform,
@@ -388,9 +655,9 @@ class ContentService {
     
     // Shuffle for variety
     filteredVideos.shuffle(Random());
-    
+
     // Limit results
-    return filteredVideos.take(limit).toList();
+    return _withCreatorIds(filteredVideos.take(limit).toList());
   }
 
   Future<List<Content>> getTrendingVideos({int limit = 5}) async {
@@ -399,7 +666,7 @@ class ContentService {
     List<Content> trending = List.from(_sampleVideos);
     trending.sort((a, b) => (b.viewCount + b.likeCount).compareTo(a.viewCount + a.likeCount));
     
-    return trending.take(limit).toList();
+    return _withCreatorIds(trending.take(limit).toList());
   }
 
   // Get videos by category
@@ -418,7 +685,7 @@ class ContentService {
       video.tags.any((tag) => tag.toLowerCase().contains(query.toLowerCase()))
     ).toList();
     
-    return searchResults.take(limit).toList();
+    return _withCreatorIds(searchResults.take(limit).toList());
   }
 
   Future<Content?> getVideoById(String id) async {
@@ -458,8 +725,8 @@ class ContentService {
     
     List<Content> feedContent = List.from(_sampleVideos);
     feedContent.shuffle(Random());
-    
-    return feedContent.take(limit).toList();
+
+    return _withCreatorIds(feedContent.take(limit).toList());
   }
 
   Future<List<Content>> loadMoreContent(int offset, {int limit = 10}) async {
@@ -511,7 +778,7 @@ class ContentService {
       // Convert recommendations to content objects
       return recommendations.map((rec) => rec.content).toList();
     } catch (e) {
-      print('Error getting personalized content: $e');
+      debugPrint('Error getting personalized content: $e');
       // Fallback to regular feed content
       return getFeedContent(limit: limit);
     }
@@ -544,7 +811,7 @@ class ContentService {
       // Convert recommendations to content objects
       return recommendations.map((rec) => rec.content).toList();
     } catch (e) {
-      print('Error getting onboarding-based recommendations: $e');
+      debugPrint('Error getting onboarding-based recommendations: $e');
       // Fallback to regular feed content
       return getFeedContent(limit: limit);
     }

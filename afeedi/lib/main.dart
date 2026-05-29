@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'services/navigation_service.dart';
+import 'services/user_interaction_service.dart';
 import 'services/analytics_service.dart';
 import 'services/onboarding_service.dart';
 import 'services/recommendation_integration_service.dart';
@@ -32,6 +33,9 @@ void main() async {
     
     // Initialize Recommendation Integration Service
     await RecommendationIntegrationService.instance.initialize();
+
+    // Initialize User Interaction Service (Phase 4: like, save, share, follow)
+    await UserInteractionService.instance.initialize();
     
     // Initialize Platform View Registration Service for web
     if (kIsWeb) {

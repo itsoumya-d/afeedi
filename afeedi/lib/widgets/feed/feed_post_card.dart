@@ -3,29 +3,31 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/content_model.dart';
 import '../../services/content_service.dart';
+import '../../services/user_interaction_service.dart';
 
-class FeedPostCard extends StatelessWidget {
+class FeedPostCard extends StatefulWidget {
   final Content content;
 
   const FeedPostCard({super.key, required this.content});
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(),
-          _buildContent(),
-          _buildVideoPlayer(),
-          _buildActions(),
-        ],
-      ),
-    );
+  State<FeedPostCard> createState() => _FeedPostCardState();
+}
+
+class _FeedPostCardState extends State<FeedPostCard> {
+  late bool _isLiked;
+  late bool _isSaved;
+  late bool _isFollowed;
+
+  @override
+  void initState() {
+    super.initState();
+    final svc = UserInteractionService.instance;
+    _isLiked = svc.isLiked(widget.content.id);
+    _isSaved = svc.isSaved(widget.content.id);
+    _isFollowed = widget.content.creatorId != null
+        ? svc.isFollowed(widget.content.creatorId!)
+        : false;
   }
 
   String _formatCount(int count) {
@@ -56,15 +58,34 @@ class FeedPostCard extends StatelessWidget {
     }
   }
 
-  Widget _buildHeader() {
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(context),
+          _buildContent(),
+          _buildVideoPlayer(),
+          _buildActions(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
           CircleAvatar(
             radius: 16,
-            backgroundImage: content.thumbnailUrl != null 
-                ? CachedNetworkImageProvider(content.thumbnailUrl!)
+            backgroundImage: widget.content.thumbnailUrl != null
+                ? CachedNetworkImageProvider(widget.content.thumbnailUrl!)
                 : null,
             backgroundColor: AppTheme.primaryCyan.withValues(alpha: 0.1),
           ),
@@ -76,19 +97,24 @@ class FeedPostCard extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      content.creatorName ?? 'Unknown Creator',
+                      widget.content.creatorName ?? 'Unknown Creator',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
                     ),
                     const SizedBox(width: 8),
-                    _buildPlatformBadge(content.platform.name),
+                    _buildPlatformBadge(widget.content.platform.name),
+                    // Follow chip — only shown when creatorId is present
+                    if (widget.content.creatorId != null) ...[
+                      const SizedBox(width: 8),
+                      _buildFollowChip(context),
+                    ],
                   ],
                 ),
                 Text(
-                  content.publishedAt != null 
-                      ? _formatTimeAgo(content.publishedAt!)
+                  widget.content.publishedAt != null
+                      ? _formatTimeAgo(widget.content.publishedAt!)
                       : 'Unknown time',
                   style: TextStyle(
                     color: Colors.grey[600],
@@ -109,10 +135,38 @@ class FeedPostCard extends StatelessWidget {
     );
   }
 
+  Widget _buildFollowChip(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        final creatorId = widget.content.creatorId!;
+        final next = await UserInteractionService.instance.toggleFollow(creatorId);
+        setState(() => _isFollowed = next);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: _isFollowed
+              ? AppTheme.primaryCyan.withValues(alpha: 0.15)
+              : AppTheme.primaryCyan,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.primaryCyan),
+        ),
+        child: Text(
+          _isFollowed ? 'Following' : 'Follow',
+          style: TextStyle(
+            color: _isFollowed ? AppTheme.primaryCyan : Colors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildPlatformBadge(String platform) {
     Color color;
     IconData icon;
-    
+
     switch (platform.toLowerCase()) {
       case 'youtube':
         color = const Color(0xFFFF0000);
@@ -153,11 +207,7 @@ class FeedPostCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 10,
-            color: color,
-          ),
+          Icon(icon, size: 10, color: color),
           const SizedBox(width: 3),
           Text(
             platform,
@@ -176,7 +226,7 @@ class FeedPostCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Text(
-        content.title ?? 'No title',
+        widget.content.title ?? 'No title',
         style: const TextStyle(
           fontSize: 13,
           height: 1.3,
@@ -187,9 +237,9 @@ class FeedPostCard extends StatelessWidget {
   }
 
   Widget _buildVideoPlayer() {
-    final Color platformColor = _getPlatformColor(content.platform);
-    final String durationText = content.durationSeconds != null
-        ? _formatDuration(content.durationSeconds!)
+    final Color platformColor = _getPlatformColor(widget.content.platform);
+    final String durationText = widget.content.durationSeconds != null
+        ? _formatDuration(widget.content.durationSeconds!)
         : '';
 
     return Padding(
@@ -197,7 +247,7 @@ class FeedPostCard extends StatelessWidget {
       child: GestureDetector(
         onTap: () async {
           await ContentService.instance.trackContentInteraction(
-            contentId: content.id,
+            contentId: widget.content.id,
             interactionType: InteractionType.view,
           );
         },
@@ -219,9 +269,9 @@ class FeedPostCard extends StatelessWidget {
                     end: Alignment.bottomRight,
                   ),
                 ),
-                child: content.thumbnailUrl != null
+                child: widget.content.thumbnailUrl != null
                     ? Image.network(
-                        content.thumbnailUrl!,
+                        widget.content.thumbnailUrl!,
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: 200,
@@ -234,7 +284,10 @@ class FeedPostCard extends StatelessWidget {
                 height: 200,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.transparent, Colors.black.withValues(alpha: 0.3)],
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.3),
+                    ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
@@ -305,46 +358,57 @@ class FeedPostCard extends StatelessWidget {
     return '$m:${s.toString().padLeft(2, '0')}';
   }
 
-  Widget _buildActions() {
+  Widget _buildActions(BuildContext context) {
+    final svc = UserInteractionService.instance;
+    final likeCount = svc.getLikeCount(
+      widget.content.id,
+      baseCount: widget.content.likeCount,
+    );
+
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
+          // Like button
           _buildActionButton(
-            icon: Icons.favorite_border,
-            label: _formatCount(content.viewCount),
+            icon: _isLiked ? Icons.favorite : Icons.favorite_border,
+            iconColor: _isLiked ? Colors.red : null,
+            label: _formatCount(likeCount),
             onTap: () async {
-              await ContentService.instance.trackContentInteraction(
-                contentId: content.id,
-                interactionType: InteractionType.like,
+              final next = await svc.toggleLike(
+                widget.content.id,
+                baseCount: widget.content.likeCount,
               );
+              setState(() => _isLiked = next);
             },
           ),
           const SizedBox(width: 20),
+          // Comment button (static, no interaction tracked yet)
           _buildActionButton(
             icon: Icons.chat_bubble_outline,
-            count: 0, // Comments not available in Content model
-            onTap: () async {
-              await ContentService.instance.trackContentInteraction(
-                contentId: content.id,
-                interactionType: InteractionType.share,
-              );
-            },
+            count: 0,
+            onTap: () {},
           ),
           const SizedBox(width: 20),
+          // Share button
           _buildActionButton(
             icon: Icons.share_outlined,
-            count: 0, // Shares not available in Content model
+            count: 0,
             onTap: () async {
-              await ContentService.instance.trackContentInteraction(
-                contentId: content.id,
-                interactionType: InteractionType.share,
-              );
+              await svc.trackShare(widget.content.id);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Link copied!'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
             },
           ),
           const Spacer(),
           Text(
-            content.formattedDuration,
+            widget.content.formattedDuration,
             style: TextStyle(
               color: Colors.grey[600],
               fontSize: 12,
@@ -352,13 +416,15 @@ class FeedPostCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
+          // Save / bookmark button
           IconButton(
-            icon: const Icon(Icons.bookmark_border),
+            icon: Icon(
+              _isSaved ? Icons.bookmark : Icons.bookmark_border,
+              color: _isSaved ? Colors.cyan : null,
+            ),
             onPressed: () async {
-              await ContentService.instance.trackContentInteraction(
-                contentId: content.id,
-                interactionType: InteractionType.save,
-              );
+              final next = await svc.toggleSave(widget.content.id);
+              setState(() => _isSaved = next);
             },
           ),
         ],
@@ -368,6 +434,7 @@ class FeedPostCard extends StatelessWidget {
 
   Widget _buildActionButton({
     required IconData icon,
+    Color? iconColor,
     String? label,
     int count = 0,
     required VoidCallback onTap,
@@ -381,7 +448,7 @@ class FeedPostCard extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 18),
+            Icon(icon, size: 18, color: iconColor),
             const SizedBox(width: 3),
             Text(
               displayLabel,

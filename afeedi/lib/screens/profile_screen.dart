@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme/app_theme.dart';
 import '../services/local_auth_service.dart';
+import '../services/user_interaction_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -93,7 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       joinDate = 'Today';
     }
 
-    // Load persisted stats (default to new-user values)
+    // Load persisted stats
     final videosWatched = prefs.getInt('stat_videos_watched') ?? 0;
     final streakDays = prefs.getInt('stat_streak_days') ?? 1;
     final watchMinutes = prefs.getInt('stat_watch_minutes') ?? 0;
@@ -101,14 +102,30 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         ? '${watchMinutes ~/ 60}h ${watchMinutes % 60}m'
         : '${watchMinutes}m';
 
-    // Update first achievement based on account creation
-    final firstAchievementUnlocked = user != null || name != 'You';
-    if (firstAchievementUnlocked) {
+    // Load interaction stats from UserInteractionService
+    final interactionService = UserInteractionService.instance;
+    final likedCount = interactionService.getSavedContentIds().length +
+        interactionService.getFollowedCreatorIds().length; // proxies for activity
+    final savedCount = interactionService.getSavedContentIds().length;
+    final followingCount = interactionService.getFollowedCreatorIds().length;
+
+    // Update achievements based on real activity
+    if (user != null || name != 'You') {
       _achievements[0]['unlocked'] = true;
     }
     if (videosWatched > 0) {
       _achievements[1]['unlocked'] = true;
       _achievements[1]['progress'] = 1.0;
+    }
+    if (followingCount >= 1) {
+      _achievements[2]['progress'] = (followingCount / 3.0).clamp(0.0, 1.0);
+      if (followingCount >= 3) _achievements[2]['unlocked'] = true;
+    }
+    if (streakDays >= 7) {
+      _achievements[3]['unlocked'] = true;
+      _achievements[3]['progress'] = 1.0;
+    } else {
+      _achievements[3]['progress'] = streakDays / 7.0;
     }
 
     if (mounted) {
@@ -120,6 +137,9 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         _userProfile['streakDays'] = streakDays;
         _userProfile['totalWatchTime'] = watchTimeStr;
         _userProfile['level'] = (videosWatched ~/ 10) + 1;
+        _userProfile['savedCount'] = savedCount;
+        _userProfile['followingCount'] = followingCount;
+        _userProfile['likedCount'] = likedCount;
       });
     }
   }

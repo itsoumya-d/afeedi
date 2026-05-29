@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/local_auth_service.dart';
 import '../services/navigation_service.dart';
 
@@ -17,9 +18,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _analyticsEnabled = true;
   String _videoQuality = 'Auto';
   String _contentLanguage = 'English';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _notificationsEnabled = prefs.getBool('setting_notifications') ?? true;
+        _autoplayEnabled = prefs.getBool('setting_autoplay') ?? true;
+        _dataSaverMode = prefs.getBool('setting_data_saver') ?? false;
+        _darkMode = prefs.getBool('setting_dark_mode') ?? true;
+        _analyticsEnabled = prefs.getBool('setting_analytics') ?? true;
+        _videoQuality = prefs.getString('setting_video_quality') ?? 'Auto';
+        _contentLanguage = prefs.getString('setting_language') ?? 'English';
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _saveBool(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
+
+  Future<void> _saveString(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value);
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Color(0xFF0D0B1E),
+        body: Center(child: CircularProgressIndicator(color: Color(0xFF00D4FF))),
+      );
+    }
     return Scaffold(
       backgroundColor: const Color(0xFF0D0B1E),
       appBar: AppBar(
@@ -37,21 +77,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: 'Autoplay',
             subtitle: 'Automatically play next video',
             value: _autoplayEnabled,
-            onChanged: (v) => setState(() => _autoplayEnabled = v),
+            onChanged: (v) { setState(() => _autoplayEnabled = v); _saveBool('setting_autoplay', v); },
           ),
           _dropdownTile(
             icon: Icons.hd,
             title: 'Video Quality',
             value: _videoQuality,
             options: ['Auto', '1080p', '720p', '480p', '360p'],
-            onChanged: (v) => setState(() => _videoQuality = v ?? 'Auto'),
+            onChanged: (v) { setState(() => _videoQuality = v ?? 'Auto'); _saveString('setting_video_quality', v ?? 'Auto'); },
           ),
           _switchTile(
             icon: Icons.data_saver_on,
             title: 'Data Saver',
             subtitle: 'Reduce data usage while streaming',
             value: _dataSaverMode,
-            onChanged: (v) => setState(() => _dataSaverMode = v),
+            onChanged: (v) { setState(() => _dataSaverMode = v); _saveBool('setting_data_saver', v); },
           ),
           const Divider(color: Colors.white10, height: 1),
 
@@ -61,7 +101,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: 'Push Notifications',
             subtitle: 'New content from followed creators',
             value: _notificationsEnabled,
-            onChanged: (v) => setState(() => _notificationsEnabled = v),
+            onChanged: (v) { setState(() => _notificationsEnabled = v); _saveBool('setting_notifications', v); },
           ),
           const Divider(color: Colors.white10, height: 1),
 
@@ -71,14 +111,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: 'Dark Mode',
             subtitle: 'Use dark theme throughout the app',
             value: _darkMode,
-            onChanged: (v) => setState(() => _darkMode = v),
+            onChanged: (v) { setState(() => _darkMode = v); _saveBool('setting_dark_mode', v); },
           ),
           _dropdownTile(
             icon: Icons.language,
             title: 'Content Language',
             value: _contentLanguage,
             options: ['English', 'Spanish', 'French', 'German', 'Japanese', 'Hindi'],
-            onChanged: (v) => setState(() => _contentLanguage = v ?? 'English'),
+            onChanged: (v) { setState(() => _contentLanguage = v ?? 'English'); _saveString('setting_language', v ?? 'English'); },
           ),
           const Divider(color: Colors.white10, height: 1),
 
@@ -88,7 +128,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: 'Usage Analytics',
             subtitle: 'Help improve the app with anonymous data',
             value: _analyticsEnabled,
-            onChanged: (v) => setState(() => _analyticsEnabled = v),
+            onChanged: (v) { setState(() => _analyticsEnabled = v); _saveBool('setting_analytics', v); },
           ),
           _tappableTile(
             icon: Icons.delete_outline,

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/content_model.dart';
-import '../../widgets/streaming/responsive_video_player.dart';
 import '../../services/content_service.dart';
 
 class FeedPostCard extends StatelessWidget {
@@ -188,36 +187,124 @@ class FeedPostCard extends StatelessWidget {
   }
 
   Widget _buildVideoPlayer() {
+    final Color platformColor = _getPlatformColor(content.platform);
+    final String durationText = content.durationSeconds != null
+        ? _formatDuration(content.durationSeconds!)
+        : '';
+
     return Padding(
-      padding: const EdgeInsets.all(12),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          height: 200,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: GestureDetector(
-            onTap: () async {
-              await ContentService.instance.trackContentInteraction(
-                contentId: content.id,
-                interactionType: InteractionType.view,
-              );
-            },
-            child: Center(
-              child: ResponsiveVideoPlayer(
-                content: content,
-                autoPlay: false,
-                showControls: true,
-                showBranding: true,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: GestureDetector(
+        onTap: () async {
+          await ContentService.instance.trackContentInteraction(
+            contentId: content.id,
+            interactionType: InteractionType.view,
+          );
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Stack(
+            children: [
+              // Thumbnail
+              Container(
+                height: 200,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      platformColor.withOpacity(0.8),
+                      platformColor.withOpacity(0.4),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: content.thumbnailUrl != null
+                    ? Image.network(
+                        content.thumbnailUrl!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: 200,
+                        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                      )
+                    : null,
               ),
-            ),
+              // Dark overlay for play button visibility
+              Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.transparent, Colors.black.withOpacity(0.3)],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+              ),
+              // Play button
+              Positioned.fill(
+                child: Center(
+                  child: Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.play_arrow_rounded,
+                      color: platformColor,
+                      size: 32,
+                    ),
+                  ),
+                ),
+              ),
+              // Duration badge
+              if (durationText.isNotEmpty)
+                Positioned(
+                  right: 8,
+                  bottom: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.75),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      durationText,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),
     );
+  }
+
+  Color _getPlatformColor(PlatformType platform) {
+    switch (platform) {
+      case PlatformType.youtube:
+        return const Color(0xFFFF0000);
+      case PlatformType.instagram:
+        return const Color(0xFFE1306C);
+      case PlatformType.tiktok:
+        return const Color(0xFF010101);
+      case PlatformType.facebook:
+        return const Color(0xFF1877F2);
+      default:
+        return AppTheme.primaryCyan;
+    }
+  }
+
+  String _formatDuration(int seconds) {
+    final m = seconds ~/ 60;
+    final s = seconds % 60;
+    return '$m:${s.toString().padLeft(2, '0')}';
   }
 
   Widget _buildActions() {

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/content_model.dart';
 import '../../services/content_service.dart';
-import '../../widgets/streaming/responsive_video_player.dart';
 import '../../services/analytics_service.dart';
 
 class ShortsTab extends StatefulWidget {
@@ -213,30 +212,112 @@ class _ShortsTabState extends State<ShortsTab> {
     );
   }
   
+  Color _getPlatformColor(PlatformType platform) {
+    switch (platform) {
+      case PlatformType.youtube:
+        return const Color(0xFFFF0000);
+      case PlatformType.instagram:
+        return const Color(0xFFE1306C);
+      case PlatformType.tiktok:
+        return const Color(0xFF010101);
+      case PlatformType.facebook:
+        return const Color(0xFF1877F2);
+      default:
+        return AppTheme.primaryCyan;
+    }
+  }
+
   Widget _buildShortItemFromContent(Content content) {
+    final platformColor = _getPlatformColor(content.platform);
+
     return Stack(
       children: [
-        // Video player
+        // Background: thumbnail image with gradient fallback
         Positioned.fill(
-          child: ResponsiveVideoPlayer(
-            content: content,
-            autoPlay: true,
-            showControls: false,
-            showBranding: true,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.black,
+                  platformColor.withOpacity(0.4),
+                  Colors.black,
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: content.thumbnailUrl != null
+                ? Image.network(
+                    content.thumbnailUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  )
+                : null,
           ),
         ),
-        
-        // Overlay with content info and interactions
+
+        // Dark gradient overlay at bottom for readability
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
+                begin: Alignment.center,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+        ),
+
+        // Platform logo top-right
+        Positioned(
+          top: 48,
+          right: 16,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: platformColor,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              content.platform.name.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+        ),
+
+        // Play button in center
+        Positioned.fill(
+          child: Center(
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white.withOpacity(0.6), width: 2),
+              ),
+              child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 40),
+            ),
+          ),
+        ),
+
+        // Interaction buttons right side
         Positioned(
           right: 12,
-          bottom: 80,
+          bottom: 100,
           child: _buildInteractionButtons(content),
         ),
-        
-        // Content info
+
+        // Content info bottom left
         Positioned(
           left: 12,
-          bottom: 80,
+          bottom: 100,
           right: 80,
           child: _buildContentInfo(content),
         ),

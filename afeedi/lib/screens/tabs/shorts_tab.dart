@@ -244,12 +244,19 @@ class _ShortsTabState extends State<ShortsTab> {
     );
   }
   
+  String _formatCount(int count) {
+    if (count >= 1000000000) return '${(count / 1000000000).toStringAsFixed(1)}B';
+    if (count >= 1000000) return '${(count / 1000000).toStringAsFixed(1)}M';
+    if (count >= 1000) return '${(count / 1000).toStringAsFixed(1)}K';
+    return count.toString();
+  }
+
   Widget _buildInteractionButtons(Content content) {
     return Column(
       children: [
         _buildActionButton(
           icon: Icons.favorite_border,
-          label: content.likeCount.toString(),
+          label: _formatCount(content.likeCount),
           onTap: () => _handleLike(content),
         ),
         const SizedBox(height: 20),

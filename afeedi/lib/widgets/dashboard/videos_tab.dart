@@ -381,7 +381,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      video.publishedAt?.toString().split(' ')[0] ?? 'Unknown Date',
+                      video.publishedAt != null ? _formatTimeAgo(video.publishedAt!) : '',
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.5),
                         fontSize: 9,
@@ -398,13 +398,21 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
   }
   
   String _formatCount(int count) {
-    if (count >= 1000000) {
-      return '${(count / 1000000).toStringAsFixed(1)}M';
-    } else if (count >= 1000) {
-      return '${(count / 1000).toStringAsFixed(1)}K';
-    } else {
-      return count.toString();
-    }
+    if (count >= 1000000000) return '${(count / 1000000000).toStringAsFixed(1)}B';
+    if (count >= 1000000) return '${(count / 1000000).toStringAsFixed(1)}M';
+    if (count >= 1000) return '${(count / 1000).toStringAsFixed(1)}K';
+    return count.toString();
+  }
+
+  String _formatTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+    if (difference.inDays >= 365) return '${(difference.inDays / 365).floor()}y ago';
+    if (difference.inDays >= 30) return '${(difference.inDays / 30).floor()}mo ago';
+    if (difference.inDays > 0) return '${difference.inDays}d ago';
+    if (difference.inHours > 0) return '${difference.inHours}h ago';
+    if (difference.inMinutes > 0) return '${difference.inMinutes}m ago';
+    return 'Just now';
   }
 
   Color _getPlatformColor(String platform) {

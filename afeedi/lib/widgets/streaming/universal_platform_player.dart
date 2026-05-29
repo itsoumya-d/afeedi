@@ -113,7 +113,15 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
           });
         }
       } else if (_isSocialMediaPlatform(widget.content.platform)) {
-        await _createSocialMediaPlayer();
+        // Instagram/TikTok/Facebook require OAuth tokens for embedding.
+        // Show thumbnail + "Watch on Platform" UI instead.
+        setState(() {
+          _isLoading = false;
+          _hasError = false;
+          _showFallbackOptions = false;
+          _playerResult = null;
+        });
+        widget.onPlayerReady?.call();
       } else if (kIsWeb && _containerId != null) {
         await _createWebIframe();
       } else {

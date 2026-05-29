@@ -20,6 +20,7 @@ import '../screens/calendar_screen.dart';
 import '../screens/create_content_screen.dart';
 import '../screens/player_screen.dart';
 import '../screens/privacy_policy_screen.dart';
+import '../screens/premium_screen.dart';
 
 class NavigationService {
   static NavigationService? _instance;
@@ -97,6 +98,7 @@ class AppRoutes {
 
   // Info routes
   static const String privacyPolicy = '/privacy-policy';
+  static const String premium = '/premium';
 
   // Admin routes
   static const String adminPanel = '/admin';
@@ -136,5 +138,6 @@ class AppRoutes {
         },
         '/onboarding': (_) => const PlaceholderScreen(title: 'Onboarding', icon: Icons.start),
         AppRoutes.privacyPolicy: (_) => const PrivacyPolicyScreen(),
+        AppRoutes.premium: (_) => const PremiumScreen(),
       };
 }

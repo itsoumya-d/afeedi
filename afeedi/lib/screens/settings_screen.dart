@@ -73,6 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: [
+          _buildPremiumBanner(context),
           _sectionHeader('Playback'),
           _switchTile(
             icon: Icons.play_circle_outline,
@@ -193,6 +194,49 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 32),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumBanner(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, AppRoutes.premium),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF003A4A), Color(0xFF2A1A4A)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFF00D4FF).withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.bolt, color: Color(0xFF00D4FF), size: 28),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Upgrade to Pro', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                  SizedBox(height: 2),
+                  Text('Ad-free, AI feed, unlimited saves', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF00D4FF),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text('See Plans', style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
       ),
     );
   }

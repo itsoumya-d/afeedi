@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/content_model.dart';
 import '../../services/content_service.dart';
 import '../../services/analytics_service.dart';
+import '../../services/navigation_service.dart';
 import '../../services/user_interaction_service.dart';
 
 class ShortsTab extends StatefulWidget {
@@ -232,7 +234,21 @@ class _ShortsTabState extends State<ShortsTab> {
   Widget _buildShortItemFromContent(Content content) {
     final platformColor = _getPlatformColor(content.platform);
 
-    return Stack(
+    return GestureDetector(
+      onTap: () async {
+        if (content.platform == PlatformType.youtube) {
+          Navigator.pushNamed(context, AppRoutes.player, arguments: content);
+        } else {
+          final url = content.videoUrl;
+          if (url != null && url.isNotEmpty) {
+            final uri = Uri.tryParse(url);
+            if (uri != null) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
+          }
+        }
+      },
+      child: Stack(
       children: [
         // Background: thumbnail image with gradient fallback
         Positioned.fill(
@@ -325,9 +341,10 @@ class _ShortsTabState extends State<ShortsTab> {
           child: _buildContentInfo(content),
         ),
       ],
+      ),
     );
   }
-  
+
   Widget _buildFollowButton(String creatorId) {
     final isFollowed = _followedCreators.contains(creatorId);
     return GestureDetector(

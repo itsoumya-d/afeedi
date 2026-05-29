@@ -161,10 +161,12 @@ class ChatController extends ChangeNotifier {
         ];
         break;
       case 1:
+        // Genre selection step — show genre category quick-picks
         _currentSuggestions = [
-          'My name is Alex',
-          'Call me Sam',
-          'I\'m Jordan'
+          'Comedy & Humor',
+          'Tech & Gaming',
+          'Fitness & Health',
+          'Music & Dance',
         ];
         break;
       case 2:
@@ -173,6 +175,14 @@ class ChatController extends ChangeNotifier {
           'I enjoy educational content',
           'I like music and entertainment',
           'I prefer short funny clips'
+        ];
+        break;
+      case 3:
+        // Personal info step — show name suggestions
+        _currentSuggestions = [
+          'My name is Alex',
+          'Call me Sam',
+          'I\'m Jordan',
         ];
         break;
       case 5:
@@ -217,6 +227,10 @@ class ChatController extends ChangeNotifier {
   }
 
   void handleGenreContinue() {
+    if (_selectedGenres.length < 3) {
+      showBotMessage('Please pick at least 3 genres so I can build your perfect feed! You\'ve selected ${_selectedGenres.length} so far.');
+      return;
+    }
     final genreNames = _selectedGenres.map((g) => g.name).join(', ');
     addUserMessage('I\'m interested in: $genreNames');
     processUserInput('Selected ${_selectedGenres.length} genres');

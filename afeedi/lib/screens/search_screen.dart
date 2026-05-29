@@ -22,6 +22,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   String _query = '';
   late TabController _tabController;
   List<String> _recentSearches = [];
+  PlatformType? _selectedPlatform;
 
   final List<String> _trendingTopics = [
     'Flutter', 'JavaScript', 'Python', 'React', 'AI', 'Machine Learning',
@@ -92,12 +93,18 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   }
 
   List<Content> get _filteredResults {
+    var results = _results;
+    // Apply platform filter
+    if (_selectedPlatform != null) {
+      results = results.where((c) => c.platform == _selectedPlatform).toList();
+    }
+    // Apply content type filter (tab)
     final tab = _tabController.index;
-    if (tab == 0) return _results;
+    if (tab == 0) return results;
     final types = [null, ContentType.video, ContentType.short, ContentType.reel];
     final type = types[tab];
-    if (type == null) return _results;
-    return _results.where((c) => c.contentType == type).toList();
+    if (type == null) return results;
+    return results.where((c) => c.contentType == type).toList();
   }
 
   @override
@@ -373,17 +380,17 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
           const SizedBox(height: 12),
           Row(
             children: [
-              _platformChip('YouTube', const Color(0xFFFF0000), Icons.play_circle_filled),
+              _platformChip('YouTube', const Color(0xFFFF0000), Icons.play_circle_filled, PlatformType.youtube),
               const SizedBox(width: 10),
-              _platformChip('Instagram', const Color(0xFFE1306C), Icons.camera_alt),
+              _platformChip('Instagram', const Color(0xFFE1306C), Icons.camera_alt, PlatformType.instagram),
             ],
           ),
           const SizedBox(height: 10),
           Row(
             children: [
-              _platformChip('TikTok', const Color(0xFF69C9D0), Icons.music_note),
+              _platformChip('TikTok', const Color(0xFF69C9D0), Icons.music_note, PlatformType.tiktok),
               const SizedBox(width: 10),
-              _platformChip('Facebook', const Color(0xFF1877F2), Icons.facebook),
+              _platformChip('Facebook', const Color(0xFF1877F2), Icons.facebook, PlatformType.facebook),
             ],
           ),
           const SizedBox(height: 28),
@@ -404,25 +411,34 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
     );
   }
 
-  Widget _platformChip(String name, Color color, IconData icon) {
+  Widget _platformChip(String name, Color color, IconData icon, PlatformType platform) {
+    final isSelected = _selectedPlatform == platform;
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          _searchController.text = name;
-          _search(name);
+          setState(() {
+            _selectedPlatform = isSelected ? null : platform;
+          });
+          // If there's already a search query, re-run search to apply filter
+          if (_query.isNotEmpty) _search(_query);
         },
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
+            color: isSelected ? color.withValues(alpha: 0.25) : color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withValues(alpha: 0.3)),
+            border: Border.all(color: isSelected ? color : color.withValues(alpha: 0.3), width: isSelected ? 2 : 1),
           ),
           child: Row(
             children: [
               Icon(icon, color: color, size: 20),
               const SizedBox(width: 8),
-              Text(name, style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 14)),
+              Flexible(child: Text(name, style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 14), overflow: TextOverflow.ellipsis)),
+              if (isSelected) ...[
+                const SizedBox(width: 4),
+                Icon(Icons.check_circle, color: color, size: 14),
+              ],
             ],
           ),
         ),

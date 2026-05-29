@@ -43,7 +43,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   late AnimationController _filterAnimationController;
   late Animation<double> _filterAnimation;
   
-  final List<Map<String, dynamic>> _scheduledContent = [
+  late final List<Map<String, dynamic>> _scheduledContent = [
     {
       'id': '1',
       'title': 'Morning Tech News',
@@ -57,6 +57,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       'keywords': ['tech', 'news', 'daily'],
       'educationValue': 30,
       'entertainmentValue': 70,
+      'date': DateTime.now(),
     },
     {
       'id': '2',
@@ -71,6 +72,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       'keywords': ['flutter', 'programming', 'tutorial'],
       'educationValue': 90,
       'entertainmentValue': 10,
+      'date': DateTime.now(),
     },
     {
       'id': '3',
@@ -85,6 +87,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       'keywords': ['music', 'relaxing', 'chill'],
       'educationValue': 5,
       'entertainmentValue': 95,
+      'date': DateTime.now(),
     },
     {
       'id': '4',
@@ -99,6 +102,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       'keywords': ['mathematics', 'calculus', 'study'],
       'educationValue': 95,
       'entertainmentValue': 5,
+      'date': DateTime.now().add(const Duration(days: 2)),
     },
   ];
   
@@ -1179,16 +1183,45 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   
   List<Map<String, dynamic>> _getContentForDate(DateTime date) {
     try {
-      return _getFilteredContent().where((content) {
-        try {
-          // Mock logic - in real app, this would check actual scheduled dates
-          final contentDay = date.day;
-          return contentDay % 3 == 0 || contentDay % 5 == 0;
-        } catch (e) {
-          debugPrint('Error checking content for date: $e');
-          return false;
-        }
+      // Check Google Calendar events for this date
+      final gcalEventsForDate = _gcalEvents.where((event) {
+        return event.start.year == date.year &&
+            event.start.month == date.month &&
+            event.start.day == date.day;
       }).toList();
+
+      // Check scheduled content items that have a 'date' field matching this date
+      final scheduledForDate = _getFilteredContent().where((content) {
+        final rawDate = content['date'];
+        if (rawDate == null) return false;
+        final contentDate = rawDate is DateTime ? rawDate : null;
+        if (contentDate == null) return false;
+        return contentDate.year == date.year &&
+            contentDate.month == date.month &&
+            contentDate.day == date.day;
+      }).toList();
+
+      // Combine: if Google Calendar events exist for this date, show them as entries
+      if (gcalEventsForDate.isNotEmpty) {
+        final gcalItems = gcalEventsForDate.map((e) => {
+          'id': e.id,
+          'title': e.title,
+          'time': e.isAllDay ? 'All day' :
+              '${e.start.hour.toString().padLeft(2, '0')}:${e.start.minute.toString().padLeft(2, '0')}',
+          'duration': e.end != null ? e.end!.difference(e.start).inMinutes : 60,
+          'platform': 'Google Calendar',
+          'creator': e.location ?? '',
+          'thumbnail': null,
+          'type': 'calendar',
+          'category': 'all',
+          'keywords': <String>[],
+          'educationValue': 50,
+          'entertainmentValue': 50,
+          'date': e.start,
+        }).toList();
+        return [...gcalItems, ...scheduledForDate];
+      }
+      return scheduledForDate;
     } catch (e) {
       debugPrint('Error in _getContentForDate: $e');
       return [];

@@ -1,21 +1,39 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:flutter/foundation.dart';
-import 'services/navigation_service.dart';
-import 'services/user_interaction_service.dart';
 import 'services/analytics_service.dart';
-import 'services/onboarding_service.dart';
-import 'services/recommendation_integration_service.dart';
-import 'services/platform_view_registration_service.dart';
-import 'services/local_auth_service.dart';
 import 'services/content_service.dart';
+import 'services/error_reporting_service.dart';
+import 'services/local_auth_service.dart';
+import 'services/navigation_service.dart';
+import 'services/onboarding_service.dart';
+import 'services/platform_view_registration_service.dart';
+import 'services/recommendation_integration_service.dart';
+import 'services/user_interaction_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/storage/local_storage_service.dart';
 
-void main() async {
+void main() {
+  // Wrap in runZonedGuarded so uncaught async errors are captured by
+  // ErrorReportingService rather than silently crashing.
+  runZonedGuarded(
+    _appMain,
+    ErrorReportingService.instance.onZoneError,
+  );
+}
+
+/// Exposed for integration tests. Initializes services and runs the app.
+// ignore: library_private_types_in_public_api
+Future<void> appMain() => _appMain();
+
+Future<void> _appMain() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  // Initialize error reporting first so all subsequent errors are captured
+  ErrorReportingService.instance.initialize();
+
   try {
     // Initialize Hive for local storage
     await Hive.initFlutter();

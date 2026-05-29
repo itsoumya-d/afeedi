@@ -6,6 +6,7 @@ import 'enhanced_recommendation_service.dart';
 import 'onboarding_service.dart';
 import 'auth_service.dart';
 import 'youtube_live_content_service.dart';
+import 'api_content_service.dart';
 
 class ContentService {
   static final ContentService _instance = ContentService._internal();
@@ -628,12 +629,29 @@ class ContentService {
   // Live content fetched from YouTube (primary source)
   List<Content> _liveContent = [];
 
-  /// Call once at app startup. Fetches real YouTube content; falls back to
-  /// seed data silently if offline or YouTube is unavailable.
+  /// Call once at app startup.
+  /// Priority: local API server → youtube_explode_dart → seed data.
   Future<void> initialize() async {
+    // 1. Try local API backend first (the "local MCP environment")
+    try {
+      final apiSvc = ApiContentService.instance;
+      final available = await apiSvc.checkHealth();
+      if (available) {
+        final apiItems = await apiSvc.getFeed(limit: 50);
+        if (apiItems.isNotEmpty) {
+          _liveContent = apiItems;
+          debugPrint('ContentService: ${_liveContent.length} items from local API');
+          return;
+        }
+      }
+    } catch (e) {
+      debugPrint('ContentService: local API unavailable ($e), trying YouTube');
+    }
+
+    // 2. Fallback: youtube_explode_dart (real YouTube, no API key)
     try {
       _liveContent = await YouTubeLiveContentService.instance.getContent();
-      debugPrint('ContentService: ${_liveContent.length} live items loaded');
+      debugPrint('ContentService: ${_liveContent.length} items from YouTube');
     } catch (e) {
       debugPrint('ContentService initialize error (using seeds): $e');
     }
@@ -641,6 +659,18 @@ class ContentService {
 
   /// Force-refresh live content (call from pull-to-refresh).
   Future<void> refreshContent() async {
+    // Prefer local API, fall back to YouTube
+    try {
+      if (ApiContentService.instance.isAvailable) {
+        final items = await ApiContentService.instance.getFeed(limit: 50);
+        if (items.isNotEmpty) {
+          _liveContent = items;
+          return;
+        }
+      }
+    } catch (e) {
+      debugPrint('ContentService refresh API error: $e');
+    }
     try {
       _liveContent =
           await YouTubeLiveContentService.instance.getContent(forceRefresh: true);
@@ -718,16 +748,27 @@ class ContentService {
       return _withCreatorIds(localResults.take(limit).toList());
     }
 
-    // Supplement with live YouTube search if local results are thin
+    // Supplement with API/YouTube search if local results are thin
     try {
-      final liveResults = await YouTubeLiveContentService.instance
-          .searchLive(query, limit: limit - localResults.length);
-      final existingIds = localResults.map((c) => c.platformContentId).toSet();
-      final newItems =
-          liveResults.where((c) => !existingIds.contains(c.platformContentId));
-      localResults = [...localResults, ...newItems];
+      final apiSvc = ApiContentService.instance;
+      if (apiSvc.isAvailable) {
+        final apiResults = await apiSvc.search(query, limit: limit - localResults.length);
+        final existingIds = localResults.map((c) => c.platformContentId).toSet();
+        localResults = [
+          ...localResults,
+          ...apiResults.where((c) => !existingIds.contains(c.platformContentId)),
+        ];
+      } else {
+        final liveResults = await YouTubeLiveContentService.instance
+            .searchLive(query, limit: limit - localResults.length);
+        final existingIds = localResults.map((c) => c.platformContentId).toSet();
+        localResults = [
+          ...localResults,
+          ...liveResults.where((c) => !existingIds.contains(c.platformContentId)),
+        ];
+      }
     } catch (e) {
-      debugPrint('ContentService live search error: $e');
+      debugPrint('ContentService search supplement error: $e');
     }
 
     return _withCreatorIds(localResults.take(limit).toList());

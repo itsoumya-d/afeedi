@@ -449,7 +449,7 @@ class AnalyticsService {
     final event = {
       'event_type': 'search',
       'event_name': 'search_query',
-      'query': query,
+      'query_length': query.length,
       'result_count': resultCount,
       'timestamp': DateTime.now().toIso8601String(),
       'session_id': await _getSessionId(),

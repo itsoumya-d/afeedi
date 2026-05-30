@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../services/content_service.dart';
+import '../services/navigation_service.dart';
 import '../models/content_model.dart';
 
 enum _SortMode { recentlySaved, alphabetical, byPlatform }
@@ -44,16 +45,19 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
       return;
     }
 
-    final allContent = await ContentService.instance.getVideos(limit: 200);
-    final matched =
-        allContent.where((c) => savedIds.contains(c.id)).toList();
-
-    if (mounted) {
-      setState(() {
-        _saved = matched;
-        _displayed = List.from(matched);
-        _isLoading = false;
-      });
+    try {
+      final allContent = await ContentService.instance.getVideos(limit: 200);
+      final matched =
+          allContent.where((c) => savedIds.contains(c.id)).toList();
+      if (mounted) {
+        setState(() {
+          _saved = matched;
+          _displayed = List.from(matched);
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -248,9 +252,13 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
   }
 
   Widget _buildSavedTile(Content content) {
-    return SizedBox(
+    return Semantics(
+      label: '${content.title ?? 'Untitled'}. ${content.creatorName ?? ''}. Bookmarked',
+      button: true,
+      child: SizedBox(
       height: 80,
       child: ListTile(
+        onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         leading: ClipRRect(
@@ -315,6 +323,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
           tooltip: 'Remove bookmark',
           onPressed: () => _unsave(content),
         ),
+      ),
       ),
     );
   }

@@ -226,7 +226,6 @@ class AuthService {
          additionalData: {
            'provider': provider,
            'user_id': userId,
-           'email': email,
          },
        );
       

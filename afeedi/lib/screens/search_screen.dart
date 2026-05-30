@@ -18,7 +18,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   List<Content> _allContent = [];
   List<Content> _results = [];
   List<Content> _trendingContent = [];
-  final bool _isLoading = false;
+  bool _isLoading = false;
   bool _hasSearched = false;
   String _query = '';
   late TabController _tabController;
@@ -69,13 +69,24 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   }
 
   Future<void> _loadContent() async {
-    final content = await ContentService.instance.getFeedContent(limit: 100);
-    if (mounted) setState(() => _allContent = content);
+    if (mounted) setState(() => _isLoading = true);
+    try {
+      final content = await ContentService.instance.getFeedContent(limit: 100);
+      if (mounted) setState(() => _allContent = content);
+    } catch (_) {
+      // silently fall through — seed data is in-memory so this shouldn't fail
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _loadTrending() async {
-    final trending = await ContentService.instance.getTrendingVideos(limit: 10);
-    if (mounted) setState(() => _trendingContent = trending);
+    try {
+      final trending = await ContentService.instance.getTrendingVideos(limit: 10);
+      if (mounted) setState(() => _trendingContent = trending);
+    } catch (_) {
+      if (mounted) setState(() => _trendingContent = []);
+    }
   }
 
   Future<void> _loadRecentSearches() async {

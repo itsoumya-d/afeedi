@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../services/content_service.dart';
+import '../services/navigation_service.dart';
 import '../models/content_model.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -63,39 +64,42 @@ class _HistoryScreenState extends State<HistoryScreen> {
       return;
     }
 
-    final allContent =
-        await ContentService.instance.getVideos(limit: 200);
-    final contentMap = {for (final c in allContent) c.id: c};
+    try {
+      final allContent =
+          await ContentService.instance.getVideos(limit: 200);
+      final contentMap = {for (final c in allContent) c.id: c};
 
-    // Restore order from orderedIds, then append any extras from progressMap
-    final extras =
-        progressMap.keys.where((id) => !orderedIds.contains(id)).toList();
-    final fullOrder = [...orderedIds, ...extras];
+      final extras =
+          progressMap.keys.where((id) => !orderedIds.contains(id)).toList();
+      final fullOrder = [...orderedIds, ...extras];
 
-    final matched = fullOrder
-        .where((id) => allIds.contains(id))
-        .map((id) => contentMap[id])
-        .whereType<Content>()
-        .toList();
+      final matched = fullOrder
+          .where((id) => allIds.contains(id))
+          .map((id) => contentMap[id])
+          .whereType<Content>()
+          .toList();
 
-    final continueWatching = matched
-        .where((c) => (progressMap[c.id] ?? 0.0) < 0.8 &&
-            (progressMap[c.id] ?? 0.0) > 0.0)
-        .toList();
+      final continueWatching = matched
+          .where((c) => (progressMap[c.id] ?? 0.0) < 0.8 &&
+              (progressMap[c.id] ?? 0.0) > 0.0)
+          .toList();
 
-    final history = matched
-        .where((c) =>
-            (progressMap[c.id] ?? 0.0) >= 0.8 ||
-            progressMap[c.id] == null)
-        .toList();
+      final history = matched
+          .where((c) =>
+              (progressMap[c.id] ?? 0.0) >= 0.8 ||
+              progressMap[c.id] == null)
+          .toList();
 
-    if (mounted) {
-      setState(() {
-        _progressMap = progressMap;
-        _continueWatching = continueWatching;
-        _history = history;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _progressMap = progressMap;
+          _continueWatching = continueWatching;
+          _history = history;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -393,7 +397,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final isContinueWatching =
         _continueWatching.any((c) => c.id == content.id);
 
-    return Container(
+    return Semantics(
+      label: '${content.title ?? 'Untitled'}. ${content.creatorName ?? ''}. ${isContinueWatching ? 'In progress' : 'Watched'}',
+      button: true,
+      child: GestureDetector(
+        onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
+        child: Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
         color: const Color(0xFF1A1A2E),
@@ -479,6 +488,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
           ],
         ),
+        ),
+      ),
       ),
     );
   }

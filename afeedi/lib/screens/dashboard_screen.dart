@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme/app_theme.dart';
 import '../services/navigation_service.dart';
 import '../widgets/dashboard/home_tab.dart';
@@ -19,6 +20,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     with TickerProviderStateMixin {
   int _currentIndex = 0;
   late PageController _pageController;
+  bool _hasUnreadNotifications = false;
   
   final List<Map<String, dynamic>> _tabs = [
     {
@@ -57,7 +59,8 @@ class _DashboardScreenState extends State<DashboardScreen>
   void initState() {
     super.initState();
     _pageController = PageController();
-    
+    _loadUnreadState();
+
     // Handle initial tab from navigation arguments
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
@@ -66,6 +69,18 @@ class _DashboardScreenState extends State<DashboardScreen>
         _onTabTapped(initialTab);
       }
     });
+  }
+
+  Future<void> _loadUnreadState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasUnread = prefs.getBool('has_unread_notifications') ?? true;
+    if (mounted) setState(() => _hasUnreadNotifications = hasUnread);
+  }
+
+  Future<void> _clearUnreadState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('has_unread_notifications', false);
+    if (mounted) setState(() => _hasUnreadNotifications = false);
   }
 
   @override
@@ -204,10 +219,11 @@ class _DashboardScreenState extends State<DashboardScreen>
             ),
           ),
           Semantics(
-            label: 'Notifications',
+            label: _hasUnreadNotifications ? 'Notifications, unread' : 'Notifications',
             button: true,
             child: IconButton(
             onPressed: () {
+              _clearUnreadState();
               Navigator.pushNamed(context, AppRoutes.notifications);
             },
             tooltip: 'Notifications',
@@ -218,18 +234,19 @@ class _DashboardScreenState extends State<DashboardScreen>
                   color: Colors.white,
                   size: 22,
                 ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: AppTheme.primaryPink,
-                      shape: BoxShape.circle,
+                if (_hasUnreadNotifications)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: AppTheme.primaryPink,
+                        shape: BoxShape.circle,
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
             ),

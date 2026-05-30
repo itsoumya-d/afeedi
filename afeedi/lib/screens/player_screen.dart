@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/content_model.dart';
-import '../services/user_interaction_service.dart';
-import '../widgets/streaming/youtube_player_widget.dart';
+import '../services/content_service.dart';
+import '../widgets/streaming/enhanced_youtube_player.dart';
 import '../widgets/streaming/social_media_video_player.dart';
 
 class PlayerScreen extends StatefulWidget {
@@ -15,16 +15,13 @@ class PlayerScreen extends StatefulWidget {
 }
 
 class _PlayerScreenState extends State<PlayerScreen> {
-  late bool _isLiked;
-  late bool _isSaved;
+  bool _isLiked = false;
+  bool _isSaved = false;
   late DateTime _watchStartTime;
 
   @override
   void initState() {
     super.initState();
-    final svc = UserInteractionService.instance;
-    _isLiked = svc.isLiked(widget.content.id);
-    _isSaved = svc.isSaved(widget.content.id);
     _watchStartTime = DateTime.now();
     _incrementVideoCount();
   }
@@ -63,7 +60,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // App bar row
+            // App bar row — 44dp minimum touch on back button via IconButton default
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(
@@ -79,7 +76,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
             // Video player
             Expanded(
               child: widget.content.platform == PlatformType.youtube
-                  ? YouTubePlayerWidget(content: widget.content, autoPlay: true)
+                  ? EnhancedYouTubePlayer(content: widget.content, autoPlay: true)
                   : SocialMediaVideoPlayer(content: widget.content, autoPlay: true),
             ),
             // Info section
@@ -88,6 +85,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     widget.content.title ?? 'Untitled',
@@ -116,18 +114,13 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       _ActionButton(
                         icon: _isLiked ? Icons.favorite : Icons.favorite_border,
                         color: _isLiked ? Colors.red : Colors.white,
-                        label: _formatCount(
-                          UserInteractionService.instance.getLikeCount(
-                            widget.content.id,
-                            baseCount: widget.content.likeCount,
-                          ),
-                        ),
+                        label: _formatCount(widget.content.likeCount),
                         onTap: () async {
-                          final next = await UserInteractionService.instance.toggleLike(
-                            widget.content.id,
-                            baseCount: widget.content.likeCount,
+                          await ContentService.instance.trackContentInteraction(
+                            contentId: widget.content.id,
+                            interactionType: InteractionType.like,
                           );
-                          setState(() => _isLiked = next);
+                          setState(() => _isLiked = !_isLiked);
                         },
                       ),
                       const SizedBox(width: 20),
@@ -137,10 +130,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
                         color: _isSaved ? Colors.cyan : Colors.white,
                         label: _isSaved ? 'Saved' : 'Save',
                         onTap: () async {
-                          final next = await UserInteractionService.instance.toggleSave(
-                            widget.content.id,
+                          await ContentService.instance.trackContentInteraction(
+                            contentId: widget.content.id,
+                            interactionType: InteractionType.save,
                           );
-                          setState(() => _isSaved = next);
+                          setState(() => _isSaved = !_isSaved);
                         },
                       ),
                     ],

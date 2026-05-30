@@ -265,6 +265,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
                             fontSize: 14,
                             fontWeight: isUnread ? FontWeight.w600 : FontWeight.normal,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       if (isUnread)
@@ -308,9 +310,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
         children: [
           Icon(Icons.notifications_none, size: 64, color: Colors.white.withValues(alpha: 0.2)),
           const SizedBox(height: 16),
-          const Text('No notifications', style: TextStyle(color: Colors.white54, fontSize: 16)),
+          const Text(
+            'No notifications',
+            style: TextStyle(color: Colors.white54, fontSize: 16),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           const SizedBox(height: 8),
-          const Text('You\'re all caught up!', style: TextStyle(color: Colors.white38, fontSize: 13)),
+          const Text(
+            "You're all caught up!",
+            style: TextStyle(color: Colors.white38, fontSize: 13),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );

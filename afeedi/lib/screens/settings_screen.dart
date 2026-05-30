@@ -5,6 +5,7 @@ import '../services/navigation_service.dart';
 import '../services/locale_service.dart';
 import '../services/subscription_service.dart';
 import '../widgets/common/language_selector_sheet.dart';
+import '../main.dart' show themeModeNotifier;
 
 /// Settings screen — grouped sections with SwitchListTile, dropdown tiles,
 /// and navigation tiles (chevron_right).
@@ -205,6 +206,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: (v) {
               setState(() => _darkMode = v);
               _saveBool('setting_dark_mode', v);
+              themeModeNotifier.value = v ? ThemeMode.dark : ThemeMode.light;
             },
             activeColor: const Color(0xFF00D4FF),
             activeTrackColor:

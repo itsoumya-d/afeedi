@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../services/local_auth_service.dart';
@@ -186,13 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     }
   }
 
-  String _monthName(int month) {
-    const months = [
-      '', 'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
-    ];
-    return months[month];
-  }
+  String _monthName(int month) => DateFormat.MMMM().format(DateTime(2000, month));
 
   @override
   void dispose() {

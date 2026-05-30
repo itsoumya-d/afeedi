@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/enhanced_calendar_service.dart';
 import '../../services/analytics_service.dart';
@@ -1048,9 +1049,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
 
   Widget _buildSelectedDatePanel() {
     final items = _getContentForDate(_selectedDate);
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    final label = '${months[_selectedDate.month - 1]} ${_selectedDate.day}, ${_selectedDate.year}';
+    final label = DateFormat.yMMMd().format(_selectedDate);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -1243,19 +1242,14 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   }
   
   String _getHeaderText() {
-    final months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    
     if (_viewMode == 'month') {
-      return '${months[_selectedDate.month - 1]} ${_selectedDate.year}';
+      return DateFormat.yMMMM().format(_selectedDate);
     } else if (_viewMode == 'week') {
       final startOfWeek = _selectedDate.subtract(Duration(days: _selectedDate.weekday - 1));
       final endOfWeek = startOfWeek.add(const Duration(days: 6));
-      return '${startOfWeek.day} - ${endOfWeek.day} ${months[_selectedDate.month - 1]}';
+      return '${startOfWeek.day}–${endOfWeek.day} ${DateFormat.MMMM().format(_selectedDate)}';
     } else {
-      return '${_selectedDate.day} ${months[_selectedDate.month - 1]} ${_selectedDate.year}';
+      return DateFormat.yMMMMd().format(_selectedDate);
     }
   }
   

@@ -233,8 +233,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
 
   Widget _buildNotificationTile(Map<String, dynamic> notification) {
     final isUnread = !(notification['read'] as bool);
-    return InkWell(
-      onTap: () => _markRead(notification),
+    final title = notification['title'] as String;
+    return Semantics(
+      label: '$title, ${isUnread ? 'unread' : 'read'} notification',
+      button: true,
+      child: InkWell(
+        onTap: () => _markRead(notification),
       child: Container(
         color: isUnread ? const Color(0xFF00D4FF).withValues(alpha: 0.04) : Colors.transparent,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -300,6 +304,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
           ],
         ),
       ),
+    ),
     );
   }
 

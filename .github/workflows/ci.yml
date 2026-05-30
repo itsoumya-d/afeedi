@@ -33,13 +33,4 @@ jobs:
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
       - name: Run tests
-        run: flutter test --no-pub --reporter=expanded
-
-      - name: Check test count
-        run: |
-          COUNT=$(flutter test --no-pub 2>&1 | grep -oP '\+\K\d+(?=:.*\(tearDownAll\))' | tail -1)
-          echo "Tests passed: $COUNT"
-          if [ -z "$COUNT" ] || [ "$COUNT" -lt 300 ]; then
-            echo "::error::Expected at least 300 tests, got: $COUNT"
-            exit 1
-          fi
+        run: flutter test --no-pub

@@ -84,6 +84,7 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
+          tooltip: 'Back',
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
@@ -268,7 +269,10 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
     final platformName = platformNames[content.platform] ?? 'Video';
     final thumbnail = content.thumbnailUrl;
 
-    return GestureDetector(
+    return Semantics(
+      label: 'Rank $rank: ${content.title ?? 'Video'}, $platformName. Double-tap to play.',
+      button: true,
+      child: GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, AppRoutes.player, arguments: content);
         AnalyticsService.instance.trackUserInteraction(
@@ -366,11 +370,14 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
             ),
             const Padding(
               padding: EdgeInsets.only(right: 12),
-              child: Icon(Icons.play_circle_outline, color: Colors.white38, size: 22),
+              child: ExcludeSemantics(
+                child: Icon(Icons.play_circle_outline, color: Colors.white38, size: 22),
+              ),
             ),
           ],
         ),
       ),
+    ),
     );
   }
 
@@ -384,7 +391,10 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
   }
 
   Widget _buildShareCTA() {
-    return GestureDetector(
+    return Semantics(
+      label: 'Share your digest and get 7 days Pro free. Double-tap to share.',
+      button: true,
+      child: GestureDetector(
       onTap: _shareDigest,
       child: Container(
         padding: const EdgeInsets.all(18),
@@ -425,10 +435,13 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, color: Colors.white30, size: 14),
+            const ExcludeSemantics(
+              child: Icon(Icons.arrow_forward_ios, color: Colors.white30, size: 14),
+            ),
           ],
         ),
       ),
+    ),
     );
   }
 }

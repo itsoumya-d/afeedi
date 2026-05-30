@@ -199,26 +199,26 @@ class ChatController extends ChangeNotifier {
           'I\'m ready'
         ];
         break;
-      case 1:
+      case 1: // content_interests (genre selection)
+        _currentSuggestions = [
+          'Comedy & Humor',
+          'Tech & Gaming',
+          'Fitness & Health',
+          'Music & Entertainment',
+        ];
+        break;
+      case 4: // personal_info (name)
         _currentSuggestions = [
           'My name is Alex',
           'Call me Sam',
-          'I\'m Jordan'
+          'I\'m Jordan',
         ];
         break;
-      case 2:
+      case 5: // completion
         _currentSuggestions = [
-          'I love comedy videos',
-          'I enjoy educational content',
-          'I like music and entertainment',
-          'I prefer short funny clips'
-        ];
-        break;
-      case 5:
-        _currentSuggestions = [
-          'Sounds great!',
+          'Let\'s go! 🚀',
+          'Show me my feed!',
           'I\'m excited to start',
-          'Let\'s do this'
         ];
         break;
       default:

@@ -16,6 +16,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
   int _invitesSent = 0;
   int _friendsJoined = 0;
   bool _codeCopied = false;
+  bool _loading = true;
 
   static const _cyan = Color(0xFF00D4FF);
   static const _bg = Color(0xFF0D0D1A);
@@ -41,6 +42,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
       _referralCode = code;
       _invitesSent = prefs.getInt('referral_invites_sent') ?? 0;
       _friendsJoined = prefs.getInt('referral_friends_joined') ?? 0;
+      _loading = false;
     });
   }
 
@@ -98,6 +100,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
+          tooltip: 'Back',
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
@@ -106,7 +109,9 @@ class _ReferralScreenState extends State<ReferralScreen> {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
-      body: SingleChildScrollView(
+      body: _loading
+          ? const Center(child: CircularProgressIndicator(color: _cyan))
+          : SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -197,21 +202,26 @@ class _ReferralScreenState extends State<ReferralScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              GestureDetector(
-                onTap: _copyCode,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: _codeCopied
-                        ? _cyan.withValues(alpha: 0.2)
-                        : Colors.white.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    _codeCopied ? Icons.check : Icons.copy,
-                    color: _codeCopied ? _cyan : Colors.white54,
-                    size: 20,
+              Semantics(
+                label: _codeCopied ? 'Code copied' : 'Copy referral code',
+                button: true,
+                child: GestureDetector(
+                  onTap: _copyCode,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    // Minimum 44×44pt touch target (12px padding around 20px icon)
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: _codeCopied
+                          ? _cyan.withValues(alpha: 0.2)
+                          : Colors.white.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      _codeCopied ? Icons.check : Icons.copy,
+                      color: _codeCopied ? _cyan : Colors.white54,
+                      size: 20,
+                    ),
                   ),
                 ),
               ),

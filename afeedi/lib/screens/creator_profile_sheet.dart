@@ -196,13 +196,16 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
         child: Column(
           children: [
             // Drag handle
-            Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
+            Semantics(
+              label: 'Drag to resize panel',
+              child: Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
             Expanded(
@@ -257,8 +260,10 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(_platformIcon(widget.platform),
-                                  color: platformColor, size: 14),
+                              ExcludeSemantics(
+                                child: Icon(_platformIcon(widget.platform),
+                                    color: platformColor, size: 14),
+                              ),
                               const SizedBox(width: 5),
                               Text(
                                 widget.platform?.name.toUpperCase() ?? 'UNKNOWN',
@@ -344,17 +349,27 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                         child: CircularProgressIndicator(
                             color: Color(0xFF00BCD4)))
                   else if (_loadError)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.error_outline, color: Colors.white38, size: 18),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Could not load content. Tap to retry.',
-                            style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
+                    Semantics(
+                      label: 'Could not load content. Double-tap to retry.',
+                      button: true,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() { _loadError = false; _loading = true; });
+                          _loadCreatorContent();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline, color: Colors.white38, size: 18),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Could not load content. Tap to retry.',
+                                style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     )
                   else if (_recentContent.isEmpty)

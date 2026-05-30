@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Flutter Test & Analyze
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: afeedi
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.29.0"
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed lib/
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Run tests
+        run: flutter test --no-pub --reporter=expanded
+
+      - name: Check test count
+        run: |
+          COUNT=$(flutter test --no-pub 2>&1 | grep -oP '\+\K\d+(?=:.*\(tearDownAll\))' | tail -1)
+          echo "Tests passed: $COUNT"
+          if [ -z "$COUNT" ] || [ "$COUNT" -lt 300 ]; then
+            echo "::error::Expected at least 300 tests, got: $COUNT"
+            exit 1
+          fi

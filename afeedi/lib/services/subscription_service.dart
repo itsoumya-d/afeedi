@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'analytics_service.dart';
 
 /// Product IDs — must match exactly what's configured in App Store Connect & Google Play Console
 class SubscriptionIds {
@@ -166,6 +167,13 @@ class SubscriptionService extends ChangeNotifier {
     _tier = SubscriptionTier.pro;
     _purchaseState = PurchaseState.success;
     notifyListeners();
+
+    final price = isYearly ? SubscriptionIds.yearlyPrice : SubscriptionIds.monthlyPrice;
+    AnalyticsService.instance.trackSubscriptionPurchase(
+      planId: purchase.productID,
+      amount: price,
+      currency: 'USD',
+    ).catchError((_) {});
   }
 
   /// Purchase monthly subscription

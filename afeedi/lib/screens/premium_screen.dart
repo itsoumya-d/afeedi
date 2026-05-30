@@ -17,6 +17,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
   void initState() {
     super.initState();
     AnalyticsService.instance.trackUserInteraction(action: 'screen_view', screen: 'premium');
+    AnalyticsService.instance.trackPaywallShown('premium_screen');
   }
 
   @override

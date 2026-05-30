@@ -181,6 +181,73 @@ class AnalyticsService with WidgetsBindingObserver {
     await _queueEvent(event);
   }
 
+  // Conversion funnel events — required for paywall & subscription optimization
+
+  Future<void> trackFirstContentViewed(String contentId, String platform) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('_first_content_tracked') == true) return;
+    await prefs.setBool('_first_content_tracked', true);
+    await trackUserInteraction(
+      action: 'first_content_viewed',
+      screen: 'feed',
+      additionalData: {'content_id': contentId, 'content_platform': platform},
+    );
+  }
+
+  Future<void> trackFirstSave(String contentId) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('_first_save_tracked') == true) return;
+    await prefs.setBool('_first_save_tracked', true);
+    await trackUserInteraction(
+      action: 'first_save',
+      screen: 'feed',
+      additionalData: {'content_id': contentId},
+    );
+  }
+
+  Future<void> trackPaywallShown(String context) async {
+    await trackUserInteraction(
+      action: 'paywall_shown',
+      screen: 'paywall',
+      additionalData: {'trigger_context': context},
+    );
+  }
+
+  Future<void> trackSubscriptionPurchase({
+    required String planId,
+    required double amount,
+    required String currency,
+  }) async {
+    final event = {
+      'event_type': 'subscription',
+      'action': 'purchased',
+      'plan_id': planId,
+      'amount': amount,
+      'currency': currency,
+      'timestamp': DateTime.now().toIso8601String(),
+      'session_id': await _getSessionId(),
+      'user_id': await _getUserId(),
+      'platform': _getPlatform(),
+      'app_version': await _getAppVersion(),
+    };
+    await _queueEvent(event);
+  }
+
+  Future<void> trackSubscriptionCanceled(String planId, {String? reason}) async {
+    final event = {
+      'event_type': 'subscription',
+      'action': 'canceled',
+      'plan_id': planId,
+      'reason': reason,
+      'timestamp': DateTime.now().toIso8601String(),
+      'session_id': await _getSessionId(),
+      'user_id': await _getUserId(),
+      'platform': _getPlatform(),
+      'app_version': await _getAppVersion(),
+    };
+    await _queueEvent(event);
+  }
+
   // Get onboarding completion metrics
   Future<Map<String, dynamic>> getOnboardingMetrics() async {
     final events = await _getStoredEvents();

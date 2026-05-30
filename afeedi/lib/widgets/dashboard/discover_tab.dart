@@ -565,6 +565,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
       padding: EdgeInsets.zero,
       children: [
         _buildTimeWindowChips(),
+        _buildWeeklyDigestBanner(),
         _buildSectionHeader('🌐 Trending Across Platforms'),
         _buildCrossPlatformTrending(),
         _buildSectionHeader('🔥 Trending Now'),
@@ -575,6 +576,60 @@ class _DiscoverTabState extends State<DiscoverTab> {
         _buildCategoryGrid(),
         const SizedBox(height: 20),
       ],
+    );
+  }
+
+  Widget _buildWeeklyDigestBanner() {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, AppRoutes.weeklyDigest),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF00D4FF).withValues(alpha: 0.12),
+              const Color(0xFF7C3AED).withValues(alpha: 0.12),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFF00D4FF).withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(9),
+              decoration: BoxDecoration(
+                color: const Color(0xFF00D4FF).withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.auto_awesome, color: Color(0xFF00D4FF), size: 20),
+            ),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Your Weekly Digest is ready ✨',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    '5 AI-curated picks based on your taste',
+                    style: TextStyle(color: Colors.white54, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.white24, size: 14),
+          ],
+        ),
+      ),
     );
   }
 

@@ -172,6 +172,26 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
       });
     }
 
+    // Weekly Digest — show on Sundays OR if digest not viewed this week
+    final now = DateTime.now();
+    final weekNumber = now.millisecondsSinceEpoch ~/ Duration.millisecondsPerDay ~/ 7;
+    final lastDigestWeek = prefs.getInt('last_digest_viewed_week') ?? -1;
+    final isSunday = now.weekday == DateTime.sunday;
+    if (isSunday || lastDigestWeek < weekNumber) {
+      final genres = prefs.getStringList('onboarding_selected_genres') ?? [];
+      final genreHint = genres.isNotEmpty ? genres.take(2).join(' & ') : 'your interests';
+      dynamicItems.insert(0, {
+        'id': 'dyn_digest_$weekNumber',
+        'type': 'weekly_digest',
+        'title': 'Your Weekly Digest is ready ✨',
+        'body': '5 top picks in $genreHint — curated just for you this week.',
+        'time': isSunday ? 'Today' : 'This week',
+        'read': lastDigestWeek >= weekNumber,
+        'icon': Icons.auto_awesome,
+        'color': const Color(0xFF00D4FF),
+      });
+    }
+
     if (dynamicItems.isNotEmpty && mounted) {
       setState(() {
         // Prepend dynamic notifications before static ones, dedup by id
@@ -285,6 +305,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
         Navigator.of(context).pushNamed(AppRoutes.dashboard, arguments: {'initialTab': 0});
       case 'trending':
         Navigator.of(context).pushNamed(AppRoutes.dashboard, arguments: {'initialTab': 1});
+      case 'weekly_digest':
+        SharedPreferences.getInstance().then((prefs) {
+          final weekNumber = DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerDay ~/ 7;
+          prefs.setInt('last_digest_viewed_week', weekNumber);
+        });
+        Navigator.of(context).pushNamed(AppRoutes.weeklyDigest);
       case 'achievement':
         Navigator.of(context).pushNamed(AppRoutes.profile);
       case 'system':

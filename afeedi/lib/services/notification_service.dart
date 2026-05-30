@@ -248,17 +248,8 @@ class NotificationService {
         category: NotificationCategory.recommendation,
       );
 
-      // 2. Weekly new-content notification (Sunday at 11am)
-      await scheduleWeeklyNotification(
-        id: _weeklyNewContentId,
-        title: 'New content added',
-        body: genres.isNotEmpty
-            ? 'Fresh ${genres.take(2).join(' and ')} videos just for you'
-            : 'New content added to your interests',
-        hour: 11,
-        minute: 0,
-        category: NotificationCategory.newContent,
-      );
+      // 2. Weekly AI Digest — always fires on Sunday at 10AM
+      await _scheduleWeeklyDigest(genres);
 
       // 3. Continue watching — if any progress entry exists with progress < 0.8
       await _scheduleIfContinueWatchingPending(prefs);
@@ -274,6 +265,48 @@ class NotificationService {
       }
     } catch (e) {
       debugPrint('NotificationService schedulePersonalizedNotifications error: $e');
+    }
+  }
+
+  Future<void> _scheduleWeeklyDigest(List<String> genres) async {
+    if (!_initialized || kIsWeb) return;
+    try {
+      _initTimezone();
+      final location = tz.local;
+      final now = tz.TZDateTime.now(location);
+      // Calculate next Sunday at 10:00 AM
+      final daysUntilSunday = (DateTime.sunday - now.weekday + 7) % 7;
+      var nextSunday = tz.TZDateTime(
+        location,
+        now.year,
+        now.month,
+        now.day + daysUntilSunday,
+        10, // 10 AM
+        0,
+      );
+      // If today is Sunday but already past 10AM, schedule for next week
+      if (daysUntilSunday == 0 && now.hour >= 10) {
+        nextSunday = nextSunday.add(const Duration(days: 7));
+      }
+
+      final genreHint = genres.isNotEmpty
+          ? genres.take(2).join(' & ')
+          : 'your interests';
+      final details = _buildDetails(category: NotificationCategory.recommendation);
+      await _plugin.zonedSchedule(
+        _weeklyNewContentId,
+        'Your Weekly Digest is ready ✨',
+        '5 top picks in $genreHint — curated just for you.',
+        nextSunday,
+        details,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.wallClockTime,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+      );
+      debugPrint('NotificationService: weekly digest scheduled for Sunday 10AM');
+    } catch (e) {
+      debugPrint('NotificationService _scheduleWeeklyDigest error: $e');
     }
   }
 

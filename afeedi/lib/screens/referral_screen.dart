@@ -17,6 +17,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
   int _friendsJoined = 0;
   bool _codeCopied = false;
   bool _loading = true;
+  DateTime? _lastShareTime;
 
   static const _cyan = Color(0xFF00D4FF);
   static const _bg = Color(0xFF0D0D1A);
@@ -60,6 +61,10 @@ class _ReferralScreenState extends State<ReferralScreen> {
   }
 
   Future<void> _shareInvite() async {
+    final now = DateTime.now();
+    if (_lastShareTime != null && now.difference(_lastShareTime!) < const Duration(seconds: 5)) return;
+    _lastShareTime = now;
+
     final message =
         'I\'ve been using Afeedi to watch all my favorite content from YouTube, TikTok, Instagram, and more in one place — personalized just for me. '
         'Join me and get 7 days of Pro free! Use my code: $_referralCode\n'

@@ -15,6 +15,11 @@ class AnalyticsService with WidgetsBindingObserver {
   SharedPreferences? _prefs;
   final List<Map<String, dynamic>> _eventQueue = [];
 
+  // PRODUCTION REQUIREMENT: Call AnalyticsService.setEndpoint(url) in main()
+  // before runApp() with your backend ingest URL (e.g. Supabase Edge Function or
+  // custom /api/analytics endpoint). Without this, all events are queued locally
+  // and never flushed to remote. The queue is persisted across sessions in the
+  // app's documents directory.
   static String _endpointUrl = '';
   static const int _flushThreshold = 50;
   bool _flushInProgress = false;

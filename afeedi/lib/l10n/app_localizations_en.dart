@@ -783,4 +783,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get watchTimeLabel => 'Watch\nTime';
+
+  @override
+  String get goodMorning => 'Good morning!';
+
+  @override
+  String get goodAfternoon => 'Good afternoon!';
+
+  @override
+  String get goodEvening => 'Good evening!';
+
+  @override
+  String get noNotifications => 'No notifications';
+
+  @override
+  String get allCaughtUp => "You're all caught up!";
 }

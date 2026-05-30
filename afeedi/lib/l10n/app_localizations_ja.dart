@@ -782,4 +782,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get watchTimeLabel => '視聴\n時間';
+
+  @override
+  String get goodMorning => 'おはようございます！';
+
+  @override
+  String get goodAfternoon => 'こんにちは！';
+
+  @override
+  String get goodEvening => 'こんばんは！';
+
+  @override
+  String get noNotifications => '通知はありません';
+
+  @override
+  String get allCaughtUp => 'すべて確認済みです！';
 }

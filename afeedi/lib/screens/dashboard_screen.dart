@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 import '../services/navigation_service.dart';
 import '../widgets/dashboard/home_tab.dart';
 import '../widgets/dashboard/discover_tab.dart';
@@ -141,6 +142,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
   
   Widget _buildAppBar() {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -193,7 +195,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   ),
                 ),
                 Text(
-                  _getGreeting(),
+                  _getGreeting(l10n),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
@@ -256,14 +258,14 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  String _getGreeting() {
+  String _getGreeting(AppLocalizations? l10n) {
     final hour = DateTime.now().hour;
     if (hour < 12) {
-      return 'Good morning!';
+      return l10n?.goodMorning ?? 'Good morning!';
     } else if (hour < 17) {
-      return 'Good afternoon!';
+      return l10n?.goodAfternoon ?? 'Good afternoon!';
     } else {
-      return 'Good evening!';
+      return l10n?.goodEvening ?? 'Good evening!';
     }
   }
 }

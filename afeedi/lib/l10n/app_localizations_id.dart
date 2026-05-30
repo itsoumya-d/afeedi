@@ -784,4 +784,19 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get watchTimeLabel => 'Waktu\nTonton';
+
+  @override
+  String get goodMorning => 'Selamat pagi!';
+
+  @override
+  String get goodAfternoon => 'Selamat siang!';
+
+  @override
+  String get goodEvening => 'Selamat malam!';
+
+  @override
+  String get noNotifications => 'Tidak ada notifikasi';
+
+  @override
+  String get allCaughtUp => 'Anda sudah mengikuti semua!';
 }

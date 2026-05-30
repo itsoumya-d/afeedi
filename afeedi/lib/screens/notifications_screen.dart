@@ -249,7 +249,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
           tabs: [
             Tab(text: AppLocalizations.of(context)!.allNotifications),
             Tab(text: AppLocalizations.of(context)!.unread),
-            const Tab(text: 'For You'),
+            Tab(text: AppLocalizations.of(context)?.forYou ?? 'For You'),
           ],
         ),
       ),
@@ -364,22 +364,23 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.notifications_none, size: 64, color: Colors.white.withValues(alpha: 0.2)),
-          const SizedBox(height: 16),
-          const Text(
-            'No notifications',
-            style: TextStyle(color: Colors.white54, fontSize: 16),
+          Icon(Icons.notifications_none, size: 72, color: Colors.white.withValues(alpha: 0.2)),
+          const SizedBox(height: 20),
+          Text(
+            l10n?.noNotifications ?? 'No notifications',
+            style: const TextStyle(color: Colors.white70, fontSize: 18, fontWeight: FontWeight.w600),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 8),
-          const Text(
-            "You're all caught up!",
-            style: TextStyle(color: Colors.white60, fontSize: 13),
+          Text(
+            l10n?.allCaughtUp ?? "You're all caught up!",
+            style: const TextStyle(color: Colors.white38, fontSize: 13),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

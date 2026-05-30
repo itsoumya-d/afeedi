@@ -781,4 +781,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get watchTimeLabel => '观看\n时间';
+
+  @override
+  String get goodMorning => '早上好！';
+
+  @override
+  String get goodAfternoon => '下午好！';
+
+  @override
+  String get goodEvening => '晚上好！';
+
+  @override
+  String get noNotifications => '没有通知';
+
+  @override
+  String get allCaughtUp => '您已经全部查看了！';
 }

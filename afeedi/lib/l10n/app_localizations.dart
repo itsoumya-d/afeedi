@@ -1134,6 +1134,11 @@ abstract class AppLocalizations {
   String get deleteAccountConfirm;
   String get videosWatchedLabel;
   String get watchTimeLabel;
+  String get goodMorning;
+  String get goodAfternoon;
+  String get goodEvening;
+  String get noNotifications;
+  String get allCaughtUp;
 }
 
 class _AppLocalizationsDelegate

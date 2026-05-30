@@ -784,4 +784,19 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get watchTimeLabel => 'Время\nпросмотра';
+
+  @override
+  String get goodMorning => 'Доброе утро!';
+
+  @override
+  String get goodAfternoon => 'Добрый день!';
+
+  @override
+  String get goodEvening => 'Добрый вечер!';
+
+  @override
+  String get noNotifications => 'Нет уведомлений';
+
+  @override
+  String get allCaughtUp => 'Вы всё прочитали!';
 }

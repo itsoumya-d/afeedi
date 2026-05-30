@@ -783,4 +783,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get watchTimeLabel => 'وقت\nالمشاهدة';
+
+  @override
+  String get goodMorning => 'صباح الخير!';
+
+  @override
+  String get goodAfternoon => 'مساء الخير!';
+
+  @override
+  String get goodEvening => 'مساء الخير!';
+
+  @override
+  String get noNotifications => 'لا توجد إشعارات';
+
+  @override
+  String get allCaughtUp => 'أنت على دراية بكل شيء!';
 }

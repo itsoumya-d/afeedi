@@ -785,4 +785,19 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get watchTimeLabel => 'देखने\nका समय';
+
+  @override
+  String get goodMorning => 'सुप्रभात!';
+
+  @override
+  String get goodAfternoon => 'शुभ दोपहर!';
+
+  @override
+  String get goodEvening => 'शुभ संध्या!';
+
+  @override
+  String get noNotifications => 'कोई सूचनाएं नहीं';
+
+  @override
+  String get allCaughtUp => 'आप सब देख चुके हैं!';
 }

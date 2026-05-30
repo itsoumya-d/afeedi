@@ -117,7 +117,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
         }
       } else {
-        _showErrorSnackBar(AppLocalizations.of(context)?.authFailed ?? 'Sign-in failed. Please try again.');
+        _showErrorSnackBar(AppLocalizations.of(context)?.authenticationFailed ?? 'Authentication failed. Please try again.');
       }
     } catch (error) {
       await AnalyticsService.instance.trackOAuthEvent(
@@ -125,7 +125,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         action: 'error',
         errorMessage: error.toString(),
       );
-      _showErrorSnackBar(AppLocalizations.of(context)?.authFailed ?? 'Sign-in failed. Please try again.');
+      _showErrorSnackBar(AppLocalizations.of(context)?.authenticationFailed ?? 'Authentication failed. Please try again.');
     } finally {
       if (mounted) {
         setState(() {
@@ -154,7 +154,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
         }
       } else {
-        _showErrorSnackBar(AppLocalizations.of(context)?.authFailed ?? 'Sign-in failed. Please try again.');
+        _showErrorSnackBar(AppLocalizations.of(context)?.authenticationFailed ?? 'Authentication failed. Please try again.');
       }
     } catch (error) {
       await AnalyticsService.instance.trackOAuthEvent(
@@ -162,7 +162,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         action: 'error',
         errorMessage: error.toString(),
       );
-      _showErrorSnackBar(AppLocalizations.of(context)?.authFailed ?? 'Sign-in failed. Please try again.');
+      _showErrorSnackBar(AppLocalizations.of(context)?.authenticationFailed ?? 'Authentication failed. Please try again.');
     } finally {
       if (mounted) {
         setState(() {

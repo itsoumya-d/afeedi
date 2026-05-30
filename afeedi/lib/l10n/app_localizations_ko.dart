@@ -782,4 +782,19 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get watchTimeLabel => '시청\n시간';
+
+  @override
+  String get goodMorning => '좋은 아침이에요!';
+
+  @override
+  String get goodAfternoon => '좋은 오후예요!';
+
+  @override
+  String get goodEvening => '좋은 저녁이에요!';
+
+  @override
+  String get noNotifications => '알림이 없습니다';
+
+  @override
+  String get allCaughtUp => '모두 확인하셨습니다!';
 }

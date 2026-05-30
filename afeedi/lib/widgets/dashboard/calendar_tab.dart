@@ -1320,7 +1320,13 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                              _selectedDate.year == DateTime.now().year;
               final isSelected = dayNumber == _selectedDate.day;
               
-              return GestureDetector(
+              return Semantics(
+                label: isToday
+                    ? 'Today, $dayNumber${hasContent ? ", has content" : ""}'
+                    : '$dayNumber${hasContent ? ", has content" : ""}',
+                selected: isSelected,
+                button: true,
+                child: GestureDetector(
                 onTap: () {
                   setState(() {
                     _selectedDate = DateTime(_selectedDate.year, _selectedDate.month, dayNumber);
@@ -1386,6 +1392,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                     ],
                   ),
                 ),
+                ),
               );
             },
           ),
@@ -1393,7 +1400,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ],
     );
   }
-  
+
   List<Map<String, dynamic>> _getContentForDate(DateTime date) {
     try {
       // Check Google Calendar events for this date

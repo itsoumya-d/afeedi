@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../services/local_auth_service.dart';
 import '../services/user_interaction_service.dart';
 import '../services/content_service.dart';
+import '../services/navigation_service.dart';
 import '../models/content_model.dart';
 
 // ─── Color palette ───────────────────────────────────────────────────────────
@@ -663,23 +664,37 @@ class _ProfileScreenState extends State<ProfileScreen>
   // ─── SAVED TAB ────────────────────────────────────────────────────────────
 
   Widget _buildSavedTab() {
-    if (_savedItems.isEmpty) {
-      return _buildEmptyState(
-        icon: Icons.bookmark_outline,
-        title: 'Nothing saved yet',
-        subtitle: 'Bookmark content to see it here',
-      );
-    }
-    return GridView.builder(
-      padding: const EdgeInsets.all(12),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 16 / 9,
-      ),
-      itemCount: _savedItems.length,
-      itemBuilder: (context, index) => _buildContentTile(_savedItems[index]),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
+          child: Row(
+            children: [
+              const Text('Bookmarks', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+              const Spacer(),
+              TextButton(
+                onPressed: () => Navigator.pushNamed(context, AppRoutes.bookmarks),
+                child: const Text('View All', style: TextStyle(color: _accent, fontSize: 13)),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: _savedItems.isEmpty
+              ? _buildEmptyState(icon: Icons.bookmark_outline, title: 'Nothing saved yet', subtitle: 'Bookmark content to see it here')
+              : GridView.builder(
+                  padding: const EdgeInsets.all(12),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 16 / 9,
+                  ),
+                  itemCount: _savedItems.length,
+                  itemBuilder: (context, index) => _buildContentTile(_savedItems[index]),
+                ),
+        ),
+      ],
     );
   }
 
@@ -745,7 +760,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           child: Row(
             children: [
               const Text(
-                'Recent Activity',
+                'Watch History',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -754,9 +769,9 @@ class _ProfileScreenState extends State<ProfileScreen>
               ),
               const Spacer(),
               TextButton(
-                onPressed: _showClearHistoryDialog,
+                onPressed: () => Navigator.pushNamed(context, AppRoutes.history),
                 child: const Text(
-                  'Clear All',
+                  'View All',
                   style: TextStyle(color: _accent, fontSize: 13),
                 ),
               ),

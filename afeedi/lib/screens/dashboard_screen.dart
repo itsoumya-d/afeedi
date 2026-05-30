@@ -188,20 +188,29 @@ class _DashboardScreenState extends State<DashboardScreen>
             ),
           ),
           // Action buttons
-          IconButton(
+          Semantics(
+            label: 'Search',
+            button: true,
+            child: IconButton(
             onPressed: () {
               Navigator.pushNamed(context, AppRoutes.search);
             },
+            tooltip: 'Search',
             icon: const Icon(
               Icons.search,
               color: Colors.white,
               size: 22,
             ),
+            ),
           ),
-          IconButton(
+          Semantics(
+            label: 'Notifications',
+            button: true,
+            child: IconButton(
             onPressed: () {
               Navigator.pushNamed(context, AppRoutes.notifications);
             },
+            tooltip: 'Notifications',
             icon: Stack(
               children: [
                 const Icon(
@@ -223,14 +232,13 @@ class _DashboardScreenState extends State<DashboardScreen>
                 ),
               ],
             ),
+            ),
           ),
         ],
       ),
     );
   }
-  
 
-  
   String _getGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) {

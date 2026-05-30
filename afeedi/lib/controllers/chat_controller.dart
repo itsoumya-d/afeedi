@@ -324,6 +324,39 @@ class ChatController extends ChangeNotifier {
       _userName = input;
     }
 
+    // Save responses for all collected steps
+    switch (_currentStep < _onboardingSteps.length
+        ? _onboardingSteps[_currentStep].key
+        : '') {
+      case 'viewing_frequency':
+        SharedPreferences.getInstance().then((prefs) {
+          prefs.setString('user_viewing_frequency', input);
+        });
+      case 'content_duration':
+        SharedPreferences.getInstance().then((prefs) {
+          prefs.setString('user_content_duration', input);
+        });
+      case 'content_goals':
+        SharedPreferences.getInstance().then((prefs) {
+          prefs.setString('user_content_goals', input);
+        });
+      case 'creator_style':
+        SharedPreferences.getInstance().then((prefs) {
+          prefs.setString('user_creator_style', input);
+        });
+      case 'viewing_time':
+        SharedPreferences.getInstance().then((prefs) {
+          prefs.setString('user_viewing_time', input);
+          // Also save as a scheduled notification time hint
+          final hour = _parseViewingTimeToHour(input);
+          if (hour != null) prefs.setInt('preferred_notification_hour', hour);
+        });
+      case 'notifications':
+        SharedPreferences.getInstance().then((prefs) {
+          prefs.setString('user_notification_preference', input);
+        });
+    }
+
     AnalyticsService.instance.trackOnboardingEvent(
       eventName: AnalyticsEvents.onboardingStepCompleted,
       stepNumber: _currentStep,
@@ -363,6 +396,7 @@ class ChatController extends ChangeNotifier {
   }
 
   Future<void> completeOnboarding() async {
+    final _completionPrefs = await SharedPreferences.getInstance();
     AnalyticsService.instance.trackOnboardingEvent(
       eventName: AnalyticsEvents.onboardingCompleted,
       stepNumber: _currentStep,
@@ -373,6 +407,9 @@ class ChatController extends ChangeNotifier {
         'selected_genres': _selectedGenres.length,
         'completion_time': DateTime.now().toIso8601String(),
         'user_name': _userName,
+        'viewing_frequency': _completionPrefs.getString('user_viewing_frequency') ?? '',
+        'content_goals': _completionPrefs.getString('user_content_goals') ?? '',
+        'viewing_time': _completionPrefs.getString('user_viewing_time') ?? '',
       },
     );
 
@@ -403,6 +440,15 @@ class ChatController extends ChangeNotifier {
     
     _showFinalButton = true;
     notifyListeners();
+  }
+
+  int? _parseViewingTimeToHour(String input) {
+    final lower = input.toLowerCase();
+    if (lower.contains('morning') || lower.contains('☀️')) return 8;
+    if (lower.contains('afternoon') || lower.contains('🌤️')) return 14;
+    if (lower.contains('evening') || lower.contains('🌆')) return 19;
+    if (lower.contains('night') || lower.contains('🌙')) return 22;
+    return null;
   }
 
   void scrollToBottom() {

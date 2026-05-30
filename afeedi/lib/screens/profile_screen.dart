@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_picker/image_picker.dart';
 import '../services/local_auth_service.dart';
 import '../services/subscription_service.dart';
 import '../services/user_interaction_service.dart';
@@ -89,6 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   bool _bioExpanded = false;
   bool _isLoading = true;
+  String? _localAvatarPath;
 
   String _bioText =
       'Curious mind. Content explorer. Watching the world one feed at a time.';
@@ -203,6 +206,10 @@ class _ProfileScreenState extends State<ProfileScreen>
         _viewingHistory = historyItems;
         final bio = prefs.getString('user_bio');
         if (bio != null && bio.isNotEmpty) _bioText = bio;
+        final savedAvatarPath = prefs.getString('user_avatar_path');
+        if (savedAvatarPath != null && File(savedAvatarPath).existsSync()) {
+          _localAvatarPath = savedAvatarPath;
+        }
         _isLoading = false;
       });
     }
@@ -327,7 +334,10 @@ class _ProfileScreenState extends State<ProfileScreen>
         Positioned(
           bottom: -40,
           left: 16,
-          child: _buildAvatar(),
+          child: GestureDetector(
+            onTap: _pickAvatarImage,
+            child: _buildAvatar(),
+          ),
         ),
       ],
     );
@@ -345,10 +355,23 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
+  Future<void> _pickAvatarImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 400,
+      maxHeight: 400,
+    );
+    if (picked == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_avatar_path', picked.path);
+    if (mounted) setState(() => _localAvatarPath = picked.path);
+  }
+
   Widget _buildAvatar() {
-    final avatarUrl = _userProfile['avatar'] as String?;
-    final name      = _userProfile['name']   as String? ?? '';
-    final initial   = name.isNotEmpty ? name[0].toUpperCase() : 'A';
+    final name    = _userProfile['name'] as String? ?? '';
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : 'A';
 
     return Stack(
       children: [
@@ -362,22 +385,33 @@ class _ProfileScreenState extends State<ProfileScreen>
             color: _surfaceElevated,
           ),
           child: ClipOval(
-            child: avatarUrl != null && avatarUrl.isNotEmpty
-                ? CachedNetworkImage(
-                    imageUrl: avatarUrl,
+            child: _localAvatarPath != null
+                ? Image.file(
+                    File(_localAvatarPath!),
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,
-                    placeholder: (ctx, url) => Container(color: Colors.grey[900]),
-                    errorWidget: (ctx, url, err) => Container(
-                      color: _surfaceElevated,
-                      child: const Icon(Icons.person, color: Colors.white54),
-                    ),
+                    errorBuilder: (_, __, ___) => _avatarFallback(initial),
                   )
                 : _avatarFallback(initial),
           ),
         ),
-        // Premium / verified badge
+        // Camera icon overlay (bottom-left to avoid overlap with premium badge)
+        Positioned(
+          bottom: 4,
+          left: 4,
+          child: Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: _accent,
+              shape: BoxShape.circle,
+              border: Border.all(color: _bgPrimary, width: 2),
+            ),
+            child: const Icon(Icons.camera_alt, color: Colors.white, size: 12),
+          ),
+        ),
+        // Premium / verified badge (bottom-right)
         if (_userProfile['isPremium'] == true)
           Positioned(
             bottom: 4,

@@ -1211,6 +1211,64 @@ class _ShortsTabState extends State<ShortsTab> {
     if (context.mounted) _showCommentsSheet(context, content);
   }
 
+  static const List<Map<String, String>> _sampleComments = [
+    {'name': 'Alex_M', 'text': 'This is exactly what I needed today 🙌', 'time': '1m ago'},
+    {'name': 'riya.codes', 'text': 'The editing on this is insane 🔥', 'time': '4m ago'},
+    {'name': 'TechWithJordan', 'text': 'Can you drop the source for this?', 'time': '12m ago'},
+    {'name': 'sunsetsandsam', 'text': 'Watched it 3 times already lol', 'time': '23m ago'},
+    {'name': 'CaseyReacts', 'text': 'Never thought about it this way. Mind blown.', 'time': '45m ago'},
+    {'name': 'dev.priya', 'text': 'More content like this please 👏', 'time': '1h ago'},
+    {'name': 'KyleLennox7', 'text': 'Tag someone who needs to see this', 'time': '2h ago'},
+    {'name': 'mia.watches', 'text': 'The quality has improved so much 💯', 'time': '3h ago'},
+  ];
+
+  static const List<Color> _commentAvatarColors = [
+    Color(0xFF00D4FF), Color(0xFFFF6B9D), Color(0xFF7C4DFF),
+    Color(0xFF00BFA5), Color(0xFFFF8F00), Color(0xFF4CAF50),
+    Color(0xFFE91E63), Color(0xFF2196F3),
+  ];
+
+  Widget _buildCommentsList(ScrollController controller) {
+    return ListView.builder(
+      controller: controller,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: _sampleComments.length,
+      itemBuilder: (_, i) {
+        final comment = _sampleComments[i];
+        final color = _commentAvatarColors[i % _commentAvatarColors.length];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: color.withValues(alpha: 0.25),
+                child: Text(
+                  comment['name']![0].toUpperCase(),
+                  style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(comment['name']!, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 2),
+                    Text(comment['text']!, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                    const SizedBox(height: 4),
+                    Text(comment['time']!, style: const TextStyle(color: Colors.white38, fontSize: 11)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _showCommentsSheet(BuildContext context, Content content) {
     final commentController = TextEditingController();
     showModalBottomSheet(
@@ -1261,53 +1319,7 @@ class _ShortsTabState extends State<ShortsTab> {
                 ),
                 const Divider(color: Colors.white12),
                 Expanded(
-                  child: ListView.builder(
-                    controller: controller,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    itemCount: 5,
-                    itemBuilder: (_, i) => Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          CircleAvatar(
-                            radius: 16,
-                            backgroundColor: const Color(0xFF00D4FF).withValues(alpha: 0.3),
-                            child: Text(
-                              String.fromCharCode(65 + i),
-                              style: const TextStyle(color: Colors.white, fontSize: 13),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'User ${i + 1}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                const Text(
-                                  'Great content! Really enjoyed this one.',
-                                  style: TextStyle(color: Colors.white70, fontSize: 13),
-                                ),
-                                const SizedBox(height: 4),
-                                const Text(
-                                  '2h ago',
-                                  style: TextStyle(color: Colors.white38, fontSize: 11),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  child: _buildCommentsList(controller),
                 ),
                 SafeArea(
                   child: Padding(

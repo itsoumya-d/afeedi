@@ -2250,10 +2250,55 @@ class ContentService {
     return recommended.take(limit).toList();
   }
 
+  /// Reads the user's preferred locale code (e.g. 'hi', 'es') from
+  /// SharedPreferences.  Returns null when the preference has not been set or
+  /// when the value is 'en' (English), so callers can treat null as
+  /// "no non-English preference active".
+  static Future<String?> _getUserLocale() async {
+    final prefs = await SharedPreferences.getInstance();
+    final locale = prefs.getString('app_locale');
+    if (locale == null || locale.isEmpty || locale == 'en') return null;
+    return locale;
+  }
+
+  /// Applies a locale-awareness sort to [items]:
+  ///   - Content whose [Content.language] matches [userLocale] → boosted to front.
+  ///   - Content with no language tag (null) → treated as language-neutral,
+  ///     kept in their current order (covers all English seed data gracefully).
+  ///   - Content explicitly tagged with a *different* language → sorted to back.
+  ///
+  /// When [userLocale] is null the list is returned unchanged.
+  static List<Content> _applyLocaleBoost(List<Content> items, String? userLocale) {
+    if (userLocale == null || items.isEmpty) return items;
+
+    // Stable partition: matching → neutral → non-matching.
+    final matching  = <Content>[];
+    final neutral   = <Content>[];
+    final nonMatch  = <Content>[];
+
+    for (final item in items) {
+      final lang = item.language?.toLowerCase().trim();
+      if (lang == null || lang.isEmpty) {
+        neutral.add(item);
+      } else if (lang == userLocale.toLowerCase()) {
+        matching.add(item);
+      } else {
+        nonMatch.add(item);
+      }
+    }
+
+    return [...matching, ...neutral, ...nonMatch];
+  }
+
   Future<List<Content>> getFeedContent({int limit = 10}) async {
+    final userLocale = await _getUserLocale();
 
     List<Content> feedContent = List.from(_allContent);
     feedContent.shuffle(Random());
+
+    // Apply locale boost before taking the limit so that language-matching
+    // content surfaces even when pool is large.
+    feedContent = _applyLocaleBoost(feedContent, userLocale);
 
     return _withCreatorIds(feedContent.take(limit).toList());
   }
@@ -2282,32 +2327,37 @@ class ContentService {
       final enhancedService = EnhancedRecommendationService.instance;
       final onboardingService = OnboardingService();
       final authService = AuthService.instance;
-      
+
+      // Load locale preference once and reuse for the boost step.
+      final userLocale = await _getUserLocale();
+
       // Check if user is authenticated
       final user = authService.currentUser;
       if (user == null) {
         // Return general trending content for unauthenticated users
-        return getTrendingVideos(limit: limit);
+        final trending = await getTrendingVideos(limit: limit);
+        return _applyLocaleBoost(trending, userLocale);
       }
-      
+
       // Check if onboarding is completed
       final isOnboardingCompleted = await onboardingService.isOnboardingCompleted();
       if (!isOnboardingCompleted) {
         // Return general content if onboarding not completed
-        return getFeedContent(limit: limit);
+        return getFeedContent(limit: limit); // getFeedContent already boosts locale
       }
-      
+
       // Get personalized recommendations
       final recommendations = await enhancedService.getPersonalizedRecommendations(
         userId: user.id,
         limit: limit,
       );
-      
-      // Convert recommendations to content objects
-      return recommendations.map((rec) => rec.content).toList();
+
+      // Convert recommendations to content objects then apply locale boost.
+      final items = recommendations.map((rec) => rec.content).toList();
+      return _applyLocaleBoost(items, userLocale);
     } catch (e) {
       if (kDebugMode) debugPrint('Error getting personalized content: $e');
-      // Fallback to regular feed content
+      // Fallback to regular feed content (which already applies locale boost)
       return getFeedContent(limit: limit);
     }
   }
@@ -2319,8 +2369,11 @@ class ContentService {
       final selectedGenres = prefs.getStringList('onboarding_selected_genres') ?? [];
       final selectedPlatforms = prefs.getStringList('onboarding_connected_platforms') ?? [];
 
+      // Read locale preference once for the scoring step.
+      final userLocale = await _getUserLocale(); // null when English / unset
+
       if (selectedGenres.isEmpty) {
-        return getFeedContent(limit: limit);
+        return getFeedContent(limit: limit); // getFeedContent applies locale boost
       }
 
       // Score all content by genre match
@@ -2338,6 +2391,21 @@ class ContentService {
         if (c.publishedAt != null) {
           final ageHours = DateTime.now().difference(c.publishedAt!).inHours;
           if (ageHours < 72) score += 0.3;
+        }
+        // Language / locale boost: reward content tagged with the user's
+        // preferred language; penalise content explicitly tagged with a
+        // *different* language (null-language items are left neutral so that
+        // English seed data is not penalised).
+        if (userLocale != null) {
+          final lang = c.language?.toLowerCase().trim();
+          if (lang != null && lang.isNotEmpty) {
+            if (lang == userLocale.toLowerCase()) {
+              score += 1.0; // same language → boost
+            } else {
+              score -= 0.5; // different language → slight penalty
+            }
+          }
+          // lang == null → no change (neutral; covers all English seed items)
         }
         return MapEntry(c, score);
       }).toList()

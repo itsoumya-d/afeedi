@@ -2068,18 +2068,18 @@ class ContentService {
         final apiItems = await apiSvc.getFeed(limit: 50);
         if (apiItems.isNotEmpty) {
           _liveContent = apiItems;
-          debugPrint('ContentService: ${_liveContent.length} items from local API');
+          if (kDebugMode) debugPrint('ContentService: ${_liveContent.length} items from local API');
           return;
         }
       }
     } catch (e) {
-      debugPrint('ContentService: local API unavailable ($e), trying YouTube');
+      if (kDebugMode) debugPrint('ContentService: local API unavailable ($e), trying YouTube');
     }
 
     // NOTE: youtube_explode_dart scraping is disabled — it violates YouTube's
     // Developer ToS ("API Clients must not scrape YouTube Applications").
     // Fall through to seed data until YouTube Data API v3 integration is complete.
-    debugPrint('ContentService: using seed data (YouTube Data API v3 not yet configured)');
+    if (kDebugMode) debugPrint('ContentService: using seed data (YouTube Data API v3 not yet configured)');
   }
 
   /// Force-refresh live content (call from pull-to-refresh).
@@ -2305,7 +2305,7 @@ class ContentService {
       // Convert recommendations to content objects
       return recommendations.map((rec) => rec.content).toList();
     } catch (e) {
-      debugPrint('Error getting personalized content: $e');
+      if (kDebugMode) debugPrint('Error getting personalized content: $e');
       // Fallback to regular feed content
       return getFeedContent(limit: limit);
     }
@@ -2338,7 +2338,7 @@ class ContentService {
       // Convert recommendations to content objects
       return recommendations.map((rec) => rec.content).toList();
     } catch (e) {
-      debugPrint('Error getting onboarding-based recommendations: $e');
+      if (kDebugMode) debugPrint('Error getting onboarding-based recommendations: $e');
       // Fallback to regular feed content
       return getFeedContent(limit: limit);
     }
@@ -2420,7 +2420,7 @@ class ContentService {
       
       await enhancedService.trackContentInteraction(interaction.toJson());
     } catch (e) {
-      debugPrint('Error tracking content interaction: $e');
+      if (kDebugMode) debugPrint('Error tracking content interaction: $e');
     }
   }
 

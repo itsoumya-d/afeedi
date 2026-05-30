@@ -20,6 +20,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   List<Content> _trendingContent = [];
   bool _isLoading = false;
   bool _hasSearched = false;
+  bool _hasError = false;
   String _query = '';
   late TabController _tabController;
   List<String> _recentSearches = [];
@@ -74,7 +75,8 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
       final content = await ContentService.instance.getFeedContent(limit: 100);
       if (mounted) setState(() => _allContent = content);
     } catch (_) {
-      // silently fall through — seed data is in-memory so this shouldn't fail
+      if (mounted) setState(() { _hasError = true; _isLoading = false; });
+      return;
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -110,6 +112,9 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   void _search(String query) {
     final trimmed = query.trim();
     setState(() {
+      _hasError = false;
+      _selectedPlatform = null;
+      _selectedCategory = null;
       _query = trimmed;
       _hasSearched = _query.isNotEmpty;
       if (_query.isEmpty) {
@@ -429,6 +434,26 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   }
 
   Widget _buildResults() {
+    if (_hasError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 56, color: Colors.white24),
+            const SizedBox(height: 16),
+            const Text(
+              'Failed to load results',
+              style: TextStyle(color: Colors.white54, fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => _search(_query),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
     final results = _filteredResults;
     if (_isLoading) return const LoadingShimmer();
     if (results.isEmpty) {

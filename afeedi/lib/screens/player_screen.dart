@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -25,6 +26,7 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
   bool _isDescriptionExpanded = false;
   late DateTime _watchStartTime;
   List<Content> _relatedContent = [];
+  Timer? _progressTimer;
 
   @override
   void initState() {
@@ -33,6 +35,7 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
     _watchStartTime = DateTime.now();
     _incrementVideoCount();
     _loadRelatedContent();
+    _progressTimer = Timer.periodic(const Duration(seconds: 30), (_) => _saveWatchTime());
   }
 
   @override
@@ -85,6 +88,7 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
     WidgetsBinding.instance.removeObserver(this);
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    _progressTimer?.cancel();
     _saveWatchTime();
     super.dispose();
   }
@@ -120,7 +124,12 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
   void _share() {
     final url = widget.content.videoUrl ?? widget.content.embedUrl;
     if (url != null && url.isNotEmpty) {
-      launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      final uri = Uri.tryParse(url);
+      if (uri != null) {
+        launchUrl(uri, mode: LaunchMode.externalApplication).catchError((_) {
+          // silently fail - url_launcher handles its own errors
+        });
+      }
     }
   }
 

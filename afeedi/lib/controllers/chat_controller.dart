@@ -275,12 +275,17 @@ class ChatController extends ChangeNotifier {
       },
     );
 
-    await _onboardingService.saveOnboardingData(
-      userName: _userName,
-      selectedGenres: _selectedGenres,
-      platformConnections: _platformConnections,
-      chatHistory: _messages,
-    );
+    try {
+      await _onboardingService.saveOnboardingData(
+        userName: _userName,
+        selectedGenres: _selectedGenres,
+        platformConnections: _platformConnections,
+        chatHistory: _messages,
+      );
+    } catch (e) {
+      debugPrint('Onboarding save error: $e');
+      // Don't block user - continue with partial data
+    }
 
     // Schedule personalized notifications based on selected genres
     NotificationService.instance

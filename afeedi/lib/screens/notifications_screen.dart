@@ -80,7 +80,43 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     AnalyticsService.instance.trackUserInteraction(action: 'screen_view', screen: 'notifications');
+    _loadReadState();
     _injectDynamicNotifications();
+  }
+
+  Future<void> _loadReadState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final readIds = prefs.getStringList('read_notification_ids') ?? [];
+      if (readIds.isNotEmpty && mounted) {
+        setState(() {
+          for (final n in _notifications) {
+            if (readIds.contains(n['id'] as String)) {
+              n['read'] = true;
+            }
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to load notification state')),
+        );
+      }
+    }
+  }
+
+  Future<void> _saveReadState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final readIds = _notifications
+          .where((n) => n['read'] == true)
+          .map((n) => n['id'] as String)
+          .toList();
+      await prefs.setStringList('read_notification_ids', readIds);
+    } catch (_) {
+      // Best-effort persistence; ignore write errors silently
+    }
   }
 
   Future<void> _injectDynamicNotifications() async {
@@ -335,6 +371,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
 
   void _markRead(Map<String, dynamic> notification) {
     setState(() => notification['read'] = true);
+    _saveReadState();
   }
 
   void _markAllRead() {
@@ -343,5 +380,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
         n['read'] = true;
       }
     });
+    _saveReadState();
   }
 }

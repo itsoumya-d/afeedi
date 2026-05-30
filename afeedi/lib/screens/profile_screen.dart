@@ -87,6 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   final List<Content> _savedItems     = [];
 
   bool _bioExpanded = false;
+  bool _isLoading = true;
 
   static const String _bioText =
       'Curious mind. Content explorer. Watching the world one feed at a time.';
@@ -183,6 +184,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         _likedItems
           ..clear()
           ..addAll(likedContent);
+        _isLoading = false;
       });
     }
   }
@@ -636,6 +638,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   // ─── LIKED TAB ────────────────────────────────────────────────────────────
 
   Widget _buildLikedTab() {
+    if (_isLoading) return const Center(child: CircularProgressIndicator(color: _accent));
     if (_likedItems.isEmpty) {
       return _buildEmptyState(
         icon: Icons.favorite_outline,
@@ -659,6 +662,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   // ─── SAVED TAB ────────────────────────────────────────────────────────────
 
   Widget _buildSavedTab() {
+    if (_isLoading) return const Center(child: CircularProgressIndicator(color: _accent));
     return Column(
       children: [
         Padding(

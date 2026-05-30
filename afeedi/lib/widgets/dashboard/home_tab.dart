@@ -34,9 +34,21 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   String _dateFilter = 'all';
   ContentType? _contentTypeFilter;
   List<({Content content, double progress})> _continueWatching = [];
+  List<String> _followedCreatorIds = [];
+  List<String> _trendingTopics = ['#Trending', '#ForYou', '#New'];
 
   List<Content> get _filteredPosts {
     var posts = _posts;
+    if (_showFollowing) {
+      if (_followedCreatorIds.isEmpty) {
+        return [];
+      }
+      posts = posts.where((p) {
+        final creatorId = p.creatorId ?? p.creatorName?.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+        return _followedCreatorIds.contains(creatorId) ||
+            _followedCreatorIds.contains(p.creatorName);
+      }).toList();
+    }
     if (_contentTypeFilter != null) {
       posts = posts.where((p) => p.contentType == _contentTypeFilter).toList();
     }
@@ -160,12 +172,26 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         feedContent = await ContentService.instance.getTrendingVideos(limit: 15);
       }
       
-      final followingCount = UserInteractionService.instance.getFollowedCreatorIds().length;
+      final followedIds = UserInteractionService.instance.getFollowedCreatorIds();
+      // Derive trending topics from actual feed content
+      final tagCounts = feedContent
+          .expand((p) => p.tags)
+          .fold<Map<String, int>>({}, (m, t) {
+        m[t] = (m[t] ?? 0) + 1;
+        return m;
+      });
+      final derivedTopics = (tagCounts.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value)))
+          .take(6)
+          .map((e) => '#${e.key}')
+          .toList();
       setState(() {
         _allPosts = feedContent;
         _posts = List.from(_allPosts);
         _isLoading = false;
-        _showFollowSuggestion = followingCount == 0;
+        _followedCreatorIds = followedIds;
+        _showFollowSuggestion = followedIds.isEmpty;
+        if (derivedTopics.isNotEmpty) _trendingTopics = derivedTopics;
       });
       // Preload the first 5 thumbnails immediately after load
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -227,12 +253,14 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       }
       
       setState(() {
-        _allPosts.addAll(newPosts);
+        final existingIds = _allPosts.map((p) => p.id).toSet();
+        final deduped = newPosts.where((p) => !existingIds.contains(p.id)).toList();
+        _allPosts.addAll(deduped);
         // Apply current filter to new posts
         if (_selectedPlatform == null) {
-          _posts.addAll(newPosts);
+          _posts.addAll(deduped);
         } else {
-          _posts.addAll(newPosts.where((post) => post.platform == _selectedPlatform));
+          _posts.addAll(deduped.where((post) => post.platform == _selectedPlatform));
         }
         _isLoading = false;
         _hasMore = _allPosts.length < 50;
@@ -480,7 +508,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   }
 
   Widget _buildTrendingTopics() {
-    final topics = ['#Flutter', '#AI', '#Tech', '#Design'];
+    final topics = _trendingTopics;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -619,6 +647,31 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     }
 
     if (!_isLoading && _posts.isNotEmpty && displayPosts.isEmpty) {
+      if (_showFollowing && _followedCreatorIds.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.people_outline, size: 64, color: Colors.white24),
+              const SizedBox(height: 16),
+              const Text(
+                'No followed creators yet',
+                style: TextStyle(color: Colors.white54, fontSize: 18),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Follow creators to see their content here',
+                style: TextStyle(color: Colors.white38, fontSize: 14),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.pushNamed(context, AppRoutes.search),
+                child: const Text('Find Creators'),
+              ),
+            ],
+          ),
+        );
+      }
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

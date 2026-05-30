@@ -80,7 +80,12 @@ void main() {
 
     testWidgets('shows trending topic hashtags', (tester) async {
       await pumpHomeTab(tester);
-      expect(find.text('#Flutter'), findsOneWidget);
+      // Trending topics are derived from content tags (dynamic) or default to '#Trending'
+      expect(
+        find.byWidgetPredicate((w) =>
+            w is Text && (w.data?.startsWith('#') ?? false)),
+        findsWidgets,
+      );
     });
 
     testWidgets('shows For You tab switch', (tester) async {

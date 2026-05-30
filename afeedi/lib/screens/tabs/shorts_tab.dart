@@ -1,9 +1,19 @@
+// Shorts tab – rewrites the original broken implementation.
+//
+// Root cause of the original bug: ContentService.getFeedContent() returns no
+// items with ContentType.short/reel and none with durationSeconds <= 180,
+// so _shortsContent was always empty. The fallback mock data used
+// via.placeholder.com URLs (which are unreliable) and had no real YouTube
+// integration. This version uses YouTubeDataApiService, filters to genuine
+// short videos (ISO 8601 duration < 60 s), and opens each video at the
+// YouTube Shorts URL on tap.
+
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
-import '../../models/content_model.dart';
-import '../../services/content_service.dart';
-import '../../widgets/streaming/responsive_video_player.dart';
-import '../../services/analytics_service.dart';
+import '../../services/youtube_data_api_service.dart';
 
 class ShortsTab extends StatefulWidget {
   const ShortsTab({super.key});
@@ -13,359 +23,143 @@ class ShortsTab extends StatefulWidget {
 }
 
 class _ShortsTabState extends State<ShortsTab> {
-  final PageController _pageController = PageController();
-  int _currentIndex = 0;
-  List<Content> _shortsContent = [];
+  List<YouTubeVideo> _shorts = [];
   bool _isLoading = true;
   bool _hasError = false;
 
   @override
   void initState() {
     super.initState();
-    _loadShortsContent();
+    _loadShorts();
   }
-  
-  Future<void> _loadShortsContent() async {
+
+  // ---------------------------------------------------------------------------
+  // Data
+  // ---------------------------------------------------------------------------
+
+  Future<void> _loadShorts() async {
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
     try {
-      setState(() {
-        _isLoading = true;
-        _hasError = false;
-      });
-      
-      // Load short-form content from ContentService
-      final allContent = await ContentService.instance.getFeedContent();
-      final shorts = allContent.where((content) => 
-        content.contentType == ContentType.short || 
-        content.contentType == ContentType.reel ||
-        (content.durationSeconds != null && content.durationSeconds! <= 180)
-      ).toList();
-      
-      setState(() {
-        _shortsContent = shorts;
-        _isLoading = false;
-      });
-      
-      // Track shorts tab view
-      await AnalyticsService.instance.trackUserInteraction(
-        action: 'shorts_tab_viewed',
-        screen: 'shorts',
-        additionalData: {
-          'shorts_count': shorts.length,
-        },
-      );
-    } catch (error) {
-      setState(() {
-        _isLoading = false;
-        _hasError = true;
-      });
-      
-      await AnalyticsService.instance.trackError(
-        errorType: 'shorts_loading_error',
-        errorMessage: error.toString(),
-        screen: 'shorts',
-      );
+      final all = await YouTubeDataApiService.instance
+          .fetchVideosByQuery(query: 'shorts', maxResults: 30);
+      // Keep only videos whose ISO 8601 duration parses to < 60 seconds.
+      final filtered =
+          all.where((v) => _durationSeconds(v.duration) < 60).toList();
+      // If the filter is too aggressive (e.g. all durations are missing),
+      // fall back to the full result set so the tab is never blank.
+      final result = filtered.isNotEmpty ? filtered : all;
+      if (mounted) {
+        setState(() {
+          _shorts = result;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+        });
+      }
     }
   }
 
-  // Fallback mock data for demonstration
-  final List<Map<String, dynamic>> _mockShortsData = [
-    {
-      'id': '1',
-      'title': 'Quick Cooking Tips',
-      'creator': 'Chef Maria',
-      'duration': '0:45',
-      'likes': '12.5K',
-      'comments': '234',
-      'shares': '89',
-      'category': 'Food',
-      'thumbnail': 'https://via.placeholder.com/300x400/FF6B6B/FFFFFF?text=Cooking+Tips',
-      'description': 'Learn how to make perfect pasta in under 10 minutes!',
-    },
-    {
-      'id': '2',
-      'title': 'Tech Review: Latest Gadgets',
-      'creator': 'TechGuru',
-      'duration': '1:20',
-      'likes': '8.9K',
-      'comments': '156',
-      'shares': '67',
-      'category': 'Technology',
-      'thumbnail': 'https://via.placeholder.com/300x400/4ECDC4/FFFFFF?text=Tech+Review',
-      'description': 'Unboxing and reviewing the newest smartphone features.',
-    },
-    {
-      'id': '3',
-      'title': 'Fitness Challenge',
-      'creator': 'FitLife',
-      'duration': '0:30',
-      'likes': '15.2K',
-      'comments': '445',
-      'shares': '123',
-      'category': 'Health',
-      'thumbnail': 'https://via.placeholder.com/300x400/45B7D1/FFFFFF?text=Fitness',
-      'description': '30-second workout that you can do anywhere!',
-    },
-    {
-      'id': '4',
-      'title': 'Art Tutorial',
-      'creator': 'ArtisticSoul',
-      'duration': '2:15',
-      'likes': '6.7K',
-      'comments': '89',
-      'shares': '45',
-      'category': 'Art',
-      'thumbnail': 'https://via.placeholder.com/300x400/96CEB4/FFFFFF?text=Art+Tutorial',
-      'description': 'Learn watercolor techniques for beginners.',
-    },
-    {
-      'id': '5',
-      'title': 'Travel Vlog',
-      'creator': 'Wanderlust',
-      'duration': '1:45',
-      'likes': '22.1K',
-      'comments': '567',
-      'shares': '234',
-      'category': 'Travel',
-      'thumbnail': 'https://via.placeholder.com/300x400/FFEAA7/FFFFFF?text=Travel',
-      'description': 'Hidden gems in Tokyo that tourists never see!',
-    },
-  ];
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+  /// Parses an ISO 8601 duration string such as PT45S, PT1M30S, PT4M13S
+  /// and returns the total number of seconds.
+  int _durationSeconds(String iso) {
+    if (iso.isEmpty || iso == 'PT0S') return 0;
+    try {
+      final match = RegExp(
+              r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?',
+              caseSensitive: false)
+          .firstMatch(iso);
+      if (match == null) return 0;
+      final h = int.tryParse(match.group(1) ?? '0') ?? 0;
+      final m = int.tryParse(match.group(2) ?? '0') ?? 0;
+      final s = int.tryParse(match.group(3) ?? '0') ?? 0;
+      return h * 3600 + m * 60 + s;
+    } catch (_) {
+      return 0;
+    }
   }
+
+  String _formatDuration(String iso) {
+    final secs = _durationSeconds(iso);
+    if (secs <= 0) return '';
+    final m = secs ~/ 60;
+    final s = secs % 60;
+    return '$m:${s.toString().padLeft(2, '0')}';
+  }
+
+  String _formatViews(int count) {
+    if (count >= 1000000000) {
+      return '${(count / 1000000000).toStringAsFixed(1)}B';
+    }
+    if (count >= 1000000) {
+      return '${(count / 1000000).toStringAsFixed(1)}M';
+    }
+    if (count >= 1000) {
+      return '${(count / 1000).toStringAsFixed(1)}K';
+    }
+    return '$count';
+  }
+
+  Future<void> _openShort(YouTubeVideo video) async {
+    final uri = Uri.parse('https://www.youtube.com/shorts/${video.id}');
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open video')),
+        );
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Build
+  // ---------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryCyan),
-          ),
-        ),
-      );
-    }
-    
-    if (_hasError) {
-      return Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                color: Colors.white,
-                size: 64,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Failed to load shorts',
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _loadShortsContent,
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    
+    if (_isLoading) return _buildShimmer();
+    if (_hasError) return _buildError();
+
     return Scaffold(
       backgroundColor: Colors.black,
-      body: PageView.builder(
-        controller: _pageController,
-        scrollDirection: Axis.vertical,
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-          
-          // Track short view
-          if (_shortsContent.isNotEmpty && index < _shortsContent.length) {
-            AnalyticsService.instance.trackUserInteraction(
-              action: 'short_viewed',
-              screen: 'shorts',
-              additionalData: {
-                'content_id': _shortsContent[index].id,
-                'platform': _shortsContent[index].platform.name,
-                'index': index,
-              },
-            );
-          }
-        },
-        itemCount: _shortsContent.isNotEmpty ? _shortsContent.length : _mockShortsData.length,
-        itemBuilder: (context, index) {
-          if (_shortsContent.isNotEmpty) {
-            return _buildShortItemFromContent(_shortsContent[index]);
-          } else {
-            return _buildShortItem(_mockShortsData[index]);
-          }
-        },
-      ),
-    );
-  }
-  
-  Widget _buildShortItemFromContent(Content content) {
-    return Stack(
-      children: [
-        // Video player
-        Positioned.fill(
-          child: ResponsiveVideoPlayer(
-            content: content,
-            autoPlay: true,
-            showControls: false,
-            showBranding: true,
-          ),
-        ),
-        
-        // Overlay with content info and interactions
-        Positioned(
-          right: 12,
-          bottom: 80,
-          child: _buildInteractionButtons(content),
-        ),
-        
-        // Content info
-        Positioned(
-          left: 12,
-          bottom: 80,
-          right: 80,
-          child: _buildContentInfo(content),
-        ),
-      ],
-    );
-  }
-  
-  Widget _buildInteractionButtons(Content content) {
-    return Column(
-      children: [
-        _buildActionButton(
-          icon: Icons.favorite_border,
-          label: content.likeCount.toString(),
-          onTap: () => _handleLike(content),
-        ),
-        const SizedBox(height: 20),
-        _buildActionButton(
-          icon: Icons.comment,
-          label: '${content.metadata['comments'] ?? 0}',
-          onTap: () => _handleComment(content),
-        ),
-        const SizedBox(height: 20),
-        _buildActionButton(
-          icon: Icons.share,
-          label: 'Share',
-          onTap: () => _handleShare(content),
-        ),
-        const SizedBox(height: 20),
-        _buildActionButton(
-          icon: Icons.more_vert,
-          label: '',
-          onTap: () => _showMoreOptions(content),
-        ),
-      ],
-    );
-  }
-  
-  Widget _buildContentInfo(Content content) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '@${content.creatorName ?? 'Unknown'}',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        if (content.title != null)
-          Text(
-            content.title!,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        if (content.description != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            content.description!,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-            ),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ],
-    );
-  }
-  
-  void _handleLike(Content content) {
-    AnalyticsService.instance.trackUserInteraction(
-      action: 'short_liked',
-      screen: 'shorts',
-      additionalData: {
-        'content_id': content.id,
-        'platform': content.platform.name,
-      },
-    );
-  }
-  
-  void _handleComment(Content content) {
-    AnalyticsService.instance.trackUserInteraction(
-      action: 'short_comment_opened',
-      screen: 'shorts',
-      additionalData: {
-        'content_id': content.id,
-        'platform': content.platform.name,
-      },
-    );
-    // TODO: Open comment sheet
-  }
-  
-  void _handleShare(Content content) {
-    AnalyticsService.instance.trackUserInteraction(
-      action: 'short_shared',
-      screen: 'shorts',
-      additionalData: {
-        'content_id': content.id,
-        'platform': content.platform.name,
-      },
-    );
-    // TODO: Implement share functionality
-  }
-  
-  void _showMoreOptions(Content content) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.grey[900],
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
+      body: SafeArea(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ListTile(
-              leading: const Icon(Icons.report, color: Colors.white),
-              title: const Text('Report', style: TextStyle(color: Colors.white)),
-              onTap: () => Navigator.pop(context),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: Text(
+                'Shorts',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-            ListTile(
-              leading: const Icon(Icons.block, color: Colors.white),
-              title: const Text('Not Interested', style: TextStyle(color: Colors.white)),
-              onTap: () => Navigator.pop(context),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: _loadShorts,
+                color: AppTheme.primaryCyan,
+                backgroundColor: Colors.black,
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  itemCount: _shorts.length,
+                  itemBuilder: (context, index) =>
+                      _buildShortsCard(_shorts[index]),
+                ),
+              ),
             ),
           ],
         ),
@@ -373,270 +167,230 @@ class _ShortsTabState extends State<ShortsTab> {
     );
   }
 
-  Widget _buildShortItem(Map<String, dynamic> shortData) {
-    return Stack(
-      children: [
-        // Video/Content Background
-        Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withOpacity(0.3),
-                Colors.black.withOpacity(0.7),
-              ],
-            ),
-          ),
-          child: Center(
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                color: AppTheme.primaryCyan.withOpacity(0.1),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.play_circle_outline,
-                    size: 80,
-                    color: Colors.white.withOpacity(0.8),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    shortData['title'],
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryPink,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      shortData['category'],
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+  // ---------------------------------------------------------------------------
+  // Individual card
+  // ---------------------------------------------------------------------------
+
+  Widget _buildShortsCard(YouTubeVideo video) {
+    final duration = _formatDuration(video.duration);
+    return GestureDetector(
+      onTap: () => _openShort(video),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.grey[900],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Row(
+          children: [
+            // Thumbnail (9:16 portrait crop)
+            SizedBox(
+              width: 100,
+              child: AspectRatio(
+                aspectRatio: 9 / 16,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: video.thumbnailUrl,
+                      fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) => Container(
+                        color: AppTheme.darkSecondary,
+                        child: const Icon(Icons.play_circle_outline,
+                            color: Colors.white54, size: 32),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-        // Right Side Actions
-        Positioned(
-          right: 12,
-          bottom: 100,
-          child: Column(
-            children: [
-              _buildActionButton(
-                icon: Icons.favorite_border,
-                label: shortData['likes'],
-                onTap: () {},
-              ),
-              const SizedBox(height: 20),
-              _buildActionButton(
-                icon: Icons.comment_outlined,
-                label: shortData['comments'],
-                onTap: () {},
-              ),
-              const SizedBox(height: 20),
-              _buildActionButton(
-                icon: Icons.share_outlined,
-                label: shortData['shares'],
-                onTap: () {},
-              ),
-              const SizedBox(height: 20),
-              _buildActionButton(
-                icon: Icons.bookmark_border,
-                label: '',
-                onTap: () {},
-              ),
-            ],
-          ),
-        ),
-
-        // Bottom Content Info
-        Positioned(
-          left: 12,
-          right: 80,
-          bottom: 100,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: AppTheme.primaryCyan,
-                    child: Text(
-                      shortData['creator'][0],
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    shortData['creator'],
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.white, width: 1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      'Follow',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                shortData['description'],
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(
-                    Icons.access_time,
-                    size: 14,
-                    color: Colors.white.withOpacity(0.7),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    shortData['duration'],
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        // Top Safe Area with Progress Indicators
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: List.generate(
-                        _shortsContent.isNotEmpty ? _shortsContent.length : _mockShortsData.length,
-                        (index) => Expanded(
-                          child: Container(
-                            height: 2,
-                            margin: const EdgeInsets.symmetric(horizontal: 1),
-                            decoration: BoxDecoration(
-                              color: index <= _currentIndex
-                                  ? Colors.white
-                                  : Colors.white.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(1),
+                    // Duration badge
+                    if (duration.isNotEmpty)
+                      Positioned(
+                        bottom: 6,
+                        right: 6,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.75),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            duration,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
-                        shape: BoxShape.circle,
+                    // Shorts icon badge
+                    Positioned(
+                      top: 6,
+                      left: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 5, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryPink.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'Shorts',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.close,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Info
+            Expanded(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      video.title,
+                      style: const TextStyle(
                         color: Colors.white,
-                        size: 20,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
                       ),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 6),
+                    Text(
+                      video.channelTitle,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.65),
+                        fontSize: 12,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.visibility_outlined,
+                            size: 13,
+                            color: Colors.white.withOpacity(0.45)),
+                        const SizedBox(width: 4),
+                        Text(
+                          _formatViews(video.viewCount),
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.45),
+                            fontSize: 11,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Icon(Icons.open_in_new,
+                            size: 13,
+                            color: AppTheme.primaryCyan.withOpacity(0.8)),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Watch',
+                          style: TextStyle(
+                            color: AppTheme.primaryCyan.withOpacity(0.8),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shimmer loading
+  // ---------------------------------------------------------------------------
+
+  Widget _buildShimmer() {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Shimmer.fromColors(
+          baseColor: Colors.grey[850]!,
+          highlightColor: Colors.grey[700]!,
+          child: SingleChildScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: List.generate(
+                6,
+                (_) => Container(
+                  height: 120,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ],
+                ),
               ),
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
-              shape: BoxShape.circle,
+  // ---------------------------------------------------------------------------
+  // Error state
+  // ---------------------------------------------------------------------------
+
+  Widget _buildError() {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.wifi_off_rounded,
+                color: Colors.white.withOpacity(0.5), size: 64),
+            const SizedBox(height: 16),
+            Text(
+              'Could not load Shorts',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 24,
+            const SizedBox(height: 8),
+            Text(
+              'Check your connection and try again.',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.5),
+                fontSize: 14,
+              ),
             ),
-          ),
-          if (label.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ]
-        ],
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _loadShorts,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryCyan,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

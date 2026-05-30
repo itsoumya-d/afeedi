@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/content_model.dart';
 import '../services/content_service.dart';
+import '../services/navigation_service.dart';
 import '../widgets/streaming/enhanced_youtube_player.dart';
 import '../widgets/streaming/social_media_video_player.dart';
 
@@ -19,7 +22,9 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
   bool _isLiked = false;
   bool _isSaved = false;
   bool _isFullscreen = false;
+  bool _isDescriptionExpanded = false;
   late DateTime _watchStartTime;
+  List<Content> _relatedContent = [];
 
   @override
   void initState() {
@@ -27,11 +32,11 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
     WidgetsBinding.instance.addObserver(this);
     _watchStartTime = DateTime.now();
     _incrementVideoCount();
+    _loadRelatedContent();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Players handle their own pause internally on web; on mobile we reset watch time
     if (state == AppLifecycleState.paused) {
       _saveWatchTime();
     }
@@ -57,10 +62,27 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
     await prefs.setInt('stat_videos_watched', count);
   }
 
+  Future<void> _loadRelatedContent() async {
+    try {
+      final tags = widget.content.tags;
+      final category = widget.content.categories.isNotEmpty
+          ? widget.content.categories.first
+          : (tags.isNotEmpty ? tags.first : null);
+      final all = await ContentService.instance.getVideos(
+        category: category,
+        limit: 12,
+      );
+      final related = all
+          .where((c) => c.id != widget.content.id)
+          .take(8)
+          .toList();
+      if (mounted) setState(() => _relatedContent = related);
+    } catch (_) {}
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    // Restore portrait and UI on exit
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     _saveWatchTime();
@@ -68,26 +90,21 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
   }
 
   Future<void> _saveWatchTime() async {
-    final elapsed = DateTime.now().difference(_watchStartTime).inSeconds;
-    if (elapsed < 5) return; // ignore accidental opens
     final prefs = await SharedPreferences.getInstance();
+    final elapsed = DateTime.now().difference(_watchStartTime).inSeconds;
     final minutes = prefs.getInt('stat_watch_minutes') ?? 0;
     await prefs.setInt('stat_watch_minutes', minutes + (elapsed ~/ 60));
 
-    // Save watch progress for Continue Watching
-    final duration = widget.content.durationSeconds ?? 0;
-    if (duration > 0) {
-      final progress = (elapsed / duration).clamp(0.0, 1.0);
+    final duration = widget.content.durationSeconds ?? 300;
+    final progress = elapsed / duration.clamp(1, duration);
+    if (progress > 0.01) {
       final key = 'watch_progress_${widget.content.id}';
-      if (progress < 0.95) {
-        await prefs.setDouble(key, progress);
-      } else {
-        // Fully watched — remove from continue watching
+      if (progress >= 0.9) {
         await prefs.remove(key);
+      } else {
+        await prefs.setDouble(key, progress.clamp(0.0, 1.0));
       }
     }
-
-    // Track watched ID for history
     final watchedList = prefs.getStringList('watched_ids') ?? [];
     watchedList.remove(widget.content.id);
     watchedList.insert(0, widget.content.id);
@@ -100,6 +117,13 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
     return count.toString();
   }
 
+  void _share() {
+    final url = widget.content.videoUrl ?? widget.content.embedUrl;
+    if (url != null && url.isNotEmpty) {
+      launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,21 +132,29 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // App bar row — 44dp minimum touch on back button via IconButton default
+            // ── App bar ─────────────────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
               child: Row(
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    tooltip: 'Back',
                     onPressed: () => Navigator.pop(context),
                   ),
                   const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.share_outlined, color: Colors.white),
+                    tooltip: 'Share',
+                    onPressed: _share,
+                  ),
                 ],
               ),
             ),
-            // Video player
-            Expanded(
+
+            // ── Video player ─────────────────────────────────────────────────
+            AspectRatio(
+              aspectRatio: 16 / 9,
               child: widget.content.platform == PlatformType.youtube
                   ? EnhancedYouTubePlayer(content: widget.content, autoPlay: true)
                   : SocialMediaVideoPlayer(
@@ -131,67 +163,163 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
                       onFullscreen: _toggleFullscreen,
                     ),
             ),
-            // Info section
-            Container(
-              color: const Color(0xFF0D0B1E),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    widget.content.title ?? 'Untitled',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    widget.content.creatorName ?? 'Unknown Creator',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      fontSize: 13,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
+
+            // ── Scrollable info + Up Next ────────────────────────────────────
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  color: const Color(0xFF0D0B1E),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Like button
-                      _ActionButton(
-                        icon: _isLiked ? Icons.favorite : Icons.favorite_border,
-                        color: _isLiked ? Colors.red : Colors.white,
-                        label: _formatCount(widget.content.likeCount),
-                        onTap: () async {
-                          await ContentService.instance.trackContentInteraction(
-                            contentId: widget.content.id,
-                            interactionType: InteractionType.like,
-                          );
-                          setState(() => _isLiked = !_isLiked);
-                        },
+                      // Info section
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Title
+                            Text(
+                              widget.content.title ?? 'Untitled',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                height: 1.4,
+                              ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 6),
+
+                            // View count + creator
+                            Row(
+                              children: [
+                                Icon(Icons.visibility_outlined,
+                                    color: Colors.white38, size: 14),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${_formatCount(widget.content.viewCount)} views',
+                                  style: const TextStyle(
+                                      color: Colors.white38, fontSize: 12),
+                                ),
+                                const SizedBox(width: 12),
+                                Flexible(
+                                  child: Text(
+                                    widget.content.creatorName ?? '',
+                                    style: TextStyle(
+                                        color: Colors.white.withValues(alpha: 0.7),
+                                        fontSize: 13),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+
+                            // Action buttons row
+                            Row(
+                              children: [
+                                _ActionButton(
+                                  icon: _isLiked
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: _isLiked ? Colors.red : Colors.white,
+                                  label: _formatCount(widget.content.likeCount),
+                                  onTap: () async {
+                                    await ContentService.instance
+                                        .trackContentInteraction(
+                                      contentId: widget.content.id,
+                                      interactionType: InteractionType.like,
+                                    );
+                                    setState(() => _isLiked = !_isLiked);
+                                  },
+                                ),
+                                const SizedBox(width: 20),
+                                _ActionButton(
+                                  icon: _isSaved
+                                      ? Icons.bookmark
+                                      : Icons.bookmark_border,
+                                  color: _isSaved
+                                      ? const Color(0xFF00D4FF)
+                                      : Colors.white,
+                                  label: _isSaved ? 'Saved' : 'Save',
+                                  onTap: () async {
+                                    await ContentService.instance
+                                        .trackContentInteraction(
+                                      contentId: widget.content.id,
+                                      interactionType: InteractionType.save,
+                                    );
+                                    setState(() => _isSaved = !_isSaved);
+                                  },
+                                ),
+                                const SizedBox(width: 20),
+                                _ActionButton(
+                                  icon: Icons.share_outlined,
+                                  color: Colors.white,
+                                  label: 'Share',
+                                  onTap: _share,
+                                ),
+                              ],
+                            ),
+
+                            // Description
+                            if (widget.content.description != null &&
+                                widget.content.description!.isNotEmpty) ...[
+                              const SizedBox(height: 10),
+                              GestureDetector(
+                                onTap: () => setState(() =>
+                                    _isDescriptionExpanded =
+                                        !_isDescriptionExpanded),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      widget.content.description!,
+                                      style: const TextStyle(
+                                          color: Colors.white54, fontSize: 13, height: 1.5),
+                                      maxLines: _isDescriptionExpanded ? null : 2,
+                                      overflow: _isDescriptionExpanded
+                                          ? null
+                                          : TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      _isDescriptionExpanded
+                                          ? 'Show less'
+                                          : 'Show more',
+                                      style: const TextStyle(
+                                          color: Color(0xFF00D4FF),
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
-                      const SizedBox(width: 20),
-                      // Save button
-                      _ActionButton(
-                        icon: _isSaved ? Icons.bookmark : Icons.bookmark_border,
-                        color: _isSaved ? Colors.cyan : Colors.white,
-                        label: _isSaved ? 'Saved' : 'Save',
-                        onTap: () async {
-                          await ContentService.instance.trackContentInteraction(
-                            contentId: widget.content.id,
-                            interactionType: InteractionType.save,
-                          );
-                          setState(() => _isSaved = !_isSaved);
-                        },
-                      ),
+
+                      // ── Up Next ────────────────────────────────────────────
+                      if (_relatedContent.isNotEmpty) ...[
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                          child: Text(
+                            'Up Next',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        ..._relatedContent.map((c) => _RelatedCard(content: c)),
+                        const SizedBox(height: 20),
+                      ],
                     ],
                   ),
-                ],
+                ),
               ),
             ),
           ],
@@ -201,6 +329,7 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
   }
 }
 
+// ─── Action button ────────────────────────────────────────────────────────────
 class _ActionButton extends StatelessWidget {
   final IconData icon;
   final Color color;
@@ -216,27 +345,121 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 22),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
+    return Semantics(
+      label: label,
+      button: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: color, size: 22),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Related / Up Next card ───────────────────────────────────────────────────
+class _RelatedCard extends StatelessWidget {
+  final Content content;
+  const _RelatedCard({required this.content});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: content.title ?? 'Video',
+      button: true,
+      child: InkWell(
+        onTap: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => PlayerScreen(content: content)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Thumbnail
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: SizedBox(
+                  width: 120,
+                  height: 68,
+                  child: content.thumbnailUrl != null
+                      ? CachedNetworkImage(
+                          imageUrl: content.thumbnailUrl!,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => Container(
+                            color: const Color(0xFF1A1A2E),
+                            child: const Icon(Icons.play_circle_outline,
+                                color: Colors.white24),
+                          ),
+                          errorWidget: (_, __, ___) => Container(
+                            color: const Color(0xFF1A1A2E),
+                            child: const Icon(Icons.play_circle_outline,
+                                color: Colors.white24),
+                          ),
+                        )
+                      : Container(
+                          color: const Color(0xFF1A1A2E),
+                          child: const Icon(Icons.play_circle_outline,
+                              color: Colors.white24),
+                        ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              // Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      content.title ?? 'Untitled',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        height: 1.3,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      content.creatorName ?? '',
+                      style: const TextStyle(color: Colors.white54, fontSize: 11),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      content.formattedViewCount,
+                      style: const TextStyle(color: Colors.white38, fontSize: 11),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

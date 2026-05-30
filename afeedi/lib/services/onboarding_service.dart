@@ -291,9 +291,9 @@ class OnboardingService {
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('onboarding_user_name', userName);
-    await prefs.setString(
+    await prefs.setStringList(
       'onboarding_selected_genres',
-      jsonEncode(selectedGenres.map((g) => g.name).toList()),
+      selectedGenres.map((g) => g.name).toList(),
     );
     await prefs.setString(
       'onboarding_platform_connections',
@@ -313,7 +313,7 @@ class OnboardingService {
       'completedAt': prefs.getString('onboarding_completed_at'),
       'preferences': {
         'userName': prefs.getString('onboarding_user_name') ?? '',
-        'selectedGenres': jsonDecode(prefs.getString('onboarding_selected_genres') ?? '[]'),
+        'selectedGenres': prefs.getStringList('onboarding_selected_genres') ?? [],
         'platformConnections': jsonDecode(prefs.getString('onboarding_platform_connections') ?? '{}'),
       },
     };
@@ -357,9 +357,9 @@ class OnboardingService {
   Future<void> savePreferences(UserPreferences preferences) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('onboarding_user_name', preferences.name ?? '');
-    await prefs.setString(
+    await prefs.setStringList(
       'onboarding_selected_genres',
-      jsonEncode(preferences.contentInterests),
+      preferences.contentInterests,
     );
     await prefs.setString(
       'onboarding_platform_connections',

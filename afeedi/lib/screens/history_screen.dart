@@ -29,13 +29,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final prefs = await SharedPreferences.getInstance();
 
     // Load ordered list of watched content IDs
-    final rawIds = prefs.getString('watched_ids');
-    List<String> orderedIds = [];
-    if (rawIds != null) {
-      try {
-        orderedIds = List<String>.from(jsonDecode(rawIds) as List);
-      } catch (_) {
-        orderedIds = [];
+    // Supports both StringList (new) and JSON-encoded String (legacy)
+    List<String> orderedIds = prefs.getStringList('watched_ids') ?? [];
+    if (orderedIds.isEmpty) {
+      final rawIds = prefs.getString('watched_ids');
+      if (rawIds != null) {
+        try { orderedIds = List<String>.from(jsonDecode(rawIds) as List); } catch (_) {}
       }
     }
 
@@ -105,15 +104,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _removeFromHistory(Content content) async {
     final prefs = await SharedPreferences.getInstance();
-    final rawIds = prefs.getString('watched_ids');
-    List<String> orderedIds = [];
-    if (rawIds != null) {
-      try {
-        orderedIds = List<String>.from(jsonDecode(rawIds) as List);
-      } catch (_) {}
+    List<String> orderedIds = prefs.getStringList('watched_ids') ?? [];
+    if (orderedIds.isEmpty) {
+      final raw = prefs.getString('watched_ids');
+      if (raw != null) {
+        try { orderedIds = List<String>.from(jsonDecode(raw) as List); } catch (_) {}
+      }
     }
     orderedIds.remove(content.id);
-    await prefs.setString('watched_ids', jsonEncode(orderedIds));
+    await prefs.setStringList('watched_ids', orderedIds);
     await prefs.remove('watch_progress_${content.id}');
 
     if (mounted) {

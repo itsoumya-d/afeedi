@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_theme.dart';
+import '../common/loading_shimmer.dart';
 import '../feed/feed_post_card.dart';
 import '../../models/content_model.dart';
 import '../../services/content_service.dart';
@@ -145,18 +146,17 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       
       List<Content> feedContent;
       
+      final isOnboardingCompleted = await onboardingService.isOnboardingCompleted();
       if (user != null) {
-        final isOnboardingCompleted = await onboardingService.isOnboardingCompleted();
-        
         if (isOnboardingCompleted) {
-          // Use personalized content for completed onboarding users
           feedContent = await ContentService.instance.getPersonalizedContent(limit: 15);
         } else {
-          // Use onboarding-based recommendations for users in progress
           feedContent = await ContentService.instance.getOnboardingBasedRecommendations(limit: 15);
         }
+      } else if (isOnboardingCompleted) {
+        // User completed chatbot onboarding without creating account — show genre-personalized feed
+        feedContent = await ContentService.instance.getOnboardingBasedRecommendations(limit: 15);
       } else {
-        // Use general trending content for unauthenticated users
         feedContent = await ContentService.instance.getTrendingVideos(limit: 15);
       }
       
@@ -213,18 +213,16 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       
       List<Content> newPosts;
       
+      final isOnboardingCompleted = await onboardingService.isOnboardingCompleted();
       if (user != null) {
-        final isOnboardingCompleted = await onboardingService.isOnboardingCompleted();
-        
         if (isOnboardingCompleted) {
-          // Use personalized content for completed onboarding users
           newPosts = await ContentService.instance.getPersonalizedContent(limit: 8);
         } else {
-          // Use onboarding-based recommendations for users in progress
           newPosts = await ContentService.instance.getOnboardingBasedRecommendations(limit: 8);
         }
+      } else if (isOnboardingCompleted) {
+        newPosts = await ContentService.instance.getOnboardingBasedRecommendations(limit: 8);
       } else {
-        // Use general content for unauthenticated users
         newPosts = await ContentService.instance.getFeedContent(limit: 8);
       }
       
@@ -591,11 +589,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     final displayPosts = _filteredPosts;
 
     if (_isLoading && _posts.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryCyan),
-        ),
-      );
+      return const LoadingShimmer(itemCount: 4);
     }
 
     if (!_isLoading && _posts.isEmpty) {

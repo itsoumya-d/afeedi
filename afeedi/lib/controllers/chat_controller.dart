@@ -4,6 +4,7 @@ import '../models/genre.dart';
 import '../models/onboarding_step.dart';
 import '../services/onboarding_service.dart';
 import '../services/analytics_service.dart';
+import '../services/notification_service.dart';
 
 class ChatController extends ChangeNotifier {
   final OnboardingService _onboardingService = OnboardingService();
@@ -280,6 +281,11 @@ class ChatController extends ChangeNotifier {
       platformConnections: _platformConnections,
       chatHistory: _messages,
     );
+
+    // Schedule personalized notifications based on selected genres
+    NotificationService.instance
+        .schedulePersonalizedNotifications()
+        .catchError((e) => debugPrint('Notification schedule error: $e'));
 
     final welcomeMessage = _onboardingService.generateWelcomeMessage(
       userName: _userName,

@@ -2213,29 +2213,39 @@ class ContentService {
       final enhancedService = EnhancedRecommendationService.instance;
       final onboardingService = OnboardingService();
       final authService = AuthService.instance;
-      
-      final user = authService.currentUser;
-      if (user == null) {
-        return getFeedContent(limit: limit);
-      }
-      
-      // Get user preferences from onboarding
+
+      // Get user preferences from onboarding (works even without auth)
       final preferences = await onboardingService.getCurrentPreferences();
-      if (preferences == null) {
-        return getFeedContent(limit: limit);
+
+      final user = authService.currentUser;
+      if (user != null && preferences != null) {
+        final recommendations = await enhancedService.getOnboardingBasedRecommendations(
+          userId: user.id,
+          limit: limit,
+        );
+        if (recommendations.isNotEmpty) {
+          return recommendations.map((rec) => rec.content).toList();
+        }
       }
-      
-      // Get onboarding-based recommendations
-      final recommendations = await enhancedService.getOnboardingBasedRecommendations(
-        userId: user.id,
-        limit: limit,
-      );
-      
-      // Convert recommendations to content objects
-      return recommendations.map((rec) => rec.content).toList();
+
+      // No authenticated user or no recommendations — fall back to genre-based filter
+      // using saved onboarding genres directly from SharedPreferences
+      if (preferences != null && preferences.contentInterests.isNotEmpty) {
+        final genres = preferences.contentInterests;
+        final Set<String> seen = {};
+        final List<Content> results = [];
+        for (final genre in genres.take(5)) {
+          final genreContent = await getVideosByCategory(genre, limit: limit ~/ genres.length.clamp(1, 5) + 2);
+          for (final c in genreContent) {
+            if (seen.add(c.id)) results.add(c);
+          }
+        }
+        if (results.isNotEmpty) return results.take(limit).toList();
+      }
+
+      return getFeedContent(limit: limit);
     } catch (e) {
       debugPrint('Error getting onboarding-based recommendations: $e');
-      // Fallback to regular feed content
       return getFeedContent(limit: limit);
     }
   }

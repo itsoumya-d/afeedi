@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../services/content_service.dart';
 import '../services/navigation_service.dart';
+import '../widgets/common/loading_shimmer.dart';
 import '../models/content_model.dart';
 
 enum _SortMode { recentlySaved, alphabetical, byPlatform }
@@ -167,11 +168,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(Color(0xFF00D4FF)),
-              ),
-            )
+          ? const LoadingShimmer(itemCount: 4)
           : _displayed.isEmpty
               ? _buildEmptyState()
               : _buildList(),

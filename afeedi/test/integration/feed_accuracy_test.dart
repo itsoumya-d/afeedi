@@ -66,10 +66,7 @@ Future<void> _signInMockUser() async {
 Future<void> _setGenrePreferences(List<String> genres) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setString('onboarding_user_name', 'TestUser');
-  await prefs.setString(
-    'onboarding_selected_genres',
-    '[${genres.map((g) => '"$g"').join(',')}]',
-  );
+  await prefs.setStringList('onboarding_selected_genres', genres);
   await prefs.setString('onboarding_platform_connections', '{}');
   await prefs.setBool('onboarding_completed', true);
   await prefs.setString(

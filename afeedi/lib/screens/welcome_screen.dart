@@ -510,7 +510,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         children: [
                           TextButton(
                             onPressed: () =>
-                                _launchUrl('https://afeedi.com/terms'),
+                                Navigator.pushNamed(context, AppRoutes.termsOfService),
                             child: const Text(
                               'Terms',
                               style: TextStyle(
@@ -529,7 +529,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           ),
                           TextButton(
                             onPressed: () =>
-                                _launchUrl('https://afeedi.com/privacy'),
+                                Navigator.pushNamed(context, AppRoutes.privacyPolicy),
                             child: const Text(
                               'Privacy Policy',
                               style: TextStyle(

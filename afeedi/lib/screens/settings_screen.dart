@@ -104,7 +104,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             subtitle: const Text(
               'Automatically play next video',
-              style: TextStyle(color: Colors.white38, fontSize: 12),
+              style: TextStyle(color: Colors.white60, fontSize: 12),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -140,7 +140,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             subtitle: const Text(
               'Reduce data usage while streaming',
-              style: TextStyle(color: Colors.white38, fontSize: 12),
+              style: TextStyle(color: Colors.white60, fontSize: 12),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -170,7 +170,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             subtitle: const Text(
               'New content from followed creators',
-              style: TextStyle(color: Colors.white38, fontSize: 12),
+              style: TextStyle(color: Colors.white60, fontSize: 12),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -204,7 +204,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             subtitle: const Text(
               'Use dark theme throughout the app',
-              style: TextStyle(color: Colors.white38, fontSize: 12),
+              style: TextStyle(color: Colors.white60, fontSize: 12),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -290,7 +290,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             subtitle: const Text(
               'Help improve the app with anonymous data',
-              style: TextStyle(color: Colors.white38, fontSize: 12),
+              style: TextStyle(color: Colors.white60, fontSize: 12),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),

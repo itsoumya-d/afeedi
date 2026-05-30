@@ -23,6 +23,7 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
   bool _isSaved = false;
   bool _isFullscreen = false;
   bool _isDescriptionExpanded = false;
+  bool _dataSaverMode = false;
   late DateTime _watchStartTime;
   List<Content> _relatedContent = [];
   Timer? _progressTimer;
@@ -34,11 +35,21 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
     _watchStartTime = DateTime.now();
     _incrementVideoCount();
     _loadRelatedContent();
+    _loadSettings();
     _progressTimer = Timer.periodic(const Duration(seconds: 30), (_) => _saveWatchTime());
     setState(() {
       _isLiked = UserInteractionService.instance.isLiked(widget.content.id);
       _isSaved = UserInteractionService.instance.isSaved(widget.content.id);
     });
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _dataSaverMode = prefs.getBool('setting_data_saver') ?? false;
+      });
+    }
   }
 
   @override
@@ -166,10 +177,13 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
             AspectRatio(
               aspectRatio: 16 / 9,
               child: widget.content.platform == PlatformType.youtube
-                  ? EnhancedYouTubePlayer(content: widget.content, autoPlay: true)
+                  ? EnhancedYouTubePlayer(
+                      content: widget.content,
+                      autoPlay: !_dataSaverMode,
+                    )
                   : SocialMediaVideoPlayer(
                       content: widget.content,
-                      autoPlay: true,
+                      autoPlay: !_dataSaverMode,
                       onFullscreen: _toggleFullscreen,
                     ),
             ),
@@ -206,12 +220,12 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
                             Row(
                               children: [
                                 Icon(Icons.visibility_outlined,
-                                    color: Colors.white38, size: 14),
+                                    color: Colors.white60, size: 14),
                                 const SizedBox(width: 4),
                                 Text(
                                   '${_formatCount(widget.content.viewCount)} views',
                                   style: const TextStyle(
-                                      color: Colors.white38, fontSize: 12),
+                                      color: Colors.white60, fontSize: 12),
                                 ),
                                 const SizedBox(width: 12),
                                 Flexible(
@@ -461,7 +475,7 @@ class _RelatedCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       content.formattedViewCount,
-                      style: const TextStyle(color: Colors.white38, fontSize: 11),
+                      style: const TextStyle(color: Colors.white60, fontSize: 11),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

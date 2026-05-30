@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/analytics_service.dart';
-import '../models/analytics_events.dart';
-import '../services/onboarding_service.dart';
-import '../controllers/chat_controller.dart' hide AnalyticsEvents;
+import '../controllers/chat_controller.dart';
 import '../widgets/chat/chat_interface.dart';
 
 class OnboardingChatbotScreen extends StatefulWidget {
@@ -21,17 +18,6 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
     super.initState();
     _chatController = ChatController();
     _chatController.initialize();
-
-    final steps = OnboardingService().getOnboardingSteps();
-    AnalyticsService.instance.trackOnboardingEvent(
-      eventName: AnalyticsEvents.onboardingStarted,
-      stepNumber: 0,
-      stepName: 'welcome',
-      additionalData: {
-        'timestamp': DateTime.now().toIso8601String(),
-        'total_steps': steps.length,
-      },
-    );
   }
 
   @override

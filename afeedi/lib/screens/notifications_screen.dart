@@ -346,7 +346,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
                   const SizedBox(height: 4),
                   Text(
                     notification['time'] as String,
-                    style: const TextStyle(color: Colors.white38, fontSize: 11),
+                    style: const TextStyle(color: Colors.white60, fontSize: 11),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -376,7 +376,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
           const SizedBox(height: 8),
           const Text(
             "You're all caught up!",
-            style: TextStyle(color: Colors.white38, fontSize: 13),
+            style: TextStyle(color: Colors.white60, fontSize: 13),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

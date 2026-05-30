@@ -650,7 +650,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             const SizedBox(height: 8),
             const Text(
               'Pull down to refresh',
-              style: TextStyle(color: Colors.white38, fontSize: 14),
+              style: TextStyle(color: Colors.white60, fontSize: 14),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
@@ -677,7 +677,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
               const SizedBox(height: 8),
               const Text(
                 'Follow creators to see their content here',
-                style: TextStyle(color: Colors.white38, fontSize: 14),
+                style: TextStyle(color: Colors.white60, fontSize: 14),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
@@ -701,7 +701,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             const SizedBox(height: 8),
             const Text(
               'Try changing or clearing your filters',
-              style: TextStyle(color: Colors.white38, fontSize: 14),
+              style: TextStyle(color: Colors.white60, fontSize: 14),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
@@ -945,7 +945,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
               const SizedBox(width: 12),
               GestureDetector(
                 onTap: () => setState(() => _showFollowSuggestion = false),
-                child: const Text('Dismiss', style: TextStyle(color: Colors.white38, fontSize: 12)),
+                child: const Text('Dismiss', style: TextStyle(color: Colors.white60, fontSize: 12)),
               ),
             ],
           ),

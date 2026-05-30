@@ -344,7 +344,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(icon, size: 13,
-                        color: isSelected ? const Color(0xFF00D4FF) : Colors.white38),
+                        color: isSelected ? const Color(0xFF00D4FF) : Colors.white54),
                     const SizedBox(width: 5),
                     Text(
                       label,
@@ -477,7 +477,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
               const SizedBox(height: 8),
               const Text(
                 'Try different keywords or adjust filters',
-                style: TextStyle(color: Colors.white38, fontSize: 13),
+                style: TextStyle(color: Colors.white60, fontSize: 13),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
@@ -600,7 +600,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                     const SizedBox(height: 4),
                     Text(
                       content.formattedViewCount,
-                      style: const TextStyle(color: Colors.white38, fontSize: 11),
+                      style: const TextStyle(color: Colors.white60, fontSize: 11),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -722,7 +722,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
           if (_recentSearches.isEmpty)
             const Text(
               'No recent searches yet',
-              style: TextStyle(color: Colors.white38, fontSize: 13),
+              style: TextStyle(color: Colors.white60, fontSize: 13),
             )
           else
             ..._recentSearches.take(5).map(_buildRecentSearchItem),

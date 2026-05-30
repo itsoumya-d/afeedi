@@ -367,7 +367,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     placeholder: (ctx, url) => Container(color: Colors.grey[900]),
                     errorWidget: (ctx, url, err) => Container(
                       color: _surfaceElevated,
-                      child: const Icon(Icons.person, color: Colors.white38),
+                      child: const Icon(Icons.person, color: Colors.white54),
                     ),
                   )
                 : _avatarFallback(initial),
@@ -603,7 +603,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           const SizedBox(height: 4),
           Text(
             label,
-            style: const TextStyle(color: Colors.white38, fontSize: 11),
+            style: const TextStyle(color: Colors.white60, fontSize: 11),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
@@ -632,7 +632,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         indicatorColor: _accent,
         indicatorWeight: 2.5,
         labelColor: _accent,
-        unselectedLabelColor: Colors.white38,
+        unselectedLabelColor: Colors.white60,
         labelStyle: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
@@ -730,7 +730,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     fit: BoxFit.cover,
                     errorWidget: (_, __, ___) => Container(
                       color: _surfaceElevated,
-                      child: const Icon(Icons.play_circle_outline, color: Colors.white38),
+                      child: const Icon(Icons.play_circle_outline, color: Colors.white54),
                     ),
                     placeholder: (_, __) => Container(color: _surfaceElevated),
                   )
@@ -858,7 +858,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                           color: _surfaceElevated,
                           child: const Icon(
                             Icons.play_circle_outline,
-                            color: Colors.white38,
+                            color: Colors.white54,
                             size: 24,
                           ),
                         ),
@@ -869,7 +869,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                         color: _surfaceElevated,
                         child: const Icon(
                           Icons.play_circle_outline,
-                          color: Colors.white38,
+                          color: Colors.white54,
                           size: 24,
                         ),
                       ),
@@ -965,7 +965,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                         child: Text(
                           watchedAt,
                           style: const TextStyle(
-                              color: Colors.white38, fontSize: 10),
+                              color: Colors.white60, fontSize: 10),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -989,7 +989,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             constraints:
                 const BoxConstraints.tightFor(width: 44, height: 44),
             icon: const Icon(Icons.more_vert,
-                color: Colors.white38, size: 18),
+                color: Colors.white54, size: 18),
           ),
         ],
       ),
@@ -1104,7 +1104,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         ),
         Text(
           label,
-          style: const TextStyle(color: Colors.white38, fontSize: 10),
+          style: const TextStyle(color: Colors.white60, fontSize: 10),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -1185,7 +1185,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           const SizedBox(height: 3),
           Text(
             achievement['description'] as String? ?? '',
-            style: const TextStyle(color: Colors.white38, fontSize: 11),
+            style: const TextStyle(color: Colors.white60, fontSize: 11),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -1234,7 +1234,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             const SizedBox(height: 6),
             Text(
               subtitle,
-              style: const TextStyle(color: Colors.white30, fontSize: 13),
+              style: const TextStyle(color: Colors.white60, fontSize: 13),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -1265,26 +1265,76 @@ class _ProfileScreenState extends State<ProfileScreen>
   // ─── DIALOGS ──────────────────────────────────────────────────────────────
 
   void _showEditProfileDialog() {
+    final nameController = TextEditingController(
+        text: _userProfile['name'] as String? ?? '');
+    final formKey = GlobalKey<FormState>();
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1A1A2E),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
           'Edit Profile',
-          style: TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        content: const Text(
-          'Profile editing will be available in the next update.',
-          style: TextStyle(color: Colors.white70, fontSize: 14),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            controller: nameController,
+            autofocus: true,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              labelText: 'Display Name',
+              labelStyle: const TextStyle(color: Colors.white60),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.white24),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: _accent),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.red),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.red),
+              ),
+            ),
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) return 'Name cannot be empty';
+              if (v.trim().length > 50) return 'Name too long (max 50 chars)';
+              return null;
+            },
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Close',
-                style: TextStyle(color: _accent)),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white60)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _accent,
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () async {
+              if (!formKey.currentState!.validate()) return;
+              final newName = nameController.text.trim();
+              Navigator.pop(ctx);
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('user_name', newName);
+              await prefs.setString('onboarding_user_name', newName);
+              if (mounted) {
+                setState(() => _userProfile['name'] = newName);
+              }
+            },
+            child: const Text('Save'),
           ),
         ],
       ),

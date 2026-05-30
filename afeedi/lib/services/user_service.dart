@@ -18,6 +18,13 @@ class UserService extends ChangeNotifier {
   
   /// Whether the user is authenticated
   bool get isAuthenticated => _isAuthenticated;
+
+  /// Whether the current user has admin privileges.
+  /// In production this would be role-based from the backend.
+  bool get isAdmin {
+    final email = _currentUser?.email ?? '';
+    return email.contains('@admin.') || email == 'admin@afeedi.com';
+  }
   
   /// Initialize the user service
   Future<void> initialize() async {

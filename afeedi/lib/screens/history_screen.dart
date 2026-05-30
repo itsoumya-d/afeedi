@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../services/analytics_service.dart';
 import '../services/content_service.dart';
 import '../services/navigation_service.dart';
 import '../models/content_model.dart';
@@ -23,6 +24,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void initState() {
     super.initState();
     _loadHistory();
+    AnalyticsService.instance.trackUserInteraction(
+      action: 'screen_view',
+      screen: 'history',
+    );
   }
 
   Future<void> _loadHistory() async {
@@ -80,7 +85,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
       final continueWatching = matched
           .where((c) => (progressMap[c.id] ?? 0.0) < 0.8 &&
-              (progressMap[c.id] ?? 0.0) > 0.0)
+              (progressMap[c.id] ?? 0.0) > 0.05)
           .toList();
 
       final history = matched
@@ -229,22 +234,71 @@ class _HistoryScreenState extends State<HistoryScreen> {
           if (!_isLoading &&
               (_history.isNotEmpty || _continueWatching.isNotEmpty))
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.white70),
+              icon: const Icon(Icons.delete_sweep_outlined, color: Colors.white70),
               tooltip: 'Clear all history',
               onPressed: _clearAllHistory,
             ),
           const SizedBox(width: 4),
         ],
       ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(Color(0xFF00D4FF)),
-              ),
-            )
-          : (_history.isEmpty && _continueWatching.isEmpty)
-              ? _buildEmptyState()
-              : _buildBody(),
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: _isLoading
+            ? _buildShimmer()
+            : (_history.isEmpty && _continueWatching.isEmpty)
+                ? _buildEmptyState()
+                : _buildBody(),
+      ),
+    );
+  }
+
+  Widget _buildShimmer() {
+    return Semantics(
+      label: 'Loading content',
+      liveRegion: true,
+      child: ListView.builder(
+        key: const ValueKey('shimmer'),
+        padding: const EdgeInsets.all(16),
+        itemCount: 5,
+        itemBuilder: (context, index) {
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 112,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.08),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      bottomLeft: Radius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(height: 12, color: Colors.white.withOpacity(0.1)),
+                      const SizedBox(height: 8),
+                      Container(height: 10, width: 120, color: Colors.white.withOpacity(0.07)),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -255,24 +309,33 @@ class _HistoryScreenState extends State<HistoryScreen> {
         children: [
           Icon(
             Icons.history,
-            size: 72,
+            size: 80,
             color: Colors.white.withOpacity(0.25),
           ),
-          const SizedBox(height: 16),
-          const Text(
-            'No watch history yet.',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+          const SizedBox(height: 20),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'No watch history yet.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            'Start watching videos!',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.4),
-              fontSize: 14,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              'Start watching videos to see your history here.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.4),
+                fontSize: 14,
+                height: 1.5,
+              ),
             ),
           ),
         ],
@@ -280,8 +343,43 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
+  /// Returns a date group label: Today / Yesterday / This Week / Older
+  String _dateGroupLabel(DateTime? dt) {
+    if (dt == null) return 'Older';
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final weekStart = today.subtract(Duration(days: today.weekday - 1));
+    final itemDay = DateTime(dt.year, dt.month, dt.day);
+    if (itemDay == today) return 'Today';
+    if (itemDay == yesterday) return 'Yesterday';
+    if (itemDay.isAfter(weekStart)) return 'This Week';
+    return 'Older';
+  }
+
   Widget _buildBody() {
+    // Build date-grouped history
+    final groupOrder = <String>[];
+    final groupedHistory = <String, List<Content>>{};
+    for (final item in _history) {
+      final label = _dateGroupLabel(item.publishedAt);
+      if (!groupedHistory.containsKey(label)) {
+        groupedHistory[label] = [];
+        groupOrder.add(label);
+      }
+      groupedHistory[label]!.add(item);
+    }
+
+    final List<Widget> historyWidgets = [];
+    for (final group in groupOrder) {
+      historyWidgets.add(_buildDateGroupHeader(group));
+      for (final item in groupedHistory[group]!) {
+        historyWidgets.add(_buildHistoryTile(item));
+      }
+    }
+
     return ListView(
+      key: const ValueKey('history_list'),
       padding: const EdgeInsets.only(bottom: 24),
       children: [
         if (_continueWatching.isNotEmpty) ...[
@@ -290,7 +388,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ],
         if (_history.isNotEmpty) ...[
           _buildSectionHeader('Watch History'),
-          ..._history.map(_buildHistoryTile),
+          ...historyWidgets,
         ],
       ],
     );
@@ -305,6 +403,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
           color: Colors.white,
           fontSize: 18,
           fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateGroupHeader(String label) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
+      child: Text(
+        label.toUpperCase(),
+        style: const TextStyle(
+          color: Colors.white38,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.2,
         ),
       ),
     );
@@ -395,9 +508,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget _buildHistoryTile(Content content) {
     final isContinueWatching =
         _continueWatching.any((c) => c.id == content.id);
+    final progressPct = ((_progressMap[content.id] ?? 0.0) * 100).round();
 
     return Semantics(
-      label: '${content.title ?? 'Untitled'}. ${content.creatorName ?? ''}. ${isContinueWatching ? 'In progress' : 'Watched'}',
+      label: '${content.title ?? 'Untitled'}. $progressPct% watched.',
       button: true,
       child: GestureDetector(
         onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),

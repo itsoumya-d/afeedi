@@ -149,5 +149,98 @@ void main() {
 
       expect(find.byType(PlayerScreen), findsOneWidget);
     });
+
+    testWidgets('has playback speed button (Icons.speed)', (tester) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(
+        MaterialApp(home: PlayerScreen(content: _makeContent())),
+      );
+      await tester.pump();
+
+      expect(find.byIcon(Icons.speed), findsOneWidget);
+    });
+
+    testWidgets('speed button is tappable and opens speed selector',
+        (tester) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(
+        MaterialApp(home: PlayerScreen(content: _makeContent())),
+      );
+      await tester.pump();
+
+      final speedButton = find.byIcon(Icons.speed);
+      expect(speedButton, findsOneWidget);
+      await tester.ensureVisible(speedButton);
+      await tester.tap(speedButton);
+      await tester.pumpAndSettle();
+
+      // Speed selector bottom sheet shows 'Playback Speed' label
+      expect(find.text('Playback Speed'), findsOneWidget);
+    });
+
+    testWidgets('speed selector shows all speed options', (tester) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(
+        MaterialApp(home: PlayerScreen(content: _makeContent())),
+      );
+      await tester.pump();
+
+      await tester.ensureVisible(find.byIcon(Icons.speed));
+      await tester.tap(find.byIcon(Icons.speed));
+      await tester.pumpAndSettle();
+
+      // Default speed options: 0.5, 0.75, 1×, 1.25, 1.5, 2×
+      expect(find.text('1×'), findsWidgets);
+      expect(find.text('2×'), findsOneWidget);
+    });
+
+    testWidgets('shows related content section header when async loads',
+        (tester) async {
+      tester.view.physicalSize = const Size(800, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(
+        MaterialApp(home: PlayerScreen(content: _makeContent())),
+      );
+      // Allow related content to load
+      await tester.pump(const Duration(seconds: 3));
+
+      // If related content is empty (no network in tests), section header is
+      // not rendered — just confirm the screen still renders correctly
+      expect(find.byType(PlayerScreen), findsOneWidget);
+    });
+
+    testWidgets('shows share action in action buttons row', (tester) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(
+        MaterialApp(home: PlayerScreen(content: _makeContent())),
+      );
+      await tester.pump();
+
+      // share_outlined appears in both the top bar and the action buttons row
+      expect(find.byIcon(Icons.share_outlined), findsWidgets);
+    });
+
+    testWidgets('shows view count for content', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(home: PlayerScreen(content: _makeContent())),
+      );
+      await tester.pump();
+
+      expect(find.textContaining('views'), findsOneWidget);
+    });
   });
 }

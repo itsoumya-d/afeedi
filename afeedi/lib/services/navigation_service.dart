@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'user_service.dart';
 import '../screens/welcome_screen.dart';
 import '../screens/create_account_screen.dart';
 import '../screens/login_screen.dart';
@@ -150,5 +151,31 @@ class AppRoutes {
         AppRoutes.premium: (_) => const PremiumScreen(),
         AppRoutes.bookmarks: (_) => const BookmarksScreen(),
         AppRoutes.history: (_) => const HistoryScreen(),
+
+        // Admin routes — protected by isAdmin guard
+        AppRoutes.adminPanel: (context) {
+          if (!UserService.instance.isAdmin) {
+            return const PlaceholderScreen(title: 'Access Denied', icon: Icons.lock);
+          }
+          return const PlaceholderScreen(title: 'Admin Panel', icon: Icons.admin_panel_settings);
+        },
+        AppRoutes.adminUsers: (context) {
+          if (!UserService.instance.isAdmin) {
+            return const PlaceholderScreen(title: 'Access Denied', icon: Icons.lock);
+          }
+          return const PlaceholderScreen(title: 'Admin — Users', icon: Icons.people);
+        },
+        AppRoutes.adminContent: (context) {
+          if (!UserService.instance.isAdmin) {
+            return const PlaceholderScreen(title: 'Access Denied', icon: Icons.lock);
+          }
+          return const PlaceholderScreen(title: 'Admin — Content', icon: Icons.video_library);
+        },
+        AppRoutes.adminAnalytics: (context) {
+          if (!UserService.instance.isAdmin) {
+            return const PlaceholderScreen(title: 'Access Denied', icon: Icons.lock);
+          }
+          return const PlaceholderScreen(title: 'Admin — Analytics', icon: Icons.analytics);
+        },
       };
 }

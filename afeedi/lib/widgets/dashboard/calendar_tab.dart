@@ -28,6 +28,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
 
   // Google Calendar state
   bool _gcalConnecting = false;
+  bool _gcalConnectionError = false;
   List<CalendarEvent> _gcalEvents = [];
   
   // Enhanced calendar functionality (fields removed - unused)
@@ -250,10 +251,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         _gcalConnecting = false;
       });
     } else if (mounted) {
-      setState(() => _gcalConnecting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)?.couldNotConnect ?? 'Could not connect — check permissions and try again.')),
-      );
+      setState(() {
+        _gcalConnecting = false;
+        _gcalConnectionError = true;
+      });
     }
   }
 
@@ -362,7 +363,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ),
       child: isConnected
           ? _buildConnectedCalendar()
-          : _buildConnectButton(),
+          : _gcalConnectionError
+              ? _buildConnectionErrorState()
+              : _buildConnectButton(),
     );
   }
 
@@ -400,6 +403,53 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConnectionErrorState() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.redAccent, size: 20),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                'Could not connect to Google Calendar',
+                style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Check your permissions and internet connection, then try again.',
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              setState(() => _gcalConnectionError = false);
+              _connectGoogleCalendar();
+            },
+            icon: const Icon(Icons.refresh, size: 18),
+            label: const Text('Try Again'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4285F4),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: () => setState(() => _gcalConnectionError = false),
+          child: const Text('Dismiss', style: TextStyle(color: Colors.white54, fontSize: 12)),
         ),
       ],
     );
@@ -464,7 +514,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   Widget _buildCalendarEventTile(CalendarEvent event) {
     final time = event.isAllDay
         ? (AppLocalizations.of(context)?.allDay ?? 'All day')
-        : '${event.start.hour.toString().padLeft(2, '0')}:${event.start.minute.toString().padLeft(2, '0')}';
+        : TimeOfDay.fromDateTime(event.start).format(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -1261,7 +1311,13 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     final daysInMonth = lastDayOfMonth.day;
     final firstWeekday = firstDayOfMonth.weekday;
     final totalCells = ((daysInMonth + firstWeekday - 1) / 7).ceil() * 7;
-    
+
+    // Check if this month has any scheduled content
+    final monthHasContent = List.generate(daysInMonth, (i) => i + 1).any((day) {
+      final date = DateTime(_selectedDate.year, _selectedDate.month, day);
+      return _getContentForDate(date).isNotEmpty;
+    });
+
     return Column(
       key: ValueKey('month_${_selectedDate.month}_${_selectedDate.year}'),
       children: [
@@ -1393,6 +1449,28 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             },
           ),
         ),
+        if (!monthHasContent)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.calendar_month_outlined,
+                  color: Colors.white.withValues(alpha: 0.25),
+                  size: 40,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'No content scheduled this month',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    fontSize: 13,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }
@@ -1423,7 +1501,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           'id': e.id,
           'title': e.title,
           'time': e.isAllDay ? (AppLocalizations.of(context)?.allDay ?? 'All day') :
-              '${e.start.hour.toString().padLeft(2, '0')}:${e.start.minute.toString().padLeft(2, '0')}',
+              TimeOfDay.fromDateTime(e.start).format(context),
           'duration': e.end != null ? e.end!.difference(e.start).inMinutes : 60,
           'platform': 'Google Calendar',
           'creator': e.location ?? '',
@@ -1589,12 +1667,41 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   }
   
   Widget _buildDayView() {
-    final filteredContent = _getFilteredContent();
-    
+    final filteredContent = _getContentForDate(_selectedDate);
+
     if (filteredContent.isEmpty) {
-      return _buildEmptyState();
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.event_available_outlined,
+              color: Colors.white30,
+              size: 56,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Nothing scheduled for this day',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Content from your feed appears here automatically',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.4),
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
     }
-    
+
     return Column(
       key: ValueKey('day_${_selectedDate.millisecondsSinceEpoch}_$_selectedFilter'),
       children: [

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../services/analytics_service.dart';
 import '../services/content_service.dart';
 import '../services/navigation_service.dart';
 import '../widgets/common/loading_shimmer.dart';
@@ -25,6 +26,10 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
   void initState() {
     super.initState();
     _loadSaved();
+    AnalyticsService.instance.trackUserInteraction(
+      action: 'screen_view',
+      screen: 'bookmarks',
+    );
   }
 
   Future<void> _loadSaved() async {
@@ -167,11 +172,14 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
           const SizedBox(width: 4),
         ],
       ),
-      body: _isLoading
-          ? const LoadingShimmer(itemCount: 4)
-          : _displayed.isEmpty
-              ? _buildEmptyState()
-              : _buildList(),
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: _isLoading
+            ? const LoadingShimmer(itemCount: 3)
+            : _displayed.isEmpty
+                ? _buildEmptyState()
+                : _buildList(),
+      ),
     );
   }
 
@@ -205,26 +213,34 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.bookmark_border,
-            size: 72,
+            Icons.bookmarks_outlined,
+            size: 80,
             color: Colors.white.withOpacity(0.25),
           ),
-          const SizedBox(height: 16),
-          const Text(
-            'No saved videos yet.',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+          const SizedBox(height: 20),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'No saved videos yet.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            'Tap the bookmark icon on any video to save it.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.4),
-              fontSize: 14,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              'Tap the bookmark icon on any video to save it here.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.4),
+                fontSize: 14,
+                height: 1.5,
+              ),
             ),
           ),
         ],
@@ -250,77 +266,88 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
 
   Widget _buildSavedTile(Content content) {
     return Semantics(
-      label: '${content.title ?? 'Untitled'}. ${content.creatorName ?? ''}. Bookmarked',
+      label: '${content.title ?? 'Untitled'}. ${content.creatorName ?? ''}. Bookmarked.',
       button: true,
-      child: SizedBox(
-      height: 80,
-      child: ListTile(
-        onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: SizedBox(
-            width: 112,
-            height: 72,
-            child: content.thumbnailUrl != null
-                ? CachedNetworkImage(
-                    imageUrl: content.thumbnailUrl!,
-                    fit: BoxFit.cover,
-                    errorWidget: (context, url, error) =>
-                        _buildThumbPlaceholder(content),
-                  )
-                : _buildThumbPlaceholder(content),
-          ),
+      child: Dismissible(
+        key: Key('bookmark_${content.id}'),
+        direction: DismissDirection.endToStart,
+        onDismissed: (_) => _unsave(content),
+        background: Container(
+          color: Colors.red.withOpacity(0.2),
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20),
+          child: const Icon(Icons.bookmark_remove, color: Colors.redAccent, size: 26),
         ),
-        title: Text(
-          content.title ?? 'Untitled',
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        subtitle: Row(
-          children: [
-            Text(
-              content.creatorName ?? 'Unknown',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.white54, fontSize: 11),
+        child: SizedBox(
+        height: 80,
+        child: ListTile(
+          onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          leading: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              width: 112,
+              height: 72,
+              child: content.thumbnailUrl != null
+                  ? CachedNetworkImage(
+                      imageUrl: content.thumbnailUrl!,
+                      fit: BoxFit.cover,
+                      errorWidget: (context, url, error) =>
+                          _buildThumbPlaceholder(content),
+                    )
+                  : _buildThumbPlaceholder(content),
             ),
-            const SizedBox(width: 6),
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-              decoration: BoxDecoration(
-                color: _getPlatformColor(content.platform).withOpacity(0.2),
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(
-                  color: _getPlatformColor(content.platform).withOpacity(0.5),
-                  width: 0.5,
+          ),
+          title: Text(
+            content.title ?? 'Untitled',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          subtitle: Row(
+            children: [
+              Text(
+                content.creatorName ?? 'Unknown',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Colors.white54, fontSize: 11),
+              ),
+              const SizedBox(width: 6),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                decoration: BoxDecoration(
+                  color: _getPlatformColor(content.platform).withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(
+                    color: _getPlatformColor(content.platform).withOpacity(0.5),
+                    width: 0.5,
+                  ),
+                ),
+                child: Text(
+                  _getPlatformLabel(content.platform),
+                  style: TextStyle(
+                    color: _getPlatformColor(content.platform),
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
-              child: Text(
-                _getPlatformLabel(content.platform),
-                style: TextStyle(
-                  color: _getPlatformColor(content.platform),
-                  fontSize: 9,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
+          trailing: IconButton(
+            icon: const Icon(Icons.bookmark_remove,
+                color: Colors.white38, size: 22),
+            tooltip: 'Remove bookmark',
+            onPressed: () => _unsave(content),
+          ),
         ),
-        trailing: IconButton(
-          icon: const Icon(Icons.bookmark_remove,
-              color: Colors.white38, size: 22),
-          tooltip: 'Remove bookmark',
-          onPressed: () => _unsave(content),
         ),
-      ),
       ),
     );
   }

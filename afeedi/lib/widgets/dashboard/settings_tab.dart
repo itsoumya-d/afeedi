@@ -160,17 +160,20 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           value: _locationTracking,
           onChanged: (value) => setState(() => _locationTracking = value),
         ),
+        Divider(color: Colors.white.withValues(alpha: 0.06), indent: 16, endIndent: 16),
         _buildActionItem(
           title: 'Download My Data',
           subtitle: 'Get a copy of your personal data',
           icon: Icons.download,
           onTap: () => _showDataDownloadDialog(),
         ),
+        Divider(color: Colors.white.withValues(alpha: 0.06), indent: 16, endIndent: 16),
         _buildActionItem(
           title: 'Delete Account',
           subtitle: 'Permanently delete your account and data',
           icon: Icons.delete_forever,
-          iconColor: Colors.red,
+          iconColor: Colors.redAccent,
+          isDangerous: true,
           onTap: () => _showDeleteAccountDialog(),
         ),
       ],
@@ -263,23 +266,35 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           icon: Icons.edit,
           onTap: () => _navigateToProfile(),
         ),
+        Divider(color: Colors.white.withValues(alpha: 0.06), indent: 16, endIndent: 16),
         _buildActionItem(
           title: 'Change Password',
           subtitle: 'Update your account password',
           icon: Icons.lock,
           onTap: () => _showChangePasswordDialog(),
         ),
+        Divider(color: Colors.white.withValues(alpha: 0.06), indent: 16, endIndent: 16),
         _buildActionItem(
           title: 'Subscription',
           subtitle: 'Manage your premium subscription',
           icon: Icons.star,
           onTap: () => _navigateToSubscription(),
         ),
+        Divider(color: Colors.white.withValues(alpha: 0.06), indent: 16, endIndent: 16),
         _buildActionItem(
           title: 'Connected Accounts',
           subtitle: 'Manage linked social media accounts',
           icon: Icons.link,
           onTap: () => _showConnectedAccountsDialog(),
+        ),
+        Divider(color: Colors.white.withValues(alpha: 0.06), indent: 16, endIndent: 16),
+        _buildActionItem(
+          title: 'Sign Out',
+          subtitle: 'Sign out of your Afeedi account',
+          icon: Icons.logout,
+          iconColor: Colors.redAccent,
+          isDangerous: true,
+          onTap: () {},
         ),
       ],
     );
@@ -333,33 +348,18 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: iconColor,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(
+              title.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white38,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2,
+              ),
             ),
           ),
           ...children,
@@ -374,42 +374,30 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: AppTheme.primaryCyan,
-            activeTrackColor: AppTheme.primaryCyan.withValues(alpha: 0.3),
-            inactiveThumbColor: Colors.white.withValues(alpha: 0.5),
-            inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
-          ),
-        ],
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.6),
+          fontSize: 12,
+        ),
+      ),
+      trailing: Switch(
+        value: value,
+        onChanged: onChanged,
+        activeColor: const Color(0xFF00D4FF),
+        activeTrackColor: const Color(0xFF00D4FF).withValues(alpha: 0.3),
+        inactiveThumbColor: Colors.white.withValues(alpha: 0.5),
+        inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
       ),
     );
   }
@@ -420,51 +408,54 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
     required IconData icon,
     Color? iconColor,
     VoidCallback? onTap,
+    bool isDangerous = false,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: iconColor ?? Colors.white.withValues(alpha: 0.7),
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+    final effectiveColor = iconColor ?? Colors.white.withValues(alpha: 0.7);
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      leading: Icon(icon, color: effectiveColor, size: 20),
+      title: isDangerous
+          ? TextButton(
+              onPressed: onTap,
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.redAccent,
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                alignment: Alignment.centerLeft,
+              ),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.redAccent,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            )
+          : Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
               ),
             ),
-            if (onTap != null)
-              Icon(
-                Icons.chevron_right,
-                color: Colors.white.withValues(alpha: 0.5),
-                size: 20,
-              ),
-          ],
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.6),
+          fontSize: 12,
         ),
       ),
+      trailing: (onTap != null && !isDangerous)
+          ? Icon(
+              Icons.chevron_right,
+              color: Colors.white.withValues(alpha: 0.4),
+              size: 20,
+            )
+          : null,
+      onTap: isDangerous ? null : onTap,
     );
   }
   

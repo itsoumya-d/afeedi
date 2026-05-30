@@ -47,44 +47,8 @@ class _ProfileScreenState extends State<ProfileScreen>
     'followingCount': 0,
   };
 
-  final List<Map<String, dynamic>> _achievements = [
-    {
-      'id': 'welcome',
-      'title': 'Welcome!',
-      'description': 'Create your Afeedi account',
-      'icon': Icons.celebration,
-      'color': Color(0xFFFFE66D),
-      'unlocked': true,
-      'progress': 1.0,
-    },
-    {
-      'id': 'first_video',
-      'title': 'First Watch',
-      'description': 'Watch your first video',
-      'icon': Icons.play_circle_filled,
-      'color': Color(0xFFFF6B6B),
-      'unlocked': false,
-      'progress': 0.0,
-    },
-    {
-      'id': 'explorer',
-      'title': 'Content Explorer',
-      'description': 'Watch videos from 3 platforms',
-      'icon': Icons.explore,
-      'color': Color(0xFF4ECDC4),
-      'unlocked': false,
-      'progress': 0.0,
-    },
-    {
-      'id': 'streak_starter',
-      'title': 'Streak Starter',
-      'description': 'Maintain a 7-day viewing streak',
-      'icon': Icons.local_fire_department,
-      'color': Color(0xFFFF8A65),
-      'unlocked': false,
-      'progress': 0.14,
-    },
-  ];
+  // Achievements are populated dynamically in _loadUserData
+  final List<Map<String, dynamic>> _achievements = [];
 
   List<Map<String, dynamic>> _viewingHistory = [];
   final List<Content> _likedItems     = [];
@@ -95,6 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   String? _localAvatarPath;
 
   String _bioText = '';
+  List<String> _topInterests = [];
 
   @override
   void initState() {
@@ -134,24 +99,72 @@ class _ProfileScreenState extends State<ProfileScreen>
     final followingCount = prefs.getInt('stat_following_count') ?? 0;
     final likedCount     = prefs.getInt('stat_liked_count')     ?? 0;
 
-    // Update achievements based on real activity
-    if (user != null || name != 'You') {
-      _achievements[0]['unlocked'] = true;
-    }
-    if (videosWatched > 0) {
-      _achievements[1]['unlocked'] = true;
-      _achievements[1]['progress'] = 1.0;
-    }
-    if (followingCount >= 1) {
-      _achievements[2]['progress'] = (followingCount / 3.0).clamp(0.0, 1.0);
-      if (followingCount >= 3) _achievements[2]['unlocked'] = true;
-    }
-    if (streakDays >= 7) {
-      _achievements[3]['unlocked'] = true;
-      _achievements[3]['progress'] = 1.0;
-    } else {
-      _achievements[3]['progress'] = streakDays / 7.0;
-    }
+    // Check onboarding genres for "Genre Fan" achievement
+    final onboardingGenres = prefs.getStringList('selected_genres') ?? [];
+
+    // Build 6 achievements dynamically
+    final builtAchievements = <Map<String, dynamic>>[
+      {
+        'id': 'first_watch',
+        'title': 'First Watch',
+        'description': 'Watch your first video',
+        'icon': Icons.play_arrow,
+        'color': const Color(0xFF00D4FF),
+        'unlocked': videosWatched >= 1,
+        'progress': videosWatched >= 1 ? 1.0 : 0.0,
+        'progressLabel': videosWatched >= 1 ? 'Completed!' : '0/1 videos',
+      },
+      {
+        'id': 'binge_watcher',
+        'title': 'Binge Watcher',
+        'description': 'Watch 10 videos',
+        'icon': Icons.tv,
+        'color': const Color(0xFF9C27B0),
+        'unlocked': videosWatched >= 10,
+        'progress': (videosWatched / 10.0).clamp(0.0, 1.0),
+        'progressLabel': videosWatched >= 10 ? 'Completed!' : '$videosWatched/10 videos',
+      },
+      {
+        'id': 'explorer',
+        'title': 'Explorer',
+        'description': 'Watch content from 3 platforms',
+        'icon': Icons.explore,
+        'color': const Color(0xFF4CAF50),
+        'unlocked': followingCount >= 3,
+        'progress': (followingCount / 3.0).clamp(0.0, 1.0),
+        'progressLabel': followingCount >= 3 ? 'Completed!' : '$followingCount/3 platforms',
+      },
+      {
+        'id': 'genre_fan',
+        'title': 'Genre Fan',
+        'description': 'Select 3+ genres in onboarding',
+        'icon': Icons.category,
+        'color': const Color(0xFFFF9800),
+        'unlocked': onboardingGenres.length >= 3,
+        'progress': (onboardingGenres.length / 3.0).clamp(0.0, 1.0),
+        'progressLabel': onboardingGenres.length >= 3 ? 'Completed!' : '${onboardingGenres.length}/3 genres',
+      },
+      {
+        'id': 'week_streak',
+        'title': 'Week Streak',
+        'description': 'Maintain a 7-day viewing streak',
+        'icon': Icons.local_fire_department,
+        'color': const Color(0xFFF44336),
+        'unlocked': streakDays >= 7,
+        'progress': (streakDays / 7.0).clamp(0.0, 1.0),
+        'progressLabel': streakDays >= 7 ? 'Completed!' : '$streakDays/7 days',
+      },
+      {
+        'id': 'curator',
+        'title': 'Curator',
+        'description': 'Save 5 videos to your collection',
+        'icon': Icons.bookmark,
+        'color': const Color(0xFF2196F3),
+        'unlocked': savedCount >= 5,
+        'progress': (savedCount / 5.0).clamp(0.0, 1.0),
+        'progressLabel': savedCount >= 5 ? 'Completed!' : '$savedCount/5 saved',
+      },
+    ];
 
     // Load real saved and liked content
     await UserInteractionService.instance.initialize();
@@ -184,6 +197,8 @@ class _ProfileScreenState extends State<ProfileScreen>
       }
     }
 
+    final topInterests = await _loadTopInterests();
+
     if (mounted) {
       setState(() {
         _userProfile['name']           = name;
@@ -197,6 +212,10 @@ class _ProfileScreenState extends State<ProfileScreen>
         _userProfile['followingCount'] = followingCount;
         _userProfile['likedCount']     = likedContent.isEmpty ? likedCount : likedContent.length;
         _userProfile['isPremium']      = SubscriptionService.instance.isPremium;
+        _topInterests = topInterests;
+        _achievements
+          ..clear()
+          ..addAll(builtAchievements);
         _savedItems
           ..clear()
           ..addAll(savedContent);
@@ -215,6 +234,19 @@ class _ProfileScreenState extends State<ProfileScreen>
         _isLoading = false;
       });
     }
+  }
+
+  Future<List<String>> _loadTopInterests() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString('genre_implicit_weights') ?? '';
+    if (raw.isEmpty) return [];
+    final entries = raw.split(',').map((e) {
+      final parts = e.split(':');
+      if (parts.length != 2) return null;
+      return MapEntry(parts[0], int.tryParse(parts[1]) ?? 0);
+    }).whereType<MapEntry<String, int>>().toList();
+    entries.sort((a, b) => b.value.compareTo(a.value));
+    return entries.take(3).map((e) => e.key).toList();
   }
 
   String _monthName(int month) => DateFormat.MMMM().format(DateTime(2000, month));
@@ -265,6 +297,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           _buildCoverAndAvatar(),
           _buildProfileInfo(),
           _buildStatsRow(),
+          if (_topInterests.isNotEmpty) _buildTopInterestsRow(),
         ],
       ),
     );
@@ -349,9 +382,9 @@ class _ProfileScreenState extends State<ProfileScreen>
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF1C1C2E), Color(0xFF0D0D1A)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
+          colors: [Color(0xFF2D1B69), Color(0xFF0F3460), Color(0xFF00D4FF)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
       ),
     );
@@ -602,69 +635,123 @@ class _ProfileScreenState extends State<ProfileScreen>
     final streakDays     = _userProfile['streakDays']     as int?    ?? 0;
     final savedCount     = _userProfile['savedCount']     as int?    ?? 0;
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: _surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Row(
         children: [
-          _buildStatItem('$videosWatched', AppLocalizations.of(context)?.videosWatchedLabel ?? 'Videos\nWatched'),
-          _buildStatDivider(),
-          _buildStatItem(totalWatchTime, AppLocalizations.of(context)?.watchTimeLabel ?? 'Watch\nTime'),
-          _buildStatDivider(),
-          _buildStatItem('${streakDays}d', AppLocalizations.of(context)?.streak ?? 'Streak'),
-          _buildStatDivider(),
-          _buildStatItem('$savedCount', AppLocalizations.of(context)?.saved ?? 'Saved'),
+          _buildStatCard('$videosWatched', AppLocalizations.of(context)?.videosWatchedLabel ?? 'Watched', Icons.play_circle_outline),
+          const SizedBox(width: 10),
+          _buildStatCard(totalWatchTime, AppLocalizations.of(context)?.watchTimeLabel ?? 'Watch Time', Icons.access_time),
+          const SizedBox(width: 10),
+          _buildStatCard('${streakDays}d', AppLocalizations.of(context)?.streak ?? 'Streak', Icons.local_fire_department_outlined),
+          const SizedBox(width: 10),
+          _buildStatCard('$savedCount', AppLocalizations.of(context)?.saved ?? 'Saved', Icons.bookmark_outline),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(String value, String label) {
+  Widget _buildStatCard(String value, String label, IconData icon) {
     return Expanded(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1A2E),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: _accent, size: 18),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white60, fontSize: 11),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ],
+            const SizedBox(height: 3),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white60, fontSize: 10),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildStatDivider() {
-    return Container(
-      width: 1,
-      height: 36,
-      margin: const EdgeInsets.symmetric(horizontal: 2),
-      color: Colors.white.withValues(alpha: 0.12),
+  // ─── TOP INTERESTS ────────────────────────────────────────────────────────
+
+  Widget _buildTopInterestsRow() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Top Interests',
+            style: TextStyle(
+              color: Colors.white60,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.4,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: _topInterests.map((genre) {
+              final label = genre.length > 1
+                  ? genre[0].toUpperCase() + genre.substring(1)
+                  : genre.toUpperCase();
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _accent.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: _accent.withValues(alpha: 0.45)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.interests, color: _accent, size: 13),
+                    const SizedBox(width: 5),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        color: _accent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
     );
   }
 
   // ─── TAB BAR ──────────────────────────────────────────────────────────────
 
   Widget _buildTabBar() {
+    final likedCount   = _userProfile['likedCount']   as int? ?? 0;
+    final savedCount   = _userProfile['savedCount']   as int? ?? 0;
+    final watchedCount = _userProfile['videosWatched'] as int? ?? 0;
+
     return Container(
       color: _bgPrimary,
       child: TabBar(
@@ -674,19 +761,48 @@ class _ProfileScreenState extends State<ProfileScreen>
         labelColor: _accent,
         unselectedLabelColor: Colors.white60,
         labelStyle: const TextStyle(
-          fontSize: 13,
+          fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelStyle: const TextStyle(
-          fontSize: 13,
+          fontSize: 12,
           fontWeight: FontWeight.w400,
         ),
         isScrollable: false,
         tabs: [
-          Tab(text: AppLocalizations.of(context)?.liked ?? 'Liked'),
-          Tab(text: AppLocalizations.of(context)?.saved ?? 'Saved'),
-          Tab(text: AppLocalizations.of(context)?.history ?? 'History'),
-          Tab(text: AppLocalizations.of(context)?.achievements ?? 'Achievements'),
+          _buildBadgeTab(AppLocalizations.of(context)?.liked ?? 'Liked', likedCount),
+          _buildBadgeTab(AppLocalizations.of(context)?.saved ?? 'Saved', savedCount),
+          _buildBadgeTab(AppLocalizations.of(context)?.history ?? 'History', watchedCount),
+          Tab(text: AppLocalizations.of(context)?.achievements ?? 'Achieve'),
+        ],
+      ),
+    );
+  }
+
+  Tab _buildBadgeTab(String label, int count) {
+    return Tab(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label),
+          if (count > 0) ...[
+            const SizedBox(width: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              decoration: BoxDecoration(
+                color: _accent.withValues(alpha: 0.25),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                count > 99 ? '99+' : '$count',
+                style: const TextStyle(
+                  color: _accent,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -1075,22 +1191,20 @@ class _ProfileScreenState extends State<ProfileScreen>
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(child: _buildEngagementScore()),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 14,
-              mainAxisSpacing: 14,
-              childAspectRatio: 1,
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) => _buildAchievementCard(
+              icon: _achievements[index]['icon'] as IconData,
+              color: _achievements[index]['color'] as Color,
+              title: _achievements[index]['title'] as String,
+              description: _achievements[index]['description'] as String,
+              unlocked: _achievements[index]['unlocked'] as bool? ?? false,
+              progress: _achievements[index]['progressLabel'] as String?,
             ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) =>
-                  _buildAchievementCard(_achievements[index]),
-              childCount: _achievements.length,
-            ),
+            childCount: _achievements.length,
           ),
         ),
+        const SliverToBoxAdapter(child: SizedBox(height: 24)),
       ],
     );
   }
@@ -1184,99 +1298,84 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  Widget _buildAchievementCard(Map<String, dynamic> achievement) {
-    final isUnlocked = achievement['unlocked'] as bool? ?? false;
-    final progress   = (achievement['progress'] as double?) ?? 0.0;
-    final color      = achievement['color'] as Color;
-    final title      = achievement['title'] as String? ?? '';
-    final progressPct = (progress * 100).toInt();
-
+  Widget _buildAchievementCard({
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String description,
+    required bool unlocked,
+    String? progress,
+  }) {
     return Semantics(
-      label: 'Achievement: $title, ${isUnlocked ? 'completed' : '$progressPct% complete'}',
+      label: 'Achievement: $title, ${unlocked ? 'completed' : (progress ?? 'locked')}',
       child: Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isUnlocked
-            ? color.withValues(alpha: 0.10)
-            : Colors.white.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isUnlocked
-              ? color.withValues(alpha: 0.45)
-              : Colors.white.withValues(alpha: 0.08),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: unlocked
+              ? color.withValues(alpha: 0.1)
+              : Colors.white.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: unlocked ? color.withValues(alpha: 0.4) : Colors.white12,
+          ),
         ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              if (!isUnlocked)
-                SizedBox(
-                  width: 52,
-                  height: 52,
-                  child: CircularProgressIndicator(
-                    value: progress,
-                    strokeWidth: 3,
-                    backgroundColor:
-                        Colors.white.withValues(alpha: 0.15),
-                    valueColor: AlwaysStoppedAnimation<Color>(color),
+        child: Row(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: unlocked ? color.withValues(alpha: 0.2) : Colors.white10,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: unlocked ? color : Colors.white30, size: 26),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: unlocked ? Colors.white : Colors.white54,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              Container(
-                padding: const EdgeInsets.all(11),
-                decoration: BoxDecoration(
-                  color: isUnlocked
-                      ? color.withValues(alpha: 0.2)
-                      : Colors.white.withValues(alpha: 0.08),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  achievement['icon'] as IconData,
-                  color: isUnlocked
-                      ? color
-                      : Colors.white.withValues(alpha: 0.45),
-                  size: 22,
-                ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      color: Colors.white38,
+                      fontSize: 12,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (progress != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      progress,
+                      style: TextStyle(
+                        color: unlocked ? color : Colors.white30,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
               ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            achievement['title'] as String? ?? '',
-            style: TextStyle(
-              color: isUnlocked ? Colors.white : Colors.white70,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
             ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 3),
-          Text(
-            achievement['description'] as String? ?? '',
-            style: const TextStyle(color: Colors.white60, fontSize: 11),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (!isUnlocked) ...[
-            const SizedBox(height: 6),
-            Text(
-              '${(progress * 100).toInt()}%',
-              style: TextStyle(
-                color: color,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            if (unlocked)
+              Icon(Icons.check_circle_rounded, color: color, size: 22),
           ],
-        ],
-      ),
+        ),
       ),
     );
   }

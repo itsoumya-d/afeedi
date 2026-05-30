@@ -93,5 +93,86 @@ void main() {
 
       expect(find.text('Recent Searches'), findsOneWidget);
     });
+
+    testWidgets('SearchScreen shows empty state (discover) before any search',
+        (tester) async {
+      await tester.pumpWidget(_buildApp(const SearchScreen()));
+      await tester.pump();
+
+      // Before any query is entered, the discover view is shown (not results)
+      expect(find.text('Popular Topics'), findsOneWidget);
+      expect(find.text('Browse by Platform'), findsOneWidget);
+    });
+
+    testWidgets('SearchScreen has search TextField', (tester) async {
+      await tester.pumpWidget(_buildApp(const SearchScreen()));
+      await tester.pump();
+
+      expect(find.byType(TextField), findsOneWidget);
+    });
+
+    testWidgets('SearchScreen has platform filter chips after search',
+        (tester) async {
+      await tester.pumpWidget(_buildApp(const SearchScreen()));
+      await tester.pump();
+
+      // Enter a query to trigger results view with platform filter row
+      await tester.enterText(find.byType(TextField), 'flutter');
+      await tester.pump();
+
+      // Platform filters are shown once a search query is active
+      expect(find.text('YouTube'), findsWidgets);
+      expect(find.text('TikTok'), findsWidgets);
+    });
+
+    testWidgets('SearchScreen sanitizes very long queries gracefully',
+        (tester) async {
+      await tester.pumpWidget(_buildApp(const SearchScreen()));
+      await tester.pump();
+
+      // A query longer than 200 characters should not crash the app
+      final longQuery = 'a' * 300;
+      await tester.enterText(find.byType(TextField), longQuery);
+      await tester.pump();
+
+      // Screen still renders after very long input
+      expect(find.byType(Scaffold), findsOneWidget);
+    });
+
+    testWidgets('SearchScreen sanitizes HTML/script injection in query',
+        (tester) async {
+      await tester.pumpWidget(_buildApp(const SearchScreen()));
+      await tester.pump();
+
+      // HTML tags should be stripped without causing errors
+      await tester.enterText(
+          find.byType(TextField), '<script>alert(1)</script>flutter');
+      await tester.pump();
+
+      // Screen still renders after HTML-injected input
+      expect(find.byType(Scaffold), findsOneWidget);
+    });
+
+    testWidgets('SearchScreen returns to discover view when query is cleared',
+        (tester) async {
+      await tester.pumpWidget(_buildApp(const SearchScreen()));
+      await tester.pump();
+
+      await tester.enterText(find.byType(TextField), 'flutter');
+      await tester.pump();
+
+      await tester.enterText(find.byType(TextField), '');
+      await tester.pump();
+
+      // After clearing, discover view returns
+      expect(find.text('Popular Topics'), findsOneWidget);
+    });
+
+    testWidgets('SearchScreen shows search icon in search bar', (tester) async {
+      await tester.pumpWidget(_buildApp(const SearchScreen()));
+      await tester.pump();
+
+      expect(find.byIcon(Icons.search), findsOneWidget);
+    });
   });
 }

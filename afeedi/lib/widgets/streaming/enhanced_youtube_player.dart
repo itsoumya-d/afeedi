@@ -65,6 +65,16 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       });
       return;
     }
+
+    // Guard against missing or empty video IDs before attempting player init
+    if (widget.content.platformContentId.isEmpty) {
+      setState(() {
+        _hasError = true;
+        _isLoading = false;
+      });
+      widget.onError?.call('Missing YouTube video ID');
+      return;
+    }
     
     try {
       setState(() {
@@ -151,16 +161,48 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
     if (_isLoading) {
       return _buildLoadingState();
     }
-    
+
+    // Show dedicated "video unavailable" state when video ID is missing
+    if (widget.content.platformContentId.isEmpty) {
+      return _buildVideoUnavailableState();
+    }
+
     if (_hasError || _showFallbackOptions) {
       return _buildErrorState();
     }
-    
+
     if (kIsWeb && _containerId != null) {
       return _buildWebPlayer();
     }
-    
+
     return _buildMobilePlayer();
+  }
+
+  Widget _buildVideoUnavailableState() {
+    return Container(
+      color: Colors.black,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.broken_image,
+              color: Colors.white30,
+              size: 56,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Video unavailable',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
   
   Widget _buildLoadingState() {

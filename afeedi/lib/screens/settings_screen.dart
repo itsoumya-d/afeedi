@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
+import '../services/analytics_service.dart';
 import '../services/local_auth_service.dart';
 import '../services/navigation_service.dart';
 import '../services/notification_service.dart';
@@ -32,6 +33,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _loadSettings();
+    AnalyticsService.instance.trackUserInteraction(
+      action: 'screen_view',
+      screen: 'settings',
+    );
   }
 
   Future<void> _loadSettings() async {
@@ -470,7 +475,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Text(
         title.toUpperCase(),
         style: const TextStyle(
-          color: Color(0xFF00D4FF),
+          color: Colors.white38,
           fontSize: 11,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.2,
@@ -523,15 +528,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
     VoidCallback? onTap,
     bool showChevron = true,
   }) {
+    final isDangerous = titleColor == const Color(0xFFFF6B6B) || titleColor == Colors.red;
     return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       leading: Icon(icon, color: iconColor ?? Colors.white70, size: 22),
-      title: Text(
-        title,
-        style: TextStyle(
-            color: titleColor ?? Colors.white, fontSize: 15),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
+      title: isDangerous
+          ? TextButton(
+              onPressed: onTap,
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.redAccent,
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                alignment: Alignment.centerLeft,
+              ),
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: titleColor ?? Colors.redAccent,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            )
+          : Text(
+              title,
+              style: TextStyle(
+                  color: titleColor ?? Colors.white, fontSize: 15),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
       subtitle: subtitle != null
           ? Text(
               subtitle,
@@ -541,10 +569,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               overflow: TextOverflow.ellipsis,
             )
           : null,
-      trailing: (onTap != null && showChevron)
+      trailing: (onTap != null && showChevron && !isDangerous)
           ? const Icon(Icons.chevron_right, color: Colors.white38)
           : null,
-      onTap: onTap,
+      onTap: isDangerous ? null : onTap,
     );
   }
 

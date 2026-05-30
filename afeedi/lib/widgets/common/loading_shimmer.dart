@@ -11,15 +11,19 @@ class LoadingShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: itemCount,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: _buildShimmerCard(),
-        );
-      },
+    return Semantics(
+      label: 'Loading content',
+      liveRegion: true,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: itemCount,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: _buildShimmerCard(),
+          );
+        },
+      ),
     );
   }
 

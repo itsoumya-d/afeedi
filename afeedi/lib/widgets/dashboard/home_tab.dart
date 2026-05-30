@@ -30,12 +30,14 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   bool _isLoading = false;
   bool _hasMore = true;
   bool _loadError = false;
+  bool _isOffline = false;
   PlatformType? _selectedPlatform;
   bool _showFollowing = false;
   bool _showFollowSuggestion = false;
   String _dateFilter = 'all';
   ContentType? _contentTypeFilter;
   List<({Content content, double progress})> _continueWatching = [];
+  List<Content> _becauseYouWatched = [];
   List<String> _followedCreatorIds = [];
   List<String> _trendingTopics = ['#Trending', '#ForYou', '#New'];
   int _newPostCount = 0;
@@ -117,18 +119,33 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         if (content != null) items.add((content: content, progress: progress));
       }
     }
-    if (mounted && items.isNotEmpty) setState(() => _continueWatching = items);
+    if (mounted && items.isNotEmpty) {
+      setState(() => _continueWatching = items);
+      // Load "Because you watched X" recommendations based on most recently watched
+      try {
+        final lastWatched = items.first.content;
+        final recs = await ContentService.instance.getVideos(limit: 50);
+        final becauseRecs = recs
+            .where((c) =>
+                c.id != lastWatched.id &&
+                c.tags.any((t) => lastWatched.tags.contains(t)))
+            .take(3)
+            .toList();
+        if (mounted && becauseRecs.isNotEmpty) {
+          setState(() => _becauseYouWatched = becauseRecs);
+        }
+      } catch (_) {
+        // Non-critical — silently skip if recommendations fail
+      }
+    }
   }
 
   Future<void> _checkConnectivity() async {
     final connected = await ConnectivityService.instance.isConnected();
-    if (!connected && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No internet connection - showing cached content'),
-          duration: Duration(seconds: 3),
-        ),
-      );
+    if (mounted) {
+      setState(() {
+        _isOffline = !connected;
+      });
     }
   }
 
@@ -180,6 +197,12 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       }
       
       final followedIds = UserInteractionService.instance.getFollowedCreatorIds();
+
+      // Cold-start diversity: shuffle for new users with no watch history and no follows
+      if (_continueWatching.isEmpty && followedIds.isEmpty) {
+        feedContent.shuffle();
+      }
+
       // Derive trending topics from actual feed content
       final tagCounts = feedContent
           .expand((p) => p.tags)
@@ -361,6 +384,22 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       child: Column(
         children: [
           _buildHeader(),
+          if (_isOffline)
+            Container(
+              width: double.infinity,
+              color: Colors.orange.withValues(alpha: 0.15),
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+              child: const Row(
+                children: [
+                  Icon(Icons.wifi_off, color: Colors.orange, size: 16),
+                  SizedBox(width: 8),
+                  Text(
+                    'No internet connection — showing cached content',
+                    style: TextStyle(color: Colors.orange, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
           Expanded(
             child: _buildFeed(),
           ),
@@ -696,14 +735,18 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
               letterSpacing: -0.3,
             ),
           ),
-          GestureDetector(
-            onTap: () {},
-            child: Text(
-              'See all',
-              style: TextStyle(
-                color: AppTheme.primaryCyan,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+          Semantics(
+            label: 'See all $title content',
+            button: true,
+            child: GestureDetector(
+              onTap: () {},
+              child: Text(
+                'See all',
+                style: TextStyle(
+                  color: AppTheme.primaryCyan,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -911,6 +954,10 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         ? _buildContinueWatchingSection()
         : null;
 
+    final becauseYouWatchedSection = _becauseYouWatched.isNotEmpty && _continueWatching.isNotEmpty
+        ? _buildBecauseYouWatchedSection()
+        : null;
+
     // Build mixed list: inject ad slot (null) every 6 content cards for free users
     final isPremium = SubscriptionService.instance.isPremium;
     final List<Content?> mixedList = [];
@@ -941,6 +988,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     }
 
     final extraItems = (continueSection != null ? 1 : 0) +
+        (becauseYouWatchedSection != null ? 1 : 0) +
         (_isLoading ? 1 : 0) +
         (_showFollowSuggestion ? 1 : 0);
 
@@ -957,7 +1005,10 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         itemBuilder: (context, index) {
           // First item: continue watching
           if (continueSection != null && index == 0) return continueSection;
-          final offsetIndex = continueSection != null ? index - 1 : index;
+          int offset0 = continueSection != null ? index - 1 : index;
+          // Second item: because you watched
+          if (becauseYouWatchedSection != null && offset0 == 0) return becauseYouWatchedSection;
+          final offsetIndex = becauseYouWatchedSection != null ? offset0 - 1 : offset0;
 
           // Insert follow suggestion banner after the 2nd post (YouTube/TikTok pattern)
           if (_showFollowSuggestion && offsetIndex == 2) {
@@ -1133,6 +1184,98 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                           ),
                         ],
                       ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBecauseYouWatchedSection() {
+    final lastWatched = _continueWatching.first.content;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text(
+              'Because you watched "${lastWatched.title ?? "this video"}"',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.3,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          SizedBox(
+            height: 130,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _becauseYouWatched.length,
+              itemBuilder: (context, i) {
+                final item = _becauseYouWatched[i];
+                return GestureDetector(
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: item),
+                  child: Container(
+                    width: 180,
+                    margin: const EdgeInsets.only(right: 12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: const Color(0xFF1A1A2E),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Stack(
+                      children: [
+                        if (item.thumbnailUrl != null)
+                          CachedNetworkImage(
+                            imageUrl: item.thumbnailUrl!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            errorWidget: (_, __, ___) =>
+                                Container(color: const Color(0xFF252545)),
+                          ),
+                        Positioned.fill(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withValues(alpha: 0.7),
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                stops: const [0.4, 1.0],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 8,
+                          left: 8,
+                          right: 8,
+                          child: Text(
+                            item.title ?? '',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );

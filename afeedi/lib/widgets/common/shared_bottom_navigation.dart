@@ -166,6 +166,7 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
     
     return GestureDetector(
       onTap: () => widget.onTabChanged(index),
+      behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
@@ -240,6 +241,8 @@ class NavigationHelper {
           fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
       ),
       backgroundColor: Colors.transparent,
       elevation: 0,

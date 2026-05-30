@@ -173,7 +173,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
         elevation: 0,
         title: Row(
           children: [
-            const Text('Notifications', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+            const Flexible(
+              child: Text(
+                'Notifications',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
             if (_unreadCount > 0) ...[
               const SizedBox(width: 8),
               Container(
@@ -282,6 +289,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
                   Text(
                     notification['time'] as String,
                     style: const TextStyle(color: Colors.white38, fontSize: 11),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../screens/welcome_screen.dart';
 import '../screens/create_account_screen.dart';
 import '../screens/login_screen.dart';
-import '../screens/onboarding_chatbot_screen.dart';
+import '../screens/onboarding/enhanced_onboarding_screen.dart';
 import '../screens/onboarding/new_onboarding_screen.dart';
 import '../screens/enhanced_onboarding_flow.dart';
 import '../screens/feed_screen.dart';
@@ -119,7 +119,7 @@ class AppRoutes {
         AppRoutes.welcome: (context) => const WelcomeScreen(),
         AppRoutes.createAccount: (context) => const CreateAccountScreen(),
         AppRoutes.login: (context) => const LoginScreen(),
-        AppRoutes.onboardingChatbot: (context) => const OnboardingChatbotScreen(),
+        AppRoutes.onboardingChatbot: (context) => const EnhancedOnboardingScreen(),
         AppRoutes.newOnboarding: (context) => const NewOnboardingScreen(),
         AppRoutes.enhancedOnboarding: (context) => EnhancedOnboardingFlow(onComplete: () => Navigator.pushReplacementNamed(context, AppRoutes.dashboard)),
         AppRoutes.personalizedHome: (context) => const PersonalizedHomeScreen(),

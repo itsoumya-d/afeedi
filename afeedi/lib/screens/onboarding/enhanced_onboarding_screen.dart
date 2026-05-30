@@ -10,6 +10,7 @@ import '../../services/onboarding_service.dart';
 import '../../services/navigation_service.dart';
 import '../../services/analytics_service.dart';
 import '../../widgets/onboarding/interest_selection_grid.dart';
+import '../../widgets/onboarding/language_selection.dart';
 import '../../widgets/onboarding/platform_selection_widget.dart';
 import '../../widgets/onboarding/content_type_selection.dart';
 import '../../widgets/onboarding/personalization_settings_widget.dart';
@@ -90,6 +91,21 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
     if (_currentPageIndex == _flow.length - 1) {
       _completeOnboarding();
       return;
+    }
+
+    // Validate genre step: require at least 3 selections
+    final currentStepId = _flow[_currentPageIndex]['id'] as String?;
+    if (currentStepId == 'genres' || currentStepId == 'content_interests') {
+      if (_userPreferences.contentInterests.length < 3) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Please select at least 3 genres to personalize your feed.',
+            ),
+          ),
+        );
+        return;
+      }
     }
 
     _saveCurrentStepData();
@@ -256,12 +272,26 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: LinearProgressIndicator(
-                          value: (_currentPageIndex + 1) / _flow.length,
-                          backgroundColor: Colors.white.withValues(alpha: 0.3),
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            LinearProgressIndicator(
+                              value: (_currentPageIndex + 1) / _flow.length,
+                              backgroundColor: Colors.white.withValues(alpha: 0.3),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Step ${_currentPageIndex + 1} of ${_flow.length}',
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       if (_currentPageIndex < _flow.length / 2)
@@ -433,6 +463,26 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
     switch (id) {
       case 'welcome':
         return _buildWelcomeStep();
+      case 'language':
+        return LanguageSelectionWidget(
+          onLanguageSelected: (name, locale) {
+            _updatePreferences(_userPreferences.copyWith(language: locale));
+          },
+          slideAnimation: Tween<Offset>(
+            begin: const Offset(0.05, 0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: _slideController,
+            curve: Curves.easeOut,
+          )),
+          fadeAnimation: Tween<double>(
+            begin: 0.8,
+            end: 1.0,
+          ).animate(CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOut,
+          )),
+        );
       case 'genres':
       case 'content_interests':
         return InterestSelectionGrid(
@@ -466,6 +516,7 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
                 _userPreferences.copyWith(contentTypes: contentTypes));
           },
         );
+      case 'personalization':
       case 'personalization_settings':
         return PersonalizationSettingsWidget(
           personalizationSettings: _userPreferences.personalizationSettings,

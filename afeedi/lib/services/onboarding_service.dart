@@ -15,31 +15,14 @@ class OnboardingService {
 
   // Static onboarding flow data
   static final List<Map<String, dynamic>> onboardingFlow = [
-    {
-      'id': 'welcome',
-      'title': 'Welcome',
-      'type': 'welcome',
-    },
-    {
-      'id': 'genres',
-      'title': 'Choose Genres',
-      'type': 'genre_selection',
-    },
-    {
-      'id': 'platforms',
-      'title': 'Connect Platforms',
-      'type': 'platform_selection',
-    },
-    {
-      'id': 'profile',
-      'title': 'Your Profile',
-      'type': 'profile_setup',
-    },
-    {
-      'id': 'complete',
-      'title': 'All Set!',
-      'type': 'completion',
-    },
+    {'id': 'welcome', 'title': 'Welcome to Afeedi', 'type': 'welcome'},
+    {'id': 'language', 'title': 'Choose Language', 'type': 'language_selection'},
+    {'id': 'genres', 'title': 'Your Interests', 'type': 'genre_selection'},
+    {'id': 'content_types', 'title': 'Content Preferences', 'type': 'content_type_selection'},
+    {'id': 'platforms', 'title': 'Connect Platforms', 'type': 'platform_selection'},
+    {'id': 'personalization', 'title': 'Personalize', 'type': 'personalization_settings'},
+    {'id': 'profile', 'title': 'Your Profile', 'type': 'profile_setup'},
+    {'id': 'complete', 'title': 'All Set!', 'type': 'completion'},
   ];
 
   // Onboarding steps configuration

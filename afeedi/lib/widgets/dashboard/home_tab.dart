@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_theme.dart';
 import '../feed/feed_post_card.dart';
 import '../../models/content_model.dart';
@@ -29,6 +30,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   bool _showFollowSuggestion = false;
   String _dateFilter = 'all';
   ContentType? _contentTypeFilter;
+  List<({Content content, double progress})> _continueWatching = [];
 
   List<Content> get _filteredPosts {
     var posts = _posts;
@@ -68,8 +70,24 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   void initState() {
     super.initState();
     _loadInitialPosts();
+    _loadContinueWatching();
     _scrollController.addListener(_onScroll);
     _checkConnectivity();
+  }
+
+  Future<void> _loadContinueWatching() async {
+    final prefs = await SharedPreferences.getInstance();
+    final keys = prefs.getKeys().where((k) => k.startsWith('watch_progress_'));
+    final items = <({Content content, double progress})>[];
+    for (final key in keys.take(10)) {
+      final progress = prefs.getDouble(key) ?? 0.0;
+      if (progress > 0.05 && progress < 0.9) {
+        final id = key.replaceFirst('watch_progress_', '');
+        final content = await ContentService.instance.getVideoById(id);
+        if (content != null) items.add((content: content, progress: progress));
+      }
+    }
+    if (mounted && items.isNotEmpty) setState(() => _continueWatching = items);
   }
 
   Future<void> _checkConnectivity() async {
@@ -628,6 +646,13 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       );
     }
 
+    final continueSection = _continueWatching.isNotEmpty
+        ? _buildContinueWatchingSection()
+        : null;
+    final extraItems = (continueSection != null ? 1 : 0) +
+        (_isLoading ? 1 : 0) +
+        (_showFollowSuggestion ? 1 : 0);
+
     return RefreshIndicator(
       onRefresh: _refreshPosts,
       color: AppTheme.primaryCyan,
@@ -635,16 +660,22 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       child: ListView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: displayPosts.length + (_isLoading ? 1 : 0) + (_showFollowSuggestion ? 1 : 0),
+        itemCount: displayPosts.length + extraItems,
         addRepaintBoundaries: false, // we add our own RepaintBoundary per card
         addAutomaticKeepAlives: false,
         itemBuilder: (context, index) {
+          // First item: continue watching
+          if (continueSection != null && index == 0) return continueSection;
+          final offsetIndex = continueSection != null ? index - 1 : index;
+
           // Insert follow suggestion banner after the 2nd post (YouTube/TikTok pattern)
-          if (_showFollowSuggestion && index == 2) {
+          if (_showFollowSuggestion && offsetIndex == 2) {
             return _buildFollowSuggestionBanner(context);
           }
           // Adjust index for the injected banner
-          final postIndex = _showFollowSuggestion && index > 2 ? index - 1 : index;
+          final postIndex = _showFollowSuggestion && offsetIndex > 2
+              ? offsetIndex - 1
+              : offsetIndex;
           if (postIndex >= displayPosts.length) {
             return const Padding(
               padding: EdgeInsets.all(20),
@@ -664,6 +695,110 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildContinueWatchingSection() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8),
+            child: Text(
+              'Continue Watching',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 130,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _continueWatching.length,
+              itemBuilder: (context, i) {
+                final item = _continueWatching[i];
+                return Semantics(
+                  label: 'Continue watching ${item.content.title ?? ""}',
+                  button: true,
+                  child: GestureDetector(
+                    onTap: () => Navigator.pushNamed(context, AppRoutes.player,
+                        arguments: item.content),
+                    child: Container(
+                      width: 180,
+                      margin: const EdgeInsets.only(right: 12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: const Color(0xFF1A1A2E),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Stack(
+                        children: [
+                          if (item.content.thumbnailUrl != null)
+                            CachedNetworkImage(
+                              imageUrl: item.content.thumbnailUrl!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              errorWidget: (_, __, ___) => Container(color: const Color(0xFF252545)),
+                            ),
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: Column(
+                              children: [
+                                LinearProgressIndicator(
+                                  value: item.progress,
+                                  backgroundColor: Colors.white24,
+                                  valueColor: const AlwaysStoppedAnimation<Color>(
+                                      AppTheme.primaryCyan),
+                                  minHeight: 3,
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.fromLTRB(6, 4, 6, 6),
+                                  width: double.infinity,
+                                  color: Colors.black54,
+                                  child: Text(
+                                    item.content.title ?? '',
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Positioned(
+                            top: 6,
+                            right: 6,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.black54,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.play_arrow,
+                                  color: Colors.white, size: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

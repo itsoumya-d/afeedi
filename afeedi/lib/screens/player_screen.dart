@@ -44,6 +44,25 @@ class _PlayerScreenState extends State<PlayerScreen> {
     final prefs = await SharedPreferences.getInstance();
     final minutes = prefs.getInt('stat_watch_minutes') ?? 0;
     await prefs.setInt('stat_watch_minutes', minutes + (elapsed ~/ 60));
+
+    // Save watch progress for Continue Watching
+    final duration = widget.content.durationSeconds ?? 0;
+    if (duration > 0) {
+      final progress = (elapsed / duration).clamp(0.0, 1.0);
+      final key = 'watch_progress_${widget.content.id}';
+      if (progress < 0.95) {
+        await prefs.setDouble(key, progress);
+      } else {
+        // Fully watched — remove from continue watching
+        await prefs.remove(key);
+      }
+    }
+
+    // Track watched ID for history
+    final watchedList = prefs.getStringList('watched_ids') ?? [];
+    watchedList.remove(widget.content.id);
+    watchedList.insert(0, widget.content.id);
+    await prefs.setStringList('watched_ids', watchedList.take(100).toList());
   }
 
   String _formatCount(int count) {

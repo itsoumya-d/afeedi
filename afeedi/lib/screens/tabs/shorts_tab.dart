@@ -1594,6 +1594,7 @@ class _ShortItemWrapperState extends State<_ShortItemWrapper> {
     return GestureDetector(
       onTap: widget.onTap,
       onDoubleTap: widget.onDoubleTap,
+      behavior: HitTestBehavior.opaque,
       child: Stack(
         fit: StackFit.expand,
         children: [

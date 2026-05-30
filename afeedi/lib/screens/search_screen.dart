@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math' show min;
 import 'package:flutter/material.dart';
@@ -31,6 +32,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   // Filter state
   PlatformType? _selectedPlatform;
   String? _selectedCategory;
+  Timer? _debounceTimer;
 
   // Genre chips with their matching tag keywords
   final List<Map<String, dynamic>> _genres = [
@@ -71,6 +73,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _searchController.dispose();
     _tabController.dispose();
     super.dispose();
@@ -125,12 +128,15 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
     return stripped.substring(0, min(stripped.length, 200));
   }
 
+  void _onSearchChanged(String query) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () => _search(query));
+  }
+
   void _search(String query) {
     final sanitized = _sanitizeQuery(query);
     setState(() {
       _hasError = false;
-      _selectedPlatform = null;
-      _selectedCategory = null;
       _query = sanitized;
       _hasSearched = _query.isNotEmpty;
       if (_query.isEmpty) {
@@ -264,7 +270,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-                onChanged: _search,
+                onChanged: _onSearchChanged,
                 onSubmitted: _search,
               ),
               ),

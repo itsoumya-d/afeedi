@@ -264,6 +264,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                           onPressed: () {
                             _searchController.clear();
                             _search('');
+                            _clearAllFilters();
                           },
                         )
                       : null,

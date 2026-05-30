@@ -66,9 +66,8 @@ class ChatController extends ChangeNotifier {
     _onboardingSteps = _onboardingService.getOnboardingSteps();
     _allGenres = _onboardingService.getAllGenres();
     _filteredGenres = _allGenres;
-
     _initializeAnalytics();
-    startOnboarding();
+    _resumeOrStartOnboarding();
   }
 
   Future<void> saveProgressDraft() async {
@@ -77,6 +76,30 @@ class ChatController extends ChangeNotifier {
     await prefs.setString('onboarding_draft_user_name', _userName);
     await prefs.setStringList('onboarding_draft_genres', _selectedGenres.map((g) => g.name).toList());
     await prefs.setString('onboarding_draft_saved_at', DateTime.now().toIso8601String());
+  }
+
+  Future<void> _resumeOrStartOnboarding() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedAt = prefs.getString('onboarding_draft_saved_at');
+      final draftStep = prefs.getInt('onboarding_draft_step');
+      if (savedAt != null && draftStep != null && draftStep > 0) {
+        final savedDate = DateTime.tryParse(savedAt);
+        if (savedDate != null && DateTime.now().difference(savedDate).inDays < 7) {
+          _currentStep = draftStep.clamp(0, _onboardingSteps.length - 1);
+          _userName = prefs.getString('onboarding_draft_user_name') ?? '';
+          final genreNames = prefs.getStringList('onboarding_draft_genres') ?? [];
+          _selectedGenres = _allGenres.where((g) => genreNames.contains(g.name)).toList();
+          Future.delayed(const Duration(milliseconds: 300), () {
+            showBotMessage('Welcome back! Let\'s pick up where you left off. 👋');
+            showStepOptions();
+            notifyListeners();
+          });
+          return;
+        }
+      }
+    } catch (_) {}
+    startOnboarding();
   }
 
   void _initializeAnalytics() {

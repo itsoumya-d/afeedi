@@ -454,4 +454,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String watchedVideos(int count) {
     return 'Просмотрено $count видео';
   }
+
+  @override
+  String get newLabel => 'Новое';
+
+  @override
+  String get discoverCreators => 'Найдите авторов для подписки';
+
+  @override
+  String get followCreatorsHint => 'Подпишитесь на авторов';
+
+  @override
+  String get findCreators => 'Найти авторов';
+
+  @override
+  String get dismiss => 'Закрыть';
+
+  @override
+  String get resetAll => 'Сбросить всё';
 }

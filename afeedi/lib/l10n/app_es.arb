@@ -70,7 +70,11 @@
   "noResults": "Sin resultados",
   "noResultsFor": "Sin resultados para \"{query}\"",
   "@noResultsFor": {
-    "placeholders": { "query": { "type": "String" } }
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
   },
   "noContent": "No hay contenido disponible",
   "loading": "Cargando...",
@@ -116,7 +120,11 @@
   "noContentScheduled": "No hay contenido programado para este día",
   "contentForDate": "Contenido para {date}",
   "@contentForDate": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "interests": "Intereses",
   "selectInterests": "Selecciona tus intereses",
@@ -153,6 +161,16 @@
   "startExploring": "Comienza a explorar para ver contenido aquí",
   "watchedVideos": "Visto {count} videos",
   "@watchedVideos": {
-    "placeholders": { "count": { "type": "int" } }
-  }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newLabel": "Nuevo",
+  "discoverCreators": "Descubre creadores para seguir",
+  "followCreatorsHint": "Sigue creadores para ver su contenido",
+  "findCreators": "Buscar creadores",
+  "dismiss": "Descartar",
+  "resetAll": "Restablecer todo"
 }

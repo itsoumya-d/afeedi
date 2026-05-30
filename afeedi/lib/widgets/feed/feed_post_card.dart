@@ -18,6 +18,8 @@ class FeedPostCard extends StatefulWidget {
 class _FeedPostCardState extends State<FeedPostCard> {
   bool _isLiked = false;
   bool _isSaved = false;
+  bool _likeAnimating = false;
+  bool _saveAnimating = false;
 
   // ---------------------------------------------------------------------------
   // Formatters
@@ -505,18 +507,21 @@ class _FeedPostCardState extends State<FeedPostCard> {
             label: _isLiked ? 'Unlike' : 'Like',
             button: true,
             child: _buildActionButton(
-            icon: _isLiked ? Icons.favorite : Icons.favorite_border,
-            iconColor: _isLiked ? Colors.red : null,
-            label: _formatCount(
-                widget.content.likeCount + (_isLiked ? 1 : 0)),
-            onTap: () async {
-              HapticFeedback.lightImpact();
-              setState(() => _isLiked = !_isLiked);
-              await ContentService.instance.trackContentInteraction(
-                contentId: widget.content.id,
-                interactionType: InteractionType.like,
-              );
-            },
+              icon: _isLiked ? Icons.favorite : Icons.favorite_border,
+              iconColor: _isLiked ? Colors.red : null,
+              label: _formatCount(widget.content.likeCount + (_isLiked ? 1 : 0)),
+              animating: _likeAnimating,
+              onTap: () async {
+                HapticFeedback.lightImpact();
+                setState(() { _isLiked = !_isLiked; _likeAnimating = true; });
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  if (mounted) setState(() => _likeAnimating = false);
+                });
+                await ContentService.instance.trackContentInteraction(
+                  contentId: widget.content.id,
+                  interactionType: InteractionType.like,
+                );
+              },
             ),
           ),
           const SizedBox(width: 20),
@@ -559,19 +564,27 @@ class _FeedPostCardState extends State<FeedPostCard> {
           Semantics(
             label: _isSaved ? 'Remove bookmark' : 'Save to bookmarks',
             button: true,
-            child: IconButton(
-            icon: Icon(
-              _isSaved ? Icons.bookmark : Icons.bookmark_border,
-              color: _isSaved ? Colors.cyan : null,
-            ),
-            onPressed: () async {
-              HapticFeedback.lightImpact();
-              setState(() => _isSaved = !_isSaved);
-              await ContentService.instance.trackContentInteraction(
-                contentId: widget.content.id,
-                interactionType: InteractionType.save,
-              );
-            },
+            child: AnimatedScale(
+              scale: _saveAnimating ? 1.3 : 1.0,
+              duration: const Duration(milliseconds: 150),
+              curve: Curves.elasticOut,
+              child: IconButton(
+                icon: Icon(
+                  _isSaved ? Icons.bookmark : Icons.bookmark_border,
+                  color: _isSaved ? Colors.cyan : null,
+                ),
+                onPressed: () async {
+                  HapticFeedback.lightImpact();
+                  setState(() { _isSaved = !_isSaved; _saveAnimating = true; });
+                  Future.delayed(const Duration(milliseconds: 300), () {
+                    if (mounted) setState(() => _saveAnimating = false);
+                  });
+                  await ContentService.instance.trackContentInteraction(
+                    contentId: widget.content.id,
+                    interactionType: InteractionType.save,
+                  );
+                },
+              ),
             ),
           ),
         ],
@@ -628,6 +641,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
     Color? iconColor,
     required String label,
     required VoidCallback onTap,
+    bool animating = false,
   }) {
     return InkWell(
       onTap: onTap,
@@ -637,7 +651,12 @@ class _FeedPostCardState extends State<FeedPostCard> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 18, color: iconColor),
+            AnimatedScale(
+              scale: animating ? 1.3 : 1.0,
+              duration: const Duration(milliseconds: 150),
+              curve: Curves.elasticOut,
+              child: Icon(icon, size: 22, color: iconColor),
+            ),
             const SizedBox(width: 3),
             Text(
               label,

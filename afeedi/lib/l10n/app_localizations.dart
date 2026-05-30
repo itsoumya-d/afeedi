@@ -993,6 +993,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Watched {count} videos'**
   String watchedVideos(int count);
+
+  /// No description provided for @newLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get newLabel;
+
+  /// No description provided for @discoverCreators.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover creators to follow'**
+  String get discoverCreators;
+
+  /// No description provided for @followCreatorsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow creators to surface their content first in your feed. Tap Follow on any video.'**
+  String get followCreatorsHint;
+
+  /// No description provided for @findCreators.
+  ///
+  /// In en, this message translates to:
+  /// **'Find creators'**
+  String get findCreators;
+
+  /// No description provided for @dismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dismiss;
+
+  /// No description provided for @resetAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset All'**
+  String get resetAll;
 }
 
 class _AppLocalizationsDelegate

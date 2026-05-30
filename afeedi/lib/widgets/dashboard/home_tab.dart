@@ -516,7 +516,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             ),
           ),
           Text(
-            'New',
+            AppLocalizations.of(context)?.newLabel ?? 'New',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
               fontSize: 10,
@@ -534,7 +534,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Trending',
+          AppLocalizations.of(context)?.trending ?? 'Trending',
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.9),
             fontSize: 12,
@@ -920,20 +920,20 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.people_outline, color: Color(0xFF00D4FF), size: 20),
-              SizedBox(width: 8),
+              const Icon(Icons.people_outline, color: Color(0xFF00D4FF), size: 20),
+              const SizedBox(width: 8),
               Text(
-                'Discover creators to follow',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+                AppLocalizations.of(context)?.discoverCreators ?? 'Discover creators to follow',
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
               ),
             ],
           ),
           const SizedBox(height: 6),
-          const Text(
-            'Follow creators to surface their content first in your feed. Tap Follow on any video.',
-            style: TextStyle(color: Colors.white54, fontSize: 12, height: 1.5),
+          Text(
+            AppLocalizations.of(context)?.followCreatorsHint ?? 'Follow creators to surface their content first in your feed. Tap Follow on any video.',
+            style: const TextStyle(color: Colors.white54, fontSize: 12, height: 1.5),
           ),
           const SizedBox(height: 12),
           Row(
@@ -949,13 +949,13 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                     color: const Color(0xFF00D4FF),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text('Find creators', style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
+                  child: Text(AppLocalizations.of(context)?.findCreators ?? 'Find creators', style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(width: 12),
               GestureDetector(
                 onTap: () => setState(() => _showFollowSuggestion = false),
-                child: const Text('Dismiss', style: TextStyle(color: Colors.white60, fontSize: 12)),
+                child: Text(AppLocalizations.of(context)?.dismiss ?? 'Dismiss', style: const TextStyle(color: Colors.white60, fontSize: 12)),
               ),
             ],
           ),
@@ -1023,7 +1023,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Filters', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(AppLocalizations.of(context)?.filters ?? 'Filters', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                   TextButton(
                     onPressed: () {
                       setState(() {
@@ -1032,7 +1032,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                         _contentType = null;
                       });
                     },
-                    child: const Text('Reset All', style: TextStyle(color: Color(0xFF00D4FF))),
+                    child: Text(AppLocalizations.of(context)?.resetAll ?? 'Reset All', style: const TextStyle(color: Color(0xFF00D4FF))),
                   ),
                 ],
               ),

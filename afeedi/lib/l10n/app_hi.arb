@@ -70,7 +70,11 @@
   "noResults": "कोई परिणाम नहीं",
   "noResultsFor": "\"{query}\" के लिए कोई परिणाम नहीं",
   "@noResultsFor": {
-    "placeholders": { "query": { "type": "String" } }
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
   },
   "noContent": "कोई सामग्री उपलब्ध नहीं",
   "loading": "लोड हो रहा है...",
@@ -116,7 +120,11 @@
   "noContentScheduled": "इस दिन के लिए कोई सामग्री निर्धारित नहीं है",
   "contentForDate": "{date} के लिए सामग्री",
   "@contentForDate": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "interests": "रुचियां",
   "selectInterests": "अपनी रुचियां चुनें",
@@ -153,6 +161,16 @@
   "startExploring": "यहां सामग्री देखने के लिए एक्सप्लोर करना शुरू करें",
   "watchedVideos": "{count} वीडियो देखे",
   "@watchedVideos": {
-    "placeholders": { "count": { "type": "int" } }
-  }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newLabel": "नया",
+  "discoverCreators": "फ़ॉलो करने के लिए क्रिएटर्स खोजें",
+  "followCreatorsHint": "क्रिएटर्स को फ़ॉलो करें",
+  "findCreators": "क्रिएटर्स ढूंढें",
+  "dismiss": "बंद करें",
+  "resetAll": "सब रीसेट करें"
 }

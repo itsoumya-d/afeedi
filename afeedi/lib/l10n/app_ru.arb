@@ -70,7 +70,11 @@
   "noResults": "Нет результатов",
   "noResultsFor": "Нет результатов для \"{query}\"",
   "@noResultsFor": {
-    "placeholders": { "query": { "type": "String" } }
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
   },
   "noContent": "Нет доступного контента",
   "loading": "Загрузка...",
@@ -116,7 +120,11 @@
   "noContentScheduled": "На этот день контент не запланирован",
   "contentForDate": "Контент на {date}",
   "@contentForDate": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "interests": "Интересы",
   "selectInterests": "Выберите интересы",
@@ -153,6 +161,16 @@
   "startExploring": "Начните исследование, чтобы увидеть контент здесь",
   "watchedVideos": "Просмотрено {count} видео",
   "@watchedVideos": {
-    "placeholders": { "count": { "type": "int" } }
-  }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newLabel": "Новое",
+  "discoverCreators": "Найдите авторов для подписки",
+  "followCreatorsHint": "Подпишитесь на авторов",
+  "findCreators": "Найти авторов",
+  "dismiss": "Закрыть",
+  "resetAll": "Сбросить всё"
 }

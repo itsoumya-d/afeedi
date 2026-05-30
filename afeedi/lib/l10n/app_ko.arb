@@ -70,7 +70,11 @@
   "noResults": "결과 없음",
   "noResultsFor": "\"{query}\"에 대한 결과가 없습니다",
   "@noResultsFor": {
-    "placeholders": { "query": { "type": "String" } }
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
   },
   "noContent": "사용 가능한 콘텐츠가 없습니다",
   "loading": "로딩 중...",
@@ -116,7 +120,11 @@
   "noContentScheduled": "이 날에 예정된 콘텐츠가 없습니다",
   "contentForDate": "{date}의 콘텐츠",
   "@contentForDate": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "interests": "관심사",
   "selectInterests": "관심사를 선택하세요",
@@ -153,6 +161,16 @@
   "startExploring": "여기서 콘텐츠를 보려면 탐색을 시작하세요",
   "watchedVideos": "동영상 {count}개 시청",
   "@watchedVideos": {
-    "placeholders": { "count": { "type": "int" } }
-  }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newLabel": "새로운",
+  "discoverCreators": "팔로우할 크리에이터 찾기",
+  "followCreatorsHint": "크리에이터를 팔로우하여 콘텐츠 확인",
+  "findCreators": "크리에이터 찾기",
+  "dismiss": "닫기",
+  "resetAll": "모두 초기화"
 }

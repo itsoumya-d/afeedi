@@ -454,4 +454,22 @@ class AppLocalizationsPt extends AppLocalizations {
   String watchedVideos(int count) {
     return 'Assistiu $count vídeos';
   }
+
+  @override
+  String get newLabel => 'Novo';
+
+  @override
+  String get discoverCreators => 'Descubra criadores para seguir';
+
+  @override
+  String get followCreatorsHint => 'Siga criadores para ver seu conteúdo';
+
+  @override
+  String get findCreators => 'Encontrar criadores';
+
+  @override
+  String get dismiss => 'Descartar';
+
+  @override
+  String get resetAll => 'Redefinir tudo';
 }

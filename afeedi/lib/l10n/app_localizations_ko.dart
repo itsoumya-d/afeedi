@@ -452,4 +452,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String watchedVideos(int count) {
     return '동영상 $count개 시청';
   }
+
+  @override
+  String get newLabel => '새로운';
+
+  @override
+  String get discoverCreators => '팔로우할 크리에이터 찾기';
+
+  @override
+  String get followCreatorsHint => '크리에이터를 팔로우하여 콘텐츠 확인';
+
+  @override
+  String get findCreators => '크리에이터 찾기';
+
+  @override
+  String get dismiss => '닫기';
+
+  @override
+  String get resetAll => '모두 초기화';
 }

@@ -10,26 +10,30 @@ import 'analytics_service.dart';
 class LocalAuthService {
   static LocalAuthService? _instance;
   static LocalAuthService get instance => _instance ??= LocalAuthService._();
-  
+
   LocalAuthService._();
-  
+
+  static const int _maxFailedAttempts = 5;
+  static const String _failedAttemptsKey = 'auth_failed_attempts';
+  static const String _lockoutUntilKey = 'auth_lockout_until';
+
   final LocalStorageService _storage = LocalStorageService.instance;
   User? _currentUser;
-  
+
   // Current user getter
   User? get currentUser => _currentUser;
-  
+
   // Initialize auth service
   Future<void> initialize() async {
     await _loadCurrentUser();
   }
-  
+
   // Load current user from storage
   Future<void> _loadCurrentUser() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final currentUserId = prefs.getString('current_user_id');
-      
+
       if (currentUserId != null) {
         _currentUser = await _storage.getUser(currentUserId);
       }
@@ -37,7 +41,7 @@ class LocalAuthService {
       debugPrint('Error loading current user: $error');
     }
   }
-  
+
   // Sign up with email and password
   Future<User?> signUp({
     required String email,
@@ -54,10 +58,10 @@ class LocalAuthService {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
-      
+
       // Save user to storage
       await _storage.saveUser(user);
-      
+
       // Save credentials with PBKDF2-hashed password
       final prefs = await SharedPreferences.getInstance();
       final salt = _generateSalt();
@@ -68,40 +72,46 @@ class LocalAuthService {
         'salt': salt,
         'hash': _pbkdf2Hash(password, salt),
       }));
-      
+
       // Set as current user
       await _setCurrentUser(user);
-      
+
       // Track analytics
       await AnalyticsService.instance.trackUserInteraction(
         action: 'user_signup',
         screen: 'auth',
       );
-      
+
       return user;
     } catch (error) {
       debugPrint('Error during sign up: $error');
       return null;
     }
   }
-  
+
   // Sign in with email and password
   Future<User?> signIn({
     required String email,
     required String password,
   }) async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final lockoutUntilMs = prefs.getInt(_lockoutUntilKey) ?? 0;
+      if (lockoutUntilMs > DateTime.now().millisecondsSinceEpoch) {
+        final remaining = (lockoutUntilMs - DateTime.now().millisecondsSinceEpoch) ~/ 60000;
+        throw Exception('Account temporarily locked. Try again in ${remaining + 1} minute(s).');
+      }
+
       // Find user by email
       final users = await _storage.getAllUsers();
       final user = users.firstWhere(
         (u) => u.email == email,
         orElse: () => throw Exception('User not found'),
       );
-      
+
       // Verify hashed password
-      final prefs = await SharedPreferences.getInstance();
       final credentialsJson = prefs.getString('user_credentials_${user.id}');
-      
+
       if (credentialsJson != null) {
         final credentials = jsonDecode(credentialsJson) as Map<String, dynamic>;
         bool passwordValid = false;
@@ -125,6 +135,10 @@ class LocalAuthService {
           }
         }
         if (passwordValid) {
+          // Clear failed attempts on success
+          await prefs.setInt(_failedAttemptsKey, 0);
+          await prefs.remove(_lockoutUntilKey);
+
           // Set as current user
           await _setCurrentUser(user);
 
@@ -138,13 +152,23 @@ class LocalAuthService {
         }
       }
 
-      throw Exception('Invalid credentials');
+      // Wrong password — increment failed attempts
+      final attempts = (prefs.getInt(_failedAttemptsKey) ?? 0) + 1;
+      await prefs.setInt(_failedAttemptsKey, attempts);
+      if (attempts >= _maxFailedAttempts) {
+        // Lock for 5 minutes (exponential: could be attempts*minutes but keep simple)
+        final lockUntil = DateTime.now().add(const Duration(minutes: 5)).millisecondsSinceEpoch;
+        await prefs.setInt(_lockoutUntilKey, lockUntil);
+        await prefs.setInt(_failedAttemptsKey, 0);
+        throw Exception('Too many failed attempts. Account locked for 5 minutes.');
+      }
+      throw Exception('Invalid password. ${_maxFailedAttempts - attempts} attempt(s) remaining.');
     } catch (error) {
       debugPrint('Error during sign in: $error');
       return null;
     }
   }
-  
+
   // Sign out
   Future<void> signOut() async {
     try {
@@ -158,10 +182,10 @@ class LocalAuthService {
           },
         );
       }
-      
+
       // Clear current user
       _currentUser = null;
-      
+
       // Remove from storage
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('current_user_id');
@@ -169,16 +193,16 @@ class LocalAuthService {
       debugPrint('Error during sign out: $error');
     }
   }
-  
+
   // Set current user
   Future<void> _setCurrentUser(User user) async {
     _currentUser = user;
-    
+
     // Save to storage
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('current_user_id', user.id);
   }
-  
+
   // Update user profile
   Future<User?> updateProfile({
     String? fullName,
@@ -187,22 +211,22 @@ class LocalAuthService {
   }) async {
     try {
       if (_currentUser == null) return null;
-      
+
       final updatedUser = _currentUser!.copyWith(
         updatedAt: DateTime.now(),
       );
-      
+
       // Save updated user
       await _storage.saveUser(updatedUser);
       _currentUser = updatedUser;
-      
+
       return updatedUser;
     } catch (error) {
       debugPrint('Error updating profile: $error');
       return null;
     }
   }
-  
+
   // Change password — verifies current password then saves new hash
   Future<bool> changePassword({
     required String currentPassword,
@@ -235,9 +259,9 @@ class LocalAuthService {
   Future<bool> deleteAccount() async {
     try {
       if (_currentUser == null) return false;
-      
+
       final userId = _currentUser!.id;
-      
+
       // Track analytics before deletion
       await AnalyticsService.instance.trackUserInteraction(
         action: 'user_account_deleted',
@@ -246,27 +270,27 @@ class LocalAuthService {
           'user_id': userId,
         },
       );
-      
+
       // Delete user data
       await _storage.deleteUser(userId);
-      
+
       // Clear credentials
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('user_credentials_$userId');
       await prefs.remove('current_user_id');
-      
+
       _currentUser = null;
-      
+
       return true;
     } catch (error) {
       debugPrint('Error deleting account: $error');
       return false;
     }
   }
-  
+
   // Check if user is authenticated
   bool get isAuthenticated => _currentUser != null;
-  
+
   static const int _pbkdf2Iterations = 100000;
   static const int _saltLength = 32;
 
@@ -305,7 +329,7 @@ class LocalAuthService {
     if (_currentUser == null) return null;
     return await _storage.getUserPreferences(_currentUser!.id);
   }
-  
+
   // Update user preferences
   Future<void> updateUserPreferences(UserPreferences preferences) async {
     if (_currentUser == null) return;

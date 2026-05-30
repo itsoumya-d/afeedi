@@ -453,4 +453,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String watchedVideos(int count) {
     return 'شاهدت $count فيديو';
   }
+
+  @override
+  String get newLabel => 'جديد';
+
+  @override
+  String get discoverCreators => 'اكتشف منشئي المحتوى للمتابعة';
+
+  @override
+  String get followCreatorsHint => 'اتبع المنشئين لعرض محتواهم';
+
+  @override
+  String get findCreators => 'ابحث عن المنشئين';
+
+  @override
+  String get dismiss => 'تجاهل';
+
+  @override
+  String get resetAll => 'إعادة تعيين الكل';
 }

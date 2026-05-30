@@ -70,7 +70,11 @@
   "noResults": "无结果",
   "noResultsFor": "没有 \"{query}\" 的结果",
   "@noResultsFor": {
-    "placeholders": { "query": { "type": "String" } }
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
   },
   "noContent": "暂无内容",
   "loading": "加载中...",
@@ -116,7 +120,11 @@
   "noContentScheduled": "该日无计划内容",
   "contentForDate": "{date} 的内容",
   "@contentForDate": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "interests": "兴趣爱好",
   "selectInterests": "选择您的兴趣",
@@ -153,6 +161,16 @@
   "startExploring": "开始探索以在此查看内容",
   "watchedVideos": "已观看 {count} 个视频",
   "@watchedVideos": {
-    "placeholders": { "count": { "type": "int" } }
-  }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newLabel": "最新",
+  "discoverCreators": "发现要关注的创作者",
+  "followCreatorsHint": "关注创作者以查看他们的内容",
+  "findCreators": "寻找创作者",
+  "dismiss": "关闭",
+  "resetAll": "全部重置"
 }

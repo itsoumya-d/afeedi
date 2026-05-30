@@ -279,7 +279,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
               ? _selectedPlatform == null
               : _selectedPlatform == platform;
           return Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsetsDirectional.only(end: 8),
             child: GestureDetector(
               onTap: () => setState(() => _selectedPlatform = platform),
               child: AnimatedContainer(
@@ -320,7 +320,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
           final icon = genre['icon'] as IconData;
           final isSelected = _selectedCategory == label;
           return Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsetsDirectional.only(end: 8),
             child: GestureDetector(
               onTap: () => setState(() {
                 _selectedCategory = isSelected ? null : label;
@@ -753,7 +753,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
       onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
       child: Container(
         width: 140,
-        margin: const EdgeInsets.only(right: 12),
+        margin: const EdgeInsetsDirectional.only(end: 12),
         decoration: BoxDecoration(
           color: const Color(0xFF1A1A2E),
           borderRadius: BorderRadius.circular(10),

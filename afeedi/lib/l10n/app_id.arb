@@ -70,7 +70,11 @@
   "noResults": "Tidak ada hasil",
   "noResultsFor": "Tidak ada hasil untuk \"{query}\"",
   "@noResultsFor": {
-    "placeholders": { "query": { "type": "String" } }
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
   },
   "noContent": "Tidak ada konten tersedia",
   "loading": "Memuat...",
@@ -116,7 +120,11 @@
   "noContentScheduled": "Tidak ada konten yang dijadwalkan untuk hari ini",
   "contentForDate": "Konten untuk {date}",
   "@contentForDate": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "interests": "Minat",
   "selectInterests": "Pilih minat Anda",
@@ -153,6 +161,16 @@
   "startExploring": "Mulai menjelajah untuk melihat konten di sini",
   "watchedVideos": "Menonton {count} video",
   "@watchedVideos": {
-    "placeholders": { "count": { "type": "int" } }
-  }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newLabel": "Baru",
+  "discoverCreators": "Temukan kreator untuk diikuti",
+  "followCreatorsHint": "Ikuti kreator untuk melihat konten mereka",
+  "findCreators": "Cari kreator",
+  "dismiss": "Tutup",
+  "resetAll": "Reset semua"
 }

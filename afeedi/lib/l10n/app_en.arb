@@ -70,7 +70,11 @@
   "noResults": "No results",
   "noResultsFor": "No results for \"{query}\"",
   "@noResultsFor": {
-    "placeholders": { "query": { "type": "String" } }
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
   },
   "noContent": "No content available",
   "loading": "Loading...",
@@ -116,7 +120,11 @@
   "noContentScheduled": "No content scheduled for this day",
   "contentForDate": "Content for {date}",
   "@contentForDate": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "interests": "Interests",
   "selectInterests": "Select your interests",
@@ -153,6 +161,16 @@
   "startExploring": "Start exploring to see content here",
   "watchedVideos": "Watched {count} videos",
   "@watchedVideos": {
-    "placeholders": { "count": { "type": "int" } }
-  }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newLabel": "New",
+  "discoverCreators": "Discover creators to follow",
+  "followCreatorsHint": "Follow creators to surface their content",
+  "findCreators": "Find creators",
+  "dismiss": "Dismiss",
+  "resetAll": "Reset All"
 }

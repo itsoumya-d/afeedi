@@ -70,7 +70,11 @@
   "noResults": "結果なし",
   "noResultsFor": "「{query}」の検索結果はありません",
   "@noResultsFor": {
-    "placeholders": { "query": { "type": "String" } }
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
   },
   "noContent": "コンテンツがありません",
   "loading": "読み込み中...",
@@ -116,7 +120,11 @@
   "noContentScheduled": "この日のコンテンツはありません",
   "contentForDate": "{date}のコンテンツ",
   "@contentForDate": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "interests": "興味",
   "selectInterests": "興味を選択",
@@ -153,6 +161,16 @@
   "startExploring": "ここにコンテンツを表示するには探索を開始してください",
   "watchedVideos": "{count}本の動画を視聴",
   "@watchedVideos": {
-    "placeholders": { "count": { "type": "int" } }
-  }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newLabel": "新着",
+  "discoverCreators": "フォローするクリエイターを探す",
+  "followCreatorsHint": "クリエイターをフォローしてコンテンツを表示",
+  "findCreators": "クリエイターを探す",
+  "dismiss": "閉じる",
+  "resetAll": "すべてリセット"
 }

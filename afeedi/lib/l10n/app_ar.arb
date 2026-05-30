@@ -71,7 +71,11 @@
   "noResults": "لا توجد نتائج",
   "noResultsFor": "لا توجد نتائج لـ \"{query}\"",
   "@noResultsFor": {
-    "placeholders": { "query": { "type": "String" } }
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
   },
   "noContent": "لا يوجد محتوى متاح",
   "loading": "جارٍ التحميل...",
@@ -117,7 +121,11 @@
   "noContentScheduled": "لا يوجد محتوى مجدوَل لهذا اليوم",
   "contentForDate": "محتوى {date}",
   "@contentForDate": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "interests": "الاهتمامات",
   "selectInterests": "اختر اهتماماتك",
@@ -154,6 +162,16 @@
   "startExploring": "ابدأ الاستكشاف لرؤية المحتوى هنا",
   "watchedVideos": "شاهدت {count} فيديو",
   "@watchedVideos": {
-    "placeholders": { "count": { "type": "int" } }
-  }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newLabel": "جديد",
+  "discoverCreators": "اكتشف منشئي المحتوى للمتابعة",
+  "followCreatorsHint": "اتبع المنشئين لعرض محتواهم",
+  "findCreators": "ابحث عن المنشئين",
+  "dismiss": "تجاهل",
+  "resetAll": "إعادة تعيين الكل"
 }

@@ -451,4 +451,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String watchedVideos(int count) {
     return '已观看 $count 个视频';
   }
+
+  @override
+  String get newLabel => '最新';
+
+  @override
+  String get discoverCreators => '发现要关注的创作者';
+
+  @override
+  String get followCreatorsHint => '关注创作者以查看他们的内容';
+
+  @override
+  String get findCreators => '寻找创作者';
+
+  @override
+  String get dismiss => '关闭';
+
+  @override
+  String get resetAll => '全部重置';
 }

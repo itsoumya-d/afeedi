@@ -71,11 +71,11 @@ class _ChatInterfaceState extends State<ChatInterface>
       _fadeController.forward();
     }
     
-    if (widget.controller.showQuickReplies ||
+    if (widget.controller.showQuickReplies || 
         widget.controller.showTextInput ||
         widget.controller.showGenreSelection ||
-        widget.controller.showPlatformSelection ||
-        widget.controller.showLanguagePicker) {
+        widget.controller.showLanguagePicker ||
+        widget.controller.showPlatformSelection) {
       _slideController.forward();
     } else {
       _fadeController.reset();
@@ -115,28 +115,62 @@ class _ChatInterfaceState extends State<ChatInterface>
   }
 
   Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          ),
-          const Expanded(
-            child: Text(
-              'Welcome to Afeedi',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
+    return AnimatedBuilder(
+      animation: widget.controller,
+      builder: (context, child) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                  ),
+                  const Expanded(
+                    child: Text(
+                      'Welcome to Afeedi',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(width: 48),
+                ],
               ),
-              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(width: 48),
-        ],
-      ),
+            if (widget.controller.onboardingSteps.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Step ${widget.controller.currentStep + 1} of ${widget.controller.onboardingSteps.length}',
+                      style: const TextStyle(color: Colors.white54, fontSize: 11),
+                    ),
+                    Text(
+                      '${((widget.controller.currentStep / widget.controller.onboardingSteps.length) * 100).round()}%',
+                      style: const TextStyle(color: Color(0xFF00D4FF), fontSize: 11, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
+              LinearProgressIndicator(
+                value: widget.controller.currentStep / widget.controller.onboardingSteps.length,
+                backgroundColor: Colors.white.withValues(alpha: 0.1),
+                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF00D4FF)),
+                minHeight: 3,
+              ),
+            ],
+          ],
+        );
+      },
     );
   }
 
@@ -146,8 +180,8 @@ class _ChatInterfaceState extends State<ChatInterface>
         (widget.controller.showQuickReplies ? 1 : 0) +
         (widget.controller.showTextInput ? 1 : 0) +
         (widget.controller.showGenreSelection ? 1 : 0) +
-        (widget.controller.showPlatformSelection ? 1 : 0) +
         (widget.controller.showLanguagePicker ? 1 : 0) +
+        (widget.controller.showPlatformSelection ? 1 : 0) +
         (widget.controller.showFinalButton ? 1 : 0);
   }
 

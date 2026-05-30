@@ -452,4 +452,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String watchedVideos(int count) {
     return '$count本の動画を視聴';
   }
+
+  @override
+  String get newLabel => '新着';
+
+  @override
+  String get discoverCreators => 'フォローするクリエイターを探す';
+
+  @override
+  String get followCreatorsHint => 'クリエイターをフォローしてコンテンツを表示';
+
+  @override
+  String get findCreators => 'クリエイターを探す';
+
+  @override
+  String get dismiss => '閉じる';
+
+  @override
+  String get resetAll => 'すべてリセット';
 }

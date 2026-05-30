@@ -453,4 +453,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String watchedVideos(int count) {
     return 'Watched $count videos';
   }
+
+  @override
+  String get newLabel => 'New';
+
+  @override
+  String get discoverCreators => 'Discover creators to follow';
+
+  @override
+  String get followCreatorsHint => 'Follow creators to surface their content first in your feed. Tap Follow on any video.';
+
+  @override
+  String get findCreators => 'Find creators';
+
+  @override
+  String get dismiss => 'Dismiss';
+
+  @override
+  String get resetAll => 'Reset All';
 }

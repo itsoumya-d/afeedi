@@ -454,4 +454,22 @@ class AppLocalizationsId extends AppLocalizations {
   String watchedVideos(int count) {
     return 'Menonton $count video';
   }
+
+  @override
+  String get newLabel => 'Baru';
+
+  @override
+  String get discoverCreators => 'Temukan kreator untuk diikuti';
+
+  @override
+  String get followCreatorsHint => 'Ikuti kreator untuk melihat konten mereka';
+
+  @override
+  String get findCreators => 'Cari kreator';
+
+  @override
+  String get dismiss => 'Tutup';
+
+  @override
+  String get resetAll => 'Reset semua';
 }

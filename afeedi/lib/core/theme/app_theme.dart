@@ -84,9 +84,16 @@ class AppTheme {
         elevation: 4,
         shape: CircleBorder(),
       ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: ZoomPageTransitionsBuilder(),
+          TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
+          TargetPlatform.linux: ZoomPageTransitionsBuilder(),
+        },
+      ),
     );
   }
-  
+
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
@@ -157,9 +164,16 @@ class AppTheme {
         elevation: 4,
         shape: CircleBorder(),
       ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: ZoomPageTransitionsBuilder(),
+          TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
+          TargetPlatform.linux: ZoomPageTransitionsBuilder(),
+        },
+      ),
     );
   }
-  
+
   // Gradient decorations for special UI elements
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [primaryCyan, primaryPink],

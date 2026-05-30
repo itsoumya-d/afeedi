@@ -49,6 +49,7 @@ class _CalendarTabState extends State<CalendarTab>
   late Animation<double> _calendarAnimation;
   late AnimationController _filterAnimationController;
   late Animation<double> _filterAnimation;
+  DateTime? _lastNavTap;
 
   final List<Map<String, dynamic>> _scheduledContent = [];
 
@@ -1291,6 +1292,13 @@ class _CalendarTabState extends State<CalendarTab>
       children: [
         IconButton(
           onPressed: () {
+            final now = DateTime.now();
+            if (_lastNavTap != null &&
+                now.difference(_lastNavTap!) <
+                    const Duration(milliseconds: 350)) {
+              return;
+            }
+            _lastNavTap = now;
             _calendarAnimationController.reset();
             setState(() {
               if (_viewMode == 'month') {
@@ -1337,6 +1345,13 @@ class _CalendarTabState extends State<CalendarTab>
         ),
         IconButton(
           onPressed: () {
+            final now = DateTime.now();
+            if (_lastNavTap != null &&
+                now.difference(_lastNavTap!) <
+                    const Duration(milliseconds: 350)) {
+              return;
+            }
+            _lastNavTap = now;
             _calendarAnimationController.reset();
             setState(() {
               if (_viewMode == 'month') {

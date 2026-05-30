@@ -156,6 +156,7 @@ class ChatController extends ChangeNotifier {
   }
 
   void showStepOptions() {
+    if (_currentStep >= _onboardingSteps.length) return;
     final currentStepData = _onboardingSteps[_currentStep];
 
     Future.delayed(const Duration(milliseconds: 500), () {

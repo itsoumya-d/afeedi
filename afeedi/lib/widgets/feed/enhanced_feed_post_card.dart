@@ -194,11 +194,14 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                   children: [
                     _buildPlatformBadge(),
                     const SizedBox(width: 8),
-                    Text(
-                      _getTimeAgo(),
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
-                        fontSize: 12,
+                    Flexible(
+                      child: Text(
+                        _getTimeAgo(),
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                     if (widget.content.durationSeconds != null) ...[
@@ -209,11 +212,14 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                         color: Colors.white.withValues(alpha: 0.6),
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        widget.content.formattedDuration,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
-                          fontSize: 12,
+                      Flexible(
+                        child: Text(
+                          widget.content.formattedDuration,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                     ],

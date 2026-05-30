@@ -639,7 +639,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Row(
         children: [
-          _buildStatCard('$videosWatched', AppLocalizations.of(context)?.videosWatchedLabel ?? 'Watched', Icons.play_circle_outline),
+          _buildStatCard('$videosWatched', AppLocalizations.of(context)?.videosWatchedLabel ?? 'Videos\nWatched', Icons.play_circle_outline),
           const SizedBox(width: 10),
           _buildStatCard(totalWatchTime, AppLocalizations.of(context)?.watchTimeLabel ?? 'Watch Time', Icons.access_time),
           const SizedBox(width: 10),
@@ -773,7 +773,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           _buildBadgeTab(AppLocalizations.of(context)?.liked ?? 'Liked', likedCount),
           _buildBadgeTab(AppLocalizations.of(context)?.saved ?? 'Saved', savedCount),
           _buildBadgeTab(AppLocalizations.of(context)?.history ?? 'History', watchedCount),
-          Tab(text: AppLocalizations.of(context)?.achievements ?? 'Achieve'),
+          Tab(text: AppLocalizations.of(context)?.achievements ?? 'Achievements'),
         ],
       ),
     );

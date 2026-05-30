@@ -7,11 +7,10 @@ import '../../widgets/onboarding/genre_selection.dart';
 import '../../widgets/onboarding/platform_connection.dart';
 import '../../widgets/onboarding/text_input_widget.dart';
 import '../../services/navigation_service.dart';
-import '../../services/onboarding_service.dart';
 
 class ChatInterface extends StatefulWidget {
   final ChatController controller;
-  
+
   const ChatInterface({
     super.key,
     required this.controller,
@@ -70,7 +69,7 @@ class _ChatInterfaceState extends State<ChatInterface>
       _typingController.stop();
       _fadeController.forward();
     }
-    
+
     if (widget.controller.showQuickReplies ||
         widget.controller.showTextInput ||
         widget.controller.showGenreSelection ||
@@ -122,7 +121,7 @@ class _ChatInterfaceState extends State<ChatInterface>
             ? widget.controller.onboardingSteps.length
             : 4;
         final currentStep = widget.controller.currentStep.clamp(0, totalSteps);
-        final progress = currentStep / totalSteps;
+        final progress = totalSteps > 0 ? currentStep / totalSteps : 0.0;
 
         return Container(
           padding: const EdgeInsets.fromLTRB(8, 12, 16, 8),
@@ -143,6 +142,8 @@ class _ChatInterfaceState extends State<ChatInterface>
                         fontWeight: FontWeight.w600,
                       ),
                       textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Container(
@@ -152,27 +153,38 @@ class _ChatInterfaceState extends State<ChatInterface>
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      '$currentStep / $totalSteps',
+                      'Step $currentStep of $totalSteps',
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 6),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    backgroundColor: Colors.white.withValues(alpha: 0.15),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF00D4FF)),
-                    minHeight: 4,
-                  ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween<double>(begin: 0.0, end: progress),
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeInOut,
+                  builder: (context, animatedProgress, _) {
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(3),
+                      child: LinearProgressIndicator(
+                        value: animatedProgress,
+                        backgroundColor: Colors.white.withValues(alpha: 0.15),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color(0xFF00D4FF),
+                        ),
+                        minHeight: 4,
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
@@ -183,8 +195,8 @@ class _ChatInterfaceState extends State<ChatInterface>
   }
 
   int _calculateItemCount() {
-    return widget.controller.messages.length + 
-        (widget.controller.showTyping ? 1 : 0) + 
+    return widget.controller.messages.length +
+        (widget.controller.showTyping ? 1 : 0) +
         (widget.controller.showQuickReplies ? 1 : 0) +
         (widget.controller.showTextInput ? 1 : 0) +
         (widget.controller.showGenreSelection ? 1 : 0) +
@@ -199,14 +211,14 @@ class _ChatInterfaceState extends State<ChatInterface>
         fadeAnimation: _fadeAnimation,
       );
     }
-    
+
     index -= widget.controller.messages.length;
-    
+
     if (widget.controller.showTyping && index == 0) {
       return TypingIndicator(typingAnimation: _typingAnimation);
     }
     if (widget.controller.showTyping) index--;
-    
+
     if (widget.controller.showQuickReplies && index == 0) {
       return QuickReplyChips(
         quickReplies: widget.controller.quickReplies,
@@ -216,7 +228,7 @@ class _ChatInterfaceState extends State<ChatInterface>
       );
     }
     if (widget.controller.showQuickReplies) index--;
-    
+
     if (widget.controller.showTextInput && index == 0) {
       return TextInputWidget(
         controller: widget.controller.textController,
@@ -231,7 +243,7 @@ class _ChatInterfaceState extends State<ChatInterface>
       );
     }
     if (widget.controller.showTextInput) index--;
-    
+
     if (widget.controller.showGenreSelection && index == 0) {
       return GenreSelection(
         allGenres: widget.controller.allGenres,
@@ -247,7 +259,7 @@ class _ChatInterfaceState extends State<ChatInterface>
       );
     }
     if (widget.controller.showGenreSelection) index--;
-    
+
     if (widget.controller.showPlatformSelection && index == 0) {
       return PlatformConnection(
         platformConnections: widget.controller.platformConnections,
@@ -259,11 +271,11 @@ class _ChatInterfaceState extends State<ChatInterface>
       );
     }
     if (widget.controller.showPlatformSelection) index--;
-    
+
     if (widget.controller.showFinalButton && index == 0) {
       return _buildFinalButton();
     }
-    
+
     return const SizedBox.shrink();
   }
 
@@ -299,6 +311,8 @@ class _ChatInterfaceState extends State<ChatInterface>
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),

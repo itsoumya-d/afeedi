@@ -173,56 +173,182 @@
   "findCreators": "クリエイターを探す",
   "dismiss": "閉じる",
   "resetAll": "すべてリセット",
-  "back": "戻る", "cancel": "キャンセル", "delete": "削除", "clear": "クリア", "update": "更新",
-  "play": "再生", "manage": "管理", "seePlans": "プランを見る", "disconnect": "切断", "viewAll": "すべて表示",
-  "showMore": "もっと見る", "showLess": "折りたたむ",
-  "memberSince": "{date} からのメンバー", "@memberSince": {"placeholders": {"date": {"type": "String"}}},
-  "noLikedContent": "いいねしたコンテンツなし", "noLikedContentHint": "いいねした動画がここに表示されます",
-  "nothingSavedYet": "まだ保存なし", "bookmarkContentHint": "コンテンツをブックマークしてここで確認",
-  "noHistoryYet": "まだ履歴なし", "noHistoryHint": "視聴した動画がここに表示されます",
-  "watchedOf": "{total} 中 {watched} 視聴済み", "@watchedOf": {"placeholders": {"watched": {"type": "String"}, "total": {"type": "String"}}},
-  "removeFromHistory": "履歴から削除", "engagementScore": "エンゲージメントスコア",
-  "ofMaxKeepWatching": "最大の{pct}% — 視聴を続けましょう！", "@ofMaxKeepWatching": {"placeholders": {"pct": {"type": "int"}}},
-  "watchedLabel": "視聴", "displayName": "表示名", "nameCannotBeEmpty": "名前を入力してください",
-  "nameTooLong": "名前が長すぎます（最大50文字）", "bio": "自己紹介",
+  "back": "戻る",
+  "cancel": "キャンセル",
+  "delete": "削除",
+  "clear": "クリア",
+  "update": "更新",
+  "play": "再生",
+  "manage": "管理",
+  "seePlans": "プランを見る",
+  "disconnect": "切断",
+  "viewAll": "すべて表示",
+  "showMore": "もっと見る",
+  "showLess": "折りたたむ",
+  "memberSince": "{date} からのメンバー",
+  "@memberSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noLikedContent": "いいねしたコンテンツなし",
+  "noLikedContentHint": "いいねした動画がここに表示されます",
+  "nothingSavedYet": "まだ保存なし",
+  "bookmarkContentHint": "コンテンツをブックマークしてここで確認",
+  "noHistoryYet": "まだ履歴なし",
+  "noHistoryHint": "視聴した動画がここに表示されます",
+  "watchedOf": "{total} 中 {watched} 視聴済み",
+  "@watchedOf": {
+    "placeholders": {
+      "watched": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFromHistory": "履歴から削除",
+  "engagementScore": "エンゲージメントスコア",
+  "ofMaxKeepWatching": "最大の{pct}% — 視聴を続けましょう！",
+  "@ofMaxKeepWatching": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "watchedLabel": "視聴",
+  "displayName": "表示名",
+  "nameCannotBeEmpty": "名前を入力してください",
+  "nameTooLong": "名前が長すぎます（最大50文字）",
+  "bio": "自己紹介",
   "defaultBio": "好奇心旺盛。コンテンツ探求者。一つのフィードで世界を見る。",
-  "editProfileTooltip": "プロフィールを編集", "googleCalendar": "Google カレンダー",
-  "readOnlyAccess": "読み取り専用アクセス", "readOnlyAccessHint": "イベントを読むだけで変更しません",
-  "seeEventsInApp": "アプリでイベントを確認", "seeEventsInAppHint": "カレンダーがコンテンツスケジュールと並んで表示されます",
-  "privateAndLocal": "プライベート＆ローカル", "privateAndLocalHint": "データはデバイスに保存され、共有しません",
-  "connecting": "接続中...", "connectWithGoogle": "Google と接続",
+  "editProfileTooltip": "プロフィールを編集",
+  "googleCalendar": "Google カレンダー",
+  "readOnlyAccess": "読み取り専用アクセス",
+  "readOnlyAccessHint": "イベントを読むだけで変更しません",
+  "seeEventsInApp": "アプリでイベントを確認",
+  "seeEventsInAppHint": "カレンダーがコンテンツスケジュールと並んで表示されます",
+  "privateAndLocal": "プライベート＆ローカル",
+  "privateAndLocalHint": "データはデバイスに保存され、共有しません",
+  "connecting": "接続中...",
+  "connectWithGoogle": "Google と接続",
   "couldNotConnect": "接続できません — 権限を確認してもう一度お試しください。",
-  "noUpcomingEvents": "予定なし", "allDay": "終日",
+  "noUpcomingEvents": "予定なし",
+  "allDay": "終日",
   "personalizedContentSchedule": "あなたのパーソナライズされたコンテンツスケジュール",
-  "contentCategories": "コンテンツカテゴリ", "categoryFilter": "カテゴリフィルター", "percentageFilter": "パーセンテージフィルター",
-  "educationPct": "教育: {pct}%", "@educationPct": {"placeholders": {"pct": {"type": "int"}}},
-  "entertainmentPct": "エンターテインメント: {pct}%", "@entertainmentPct": {"placeholders": {"pct": {"type": "int"}}},
-  "searchContent": "コンテンツを検索...", "monthView": "月", "weekView": "週", "dayView": "日",
-  "noFilterContent": "{filter} のコンテンツなし", "@noFilterContent": {"placeholders": {"filter": {"type": "String"}}},
+  "contentCategories": "コンテンツカテゴリ",
+  "categoryFilter": "カテゴリフィルター",
+  "percentageFilter": "パーセンテージフィルター",
+  "educationPct": "教育: {pct}%",
+  "@educationPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainmentPct": "エンターテインメント: {pct}%",
+  "@entertainmentPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "searchContent": "コンテンツを検索...",
+  "monthView": "月",
+  "weekView": "週",
+  "dayView": "日",
+  "noFilterContent": "{filter} のコンテンツなし",
+  "@noFilterContent": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
   "tryDifferentFilter": "別のフィルターや日付をお試しください",
-  "itemsScheduled": "{count} 件のスケジュール", "@itemsScheduled": {"placeholders": {"count": {"type": "int"}}},
-  "entertainment": "エンターテインメント", "aiRecommendations": "AI おすすめ",
-  "suggestedFor": "{time} におすすめ", "@suggestedFor": {"placeholders": {"time": {"type": "String"}}},
-  "movedNear": "\"{item}\" を \"{target}\" の近くに移動しました", "@movedNear": {"placeholders": {"item": {"type": "String"}, "target": {"type": "String"}}},
-  "unknownTitle": "不明なタイトル", "unknownCreator": "不明なクリエイター",
-  "playback": "再生", "autoplay": "自動再生", "autoplayHint": "次の動画を自動再生",
-  "videoQuality": "動画品質", "dataSaver": "データセーバー", "dataSaverHint": "ストリーミング時のデータ使用量を削減",
-  "pushNotificationsHint": "フォローしているクリエイターの新着コンテンツ", "appearance": "外観",
-  "darkModeHint": "アプリ全体にダークテーマを使用", "appLanguage": "アプリの言語", "contentLanguage": "コンテンツの言語",
-  "library": "ライブラリ", "savedVideos": "保存した動画", "previouslyWatchedVideos": "以前に視聴した動画",
-  "privacyAndData": "プライバシーとデータ", "usageAnalytics": "使用状況の分析",
+  "itemsScheduled": "{count} 件のスケジュール",
+  "@itemsScheduled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainment": "エンターテインメント",
+  "aiRecommendations": "AI おすすめ",
+  "suggestedFor": "{time} におすすめ",
+  "@suggestedFor": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "movedNear": "\"{item}\" を \"{target}\" の近くに移動しました",
+  "@movedNear": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownTitle": "不明なタイトル",
+  "unknownCreator": "不明なクリエイター",
+  "playback": "再生",
+  "autoplay": "自動再生",
+  "autoplayHint": "次の動画を自動再生",
+  "videoQuality": "動画品質",
+  "dataSaver": "データセーバー",
+  "dataSaverHint": "ストリーミング時のデータ使用量を削減",
+  "pushNotificationsHint": "フォローしているクリエイターの新着コンテンツ",
+  "appearance": "外観",
+  "darkModeHint": "アプリ全体にダークテーマを使用",
+  "appLanguage": "アプリの言語",
+  "contentLanguage": "コンテンツの言語",
+  "library": "ライブラリ",
+  "savedVideos": "保存した動画",
+  "previouslyWatchedVideos": "以前に視聴した動画",
+  "privacyAndData": "プライバシーとデータ",
+  "usageAnalytics": "使用状況の分析",
   "usageAnalyticsHint": "匿名データでアプリ改善にご協力ください",
-  "clearWatchHistory": "視聴履歴をクリア", "clearWatchHistoryHint": "履歴からすべての動画を削除",
-  "clearCache": "キャッシュをクリア", "clearCacheHint": "ストレージ容量を解放",
-  "changePassword": "パスワードを変更", "appVersion": "アプリバージョン", "termsOfService": "利用規約",
-  "afeediProActive": "Afeedi Pro — 有効", "upgradeToPro": "Pro にアップグレード",
-  "proFeatures": "広告なし · 無制限保存 · AI フィード", "freeFeatures": "広告なし、AI フィード、無制限保存",
+  "clearWatchHistory": "視聴履歴をクリア",
+  "clearWatchHistoryHint": "履歴からすべての動画を削除",
+  "clearCache": "キャッシュをクリア",
+  "clearCacheHint": "ストレージ容量を解放",
+  "changePassword": "パスワードを変更",
+  "appVersion": "アプリバージョン",
+  "termsOfService": "利用規約",
+  "afeediProActive": "Afeedi Pro — 有効",
+  "upgradeToPro": "Pro にアップグレード",
+  "proFeatures": "広告なし · 無制限保存 · AI フィード",
+  "freeFeatures": "広告なし、AI フィード、無制限保存",
   "clearHistoryConfirm": "視聴履歴からすべての動画が削除されます。この操作は元に戻せません。",
-  "watchHistoryClearedSnackbar": "視聴履歴がクリアされました", "cacheClearedSnackbar": "キャッシュが正常にクリアされました",
-  "currentPassword": "現在のパスワード", "newPassword": "新しいパスワード", "confirmNewPassword": "新しいパスワードを確認",
-  "minEightChars": "最低8文字", "passwordsDoNotMatch": "パスワードが一致しません", "required": "必須",
-  "passwordChangedSuccessfully": "パスワードが正常に変更されました", "currentPasswordIncorrect": "現在のパスワードが正しくありません",
+  "watchHistoryClearedSnackbar": "視聴履歴がクリアされました",
+  "cacheClearedSnackbar": "キャッシュが正常にクリアされました",
+  "currentPassword": "現在のパスワード",
+  "newPassword": "新しいパスワード",
+  "confirmNewPassword": "新しいパスワードを確認",
+  "minEightChars": "最低8文字",
+  "passwordsDoNotMatch": "パスワードが一致しません",
+  "required": "必須",
+  "passwordChangedSuccessfully": "パスワードが正常に変更されました",
+  "currentPasswordIncorrect": "現在のパスワードが正しくありません",
   "signOutConfirm": "サインアウトしますか？",
   "deleteAccountConfirm": "よろしいですか？この操作は元に戻せません。",
-  "videosWatchedLabel": "視聴\n動画", "watchTimeLabel": "視聴\n時間"
+  "videosWatchedLabel": "視聴\n動画",
+  "watchTimeLabel": "視聴\n時間",
+  "goodMorning": "おはようございます！",
+  "goodAfternoon": "こんにちは！",
+  "goodEvening": "こんばんは！",
+  "noNotifications": "通知はありません",
+  "allCaughtUp": "最新の状態です！"
 }

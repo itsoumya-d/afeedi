@@ -508,7 +508,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get showLess => '折りたたむ';
 
   @override
-  String memberSince(String date) => '$date からのメンバー';
+  String memberSince(String date) {
+    return '$date からのメンバー';
+  }
 
   @override
   String get noLikedContent => 'いいねしたコンテンツなし';
@@ -529,7 +531,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noHistoryHint => '視聴した動画がここに表示されます';
 
   @override
-  String watchedOf(String watched, String total) => '$total 中 $watched 視聴済み';
+  String watchedOf(String watched, String total) {
+    return '$total 中 $watched 視聴済み';
+  }
 
   @override
   String get removeFromHistory => '履歴から削除';
@@ -538,7 +542,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get engagementScore => 'エンゲージメントスコア';
 
   @override
-  String ofMaxKeepWatching(int pct) => '最大の$pct% — 視聴を続けましょう！';
+  String ofMaxKeepWatching(int pct) {
+    return '最大の$pct% — 視聴を続けましょう！';
+  }
 
   @override
   String get watchedLabel => '視聴';
@@ -610,10 +616,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get percentageFilter => 'パーセンテージフィルター';
 
   @override
-  String educationPct(int pct) => '教育: $pct%';
+  String educationPct(int pct) {
+    return '教育: $pct%';
+  }
 
   @override
-  String entertainmentPct(int pct) => 'エンターテインメント: $pct%';
+  String entertainmentPct(int pct) {
+    return 'エンターテインメント: $pct%';
+  }
 
   @override
   String get searchContent => 'コンテンツを検索...';
@@ -628,13 +638,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get dayView => '日';
 
   @override
-  String noFilterContent(String filter) => '$filter のコンテンツなし';
+  String noFilterContent(String filter) {
+    return '$filter のコンテンツなし';
+  }
 
   @override
   String get tryDifferentFilter => '別のフィルターや日付をお試しください';
 
   @override
-  String itemsScheduled(int count) => '$count 件のスケジュール';
+  String itemsScheduled(int count) {
+    return '$count 件のスケジュール';
+  }
 
   @override
   String get entertainment => 'エンターテインメント';
@@ -643,10 +657,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aiRecommendations => 'AI おすすめ';
 
   @override
-  String suggestedFor(String time) => '$time におすすめ';
+  String suggestedFor(String time) {
+    return '$time におすすめ';
+  }
 
   @override
-  String movedNear(String item, String target) => '"$item" を "$target" の近くに移動しました';
+  String movedNear(String item, String target) {
+    return '\"$item\" を \"$target\" の近くに移動しました';
+  }
 
   @override
   String get unknownTitle => '不明なタイトル';
@@ -796,5 +814,5 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noNotifications => '通知はありません';
 
   @override
-  String get allCaughtUp => 'すべて確認済みです！';
+  String get allCaughtUp => '最新の状態です！';
 }

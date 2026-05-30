@@ -49,10 +49,11 @@
 	<string>Afeedi needs access to your photo library to let you set a profile picture.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Afeedi needs camera access to let you take a profile picture.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Afeedi needs microphone access for video recording features.</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>Afeedi uses analytics to improve app performance and personalize your content feed. No personal data is shared with third parties for advertising.</string>
+	<!-- AdMob App ID — replace with real iOS App ID from AdMob console before App Store submission -->
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-3940256099942544~1458002511</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

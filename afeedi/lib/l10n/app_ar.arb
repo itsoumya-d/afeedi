@@ -187,7 +187,13 @@
   "showMore": "عرض المزيد",
   "showLess": "عرض أقل",
   "memberSince": "عضو منذ {date}",
-  "@memberSince": {"placeholders": {"date": {"type": "String"}}},
+  "@memberSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "noLikedContent": "لا يوجد محتوى معجب به",
   "noLikedContentHint": "ستظهر مقاطع الفيديو التي تعجبك هنا",
   "nothingSavedYet": "لم يتم حفظ أي شيء بعد",
@@ -195,11 +201,26 @@
   "noHistoryYet": "لا يوجد سجل بعد",
   "noHistoryHint": "ستظهر مقاطع الفيديو التي شاهدتها هنا",
   "watchedOf": "شاهدت {watched} من {total}",
-  "@watchedOf": {"placeholders": {"watched": {"type": "String"}, "total": {"type": "String"}}},
+  "@watchedOf": {
+    "placeholders": {
+      "watched": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "removeFromHistory": "إزالة من السجل",
   "engagementScore": "نقاط التفاعل",
   "ofMaxKeepWatching": "{pct}% من الحد الأقصى — واصل المشاهدة!",
-  "@ofMaxKeepWatching": {"placeholders": {"pct": {"type": "int"}}},
+  "@ofMaxKeepWatching": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
   "watchedLabel": "شوهد",
   "displayName": "اسم العرض",
   "nameCannotBeEmpty": "لا يمكن أن يكون الاسم فارغاً",
@@ -224,24 +245,63 @@
   "categoryFilter": "تصفية الفئة",
   "percentageFilter": "تصفية النسبة",
   "educationPct": "التعليم: {pct}%",
-  "@educationPct": {"placeholders": {"pct": {"type": "int"}}},
+  "@educationPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
   "entertainmentPct": "الترفيه: {pct}%",
-  "@entertainmentPct": {"placeholders": {"pct": {"type": "int"}}},
+  "@entertainmentPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
   "searchContent": "ابحث عن محتوى...",
   "monthView": "شهر",
   "weekView": "أسبوع",
   "dayView": "يوم",
   "noFilterContent": "لا يوجد محتوى {filter}",
-  "@noFilterContent": {"placeholders": {"filter": {"type": "String"}}},
+  "@noFilterContent": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
   "tryDifferentFilter": "جرّب تصفية أو تاريخاً مختلفاً",
   "itemsScheduled": "{count} عنصر مجدوَل",
-  "@itemsScheduled": {"placeholders": {"count": {"type": "int"}}},
+  "@itemsScheduled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "entertainment": "ترفيه",
   "aiRecommendations": "توصيات الذكاء الاصطناعي",
   "suggestedFor": "مقترح لـ {time}",
-  "@suggestedFor": {"placeholders": {"time": {"type": "String"}}},
+  "@suggestedFor": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "movedNear": "تم نقل \"{item}\" بالقرب من \"{target}\"",
-  "@movedNear": {"placeholders": {"item": {"type": "String"}, "target": {"type": "String"}}},
+  "@movedNear": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
   "unknownTitle": "عنوان غير معروف",
   "unknownCreator": "منشئ غير معروف",
   "playback": "التشغيل",
@@ -286,5 +346,10 @@
   "signOutConfirm": "هل أنت متأكد من تسجيل الخروج؟",
   "deleteAccountConfirm": "هل أنت متأكد؟ لا يمكن التراجع عن هذا.",
   "videosWatchedLabel": "فيديوهات\nمشاهَدة",
-  "watchTimeLabel": "وقت\nالمشاهدة"
+  "watchTimeLabel": "وقت\nالمشاهدة",
+  "goodMorning": "صباح الخير!",
+  "goodAfternoon": "مساء الخير!",
+  "goodEvening": "مساء النور!",
+  "noNotifications": "لا توجد إشعارات",
+  "allCaughtUp": "أنت محدث!"
 }

@@ -17,6 +17,7 @@ import 'services/user_interaction_service.dart';
 import 'services/notification_service.dart';
 import 'services/subscription_service.dart';
 import 'services/ad_service.dart';
+import 'services/att_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/storage/local_storage_service.dart';
 import 'l10n/app_localizations.dart';
@@ -93,6 +94,9 @@ Future<void> _appMain() async {
 
     // Initialize subscription service (loads cached premium state + sets up IAP stream)
     await SubscriptionService.instance.initialize();
+
+    // Request iOS App Tracking Transparency before initializing AdMob (required by Apple)
+    await AttService.requestTrackingIfNeeded();
 
     // Initialize AdMob (non-blocking; ads load lazily when widgets mount)
     AdService.instance.initialize().catchError(

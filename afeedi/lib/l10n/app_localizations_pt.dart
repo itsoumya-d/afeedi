@@ -510,7 +510,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get showLess => 'Mostrar menos';
 
   @override
-  String memberSince(String date) => 'Membro desde $date';
+  String memberSince(String date) {
+    return 'Membro desde $date';
+  }
 
   @override
   String get noLikedContent => 'Nenhum conteúdo curtido';
@@ -531,7 +533,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noHistoryHint => 'Vídeos que você assistir aparecerão aqui';
 
   @override
-  String watchedOf(String watched, String total) => 'Assistiu $watched de $total';
+  String watchedOf(String watched, String total) {
+    return 'Assistiu $watched de $total';
+  }
 
   @override
   String get removeFromHistory => 'Remover do histórico';
@@ -540,7 +544,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get engagementScore => 'Pontuação de engajamento';
 
   @override
-  String ofMaxKeepWatching(int pct) => '$pct% do máximo — continue assistindo!';
+  String ofMaxKeepWatching(int pct) {
+    return '$pct% do máximo — continue assistindo!';
+  }
 
   @override
   String get watchedLabel => 'Assistido';
@@ -558,7 +564,8 @@ class AppLocalizationsPt extends AppLocalizations {
   String get bio => 'Bio';
 
   @override
-  String get defaultBio => 'Mente curiosa. Explorador de conteúdo. Vendo o mundo um feed de cada vez.';
+  String get defaultBio =>
+      'Mente curiosa. Explorador de conteúdo. Vendo o mundo um feed de cada vez.';
 
   @override
   String get editProfileTooltip => 'Editar perfil';
@@ -576,13 +583,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get seeEventsInApp => 'Ver eventos no app';
 
   @override
-  String get seeEventsInAppHint => 'Sua agenda aparece ao lado do cronograma de conteúdo';
+  String get seeEventsInAppHint =>
+      'Sua agenda aparece ao lado do cronograma de conteúdo';
 
   @override
   String get privateAndLocal => 'Privado e local';
 
   @override
-  String get privateAndLocalHint => 'Os dados ficam no dispositivo; nunca os compartilhamos';
+  String get privateAndLocalHint =>
+      'Os dados ficam no dispositivo; nunca os compartilhamos';
 
   @override
   String get connecting => 'Conectando...';
@@ -591,7 +600,8 @@ class AppLocalizationsPt extends AppLocalizations {
   String get connectWithGoogle => 'Conectar com Google';
 
   @override
-  String get couldNotConnect => 'Não foi possível conectar — verifique as permissões e tente novamente.';
+  String get couldNotConnect =>
+      'Não foi possível conectar — verifique as permissões e tente novamente.';
 
   @override
   String get noUpcomingEvents => 'Nenhum evento próximo';
@@ -600,7 +610,8 @@ class AppLocalizationsPt extends AppLocalizations {
   String get allDay => 'Dia inteiro';
 
   @override
-  String get personalizedContentSchedule => 'Seu cronograma de conteúdo personalizado';
+  String get personalizedContentSchedule =>
+      'Seu cronograma de conteúdo personalizado';
 
   @override
   String get contentCategories => 'Categorias de conteúdo';
@@ -612,10 +623,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get percentageFilter => 'Filtro por porcentagem';
 
   @override
-  String educationPct(int pct) => 'Educação: $pct%';
+  String educationPct(int pct) {
+    return 'Educação: $pct%';
+  }
 
   @override
-  String entertainmentPct(int pct) => 'Entretenimento: $pct%';
+  String entertainmentPct(int pct) {
+    return 'Entretenimento: $pct%';
+  }
 
   @override
   String get searchContent => 'Pesquisar conteúdo...';
@@ -630,13 +645,17 @@ class AppLocalizationsPt extends AppLocalizations {
   String get dayView => 'Dia';
 
   @override
-  String noFilterContent(String filter) => 'Sem conteúdo de $filter';
+  String noFilterContent(String filter) {
+    return 'Sem conteúdo de $filter';
+  }
 
   @override
   String get tryDifferentFilter => 'Tente um filtro ou data diferente';
 
   @override
-  String itemsScheduled(int count) => '$count itens agendados';
+  String itemsScheduled(int count) {
+    return '$count itens agendados';
+  }
 
   @override
   String get entertainment => 'Entretenimento';
@@ -645,10 +664,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get aiRecommendations => 'Recomendações de IA';
 
   @override
-  String suggestedFor(String time) => 'Sugerido para $time';
+  String suggestedFor(String time) {
+    return 'Sugerido para $time';
+  }
 
   @override
-  String movedNear(String item, String target) => '"$item" movido perto de "$target"';
+  String movedNear(String item, String target) {
+    return '\"$item\" movido perto de \"$target\"';
+  }
 
   @override
   String get unknownTitle => 'Título desconhecido';
@@ -741,7 +764,8 @@ class AppLocalizationsPt extends AppLocalizations {
   String get freeFeatures => 'Sem anúncios, feed de IA, saves ilimitados';
 
   @override
-  String get clearHistoryConfirm => 'Isso removerá todos os vídeos do seu histórico. Esta ação não pode ser desfeita.';
+  String get clearHistoryConfirm =>
+      'Isso removerá todos os vídeos do seu histórico. Esta ação não pode ser desfeita.';
 
   @override
   String get watchHistoryClearedSnackbar => 'Histórico de exibição limpo';

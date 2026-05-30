@@ -180,7 +180,7 @@ class YouTubePlayerService {
     final params = {
       'autoplay': autoplay ? '1' : '0',
       'controls': showControls ? '1' : '0',
-      'modestbranding': '1',
+      
       'rel': '0',
       'showinfo': '0',
       'iv_load_policy': '3',

@@ -80,9 +80,6 @@ dependencies:
   url_launcher: ^6.2.6
   webview_flutter: ^4.7.0
   
-  # Video Content Extraction
-  youtube_explode_dart: ^2.5.2
-  
   # OAuth and Social Authentication
   google_sign_in: ^6.2.1
   flutter_facebook_auth: ^6.0.4
@@ -102,6 +99,9 @@ dependencies:
   uuid: ^4.4.0
   path_provider: ^2.1.3
   permission_handler: ^11.3.1
+
+  # iOS App Tracking Transparency — required before AdMob uses IDFA
+  app_tracking_transparency: ^2.0.7
   
   
   

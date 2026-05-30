@@ -189,15 +189,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
         features: ['Advanced AI personalization', 'Unlimited saves', 'Ad-free experience', 'Google Calendar sync', 'Creator follow insights'],
         popular: true,
       ),
-      _PlanData(
-        index: 2,
-        name: 'Creator',
-        monthlyPrice: 9.99,
-        annualPrice: 79.99,
-        color: const Color(0xFF2A1A4A),
-        accentColor: const Color(0xFF7B61FF),
-        features: ['Everything in Pro', 'Content scheduling', 'Analytics dashboard', 'Multi-platform posting', 'Priority support'],
-      ),
+      // Creator tier: not yet available — removed to comply with App Store Guideline 2.1
     ];
 
     return Column(
@@ -370,11 +362,14 @@ class _PremiumScreenState extends State<PremiumScreen> {
       );
     }
 
-    final plans = ['Pro', 'Creator'];
-    final prices = _isAnnual ? ['\$39.99/year', '\$79.99/year'] : ['\$4.99/month', '\$9.99/month'];
-    final planName = plans[_selectedPlan - 1];
-    final price = prices[_selectedPlan - 1];
-    final color = _selectedPlan == 1 ? const Color(0xFF00D4FF) : const Color(0xFF7B61FF);
+    const planName = 'Pro';
+    // Prices are fetched from the store — fall back to default if not yet loaded
+    final monthlyProduct = SubscriptionService.instance.monthlyProduct;
+    final annualProduct = SubscriptionService.instance.yearlyProduct;
+    final price = _isAnnual
+        ? (annualProduct?.price ?? '\$39.99/year')
+        : (monthlyProduct?.price ?? '\$4.99/month');
+    const color = Color(0xFF00D4FF);
 
     return ListenableBuilder(
       listenable: SubscriptionService.instance,
@@ -492,22 +487,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
       return;
     }
 
-    // Creator tier: coming soon
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
-        title: const Text('Creator Tier — Coming Soon', style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'Creator tier with analytics dashboard and multi-platform posting will be available at launch.',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Got it', style: TextStyle(color: Color(0xFF00D4FF))),
-          ),
-        ],
+    // Only Pro plan is available; other plan names are not purchasable
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('This plan is not yet available. Please select Afeedi Pro.'),
+        duration: Duration(seconds: 3),
       ),
     );
   }

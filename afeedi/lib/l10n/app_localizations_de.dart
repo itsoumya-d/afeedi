@@ -510,7 +510,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get showLess => 'Weniger anzeigen';
 
   @override
-  String memberSince(String date) => 'Mitglied seit $date';
+  String memberSince(String date) {
+    return 'Mitglied seit $date';
+  }
 
   @override
   String get noLikedContent => 'Keine gemochten Inhalte';
@@ -522,7 +524,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get nothingSavedYet => 'Noch nichts gespeichert';
 
   @override
-  String get bookmarkContentHint => 'Lesezeichen setzen, um Inhalte hier zu sehen';
+  String get bookmarkContentHint =>
+      'Lesezeichen setzen, um Inhalte hier zu sehen';
 
   @override
   String get noHistoryYet => 'Noch kein Verlauf';
@@ -531,7 +534,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noHistoryHint => 'Videos, die du ansiehst, erscheinen hier';
 
   @override
-  String watchedOf(String watched, String total) => '$watched von $total gesehen';
+  String watchedOf(String watched, String total) {
+    return '$watched von $total gesehen';
+  }
 
   @override
   String get removeFromHistory => 'Aus Verlauf entfernen';
@@ -540,7 +545,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get engagementScore => 'Engagement-Punkte';
 
   @override
-  String ofMaxKeepWatching(int pct) => '$pct% des Maximums — weiter anschauen!';
+  String ofMaxKeepWatching(int pct) {
+    return '$pct% des Maximums — weiter anschauen!';
+  }
 
   @override
   String get watchedLabel => 'Gesehen';
@@ -558,7 +565,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get bio => 'Bio';
 
   @override
-  String get defaultBio => 'Neugieriger Geist. Content-Entdecker. Die Welt ein Feed nach dem anderen erkunden.';
+  String get defaultBio =>
+      'Neugieriger Geist. Content-Entdecker. Die Welt ein Feed nach dem anderen.';
 
   @override
   String get editProfileTooltip => 'Profil bearbeiten';
@@ -576,13 +584,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get seeEventsInApp => 'Ereignisse in der App sehen';
 
   @override
-  String get seeEventsInAppHint => 'Dein Kalender erscheint neben deinem Inhaltsplan';
+  String get seeEventsInAppHint =>
+      'Dein Kalender erscheint neben deinem Inhaltsplan';
 
   @override
   String get privateAndLocal => 'Privat & lokal';
 
   @override
-  String get privateAndLocalHint => 'Daten bleiben auf dem Gerät; wir teilen sie nie';
+  String get privateAndLocalHint =>
+      'Daten bleiben auf dem Gerät; wir teilen sie nie';
 
   @override
   String get connecting => 'Verbinden...';
@@ -591,7 +601,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get connectWithGoogle => 'Mit Google verbinden';
 
   @override
-  String get couldNotConnect => 'Verbindung fehlgeschlagen — Berechtigungen prüfen und erneut versuchen.';
+  String get couldNotConnect =>
+      'Verbindung fehlgeschlagen — Berechtigungen prüfen und erneut versuchen.';
 
   @override
   String get noUpcomingEvents => 'Keine bevorstehenden Ereignisse';
@@ -612,10 +623,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get percentageFilter => 'Prozentfilter';
 
   @override
-  String educationPct(int pct) => 'Bildung: $pct%';
+  String educationPct(int pct) {
+    return 'Bildung: $pct%';
+  }
 
   @override
-  String entertainmentPct(int pct) => 'Unterhaltung: $pct%';
+  String entertainmentPct(int pct) {
+    return 'Unterhaltung: $pct%';
+  }
 
   @override
   String get searchContent => 'Inhalte suchen...';
@@ -630,13 +645,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get dayView => 'Tag';
 
   @override
-  String noFilterContent(String filter) => 'Kein $filter Inhalt';
+  String noFilterContent(String filter) {
+    return 'Kein $filter Inhalt';
+  }
 
   @override
-  String get tryDifferentFilter => 'Versuche einen anderen Filter oder ein anderes Datum';
+  String get tryDifferentFilter =>
+      'Versuche einen anderen Filter oder ein anderes Datum';
 
   @override
-  String itemsScheduled(int count) => '$count Elemente geplant';
+  String itemsScheduled(int count) {
+    return '$count Elemente geplant';
+  }
 
   @override
   String get entertainment => 'Unterhaltung';
@@ -645,10 +665,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get aiRecommendations => 'KI-Empfehlungen';
 
   @override
-  String suggestedFor(String time) => 'Vorgeschlagen für $time';
+  String suggestedFor(String time) {
+    return 'Vorgeschlagen für $time';
+  }
 
   @override
-  String movedNear(String item, String target) => '"$item" in die Nähe von "$target" verschoben';
+  String movedNear(String item, String target) {
+    return '\"$item\" in die Nähe von \"$target\" verschoben';
+  }
 
   @override
   String get unknownTitle => 'Unbekannter Titel';
@@ -705,13 +729,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get usageAnalytics => 'Nutzungsanalysen';
 
   @override
-  String get usageAnalyticsHint => 'Hilf, die App mit anonymen Daten zu verbessern';
+  String get usageAnalyticsHint =>
+      'Hilf, die App mit anonymen Daten zu verbessern';
 
   @override
   String get clearWatchHistory => 'Verlauf leeren';
 
   @override
-  String get clearWatchHistoryHint => 'Alle angesehenen Videos aus dem Verlauf entfernen';
+  String get clearWatchHistoryHint =>
+      'Alle angesehenen Videos aus dem Verlauf entfernen';
 
   @override
   String get clearCache => 'Cache leeren';
@@ -741,7 +767,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get freeFeatures => 'Werbefrei, KI-Feed, unbegrenztes Speichern';
 
   @override
-  String get clearHistoryConfirm => 'Dadurch werden alle Videos aus deinem Verlauf entfernt. Diese Aktion kann nicht rückgängig gemacht werden.';
+  String get clearHistoryConfirm =>
+      'Dadurch werden alle Videos aus deinem Verlauf entfernt. Diese Aktion kann nicht rückgängig gemacht werden.';
 
   @override
   String get watchHistoryClearedSnackbar => 'Verlauf geleert';
@@ -774,10 +801,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get currentPasswordIncorrect => 'Aktuelles Passwort ist falsch';
 
   @override
-  String get signOutConfirm => 'Bist du sicher, dass du dich abmelden möchtest?';
+  String get signOutConfirm =>
+      'Bist du sicher, dass du dich abmelden möchtest?';
 
   @override
-  String get deleteAccountConfirm => 'Bist du sicher? Dies kann nicht rückgängig gemacht werden.';
+  String get deleteAccountConfirm =>
+      'Bist du sicher? Dies kann nicht rückgängig gemacht werden.';
 
   @override
   String get videosWatchedLabel => 'Videos\ngesehen';
@@ -798,5 +827,5 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noNotifications => 'Keine Benachrichtigungen';
 
   @override
-  String get allCaughtUp => 'Du bist auf dem neuesten Stand!';
+  String get allCaughtUp => 'Sie sind auf dem neuesten Stand!';
 }

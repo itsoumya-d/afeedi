@@ -201,7 +201,7 @@ class BrowserStreamingService {
     final baseParams = {
       'autoplay': '0',
       'controls': '1',
-      'modestbranding': '1',
+      
       'rel': '0',
       'showinfo': '0',
     };

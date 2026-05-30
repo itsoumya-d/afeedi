@@ -509,7 +509,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get showLess => 'عرض أقل';
 
   @override
-  String memberSince(String date) => 'عضو منذ $date';
+  String memberSince(String date) {
+    return 'عضو منذ $date';
+  }
 
   @override
   String get noLikedContent => 'لا يوجد محتوى معجب به';
@@ -530,7 +532,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noHistoryHint => 'ستظهر مقاطع الفيديو التي شاهدتها هنا';
 
   @override
-  String watchedOf(String watched, String total) => 'شاهدت $watched من $total';
+  String watchedOf(String watched, String total) {
+    return 'شاهدت $watched من $total';
+  }
 
   @override
   String get removeFromHistory => 'إزالة من السجل';
@@ -539,7 +543,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get engagementScore => 'نقاط التفاعل';
 
   @override
-  String ofMaxKeepWatching(int pct) => '$pct% من الحد الأقصى — واصل المشاهدة!';
+  String ofMaxKeepWatching(int pct) {
+    return '$pct% من الحد الأقصى — واصل المشاهدة!';
+  }
 
   @override
   String get watchedLabel => 'شوهد';
@@ -581,7 +587,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get privateAndLocal => 'خاص ومحلي';
 
   @override
-  String get privateAndLocalHint => 'تبقى البيانات على الجهاز ولا نشاركها أبداً';
+  String get privateAndLocalHint =>
+      'تبقى البيانات على الجهاز ولا نشاركها أبداً';
 
   @override
   String get connecting => 'جارٍ الاتصال...';
@@ -590,7 +597,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get connectWithGoogle => 'الاتصال بـ Google';
 
   @override
-  String get couldNotConnect => 'تعذّر الاتصال — تحقق من الأذونات وحاول مجدداً.';
+  String get couldNotConnect =>
+      'تعذّر الاتصال — تحقق من الأذونات وحاول مجدداً.';
 
   @override
   String get noUpcomingEvents => 'لا توجد أحداث قادمة';
@@ -611,10 +619,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get percentageFilter => 'تصفية النسبة';
 
   @override
-  String educationPct(int pct) => 'التعليم: $pct%';
+  String educationPct(int pct) {
+    return 'التعليم: $pct%';
+  }
 
   @override
-  String entertainmentPct(int pct) => 'الترفيه: $pct%';
+  String entertainmentPct(int pct) {
+    return 'الترفيه: $pct%';
+  }
 
   @override
   String get searchContent => 'ابحث عن محتوى...';
@@ -629,13 +641,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dayView => 'يوم';
 
   @override
-  String noFilterContent(String filter) => 'لا يوجد محتوى $filter';
+  String noFilterContent(String filter) {
+    return 'لا يوجد محتوى $filter';
+  }
 
   @override
   String get tryDifferentFilter => 'جرّب تصفية أو تاريخاً مختلفاً';
 
   @override
-  String itemsScheduled(int count) => '$count عنصر مجدوَل';
+  String itemsScheduled(int count) {
+    return '$count عنصر مجدوَل';
+  }
 
   @override
   String get entertainment => 'ترفيه';
@@ -644,10 +660,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get aiRecommendations => 'توصيات الذكاء الاصطناعي';
 
   @override
-  String suggestedFor(String time) => 'مقترح لـ $time';
+  String suggestedFor(String time) {
+    return 'مقترح لـ $time';
+  }
 
   @override
-  String movedNear(String item, String target) => 'تم نقل "$item" بالقرب من "$target"';
+  String movedNear(String item, String target) {
+    return 'تم نقل \"$item\" بالقرب من \"$target\"';
+  }
 
   @override
   String get unknownTitle => 'عنوان غير معروف';
@@ -740,7 +760,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get freeFeatures => 'بدون إعلانات، خلاصة ذكاء اصطناعي، حفظ غير محدود';
 
   @override
-  String get clearHistoryConfirm => 'سيزيل هذا جميع الفيديوهات من سجل مشاهدتك. لا يمكن التراجع عن هذا الإجراء.';
+  String get clearHistoryConfirm =>
+      'سيزيل هذا جميع الفيديوهات من سجل مشاهدتك. لا يمكن التراجع عن هذا الإجراء.';
 
   @override
   String get watchHistoryClearedSnackbar => 'تم مسح سجل المشاهدة';
@@ -791,11 +812,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get goodAfternoon => 'مساء الخير!';
 
   @override
-  String get goodEvening => 'مساء الخير!';
+  String get goodEvening => 'مساء النور!';
 
   @override
   String get noNotifications => 'لا توجد إشعارات';
 
   @override
-  String get allCaughtUp => 'أنت على دراية بكل شيء!';
+  String get allCaughtUp => 'أنت محدث!';
 }

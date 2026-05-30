@@ -510,7 +510,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get showLess => 'Tampilkan lebih sedikit';
 
   @override
-  String memberSince(String date) => 'Anggota sejak $date';
+  String memberSince(String date) {
+    return 'Anggota sejak $date';
+  }
 
   @override
   String get noLikedContent => 'Tidak ada konten yang disukai';
@@ -531,7 +533,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get noHistoryHint => 'Video yang Anda tonton akan muncul di sini';
 
   @override
-  String watchedOf(String watched, String total) => 'Ditonton $watched dari $total';
+  String watchedOf(String watched, String total) {
+    return 'Ditonton $watched dari $total';
+  }
 
   @override
   String get removeFromHistory => 'Hapus dari riwayat';
@@ -540,7 +544,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get engagementScore => 'Skor keterlibatan';
 
   @override
-  String ofMaxKeepWatching(int pct) => '$pct% dari maks — terus menonton!';
+  String ofMaxKeepWatching(int pct) {
+    return '$pct% dari maks — terus menonton!';
+  }
 
   @override
   String get watchedLabel => 'Ditonton';
@@ -558,7 +564,8 @@ class AppLocalizationsId extends AppLocalizations {
   String get bio => 'Bio';
 
   @override
-  String get defaultBio => 'Pikiran penasaran. Penjelajah konten. Melihat dunia satu umpan sekaligus.';
+  String get defaultBio =>
+      'Pikiran penasaran. Penjelajah konten. Melihat dunia satu umpan sekaligus.';
 
   @override
   String get editProfileTooltip => 'Edit profil';
@@ -570,19 +577,22 @@ class AppLocalizationsId extends AppLocalizations {
   String get readOnlyAccess => 'Akses hanya baca';
 
   @override
-  String get readOnlyAccessHint => 'Kami hanya membaca acara, tidak pernah mengubahnya';
+  String get readOnlyAccessHint =>
+      'Kami hanya membaca acara, tidak pernah mengubahnya';
 
   @override
   String get seeEventsInApp => 'Lihat acara di aplikasi';
 
   @override
-  String get seeEventsInAppHint => 'Kalender Anda muncul bersama jadwal konten Anda';
+  String get seeEventsInAppHint =>
+      'Kalender Anda muncul bersama jadwal konten Anda';
 
   @override
   String get privateAndLocal => 'Pribadi & lokal';
 
   @override
-  String get privateAndLocalHint => 'Data tetap di perangkat; kami tidak pernah membagikannya';
+  String get privateAndLocalHint =>
+      'Data tetap di perangkat; kami tidak pernah membagikannya';
 
   @override
   String get connecting => 'Menghubungkan...';
@@ -591,7 +601,8 @@ class AppLocalizationsId extends AppLocalizations {
   String get connectWithGoogle => 'Hubungkan dengan Google';
 
   @override
-  String get couldNotConnect => 'Tidak dapat terhubung — periksa izin dan coba lagi.';
+  String get couldNotConnect =>
+      'Tidak dapat terhubung — periksa izin dan coba lagi.';
 
   @override
   String get noUpcomingEvents => 'Tidak ada acara mendatang';
@@ -612,10 +623,14 @@ class AppLocalizationsId extends AppLocalizations {
   String get percentageFilter => 'Filter persentase';
 
   @override
-  String educationPct(int pct) => 'Edukasi: $pct%';
+  String educationPct(int pct) {
+    return 'Edukasi: $pct%';
+  }
 
   @override
-  String entertainmentPct(int pct) => 'Hiburan: $pct%';
+  String entertainmentPct(int pct) {
+    return 'Hiburan: $pct%';
+  }
 
   @override
   String get searchContent => 'Cari konten...';
@@ -630,13 +645,17 @@ class AppLocalizationsId extends AppLocalizations {
   String get dayView => 'Hari';
 
   @override
-  String noFilterContent(String filter) => 'Tidak ada konten $filter';
+  String noFilterContent(String filter) {
+    return 'Tidak ada konten $filter';
+  }
 
   @override
   String get tryDifferentFilter => 'Coba filter atau tanggal berbeda';
 
   @override
-  String itemsScheduled(int count) => '$count item dijadwalkan';
+  String itemsScheduled(int count) {
+    return '$count item dijadwalkan';
+  }
 
   @override
   String get entertainment => 'Hiburan';
@@ -645,10 +664,14 @@ class AppLocalizationsId extends AppLocalizations {
   String get aiRecommendations => 'Rekomendasi AI';
 
   @override
-  String suggestedFor(String time) => 'Disarankan untuk $time';
+  String suggestedFor(String time) {
+    return 'Disarankan untuk $time';
+  }
 
   @override
-  String movedNear(String item, String target) => '"$item" dipindahkan dekat "$target"';
+  String movedNear(String item, String target) {
+    return '\"$item\" dipindahkan dekat \"$target\"';
+  }
 
   @override
   String get unknownTitle => 'Judul tidak diketahui';
@@ -705,7 +728,8 @@ class AppLocalizationsId extends AppLocalizations {
   String get usageAnalytics => 'Analitik penggunaan';
 
   @override
-  String get usageAnalyticsHint => 'Bantu tingkatkan aplikasi dengan data anonim';
+  String get usageAnalyticsHint =>
+      'Bantu tingkatkan aplikasi dengan data anonim';
 
   @override
   String get clearWatchHistory => 'Hapus riwayat tontonan';
@@ -741,7 +765,8 @@ class AppLocalizationsId extends AppLocalizations {
   String get freeFeatures => 'Bebas iklan, feed AI, simpan tak terbatas';
 
   @override
-  String get clearHistoryConfirm => 'Ini akan menghapus semua video dari riwayat tontonan Anda. Tindakan ini tidak dapat dibatalkan.';
+  String get clearHistoryConfirm =>
+      'Ini akan menghapus semua video dari riwayat tontonan Anda. Tindakan ini tidak dapat dibatalkan.';
 
   @override
   String get watchHistoryClearedSnackbar => 'Riwayat tontonan dihapus';
@@ -777,7 +802,8 @@ class AppLocalizationsId extends AppLocalizations {
   String get signOutConfirm => 'Apakah Anda yakin ingin keluar?';
 
   @override
-  String get deleteAccountConfirm => 'Apakah Anda yakin? Ini tidak dapat dibatalkan.';
+  String get deleteAccountConfirm =>
+      'Apakah Anda yakin? Ini tidak dapat dibatalkan.';
 
   @override
   String get videosWatchedLabel => 'Video\nDitonton';
@@ -798,5 +824,5 @@ class AppLocalizationsId extends AppLocalizations {
   String get noNotifications => 'Tidak ada notifikasi';
 
   @override
-  String get allCaughtUp => 'Anda sudah mengikuti semua!';
+  String get allCaughtUp => 'Kamu sudah terkini!';
 }

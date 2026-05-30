@@ -511,7 +511,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get showLess => 'कम दिखाएं';
 
   @override
-  String memberSince(String date) => '$date से सदस्य';
+  String memberSince(String date) {
+    return '$date से सदस्य';
+  }
 
   @override
   String get noLikedContent => 'कोई पसंदीदा सामग्री नहीं';
@@ -532,7 +534,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get noHistoryHint => 'देखे गए वीडियो यहाँ दिखेंगे';
 
   @override
-  String watchedOf(String watched, String total) => '$total में से $watched देखा';
+  String watchedOf(String watched, String total) {
+    return '$total में से $watched देखा';
+  }
 
   @override
   String get removeFromHistory => 'इतिहास से हटाएं';
@@ -541,7 +545,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get engagementScore => 'एंगेजमेंट स्कोर';
 
   @override
-  String ofMaxKeepWatching(int pct) => 'अधिकतम का $pct% — देखते रहें!';
+  String ofMaxKeepWatching(int pct) {
+    return 'अधिकतम का $pct% — देखते रहें!';
+  }
 
   @override
   String get watchedLabel => 'देखे';
@@ -559,7 +565,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get bio => 'बायो';
 
   @override
-  String get defaultBio => 'जिज्ञासु मन। कंटेंट एक्सप्लोरर। एक फीड पर दुनिया देख रहा हूं।';
+  String get defaultBio =>
+      'जिज्ञासु मन। कंटेंट एक्सप्लोरर। एक फीड पर दुनिया देख रहा हूं।';
 
   @override
   String get editProfileTooltip => 'प्रोफ़ाइल संपादित करें';
@@ -571,19 +578,22 @@ class AppLocalizationsHi extends AppLocalizations {
   String get readOnlyAccess => 'केवल पढ़ने की पहुंच';
 
   @override
-  String get readOnlyAccessHint => 'हम केवल इवेंट पढ़ते हैं, कभी संशोधित नहीं करते';
+  String get readOnlyAccessHint =>
+      'हम केवल इवेंट पढ़ते हैं, कभी संशोधित नहीं करते';
 
   @override
   String get seeEventsInApp => 'ऐप में इवेंट देखें';
 
   @override
-  String get seeEventsInAppHint => 'आपका कैलेंडर आपके कंटेंट शेड्यूल के साथ दिखेगा';
+  String get seeEventsInAppHint =>
+      'आपका कैलेंडर आपके कंटेंट शेड्यूल के साथ दिखेगा';
 
   @override
   String get privateAndLocal => 'निजी और स्थानीय';
 
   @override
-  String get privateAndLocalHint => 'डेटा डिवाइस पर रहता है; हम इसे कभी साझा नहीं करते';
+  String get privateAndLocalHint =>
+      'डेटा डिवाइस पर रहता है; हम इसे कभी साझा नहीं करते';
 
   @override
   String get connecting => 'कनेक्ट हो रहा है...';
@@ -592,7 +602,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get connectWithGoogle => 'Google से कनेक्ट करें';
 
   @override
-  String get couldNotConnect => 'कनेक्ट नहीं हो सका — अनुमतियाँ जाँचें और पुनः प्रयास करें।';
+  String get couldNotConnect =>
+      'कनेक्ट नहीं हो सका — अनुमतियाँ जाँचें और पुनः प्रयास करें।';
 
   @override
   String get noUpcomingEvents => 'कोई आगामी इवेंट नहीं';
@@ -613,10 +624,14 @@ class AppLocalizationsHi extends AppLocalizations {
   String get percentageFilter => 'प्रतिशत फ़िल्टर';
 
   @override
-  String educationPct(int pct) => 'शिक्षा: $pct%';
+  String educationPct(int pct) {
+    return 'शिक्षा: $pct%';
+  }
 
   @override
-  String entertainmentPct(int pct) => 'मनोरंजन: $pct%';
+  String entertainmentPct(int pct) {
+    return 'मनोरंजन: $pct%';
+  }
 
   @override
   String get searchContent => 'सामग्री खोजें...';
@@ -631,13 +646,17 @@ class AppLocalizationsHi extends AppLocalizations {
   String get dayView => 'दिन';
 
   @override
-  String noFilterContent(String filter) => 'कोई $filter सामग्री नहीं';
+  String noFilterContent(String filter) {
+    return 'कोई $filter सामग्री नहीं';
+  }
 
   @override
   String get tryDifferentFilter => 'कोई अलग फ़िल्टर या तारीख आज़माएं';
 
   @override
-  String itemsScheduled(int count) => '$count आइटम शेड्यूल किए गए';
+  String itemsScheduled(int count) {
+    return '$count आइटम शेड्यूल किए गए';
+  }
 
   @override
   String get entertainment => 'मनोरंजन';
@@ -646,10 +665,14 @@ class AppLocalizationsHi extends AppLocalizations {
   String get aiRecommendations => 'AI अनुशंसाएं';
 
   @override
-  String suggestedFor(String time) => '$time के लिए सुझाया गया';
+  String suggestedFor(String time) {
+    return '$time के लिए सुझाया गया';
+  }
 
   @override
-  String movedNear(String item, String target) => '"$item" को "$target" के पास ले जाया गया';
+  String movedNear(String item, String target) {
+    return '\"$item\" को \"$target\" के पास ले जाया गया';
+  }
 
   @override
   String get unknownTitle => 'अज्ञात शीर्षक';
@@ -742,7 +765,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get freeFeatures => 'विज्ञापन-मुक्त, AI फ़ीड, असीमित सेव';
 
   @override
-  String get clearHistoryConfirm => 'इससे आपके देखने के इतिहास से सभी वीडियो हट जाएंगे। यह क्रिया पूर्ववत नहीं की जा सकती।';
+  String get clearHistoryConfirm =>
+      'इससे आपके देखने के इतिहास से सभी वीडियो हट जाएंगे। यह क्रिया पूर्ववत नहीं की जा सकती।';
 
   @override
   String get watchHistoryClearedSnackbar => 'देखने का इतिहास साफ़ किया गया';
@@ -778,7 +802,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get signOutConfirm => 'क्या आप वाकई साइन आउट करना चाहते हैं?';
 
   @override
-  String get deleteAccountConfirm => 'क्या आप निश्चित हैं? इसे पूर्ववत नहीं किया जा सकता।';
+  String get deleteAccountConfirm =>
+      'क्या आप निश्चित हैं? इसे पूर्ववत नहीं किया जा सकता।';
 
   @override
   String get videosWatchedLabel => 'देखे\nवीडियो';
@@ -796,7 +821,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get goodEvening => 'शुभ संध्या!';
 
   @override
-  String get noNotifications => 'कोई सूचनाएं नहीं';
+  String get noNotifications => 'कोई सूचना नहीं';
 
   @override
   String get allCaughtUp => 'आप सब देख चुके हैं!';

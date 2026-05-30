@@ -507,7 +507,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get showLess => '收起';
 
   @override
-  String memberSince(String date) => '成员自 $date';
+  String memberSince(String date) {
+    return '成员自 $date';
+  }
 
   @override
   String get noLikedContent => '没有喜欢的内容';
@@ -528,7 +530,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noHistoryHint => '您观看的视频将显示在这里';
 
   @override
-  String watchedOf(String watched, String total) => '已看 $watched / $total';
+  String watchedOf(String watched, String total) {
+    return '已看 $watched / $total';
+  }
 
   @override
   String get removeFromHistory => '从历史记录中删除';
@@ -537,7 +541,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get engagementScore => '互动分数';
 
   @override
-  String ofMaxKeepWatching(int pct) => '最高分的 $pct% — 继续观看！';
+  String ofMaxKeepWatching(int pct) {
+    return '最高分的 $pct% — 继续观看！';
+  }
 
   @override
   String get watchedLabel => '已看';
@@ -609,10 +615,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get percentageFilter => '百分比筛选';
 
   @override
-  String educationPct(int pct) => '教育: $pct%';
+  String educationPct(int pct) {
+    return '教育: $pct%';
+  }
 
   @override
-  String entertainmentPct(int pct) => '娱乐: $pct%';
+  String entertainmentPct(int pct) {
+    return '娱乐: $pct%';
+  }
 
   @override
   String get searchContent => '搜索内容...';
@@ -627,13 +637,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dayView => '日';
 
   @override
-  String noFilterContent(String filter) => '没有 $filter 内容';
+  String noFilterContent(String filter) {
+    return '没有 $filter 内容';
+  }
 
   @override
   String get tryDifferentFilter => '请尝试不同的筛选条件或日期';
 
   @override
-  String itemsScheduled(int count) => '$count 个已安排';
+  String itemsScheduled(int count) {
+    return '$count 个已安排';
+  }
 
   @override
   String get entertainment => '娱乐';
@@ -642,10 +656,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get aiRecommendations => 'AI 推荐';
 
   @override
-  String suggestedFor(String time) => '推荐于 $time';
+  String suggestedFor(String time) {
+    return '推荐于 $time';
+  }
 
   @override
-  String movedNear(String item, String target) => '已将"$item"移至"$target"附近';
+  String movedNear(String item, String target) {
+    return '已将\"$item\"移至\"$target\"附近';
+  }
 
   @override
   String get unknownTitle => '未知标题';
@@ -792,8 +810,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get goodEvening => '晚上好！';
 
   @override
-  String get noNotifications => '没有通知';
+  String get noNotifications => '暂无通知';
 
   @override
-  String get allCaughtUp => '您已经全部查看了！';
+  String get allCaughtUp => '您已查看所有内容！';
 }

@@ -1009,7 +1009,7 @@ abstract class AppLocalizations {
   /// No description provided for @followCreatorsHint.
   ///
   /// In en, this message translates to:
-  /// **'Follow creators to surface their content first in your feed. Tap Follow on any video.'**
+  /// **'Follow creators to surface their content'**
   String get followCreatorsHint;
 
   /// No description provided for @findCreators.
@@ -1030,114 +1030,643 @@ abstract class AppLocalizations {
   /// **'Reset All'**
   String get resetAll;
 
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
   String get back;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
   String get cancel;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
   String get delete;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
   String get clear;
+
+  /// No description provided for @update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
   String get update;
+
+  /// No description provided for @play.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
   String get play;
+
+  /// No description provided for @manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
   String get manage;
+
+  /// No description provided for @seePlans.
+  ///
+  /// In en, this message translates to:
+  /// **'See Plans'**
   String get seePlans;
+
+  /// No description provided for @disconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
   String get disconnect;
+
+  /// No description provided for @viewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View All'**
   String get viewAll;
+
+  /// No description provided for @showMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
   String get showMore;
+
+  /// No description provided for @showLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
   String get showLess;
+
+  /// No description provided for @memberSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Member since {date}'**
   String memberSince(String date);
+
+  /// No description provided for @noLikedContent.
+  ///
+  /// In en, this message translates to:
+  /// **'No liked content'**
   String get noLikedContent;
+
+  /// No description provided for @noLikedContentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Videos you like will appear here'**
   String get noLikedContentHint;
+
+  /// No description provided for @nothingSavedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing saved yet'**
   String get nothingSavedYet;
+
+  /// No description provided for @bookmarkContentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark content to see it here'**
   String get bookmarkContentHint;
+
+  /// No description provided for @noHistoryYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No history yet'**
   String get noHistoryYet;
+
+  /// No description provided for @noHistoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Videos you watch will appear here'**
   String get noHistoryHint;
+
+  /// No description provided for @watchedOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched {watched} of {total}'**
   String watchedOf(String watched, String total);
+
+  /// No description provided for @removeFromHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from history'**
   String get removeFromHistory;
+
+  /// No description provided for @engagementScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Engagement Score'**
   String get engagementScore;
+
+  /// No description provided for @ofMaxKeepWatching.
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% of max — keep watching!'**
   String ofMaxKeepWatching(int pct);
+
+  /// No description provided for @watchedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched'**
   String get watchedLabel;
+
+  /// No description provided for @displayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Display Name'**
   String get displayName;
+
+  /// No description provided for @nameCannotBeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Name cannot be empty'**
   String get nameCannotBeEmpty;
+
+  /// No description provided for @nameTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Name too long (max 50 chars)'**
   String get nameTooLong;
+
+  /// No description provided for @bio.
+  ///
+  /// In en, this message translates to:
+  /// **'Bio'**
   String get bio;
+
+  /// No description provided for @defaultBio.
+  ///
+  /// In en, this message translates to:
+  /// **'Curious mind. Content explorer. Watching the world one feed at a time.'**
   String get defaultBio;
+
+  /// No description provided for @editProfileTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
   String get editProfileTooltip;
+
+  /// No description provided for @googleCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Calendar'**
   String get googleCalendar;
+
+  /// No description provided for @readOnlyAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only access'**
   String get readOnlyAccess;
+
+  /// No description provided for @readOnlyAccessHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We only read events, never modify them'**
   String get readOnlyAccessHint;
+
+  /// No description provided for @seeEventsInApp.
+  ///
+  /// In en, this message translates to:
+  /// **'See events in-app'**
   String get seeEventsInApp;
+
+  /// No description provided for @seeEventsInAppHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your calendar appears alongside your content schedule'**
   String get seeEventsInAppHint;
+
+  /// No description provided for @privateAndLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Private & local'**
   String get privateAndLocal;
+
+  /// No description provided for @privateAndLocalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Data stays on-device; we never share it'**
   String get privateAndLocalHint;
+
+  /// No description provided for @connecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting...'**
   String get connecting;
+
+  /// No description provided for @connectWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect with Google'**
   String get connectWithGoogle;
+
+  /// No description provided for @couldNotConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not connect — check permissions and try again.'**
   String get couldNotConnect;
+
+  /// No description provided for @noUpcomingEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming events'**
   String get noUpcomingEvents;
+
+  /// No description provided for @allDay.
+  ///
+  /// In en, this message translates to:
+  /// **'All day'**
   String get allDay;
+
+  /// No description provided for @personalizedContentSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Your personalized content schedule'**
   String get personalizedContentSchedule;
+
+  /// No description provided for @contentCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Content Categories'**
   String get contentCategories;
+
+  /// No description provided for @categoryFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Filter'**
   String get categoryFilter;
+
+  /// No description provided for @percentageFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage Filter'**
   String get percentageFilter;
+
+  /// No description provided for @educationPct.
+  ///
+  /// In en, this message translates to:
+  /// **'Education: {pct}%'**
   String educationPct(int pct);
+
+  /// No description provided for @entertainmentPct.
+  ///
+  /// In en, this message translates to:
+  /// **'Entertainment: {pct}%'**
   String entertainmentPct(int pct);
+
+  /// No description provided for @searchContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Search content...'**
   String get searchContent;
+
+  /// No description provided for @monthView.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
   String get monthView;
+
+  /// No description provided for @weekView.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
   String get weekView;
+
+  /// No description provided for @dayView.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
   String get dayView;
+
+  /// No description provided for @noFilterContent.
+  ///
+  /// In en, this message translates to:
+  /// **'No {filter} content'**
   String noFilterContent(String filter);
+
+  /// No description provided for @tryDifferentFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Try selecting a different filter or date'**
   String get tryDifferentFilter;
+
+  /// No description provided for @itemsScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items scheduled'**
   String itemsScheduled(int count);
+
+  /// No description provided for @entertainment.
+  ///
+  /// In en, this message translates to:
+  /// **'Entertainment'**
   String get entertainment;
+
+  /// No description provided for @aiRecommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Recommendations'**
   String get aiRecommendations;
+
+  /// No description provided for @suggestedFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested for {time}'**
   String suggestedFor(String time);
+
+  /// No description provided for @movedNear.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved \"{item}\" near \"{target}\"'**
   String movedNear(String item, String target);
+
+  /// No description provided for @unknownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Title'**
   String get unknownTitle;
+
+  /// No description provided for @unknownCreator.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Creator'**
   String get unknownCreator;
+
+  /// No description provided for @playback.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback'**
   String get playback;
+
+  /// No description provided for @autoplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Autoplay'**
   String get autoplay;
+
+  /// No description provided for @autoplayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically play next video'**
   String get autoplayHint;
+
+  /// No description provided for @videoQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Video Quality'**
   String get videoQuality;
+
+  /// No description provided for @dataSaver.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Saver'**
   String get dataSaver;
+
+  /// No description provided for @dataSaverHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce data usage while streaming'**
   String get dataSaverHint;
+
+  /// No description provided for @pushNotificationsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'New content from followed creators'**
   String get pushNotificationsHint;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
   String get appearance;
+
+  /// No description provided for @darkModeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use dark theme throughout the app'**
   String get darkModeHint;
+
+  /// No description provided for @appLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'App Language'**
   String get appLanguage;
+
+  /// No description provided for @contentLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Content Language'**
   String get contentLanguage;
+
+  /// No description provided for @library.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
   String get library;
+
+  /// No description provided for @savedVideos.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved videos'**
   String get savedVideos;
+
+  /// No description provided for @previouslyWatchedVideos.
+  ///
+  /// In en, this message translates to:
+  /// **'Previously watched videos'**
   String get previouslyWatchedVideos;
+
+  /// No description provided for @privacyAndData.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & Data'**
   String get privacyAndData;
+
+  /// No description provided for @usageAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage Analytics'**
   String get usageAnalytics;
+
+  /// No description provided for @usageAnalyticsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Help improve the app with anonymous data'**
   String get usageAnalyticsHint;
+
+  /// No description provided for @clearWatchHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Watch History'**
   String get clearWatchHistory;
+
+  /// No description provided for @clearWatchHistoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove all watched videos from history'**
   String get clearWatchHistoryHint;
+
+  /// No description provided for @clearCache.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Cache'**
   String get clearCache;
+
+  /// No description provided for @clearCacheHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Free up storage space'**
   String get clearCacheHint;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
   String get changePassword;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'App Version'**
   String get appVersion;
+
+  /// No description provided for @termsOfService.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
   String get termsOfService;
+
+  /// No description provided for @afeediProActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Afeedi Pro — Active'**
   String get afeediProActive;
+
+  /// No description provided for @upgradeToPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Pro'**
   String get upgradeToPro;
+
+  /// No description provided for @proFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad-free · Unlimited saves · AI feed'**
   String get proFeatures;
+
+  /// No description provided for @freeFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad-free, AI feed, unlimited saves'**
   String get freeFeatures;
+
+  /// No description provided for @clearHistoryConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove all videos from your watch history. This action cannot be undone.'**
   String get clearHistoryConfirm;
+
+  /// No description provided for @watchHistoryClearedSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch history cleared'**
   String get watchHistoryClearedSnackbar;
+
+  /// No description provided for @cacheClearedSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache cleared successfully'**
   String get cacheClearedSnackbar;
+
+  /// No description provided for @currentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Password'**
   String get currentPassword;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
   String get newPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
   String get confirmNewPassword;
+
+  /// No description provided for @minEightChars.
+  ///
+  /// In en, this message translates to:
+  /// **'Min 8 characters'**
   String get minEightChars;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
   String get passwordsDoNotMatch;
+
+  /// No description provided for @required.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
   String get required;
+
+  /// No description provided for @passwordChangedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed successfully'**
   String get passwordChangedSuccessfully;
+
+  /// No description provided for @currentPasswordIncorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password is incorrect'**
   String get currentPasswordIncorrect;
+
+  /// No description provided for @signOutConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to sign out?'**
   String get signOutConfirm;
+
+  /// No description provided for @deleteAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure? This cannot be undone.'**
   String get deleteAccountConfirm;
+
+  /// No description provided for @videosWatchedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Videos\nWatched'**
   String get videosWatchedLabel;
+
+  /// No description provided for @watchTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch\nTime'**
   String get watchTimeLabel;
+
+  /// In en, this message translates to: **'Good morning!'**
   String get goodMorning;
+
+  /// In en, this message translates to: **'Good afternoon!'**
   String get goodAfternoon;
+
+  /// In en, this message translates to: **'Good evening!'**
   String get goodEvening;
+
+  /// In en, this message translates to: **'No notifications'**
   String get noNotifications;
+
+  /// In en, this message translates to: **"You're all caught up!"**
   String get allCaughtUp;
 }
 

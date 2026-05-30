@@ -345,5 +345,10 @@
   "signOutConfirm": "Are you sure you want to sign out?",
   "deleteAccountConfirm": "Are you sure? This cannot be undone.",
   "videosWatchedLabel": "Videos\nWatched",
-  "watchTimeLabel": "Watch\nTime"
+  "watchTimeLabel": "Watch\nTime",
+  "goodMorning": "Good morning!",
+  "goodAfternoon": "Good afternoon!",
+  "goodEvening": "Good evening!",
+  "noNotifications": "No notifications",
+  "allCaughtUp": "You're all caught up!"
 }

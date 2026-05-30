@@ -173,56 +173,182 @@
   "findCreators": "寻找创作者",
   "dismiss": "关闭",
   "resetAll": "全部重置",
-  "back": "返回", "cancel": "取消", "delete": "删除", "clear": "清除", "update": "更新",
-  "play": "播放", "manage": "管理", "seePlans": "查看套餐", "disconnect": "断开连接", "viewAll": "查看全部",
-  "showMore": "显示更多", "showLess": "收起",
-  "memberSince": "成员自 {date}", "@memberSince": {"placeholders": {"date": {"type": "String"}}},
-  "noLikedContent": "没有喜欢的内容", "noLikedContentHint": "您喜欢的视频将显示在这里",
-  "nothingSavedYet": "暂无保存内容", "bookmarkContentHint": "收藏内容以在此查看",
-  "noHistoryYet": "暂无历史记录", "noHistoryHint": "您观看的视频将显示在这里",
-  "watchedOf": "已看 {watched} / {total}", "@watchedOf": {"placeholders": {"watched": {"type": "String"}, "total": {"type": "String"}}},
-  "removeFromHistory": "从历史记录中删除", "engagementScore": "互动分数",
-  "ofMaxKeepWatching": "最高分的 {pct}% — 继续观看！", "@ofMaxKeepWatching": {"placeholders": {"pct": {"type": "int"}}},
-  "watchedLabel": "已看", "displayName": "显示名称", "nameCannotBeEmpty": "名称不能为空",
-  "nameTooLong": "名称过长（最多 50 个字符）", "bio": "简介",
+  "back": "返回",
+  "cancel": "取消",
+  "delete": "删除",
+  "clear": "清除",
+  "update": "更新",
+  "play": "播放",
+  "manage": "管理",
+  "seePlans": "查看套餐",
+  "disconnect": "断开连接",
+  "viewAll": "查看全部",
+  "showMore": "显示更多",
+  "showLess": "收起",
+  "memberSince": "成员自 {date}",
+  "@memberSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noLikedContent": "没有喜欢的内容",
+  "noLikedContentHint": "您喜欢的视频将显示在这里",
+  "nothingSavedYet": "暂无保存内容",
+  "bookmarkContentHint": "收藏内容以在此查看",
+  "noHistoryYet": "暂无历史记录",
+  "noHistoryHint": "您观看的视频将显示在这里",
+  "watchedOf": "已看 {watched} / {total}",
+  "@watchedOf": {
+    "placeholders": {
+      "watched": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFromHistory": "从历史记录中删除",
+  "engagementScore": "互动分数",
+  "ofMaxKeepWatching": "最高分的 {pct}% — 继续观看！",
+  "@ofMaxKeepWatching": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "watchedLabel": "已看",
+  "displayName": "显示名称",
+  "nameCannotBeEmpty": "名称不能为空",
+  "nameTooLong": "名称过长（最多 50 个字符）",
+  "bio": "简介",
   "defaultBio": "好奇的心灵。内容探索者。一个动态一步步看世界。",
-  "editProfileTooltip": "编辑资料", "googleCalendar": "Google 日历",
-  "readOnlyAccess": "只读访问", "readOnlyAccessHint": "我们只读取事件，从不修改",
-  "seeEventsInApp": "在应用中查看事件", "seeEventsInAppHint": "您的日历与内容计划并排显示",
-  "privateAndLocal": "私密且本地", "privateAndLocalHint": "数据保留在设备上；我们从不分享",
-  "connecting": "连接中...", "connectWithGoogle": "连接 Google",
+  "editProfileTooltip": "编辑资料",
+  "googleCalendar": "Google 日历",
+  "readOnlyAccess": "只读访问",
+  "readOnlyAccessHint": "我们只读取事件，从不修改",
+  "seeEventsInApp": "在应用中查看事件",
+  "seeEventsInAppHint": "您的日历与内容计划并排显示",
+  "privateAndLocal": "私密且本地",
+  "privateAndLocalHint": "数据保留在设备上；我们从不分享",
+  "connecting": "连接中...",
+  "connectWithGoogle": "连接 Google",
   "couldNotConnect": "无法连接 — 请检查权限并重试。",
-  "noUpcomingEvents": "暂无即将到来的事件", "allDay": "全天",
+  "noUpcomingEvents": "暂无即将到来的事件",
+  "allDay": "全天",
   "personalizedContentSchedule": "您的个性化内容计划",
-  "contentCategories": "内容分类", "categoryFilter": "分类筛选", "percentageFilter": "百分比筛选",
-  "educationPct": "教育: {pct}%", "@educationPct": {"placeholders": {"pct": {"type": "int"}}},
-  "entertainmentPct": "娱乐: {pct}%", "@entertainmentPct": {"placeholders": {"pct": {"type": "int"}}},
-  "searchContent": "搜索内容...", "monthView": "月", "weekView": "周", "dayView": "日",
-  "noFilterContent": "没有 {filter} 内容", "@noFilterContent": {"placeholders": {"filter": {"type": "String"}}},
+  "contentCategories": "内容分类",
+  "categoryFilter": "分类筛选",
+  "percentageFilter": "百分比筛选",
+  "educationPct": "教育: {pct}%",
+  "@educationPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainmentPct": "娱乐: {pct}%",
+  "@entertainmentPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "searchContent": "搜索内容...",
+  "monthView": "月",
+  "weekView": "周",
+  "dayView": "日",
+  "noFilterContent": "没有 {filter} 内容",
+  "@noFilterContent": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
   "tryDifferentFilter": "请尝试不同的筛选条件或日期",
-  "itemsScheduled": "{count} 个已安排", "@itemsScheduled": {"placeholders": {"count": {"type": "int"}}},
-  "entertainment": "娱乐", "aiRecommendations": "AI 推荐",
-  "suggestedFor": "推荐于 {time}", "@suggestedFor": {"placeholders": {"time": {"type": "String"}}},
-  "movedNear": "已将\"{item}\"移至\"{target}\"附近", "@movedNear": {"placeholders": {"item": {"type": "String"}, "target": {"type": "String"}}},
-  "unknownTitle": "未知标题", "unknownCreator": "未知创作者",
-  "playback": "播放", "autoplay": "自动播放", "autoplayHint": "自动播放下一个视频",
-  "videoQuality": "视频质量", "dataSaver": "省流模式", "dataSaverHint": "减少流媒体播放时的数据使用",
-  "pushNotificationsHint": "来自关注创作者的新内容", "appearance": "外观",
-  "darkModeHint": "在整个应用中使用深色主题", "appLanguage": "应用语言", "contentLanguage": "内容语言",
-  "library": "库", "savedVideos": "已保存视频", "previouslyWatchedVideos": "之前观看的视频",
-  "privacyAndData": "隐私与数据", "usageAnalytics": "使用分析",
+  "itemsScheduled": "{count} 个已安排",
+  "@itemsScheduled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainment": "娱乐",
+  "aiRecommendations": "AI 推荐",
+  "suggestedFor": "推荐于 {time}",
+  "@suggestedFor": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "movedNear": "已将\"{item}\"移至\"{target}\"附近",
+  "@movedNear": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownTitle": "未知标题",
+  "unknownCreator": "未知创作者",
+  "playback": "播放",
+  "autoplay": "自动播放",
+  "autoplayHint": "自动播放下一个视频",
+  "videoQuality": "视频质量",
+  "dataSaver": "省流模式",
+  "dataSaverHint": "减少流媒体播放时的数据使用",
+  "pushNotificationsHint": "来自关注创作者的新内容",
+  "appearance": "外观",
+  "darkModeHint": "在整个应用中使用深色主题",
+  "appLanguage": "应用语言",
+  "contentLanguage": "内容语言",
+  "library": "库",
+  "savedVideos": "已保存视频",
+  "previouslyWatchedVideos": "之前观看的视频",
+  "privacyAndData": "隐私与数据",
+  "usageAnalytics": "使用分析",
   "usageAnalyticsHint": "使用匿名数据帮助改进应用",
-  "clearWatchHistory": "清除观看历史", "clearWatchHistoryHint": "从历史记录中删除所有视频",
-  "clearCache": "清除缓存", "clearCacheHint": "释放存储空间",
-  "changePassword": "更改密码", "appVersion": "应用版本", "termsOfService": "服务条款",
-  "afeediProActive": "Afeedi Pro — 已激活", "upgradeToPro": "升级到 Pro",
-  "proFeatures": "无广告 · 无限保存 · AI 动态", "freeFeatures": "无广告、AI 动态、无限保存",
+  "clearWatchHistory": "清除观看历史",
+  "clearWatchHistoryHint": "从历史记录中删除所有视频",
+  "clearCache": "清除缓存",
+  "clearCacheHint": "释放存储空间",
+  "changePassword": "更改密码",
+  "appVersion": "应用版本",
+  "termsOfService": "服务条款",
+  "afeediProActive": "Afeedi Pro — 已激活",
+  "upgradeToPro": "升级到 Pro",
+  "proFeatures": "无广告 · 无限保存 · AI 动态",
+  "freeFeatures": "无广告、AI 动态、无限保存",
   "clearHistoryConfirm": "这将删除您观看历史中的所有视频。此操作无法撤销。",
-  "watchHistoryClearedSnackbar": "观看历史已清除", "cacheClearedSnackbar": "缓存已成功清除",
-  "currentPassword": "当前密码", "newPassword": "新密码", "confirmNewPassword": "确认新密码",
-  "minEightChars": "最少 8 个字符", "passwordsDoNotMatch": "密码不匹配", "required": "必填",
-  "passwordChangedSuccessfully": "密码已成功更改", "currentPasswordIncorrect": "当前密码不正确",
+  "watchHistoryClearedSnackbar": "观看历史已清除",
+  "cacheClearedSnackbar": "缓存已成功清除",
+  "currentPassword": "当前密码",
+  "newPassword": "新密码",
+  "confirmNewPassword": "确认新密码",
+  "minEightChars": "最少 8 个字符",
+  "passwordsDoNotMatch": "密码不匹配",
+  "required": "必填",
+  "passwordChangedSuccessfully": "密码已成功更改",
+  "currentPasswordIncorrect": "当前密码不正确",
   "signOutConfirm": "您确定要退出吗？",
   "deleteAccountConfirm": "您确定吗？此操作无法撤销。",
-  "videosWatchedLabel": "已看\n视频", "watchTimeLabel": "观看\n时间"
+  "videosWatchedLabel": "已看\n视频",
+  "watchTimeLabel": "观看\n时间",
+  "goodMorning": "早上好！",
+  "goodAfternoon": "下午好！",
+  "goodEvening": "晚上好！",
+  "noNotifications": "暂无通知",
+  "allCaughtUp": "您已查看所有内容！"
 }

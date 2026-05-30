@@ -173,56 +173,182 @@
   "findCreators": "Encontrar criadores",
   "dismiss": "Descartar",
   "resetAll": "Redefinir tudo",
-  "back": "Voltar", "cancel": "Cancelar", "delete": "Excluir", "clear": "Limpar", "update": "Atualizar",
-  "play": "Reproduzir", "manage": "Gerenciar", "seePlans": "Ver planos", "disconnect": "Desconectar", "viewAll": "Ver tudo",
-  "showMore": "Mostrar mais", "showLess": "Mostrar menos",
-  "memberSince": "Membro desde {date}", "@memberSince": {"placeholders": {"date": {"type": "String"}}},
-  "noLikedContent": "Nenhum conteúdo curtido", "noLikedContentHint": "Vídeos que você curtir aparecerão aqui",
-  "nothingSavedYet": "Nada salvo ainda", "bookmarkContentHint": "Marque conteúdo para ver aqui",
-  "noHistoryYet": "Sem histórico ainda", "noHistoryHint": "Vídeos que você assistir aparecerão aqui",
-  "watchedOf": "Assistiu {watched} de {total}", "@watchedOf": {"placeholders": {"watched": {"type": "String"}, "total": {"type": "String"}}},
-  "removeFromHistory": "Remover do histórico", "engagementScore": "Pontuação de engajamento",
-  "ofMaxKeepWatching": "{pct}% do máximo — continue assistindo!", "@ofMaxKeepWatching": {"placeholders": {"pct": {"type": "int"}}},
-  "watchedLabel": "Assistido", "displayName": "Nome de exibição", "nameCannotBeEmpty": "O nome não pode estar vazio",
-  "nameTooLong": "Nome muito longo (máx. 50 caracteres)", "bio": "Bio",
+  "back": "Voltar",
+  "cancel": "Cancelar",
+  "delete": "Excluir",
+  "clear": "Limpar",
+  "update": "Atualizar",
+  "play": "Reproduzir",
+  "manage": "Gerenciar",
+  "seePlans": "Ver planos",
+  "disconnect": "Desconectar",
+  "viewAll": "Ver tudo",
+  "showMore": "Mostrar mais",
+  "showLess": "Mostrar menos",
+  "memberSince": "Membro desde {date}",
+  "@memberSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noLikedContent": "Nenhum conteúdo curtido",
+  "noLikedContentHint": "Vídeos que você curtir aparecerão aqui",
+  "nothingSavedYet": "Nada salvo ainda",
+  "bookmarkContentHint": "Marque conteúdo para ver aqui",
+  "noHistoryYet": "Sem histórico ainda",
+  "noHistoryHint": "Vídeos que você assistir aparecerão aqui",
+  "watchedOf": "Assistiu {watched} de {total}",
+  "@watchedOf": {
+    "placeholders": {
+      "watched": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFromHistory": "Remover do histórico",
+  "engagementScore": "Pontuação de engajamento",
+  "ofMaxKeepWatching": "{pct}% do máximo — continue assistindo!",
+  "@ofMaxKeepWatching": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "watchedLabel": "Assistido",
+  "displayName": "Nome de exibição",
+  "nameCannotBeEmpty": "O nome não pode estar vazio",
+  "nameTooLong": "Nome muito longo (máx. 50 caracteres)",
+  "bio": "Bio",
   "defaultBio": "Mente curiosa. Explorador de conteúdo. Vendo o mundo um feed de cada vez.",
-  "editProfileTooltip": "Editar perfil", "googleCalendar": "Google Agenda",
-  "readOnlyAccess": "Acesso somente leitura", "readOnlyAccessHint": "Apenas lemos eventos, nunca modificamos",
-  "seeEventsInApp": "Ver eventos no app", "seeEventsInAppHint": "Sua agenda aparece ao lado do cronograma de conteúdo",
-  "privateAndLocal": "Privado e local", "privateAndLocalHint": "Os dados ficam no dispositivo; nunca os compartilhamos",
-  "connecting": "Conectando...", "connectWithGoogle": "Conectar com Google",
+  "editProfileTooltip": "Editar perfil",
+  "googleCalendar": "Google Agenda",
+  "readOnlyAccess": "Acesso somente leitura",
+  "readOnlyAccessHint": "Apenas lemos eventos, nunca modificamos",
+  "seeEventsInApp": "Ver eventos no app",
+  "seeEventsInAppHint": "Sua agenda aparece ao lado do cronograma de conteúdo",
+  "privateAndLocal": "Privado e local",
+  "privateAndLocalHint": "Os dados ficam no dispositivo; nunca os compartilhamos",
+  "connecting": "Conectando...",
+  "connectWithGoogle": "Conectar com Google",
   "couldNotConnect": "Não foi possível conectar — verifique as permissões e tente novamente.",
-  "noUpcomingEvents": "Nenhum evento próximo", "allDay": "Dia inteiro",
+  "noUpcomingEvents": "Nenhum evento próximo",
+  "allDay": "Dia inteiro",
   "personalizedContentSchedule": "Seu cronograma de conteúdo personalizado",
-  "contentCategories": "Categorias de conteúdo", "categoryFilter": "Filtro de categoria", "percentageFilter": "Filtro por porcentagem",
-  "educationPct": "Educação: {pct}%", "@educationPct": {"placeholders": {"pct": {"type": "int"}}},
-  "entertainmentPct": "Entretenimento: {pct}%", "@entertainmentPct": {"placeholders": {"pct": {"type": "int"}}},
-  "searchContent": "Pesquisar conteúdo...", "monthView": "Mês", "weekView": "Semana", "dayView": "Dia",
-  "noFilterContent": "Sem conteúdo de {filter}", "@noFilterContent": {"placeholders": {"filter": {"type": "String"}}},
+  "contentCategories": "Categorias de conteúdo",
+  "categoryFilter": "Filtro de categoria",
+  "percentageFilter": "Filtro por porcentagem",
+  "educationPct": "Educação: {pct}%",
+  "@educationPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainmentPct": "Entretenimento: {pct}%",
+  "@entertainmentPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "searchContent": "Pesquisar conteúdo...",
+  "monthView": "Mês",
+  "weekView": "Semana",
+  "dayView": "Dia",
+  "noFilterContent": "Sem conteúdo de {filter}",
+  "@noFilterContent": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
   "tryDifferentFilter": "Tente um filtro ou data diferente",
-  "itemsScheduled": "{count} itens agendados", "@itemsScheduled": {"placeholders": {"count": {"type": "int"}}},
-  "entertainment": "Entretenimento", "aiRecommendations": "Recomendações de IA",
-  "suggestedFor": "Sugerido para {time}", "@suggestedFor": {"placeholders": {"time": {"type": "String"}}},
-  "movedNear": "\"{item}\" movido perto de \"{target}\"", "@movedNear": {"placeholders": {"item": {"type": "String"}, "target": {"type": "String"}}},
-  "unknownTitle": "Título desconhecido", "unknownCreator": "Criador desconhecido",
-  "playback": "Reprodução", "autoplay": "Reprodução automática", "autoplayHint": "Reproduzir automaticamente o próximo vídeo",
-  "videoQuality": "Qualidade do vídeo", "dataSaver": "Economia de dados", "dataSaverHint": "Reduzir o uso de dados durante o streaming",
-  "pushNotificationsHint": "Novo conteúdo de criadores seguidos", "appearance": "Aparência",
-  "darkModeHint": "Usar tema escuro em todo o app", "appLanguage": "Idioma do app", "contentLanguage": "Idioma do conteúdo",
-  "library": "Biblioteca", "savedVideos": "Vídeos salvos", "previouslyWatchedVideos": "Vídeos assistidos anteriormente",
-  "privacyAndData": "Privacidade e dados", "usageAnalytics": "Análise de uso",
+  "itemsScheduled": "{count} itens agendados",
+  "@itemsScheduled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainment": "Entretenimento",
+  "aiRecommendations": "Recomendações de IA",
+  "suggestedFor": "Sugerido para {time}",
+  "@suggestedFor": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "movedNear": "\"{item}\" movido perto de \"{target}\"",
+  "@movedNear": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownTitle": "Título desconhecido",
+  "unknownCreator": "Criador desconhecido",
+  "playback": "Reprodução",
+  "autoplay": "Reprodução automática",
+  "autoplayHint": "Reproduzir automaticamente o próximo vídeo",
+  "videoQuality": "Qualidade do vídeo",
+  "dataSaver": "Economia de dados",
+  "dataSaverHint": "Reduzir o uso de dados durante o streaming",
+  "pushNotificationsHint": "Novo conteúdo de criadores seguidos",
+  "appearance": "Aparência",
+  "darkModeHint": "Usar tema escuro em todo o app",
+  "appLanguage": "Idioma do app",
+  "contentLanguage": "Idioma do conteúdo",
+  "library": "Biblioteca",
+  "savedVideos": "Vídeos salvos",
+  "previouslyWatchedVideos": "Vídeos assistidos anteriormente",
+  "privacyAndData": "Privacidade e dados",
+  "usageAnalytics": "Análise de uso",
   "usageAnalyticsHint": "Ajude a melhorar o app com dados anônimos",
-  "clearWatchHistory": "Limpar histórico de exibição", "clearWatchHistoryHint": "Remover todos os vídeos do histórico",
-  "clearCache": "Limpar cache", "clearCacheHint": "Liberar espaço de armazenamento",
-  "changePassword": "Alterar senha", "appVersion": "Versão do app", "termsOfService": "Termos de serviço",
-  "afeediProActive": "Afeedi Pro — Ativo", "upgradeToPro": "Atualizar para Pro",
-  "proFeatures": "Sem anúncios · Saves ilimitados · Feed de IA", "freeFeatures": "Sem anúncios, feed de IA, saves ilimitados",
+  "clearWatchHistory": "Limpar histórico de exibição",
+  "clearWatchHistoryHint": "Remover todos os vídeos do histórico",
+  "clearCache": "Limpar cache",
+  "clearCacheHint": "Liberar espaço de armazenamento",
+  "changePassword": "Alterar senha",
+  "appVersion": "Versão do app",
+  "termsOfService": "Termos de serviço",
+  "afeediProActive": "Afeedi Pro — Ativo",
+  "upgradeToPro": "Atualizar para Pro",
+  "proFeatures": "Sem anúncios · Saves ilimitados · Feed de IA",
+  "freeFeatures": "Sem anúncios, feed de IA, saves ilimitados",
   "clearHistoryConfirm": "Isso removerá todos os vídeos do seu histórico. Esta ação não pode ser desfeita.",
-  "watchHistoryClearedSnackbar": "Histórico de exibição limpo", "cacheClearedSnackbar": "Cache limpo com sucesso",
-  "currentPassword": "Senha atual", "newPassword": "Nova senha", "confirmNewPassword": "Confirmar nova senha",
-  "minEightChars": "Mín. 8 caracteres", "passwordsDoNotMatch": "As senhas não coincidem", "required": "Obrigatório",
-  "passwordChangedSuccessfully": "Senha alterada com sucesso", "currentPasswordIncorrect": "A senha atual está incorreta",
+  "watchHistoryClearedSnackbar": "Histórico de exibição limpo",
+  "cacheClearedSnackbar": "Cache limpo com sucesso",
+  "currentPassword": "Senha atual",
+  "newPassword": "Nova senha",
+  "confirmNewPassword": "Confirmar nova senha",
+  "minEightChars": "Mín. 8 caracteres",
+  "passwordsDoNotMatch": "As senhas não coincidem",
+  "required": "Obrigatório",
+  "passwordChangedSuccessfully": "Senha alterada com sucesso",
+  "currentPasswordIncorrect": "A senha atual está incorreta",
   "signOutConfirm": "Tem certeza de que deseja sair?",
   "deleteAccountConfirm": "Tem certeza? Isso não pode ser desfeito.",
-  "videosWatchedLabel": "Vídeos\nAssistidos", "watchTimeLabel": "Tempo\nAssistido"
+  "videosWatchedLabel": "Vídeos\nAssistidos",
+  "watchTimeLabel": "Tempo\nAssistido",
+  "goodMorning": "Bom dia!",
+  "goodAfternoon": "Boa tarde!",
+  "goodEvening": "Boa noite!",
+  "noNotifications": "Sem notificações",
+  "allCaughtUp": "Você está em dia!"
 }

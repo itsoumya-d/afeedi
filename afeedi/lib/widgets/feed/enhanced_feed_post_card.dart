@@ -622,20 +622,24 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            const Text(
               'Comments',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
+            Icon(Icons.comment_outlined, color: Colors.white38, size: 40),
+            const SizedBox(height: 12),
             Text(
-              'Comments feature coming soon!',
+              'No comments yet.\nView and discuss this content on its original platform.',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: Colors.white.withValues(alpha: 0.6),
                 fontSize: 14,
+                height: 1.5,
               ),
             ),
           ],

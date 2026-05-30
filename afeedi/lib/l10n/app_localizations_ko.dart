@@ -508,7 +508,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get showLess => '접기';
 
   @override
-  String memberSince(String date) => '$date 부터 회원';
+  String memberSince(String date) {
+    return '$date 부터 회원';
+  }
 
   @override
   String get noLikedContent => '좋아한 콘텐츠 없음';
@@ -529,7 +531,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get noHistoryHint => '시청한 동영상이 여기에 표시됩니다';
 
   @override
-  String watchedOf(String watched, String total) => '$total 중 $watched 시청';
+  String watchedOf(String watched, String total) {
+    return '$total 중 $watched 시청';
+  }
 
   @override
   String get removeFromHistory => '기록에서 제거';
@@ -538,7 +542,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get engagementScore => '참여 점수';
 
   @override
-  String ofMaxKeepWatching(int pct) => '최대의 $pct% — 계속 시청하세요!';
+  String ofMaxKeepWatching(int pct) {
+    return '최대의 $pct% — 계속 시청하세요!';
+  }
 
   @override
   String get watchedLabel => '시청';
@@ -610,10 +616,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get percentageFilter => '비율 필터';
 
   @override
-  String educationPct(int pct) => '교육: $pct%';
+  String educationPct(int pct) {
+    return '교육: $pct%';
+  }
 
   @override
-  String entertainmentPct(int pct) => '오락: $pct%';
+  String entertainmentPct(int pct) {
+    return '오락: $pct%';
+  }
 
   @override
   String get searchContent => '콘텐츠 검색...';
@@ -628,13 +638,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get dayView => '일';
 
   @override
-  String noFilterContent(String filter) => '$filter 콘텐츠 없음';
+  String noFilterContent(String filter) {
+    return '$filter 콘텐츠 없음';
+  }
 
   @override
   String get tryDifferentFilter => '다른 필터나 날짜를 선택해보세요';
 
   @override
-  String itemsScheduled(int count) => '$count 개 예약됨';
+  String itemsScheduled(int count) {
+    return '$count 개 예약됨';
+  }
 
   @override
   String get entertainment => '오락';
@@ -643,10 +657,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get aiRecommendations => 'AI 추천';
 
   @override
-  String suggestedFor(String time) => '$time 에 추천';
+  String suggestedFor(String time) {
+    return '$time 에 추천';
+  }
 
   @override
-  String movedNear(String item, String target) => '"$item"을 "$target" 근처로 이동했습니다';
+  String movedNear(String item, String target) {
+    return '\"$item\"을 \"$target\" 근처로 이동했습니다';
+  }
 
   @override
   String get unknownTitle => '알 수 없는 제목';
@@ -796,5 +814,5 @@ class AppLocalizationsKo extends AppLocalizations {
   String get noNotifications => '알림이 없습니다';
 
   @override
-  String get allCaughtUp => '모두 확인하셨습니다!';
+  String get allCaughtUp => '모두 확인했습니다!';
 }

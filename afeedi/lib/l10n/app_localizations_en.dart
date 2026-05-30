@@ -461,7 +461,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discoverCreators => 'Discover creators to follow';
 
   @override
-  String get followCreatorsHint => 'Follow creators to surface their content first in your feed. Tap Follow on any video.';
+  String get followCreatorsHint => 'Follow creators to surface their content';
 
   @override
   String get findCreators => 'Find creators';
@@ -509,7 +509,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get showLess => 'Show less';
 
   @override
-  String memberSince(String date) => 'Member since $date';
+  String memberSince(String date) {
+    return 'Member since $date';
+  }
 
   @override
   String get noLikedContent => 'No liked content';
@@ -530,7 +532,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noHistoryHint => 'Videos you watch will appear here';
 
   @override
-  String watchedOf(String watched, String total) => 'Watched $watched of $total';
+  String watchedOf(String watched, String total) {
+    return 'Watched $watched of $total';
+  }
 
   @override
   String get removeFromHistory => 'Remove from history';
@@ -539,7 +543,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get engagementScore => 'Engagement Score';
 
   @override
-  String ofMaxKeepWatching(int pct) => '$pct% of max — keep watching!';
+  String ofMaxKeepWatching(int pct) {
+    return '$pct% of max — keep watching!';
+  }
 
   @override
   String get watchedLabel => 'Watched';
@@ -557,7 +563,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bio => 'Bio';
 
   @override
-  String get defaultBio => 'Curious mind. Content explorer. Watching the world one feed at a time.';
+  String get defaultBio =>
+      'Curious mind. Content explorer. Watching the world one feed at a time.';
 
   @override
   String get editProfileTooltip => 'Edit profile';
@@ -575,7 +582,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get seeEventsInApp => 'See events in-app';
 
   @override
-  String get seeEventsInAppHint => 'Your calendar appears alongside your content schedule';
+  String get seeEventsInAppHint =>
+      'Your calendar appears alongside your content schedule';
 
   @override
   String get privateAndLocal => 'Private & local';
@@ -590,7 +598,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connectWithGoogle => 'Connect with Google';
 
   @override
-  String get couldNotConnect => 'Could not connect — check permissions and try again.';
+  String get couldNotConnect =>
+      'Could not connect — check permissions and try again.';
 
   @override
   String get noUpcomingEvents => 'No upcoming events';
@@ -599,7 +608,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allDay => 'All day';
 
   @override
-  String get personalizedContentSchedule => 'Your personalized content schedule';
+  String get personalizedContentSchedule =>
+      'Your personalized content schedule';
 
   @override
   String get contentCategories => 'Content Categories';
@@ -611,10 +621,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get percentageFilter => 'Percentage Filter';
 
   @override
-  String educationPct(int pct) => 'Education: $pct%';
+  String educationPct(int pct) {
+    return 'Education: $pct%';
+  }
 
   @override
-  String entertainmentPct(int pct) => 'Entertainment: $pct%';
+  String entertainmentPct(int pct) {
+    return 'Entertainment: $pct%';
+  }
 
   @override
   String get searchContent => 'Search content...';
@@ -629,13 +643,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dayView => 'Day';
 
   @override
-  String noFilterContent(String filter) => 'No $filter content';
+  String noFilterContent(String filter) {
+    return 'No $filter content';
+  }
 
   @override
   String get tryDifferentFilter => 'Try selecting a different filter or date';
 
   @override
-  String itemsScheduled(int count) => '$count items scheduled';
+  String itemsScheduled(int count) {
+    return '$count items scheduled';
+  }
 
   @override
   String get entertainment => 'Entertainment';
@@ -644,10 +662,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiRecommendations => 'AI Recommendations';
 
   @override
-  String suggestedFor(String time) => 'Suggested for $time';
+  String suggestedFor(String time) {
+    return 'Suggested for $time';
+  }
 
   @override
-  String movedNear(String item, String target) => 'Moved "$item" near "$target"';
+  String movedNear(String item, String target) {
+    return 'Moved \"$item\" near \"$target\"';
+  }
 
   @override
   String get unknownTitle => 'Unknown Title';
@@ -740,7 +762,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get freeFeatures => 'Ad-free, AI feed, unlimited saves';
 
   @override
-  String get clearHistoryConfirm => 'This will remove all videos from your watch history. This action cannot be undone.';
+  String get clearHistoryConfirm =>
+      'This will remove all videos from your watch history. This action cannot be undone.';
 
   @override
   String get watchHistoryClearedSnackbar => 'Watch history cleared';

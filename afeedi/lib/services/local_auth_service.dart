@@ -260,31 +260,21 @@ class LocalAuthService {
     }
   }
 
-  // Delete account
+  // Delete account — wipes all user data (GDPR Article 17 compliance)
   Future<bool> deleteAccount() async {
     try {
       if (_currentUser == null) return false;
 
-      final userId = _currentUser!.id;
-
-      // Track analytics before deletion
       await AnalyticsService.instance.trackUserInteraction(
         action: 'user_account_deleted',
         screen: 'auth',
-        additionalData: {
-          'user_id': userId,
-        },
+        additionalData: {'deleted': true},
       );
 
-      // Delete user data
-      await _storage.deleteUser(userId);
-
-      // Clear credentials
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('user_credentials_$userId');
-      await prefs.remove('current_user_id');
-
       _currentUser = null;
+
+      // Full data wipe: Hive boxes + SharedPreferences
+      await _storage.clearAllData();
 
       return true;
     } catch (error) {

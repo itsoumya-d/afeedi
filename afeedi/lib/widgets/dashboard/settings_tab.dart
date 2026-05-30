@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_theme.dart';
+import '../../services/local_auth_service.dart';
+import '../../services/navigation_service.dart';
+import '../../services/user_management_service.dart';
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
@@ -11,7 +16,36 @@ class SettingsTab extends StatefulWidget {
 class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-  
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _dataCollection = prefs.getBool('setting_data_collection') ?? true;
+      _personalizedAds = prefs.getBool('setting_personalized_ads') ?? false;
+      _analyticsSharing = prefs.getBool('setting_analytics_sharing') ?? true;
+      _locationTracking = prefs.getBool('setting_location_tracking') ?? false;
+      _autoplay = prefs.getBool('setting_autoplay') ?? true;
+      _downloadOnWifi = prefs.getBool('setting_download_on_wifi') ?? true;
+      _highQuality = prefs.getBool('setting_high_quality') ?? false;
+      _pushNotifications = prefs.getBool('setting_push_notifications') ?? true;
+      _emailNotifications = prefs.getBool('setting_email_notifications') ?? false;
+      _weeklyDigest = prefs.getBool('setting_weekly_digest') ?? true;
+      _trendingAlerts = prefs.getBool('setting_trending_alerts') ?? true;
+    });
+  }
+
+  Future<void> _saveSetting(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
+
   // Privacy settings
   bool _dataCollection = true;
   bool _personalizedAds = false;
@@ -140,25 +174,37 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           title: 'Data Collection',
           subtitle: 'Allow Afeedi to collect usage data for improvements',
           value: _dataCollection,
-          onChanged: (value) => setState(() => _dataCollection = value),
+          onChanged: (value) {
+            setState(() => _dataCollection = value);
+            _saveSetting('setting_data_collection', value);
+          },
         ),
         _buildToggleItem(
           title: 'Personalized Ads',
           subtitle: 'Show ads based on your interests and activity',
           value: _personalizedAds,
-          onChanged: (value) => setState(() => _personalizedAds = value),
+          onChanged: (value) {
+            setState(() => _personalizedAds = value);
+            _saveSetting('setting_personalized_ads', value);
+          },
         ),
         _buildToggleItem(
           title: 'Analytics Sharing',
           subtitle: 'Share anonymous analytics to improve the platform',
           value: _analyticsSharing,
-          onChanged: (value) => setState(() => _analyticsSharing = value),
+          onChanged: (value) {
+            setState(() => _analyticsSharing = value);
+            _saveSetting('setting_analytics_sharing', value);
+          },
         ),
         _buildToggleItem(
           title: 'Location Tracking',
           subtitle: 'Use location for content recommendations',
           value: _locationTracking,
-          onChanged: (value) => setState(() => _locationTracking = value),
+          onChanged: (value) {
+            setState(() => _locationTracking = value);
+            _saveSetting('setting_location_tracking', value);
+          },
         ),
         Divider(color: Colors.white.withValues(alpha: 0.06), indent: 16, endIndent: 16),
         _buildActionItem(
@@ -294,7 +340,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           icon: Icons.logout,
           iconColor: Colors.redAccent,
           isDangerous: true,
-          onTap: () {},
+          onTap: () => _showSignOutDialog(),
         ),
       ],
     );
@@ -465,42 +511,79 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF2D1B69),
-        title: const Text(
-          'Download Data',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Download My Data', style: TextStyle(color: Colors.white)),
         content: Text(
-          'We\'ll prepare your data and send a download link to your email within 24 hours.',
+          'Your data export includes your profile, preferences, watch history, and connected accounts. Tap Export to view and copy your data.',
           style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Data request submitted. A download link will be sent to your email within 24 hours.'),
-                  duration: Duration(seconds: 4),
-                ),
-              );
+              final response = await UserManagementService.instance.exportUserData();
+              if (!mounted) return;
+              if (response.success && response.data != null) {
+                final jsonStr = response.data.toString();
+                await Clipboard.setData(ClipboardData(text: jsonStr));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Your data has been copied to clipboard.'),
+                    duration: Duration(seconds: 4),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Sign in to export your data.'),
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+              }
             },
-            child: const Text(
-              'Request',
-              style: TextStyle(color: AppTheme.primaryCyan),
-            ),
+            child: const Text('Export', style: TextStyle(color: AppTheme.primaryCyan)),
           ),
         ],
       ),
     );
   }
   
+  void _showSignOutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2D1B69),
+        title: const Text('Sign Out', style: TextStyle(color: Colors.white)),
+        content: Text(
+          'Are you sure you want to sign out?',
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await LocalAuthService.instance.signOut();
+              if (mounted) {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  AppRoutes.welcome,
+                  (_) => false,
+                );
+              }
+            },
+            child: const Text('Sign Out', style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showDeleteAccountDialog() {
     showDialog(
       context: context,
@@ -511,26 +594,35 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           style: TextStyle(color: Colors.red),
         ),
         content: Text(
-          'This action cannot be undone. All your data will be permanently deleted.',
+          'This action cannot be undone. All your data, history, and preferences will be permanently deleted.',
           style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Implement account deletion
+              final success = await LocalAuthService.instance.deleteAccount();
+              if (mounted) {
+                if (success) {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    AppRoutes.welcome,
+                    (_) => false,
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Failed to delete account. Please try again.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -710,7 +802,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              // TODO: Open terms URL
+              Navigator.pushNamed(context, AppRoutes.termsOfService);
             },
             child: const Text(
               'Open',
@@ -746,7 +838,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              // TODO: Open privacy URL
+              Navigator.pushNamed(context, AppRoutes.privacyPolicy);
             },
             child: const Text(
               'Open',
@@ -758,12 +850,11 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
     );
   }
   
-  // Navigation methods
   void _navigateToProfile() {
-    // TODO: Navigate to profile screen
+    Navigator.pushNamed(context, AppRoutes.profile);
   }
-  
+
   void _navigateToSubscription() {
-    // TODO: Navigate to subscription screen
+    Navigator.pushNamed(context, AppRoutes.premium);
   }
 }

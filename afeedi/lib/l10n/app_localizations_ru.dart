@@ -510,19 +510,23 @@ class AppLocalizationsRu extends AppLocalizations {
   String get showLess => 'Свернуть';
 
   @override
-  String memberSince(String date) => 'Участник с $date';
+  String memberSince(String date) {
+    return 'Участник с $date';
+  }
 
   @override
   String get noLikedContent => 'Нет понравившегося контента';
 
   @override
-  String get noLikedContentHint => 'Видео, которые вам понравятся, появятся здесь';
+  String get noLikedContentHint =>
+      'Видео, которые вам понравятся, появятся здесь';
 
   @override
   String get nothingSavedYet => 'Ничего не сохранено';
 
   @override
-  String get bookmarkContentHint => 'Добавьте контент в закладки, чтобы увидеть его здесь';
+  String get bookmarkContentHint =>
+      'Добавьте контент в закладки, чтобы увидеть его здесь';
 
   @override
   String get noHistoryYet => 'История пуста';
@@ -531,7 +535,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noHistoryHint => 'Просмотренные видео появятся здесь';
 
   @override
-  String watchedOf(String watched, String total) => 'Просмотрено $watched из $total';
+  String watchedOf(String watched, String total) {
+    return 'Просмотрено $watched из $total';
+  }
 
   @override
   String get removeFromHistory => 'Удалить из истории';
@@ -540,7 +546,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get engagementScore => 'Оценка вовлечённости';
 
   @override
-  String ofMaxKeepWatching(int pct) => '$pct% от максимума — продолжайте смотреть!';
+  String ofMaxKeepWatching(int pct) {
+    return '$pct% от максимума — продолжайте смотреть!';
+  }
 
   @override
   String get watchedLabel => 'Просмотрено';
@@ -558,7 +566,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get bio => 'О себе';
 
   @override
-  String get defaultBio => 'Любопытный ум. Исследователь контента. Вижу мир через один фид.';
+  String get defaultBio =>
+      'Любопытный ум. Исследователь контента. Вижу мир через один фид.';
 
   @override
   String get editProfileTooltip => 'Редактировать профиль';
@@ -570,19 +579,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String get readOnlyAccess => 'Доступ только для чтения';
 
   @override
-  String get readOnlyAccessHint => 'Мы только читаем события, никогда не изменяем их';
+  String get readOnlyAccessHint =>
+      'Мы только читаем события, никогда не изменяем их';
 
   @override
   String get seeEventsInApp => 'Просматривать события в приложении';
 
   @override
-  String get seeEventsInAppHint => 'Ваш календарь отображается рядом с расписанием контента';
+  String get seeEventsInAppHint =>
+      'Ваш календарь отображается рядом с расписанием контента';
 
   @override
   String get privateAndLocal => 'Приватно и локально';
 
   @override
-  String get privateAndLocalHint => 'Данные хранятся на устройстве, мы никогда не делимся ими';
+  String get privateAndLocalHint =>
+      'Данные хранятся на устройстве, мы никогда не делимся ими';
 
   @override
   String get connecting => 'Подключение...';
@@ -591,7 +603,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get connectWithGoogle => 'Подключить Google';
 
   @override
-  String get couldNotConnect => 'Не удалось подключиться — проверьте разрешения и попробуйте снова.';
+  String get couldNotConnect =>
+      'Не удалось подключиться — проверьте разрешения и попробуйте снова.';
 
   @override
   String get noUpcomingEvents => 'Предстоящих событий нет';
@@ -600,7 +613,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get allDay => 'Весь день';
 
   @override
-  String get personalizedContentSchedule => 'Ваше персональное расписание контента';
+  String get personalizedContentSchedule =>
+      'Ваше персональное расписание контента';
 
   @override
   String get contentCategories => 'Категории контента';
@@ -612,10 +626,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get percentageFilter => 'Фильтр по проценту';
 
   @override
-  String educationPct(int pct) => 'Образование: $pct%';
+  String educationPct(int pct) {
+    return 'Образование: $pct%';
+  }
 
   @override
-  String entertainmentPct(int pct) => 'Развлечения: $pct%';
+  String entertainmentPct(int pct) {
+    return 'Развлечения: $pct%';
+  }
 
   @override
   String get searchContent => 'Поиск контента...';
@@ -630,13 +648,17 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dayView => 'День';
 
   @override
-  String noFilterContent(String filter) => 'Нет контента: $filter';
+  String noFilterContent(String filter) {
+    return 'Нет контента: $filter';
+  }
 
   @override
   String get tryDifferentFilter => 'Попробуйте другой фильтр или дату';
 
   @override
-  String itemsScheduled(int count) => '$count запланировано';
+  String itemsScheduled(int count) {
+    return '$count запланировано';
+  }
 
   @override
   String get entertainment => 'Развлечения';
@@ -645,10 +667,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get aiRecommendations => 'Рекомендации ИИ';
 
   @override
-  String suggestedFor(String time) => 'Предложено на $time';
+  String suggestedFor(String time) {
+    return 'Предложено на $time';
+  }
 
   @override
-  String movedNear(String item, String target) => '"$item" перемещён рядом с "$target"';
+  String movedNear(String item, String target) {
+    return '\"$item\" перемещён рядом с \"$target\"';
+  }
 
   @override
   String get unknownTitle => 'Неизвестное название';
@@ -672,7 +698,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dataSaver => 'Экономия данных';
 
   @override
-  String get dataSaverHint => 'Уменьшить использование данных при потоковом воспроизведении';
+  String get dataSaverHint =>
+      'Уменьшить использование данных при потоковом воспроизведении';
 
   @override
   String get pushNotificationsHint => 'Новый контент от подписок';
@@ -705,7 +732,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get usageAnalytics => 'Аналитика использования';
 
   @override
-  String get usageAnalyticsHint => 'Помогите улучшить приложение с помощью анонимных данных';
+  String get usageAnalyticsHint =>
+      'Помогите улучшить приложение с помощью анонимных данных';
 
   @override
   String get clearWatchHistory => 'Очистить историю просмотров';
@@ -741,7 +769,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get freeFeatures => 'Без рекламы, ИИ-лента, безлимитное сохранение';
 
   @override
-  String get clearHistoryConfirm => 'Это удалит все видео из вашей истории просмотров. Это действие нельзя отменить.';
+  String get clearHistoryConfirm =>
+      'Это удалит все видео из вашей истории просмотров. Это действие нельзя отменить.';
 
   @override
   String get watchHistoryClearedSnackbar => 'История просмотров очищена';
@@ -777,7 +806,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get signOutConfirm => 'Вы уверены, что хотите выйти?';
 
   @override
-  String get deleteAccountConfirm => 'Вы уверены? Это действие нельзя отменить.';
+  String get deleteAccountConfirm =>
+      'Вы уверены? Это действие нельзя отменить.';
 
   @override
   String get videosWatchedLabel => 'Просмотрено\nвидео';
@@ -798,5 +828,5 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noNotifications => 'Нет уведомлений';
 
   @override
-  String get allCaughtUp => 'Вы всё прочитали!';
+  String get allCaughtUp => 'Вы в курсе всего!';
 }

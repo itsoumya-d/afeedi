@@ -172,5 +172,178 @@
   "followCreatorsHint": "Follow creators to surface their content",
   "findCreators": "Find creators",
   "dismiss": "Dismiss",
-  "resetAll": "Reset All"
+  "resetAll": "Reset All",
+  "back": "Back",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "clear": "Clear",
+  "update": "Update",
+  "play": "Play",
+  "manage": "Manage",
+  "seePlans": "See Plans",
+  "disconnect": "Disconnect",
+  "viewAll": "View All",
+  "showMore": "Show more",
+  "showLess": "Show less",
+  "memberSince": "Member since {date}",
+  "@memberSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noLikedContent": "No liked content",
+  "noLikedContentHint": "Videos you like will appear here",
+  "nothingSavedYet": "Nothing saved yet",
+  "bookmarkContentHint": "Bookmark content to see it here",
+  "noHistoryYet": "No history yet",
+  "noHistoryHint": "Videos you watch will appear here",
+  "watchedOf": "Watched {watched} of {total}",
+  "@watchedOf": {
+    "placeholders": {
+      "watched": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFromHistory": "Remove from history",
+  "engagementScore": "Engagement Score",
+  "ofMaxKeepWatching": "{pct}% of max — keep watching!",
+  "@ofMaxKeepWatching": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "watchedLabel": "Watched",
+  "displayName": "Display Name",
+  "nameCannotBeEmpty": "Name cannot be empty",
+  "nameTooLong": "Name too long (max 50 chars)",
+  "bio": "Bio",
+  "defaultBio": "Curious mind. Content explorer. Watching the world one feed at a time.",
+  "editProfileTooltip": "Edit profile",
+  "googleCalendar": "Google Calendar",
+  "readOnlyAccess": "Read-only access",
+  "readOnlyAccessHint": "We only read events, never modify them",
+  "seeEventsInApp": "See events in-app",
+  "seeEventsInAppHint": "Your calendar appears alongside your content schedule",
+  "privateAndLocal": "Private & local",
+  "privateAndLocalHint": "Data stays on-device; we never share it",
+  "connecting": "Connecting...",
+  "connectWithGoogle": "Connect with Google",
+  "couldNotConnect": "Could not connect — check permissions and try again.",
+  "noUpcomingEvents": "No upcoming events",
+  "allDay": "All day",
+  "personalizedContentSchedule": "Your personalized content schedule",
+  "contentCategories": "Content Categories",
+  "categoryFilter": "Category Filter",
+  "percentageFilter": "Percentage Filter",
+  "educationPct": "Education: {pct}%",
+  "@educationPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainmentPct": "Entertainment: {pct}%",
+  "@entertainmentPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "searchContent": "Search content...",
+  "monthView": "Month",
+  "weekView": "Week",
+  "dayView": "Day",
+  "noFilterContent": "No {filter} content",
+  "@noFilterContent": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
+  "tryDifferentFilter": "Try selecting a different filter or date",
+  "itemsScheduled": "{count} items scheduled",
+  "@itemsScheduled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainment": "Entertainment",
+  "aiRecommendations": "AI Recommendations",
+  "suggestedFor": "Suggested for {time}",
+  "@suggestedFor": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "movedNear": "Moved \"{item}\" near \"{target}\"",
+  "@movedNear": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownTitle": "Unknown Title",
+  "unknownCreator": "Unknown Creator",
+  "playback": "Playback",
+  "autoplay": "Autoplay",
+  "autoplayHint": "Automatically play next video",
+  "videoQuality": "Video Quality",
+  "dataSaver": "Data Saver",
+  "dataSaverHint": "Reduce data usage while streaming",
+  "pushNotificationsHint": "New content from followed creators",
+  "appearance": "Appearance",
+  "darkModeHint": "Use dark theme throughout the app",
+  "appLanguage": "App Language",
+  "contentLanguage": "Content Language",
+  "library": "Library",
+  "savedVideos": "Saved videos",
+  "previouslyWatchedVideos": "Previously watched videos",
+  "privacyAndData": "Privacy & Data",
+  "usageAnalytics": "Usage Analytics",
+  "usageAnalyticsHint": "Help improve the app with anonymous data",
+  "clearWatchHistory": "Clear Watch History",
+  "clearWatchHistoryHint": "Remove all watched videos from history",
+  "clearCache": "Clear Cache",
+  "clearCacheHint": "Free up storage space",
+  "changePassword": "Change Password",
+  "appVersion": "App Version",
+  "termsOfService": "Terms of Service",
+  "afeediProActive": "Afeedi Pro — Active",
+  "upgradeToPro": "Upgrade to Pro",
+  "proFeatures": "Ad-free · Unlimited saves · AI feed",
+  "freeFeatures": "Ad-free, AI feed, unlimited saves",
+  "clearHistoryConfirm": "This will remove all videos from your watch history. This action cannot be undone.",
+  "watchHistoryClearedSnackbar": "Watch history cleared",
+  "cacheClearedSnackbar": "Cache cleared successfully",
+  "currentPassword": "Current Password",
+  "newPassword": "New Password",
+  "confirmNewPassword": "Confirm New Password",
+  "minEightChars": "Min 8 characters",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "required": "Required",
+  "passwordChangedSuccessfully": "Password changed successfully",
+  "currentPasswordIncorrect": "Current password is incorrect",
+  "signOutConfirm": "Are you sure you want to sign out?",
+  "deleteAccountConfirm": "Are you sure? This cannot be undone.",
+  "videosWatchedLabel": "Videos\nWatched",
+  "watchTimeLabel": "Watch\nTime"
 }

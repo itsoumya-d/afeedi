@@ -473,4 +473,316 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get resetAll => 'सब रीसेट करें';
+
+  @override
+  String get back => 'वापस';
+
+  @override
+  String get cancel => 'रद्द करें';
+
+  @override
+  String get delete => 'हटाएं';
+
+  @override
+  String get clear => 'साफ़ करें';
+
+  @override
+  String get update => 'अपडेट करें';
+
+  @override
+  String get play => 'चलाएं';
+
+  @override
+  String get manage => 'प्रबंधित करें';
+
+  @override
+  String get seePlans => 'प्लान देखें';
+
+  @override
+  String get disconnect => 'डिस्कनेक्ट करें';
+
+  @override
+  String get viewAll => 'सब देखें';
+
+  @override
+  String get showMore => 'और दिखाएं';
+
+  @override
+  String get showLess => 'कम दिखाएं';
+
+  @override
+  String memberSince(String date) => '$date से सदस्य';
+
+  @override
+  String get noLikedContent => 'कोई पसंदीदा सामग्री नहीं';
+
+  @override
+  String get noLikedContentHint => 'जो वीडियो आपको पसंद आएंगे वे यहाँ दिखेंगे';
+
+  @override
+  String get nothingSavedYet => 'अभी तक कुछ सहेजा नहीं';
+
+  @override
+  String get bookmarkContentHint => 'सामग्री को बुकमार्क करें ताकि यहाँ दिखे';
+
+  @override
+  String get noHistoryYet => 'अभी तक कोई इतिहास नहीं';
+
+  @override
+  String get noHistoryHint => 'देखे गए वीडियो यहाँ दिखेंगे';
+
+  @override
+  String watchedOf(String watched, String total) => '$total में से $watched देखा';
+
+  @override
+  String get removeFromHistory => 'इतिहास से हटाएं';
+
+  @override
+  String get engagementScore => 'एंगेजमेंट स्कोर';
+
+  @override
+  String ofMaxKeepWatching(int pct) => 'अधिकतम का $pct% — देखते रहें!';
+
+  @override
+  String get watchedLabel => 'देखे';
+
+  @override
+  String get displayName => 'प्रदर्शन नाम';
+
+  @override
+  String get nameCannotBeEmpty => 'नाम खाली नहीं हो सकता';
+
+  @override
+  String get nameTooLong => 'नाम बहुत लंबा है (अधिकतम 50 अक्षर)';
+
+  @override
+  String get bio => 'बायो';
+
+  @override
+  String get defaultBio => 'जिज्ञासु मन। कंटेंट एक्सप्लोरर। एक फीड पर दुनिया देख रहा हूं।';
+
+  @override
+  String get editProfileTooltip => 'प्रोफ़ाइल संपादित करें';
+
+  @override
+  String get googleCalendar => 'Google Calendar';
+
+  @override
+  String get readOnlyAccess => 'केवल पढ़ने की पहुंच';
+
+  @override
+  String get readOnlyAccessHint => 'हम केवल इवेंट पढ़ते हैं, कभी संशोधित नहीं करते';
+
+  @override
+  String get seeEventsInApp => 'ऐप में इवेंट देखें';
+
+  @override
+  String get seeEventsInAppHint => 'आपका कैलेंडर आपके कंटेंट शेड्यूल के साथ दिखेगा';
+
+  @override
+  String get privateAndLocal => 'निजी और स्थानीय';
+
+  @override
+  String get privateAndLocalHint => 'डेटा डिवाइस पर रहता है; हम इसे कभी साझा नहीं करते';
+
+  @override
+  String get connecting => 'कनेक्ट हो रहा है...';
+
+  @override
+  String get connectWithGoogle => 'Google से कनेक्ट करें';
+
+  @override
+  String get couldNotConnect => 'कनेक्ट नहीं हो सका — अनुमतियाँ जाँचें और पुनः प्रयास करें।';
+
+  @override
+  String get noUpcomingEvents => 'कोई आगामी इवेंट नहीं';
+
+  @override
+  String get allDay => 'पूरा दिन';
+
+  @override
+  String get personalizedContentSchedule => 'आपका व्यक्तिगत कंटेंट शेड्यूल';
+
+  @override
+  String get contentCategories => 'सामग्री श्रेणियाँ';
+
+  @override
+  String get categoryFilter => 'श्रेणी फ़िल्टर';
+
+  @override
+  String get percentageFilter => 'प्रतिशत फ़िल्टर';
+
+  @override
+  String educationPct(int pct) => 'शिक्षा: $pct%';
+
+  @override
+  String entertainmentPct(int pct) => 'मनोरंजन: $pct%';
+
+  @override
+  String get searchContent => 'सामग्री खोजें...';
+
+  @override
+  String get monthView => 'माह';
+
+  @override
+  String get weekView => 'सप्ताह';
+
+  @override
+  String get dayView => 'दिन';
+
+  @override
+  String noFilterContent(String filter) => 'कोई $filter सामग्री नहीं';
+
+  @override
+  String get tryDifferentFilter => 'कोई अलग फ़िल्टर या तारीख आज़माएं';
+
+  @override
+  String itemsScheduled(int count) => '$count आइटम शेड्यूल किए गए';
+
+  @override
+  String get entertainment => 'मनोरंजन';
+
+  @override
+  String get aiRecommendations => 'AI अनुशंसाएं';
+
+  @override
+  String suggestedFor(String time) => '$time के लिए सुझाया गया';
+
+  @override
+  String movedNear(String item, String target) => '"$item" को "$target" के पास ले जाया गया';
+
+  @override
+  String get unknownTitle => 'अज्ञात शीर्षक';
+
+  @override
+  String get unknownCreator => 'अज्ञात क्रिएटर';
+
+  @override
+  String get playback => 'प्लेबैक';
+
+  @override
+  String get autoplay => 'ऑटोप्ले';
+
+  @override
+  String get autoplayHint => 'अगला वीडियो स्वचालित रूप से चलाएं';
+
+  @override
+  String get videoQuality => 'वीडियो गुणवत्ता';
+
+  @override
+  String get dataSaver => 'डेटा सेवर';
+
+  @override
+  String get dataSaverHint => 'स्ट्रीमिंग के दौरान डेटा उपयोग कम करें';
+
+  @override
+  String get pushNotificationsHint => 'फ़ॉलो किए गए क्रिएटर्स की नई सामग्री';
+
+  @override
+  String get appearance => 'दिखावट';
+
+  @override
+  String get darkModeHint => 'पूरे ऐप में डार्क थीम का उपयोग करें';
+
+  @override
+  String get appLanguage => 'ऐप भाषा';
+
+  @override
+  String get contentLanguage => 'सामग्री भाषा';
+
+  @override
+  String get library => 'लाइब्रेरी';
+
+  @override
+  String get savedVideos => 'सहेजे गए वीडियो';
+
+  @override
+  String get previouslyWatchedVideos => 'पहले देखे गए वीडियो';
+
+  @override
+  String get privacyAndData => 'गोपनीयता और डेटा';
+
+  @override
+  String get usageAnalytics => 'उपयोग विश्लेषण';
+
+  @override
+  String get usageAnalyticsHint => 'गुमनाम डेटा से ऐप सुधारने में मदद करें';
+
+  @override
+  String get clearWatchHistory => 'देखने का इतिहास साफ़ करें';
+
+  @override
+  String get clearWatchHistoryHint => 'इतिहास से सभी वीडियो हटाएं';
+
+  @override
+  String get clearCache => 'कैश साफ़ करें';
+
+  @override
+  String get clearCacheHint => 'स्टोरेज स्पेस खाली करें';
+
+  @override
+  String get changePassword => 'पासवर्ड बदलें';
+
+  @override
+  String get appVersion => 'ऐप संस्करण';
+
+  @override
+  String get termsOfService => 'सेवा की शर्तें';
+
+  @override
+  String get afeediProActive => 'Afeedi Pro — सक्रिय';
+
+  @override
+  String get upgradeToPro => 'Pro में अपग्रेड करें';
+
+  @override
+  String get proFeatures => 'विज्ञापन-मुक्त · असीमित सेव · AI फ़ीड';
+
+  @override
+  String get freeFeatures => 'विज्ञापन-मुक्त, AI फ़ीड, असीमित सेव';
+
+  @override
+  String get clearHistoryConfirm => 'इससे आपके देखने के इतिहास से सभी वीडियो हट जाएंगे। यह क्रिया पूर्ववत नहीं की जा सकती।';
+
+  @override
+  String get watchHistoryClearedSnackbar => 'देखने का इतिहास साफ़ किया गया';
+
+  @override
+  String get cacheClearedSnackbar => 'कैश सफलतापूर्वक साफ़ किया गया';
+
+  @override
+  String get currentPassword => 'वर्तमान पासवर्ड';
+
+  @override
+  String get newPassword => 'नया पासवर्ड';
+
+  @override
+  String get confirmNewPassword => 'नया पासवर्ड पुष्टि करें';
+
+  @override
+  String get minEightChars => 'न्यूनतम 8 अक्षर';
+
+  @override
+  String get passwordsDoNotMatch => 'पासवर्ड मेल नहीं खाते';
+
+  @override
+  String get required => 'आवश्यक';
+
+  @override
+  String get passwordChangedSuccessfully => 'पासवर्ड सफलतापूर्वक बदला गया';
+
+  @override
+  String get currentPasswordIncorrect => 'वर्तमान पासवर्ड गलत है';
+
+  @override
+  String get signOutConfirm => 'क्या आप वाकई साइन आउट करना चाहते हैं?';
+
+  @override
+  String get deleteAccountConfirm => 'क्या आप निश्चित हैं? इसे पूर्ववत नहीं किया जा सकता।';
+
+  @override
+  String get videosWatchedLabel => 'देखे\nवीडियो';
+
+  @override
+  String get watchTimeLabel => 'देखने\nका समय';
 }

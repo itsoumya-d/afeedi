@@ -472,4 +472,316 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get resetAll => 'Reset semua';
+
+  @override
+  String get back => 'Kembali';
+
+  @override
+  String get cancel => 'Batal';
+
+  @override
+  String get delete => 'Hapus';
+
+  @override
+  String get clear => 'Bersihkan';
+
+  @override
+  String get update => 'Perbarui';
+
+  @override
+  String get play => 'Putar';
+
+  @override
+  String get manage => 'Kelola';
+
+  @override
+  String get seePlans => 'Lihat paket';
+
+  @override
+  String get disconnect => 'Putuskan';
+
+  @override
+  String get viewAll => 'Lihat semua';
+
+  @override
+  String get showMore => 'Tampilkan lebih';
+
+  @override
+  String get showLess => 'Tampilkan lebih sedikit';
+
+  @override
+  String memberSince(String date) => 'Anggota sejak $date';
+
+  @override
+  String get noLikedContent => 'Tidak ada konten yang disukai';
+
+  @override
+  String get noLikedContentHint => 'Video yang Anda sukai akan muncul di sini';
+
+  @override
+  String get nothingSavedYet => 'Belum ada yang disimpan';
+
+  @override
+  String get bookmarkContentHint => 'Tandai konten untuk melihatnya di sini';
+
+  @override
+  String get noHistoryYet => 'Belum ada riwayat';
+
+  @override
+  String get noHistoryHint => 'Video yang Anda tonton akan muncul di sini';
+
+  @override
+  String watchedOf(String watched, String total) => 'Ditonton $watched dari $total';
+
+  @override
+  String get removeFromHistory => 'Hapus dari riwayat';
+
+  @override
+  String get engagementScore => 'Skor keterlibatan';
+
+  @override
+  String ofMaxKeepWatching(int pct) => '$pct% dari maks — terus menonton!';
+
+  @override
+  String get watchedLabel => 'Ditonton';
+
+  @override
+  String get displayName => 'Nama tampilan';
+
+  @override
+  String get nameCannotBeEmpty => 'Nama tidak boleh kosong';
+
+  @override
+  String get nameTooLong => 'Nama terlalu panjang (maks. 50 karakter)';
+
+  @override
+  String get bio => 'Bio';
+
+  @override
+  String get defaultBio => 'Pikiran penasaran. Penjelajah konten. Melihat dunia satu umpan sekaligus.';
+
+  @override
+  String get editProfileTooltip => 'Edit profil';
+
+  @override
+  String get googleCalendar => 'Google Kalender';
+
+  @override
+  String get readOnlyAccess => 'Akses hanya baca';
+
+  @override
+  String get readOnlyAccessHint => 'Kami hanya membaca acara, tidak pernah mengubahnya';
+
+  @override
+  String get seeEventsInApp => 'Lihat acara di aplikasi';
+
+  @override
+  String get seeEventsInAppHint => 'Kalender Anda muncul bersama jadwal konten Anda';
+
+  @override
+  String get privateAndLocal => 'Pribadi & lokal';
+
+  @override
+  String get privateAndLocalHint => 'Data tetap di perangkat; kami tidak pernah membagikannya';
+
+  @override
+  String get connecting => 'Menghubungkan...';
+
+  @override
+  String get connectWithGoogle => 'Hubungkan dengan Google';
+
+  @override
+  String get couldNotConnect => 'Tidak dapat terhubung — periksa izin dan coba lagi.';
+
+  @override
+  String get noUpcomingEvents => 'Tidak ada acara mendatang';
+
+  @override
+  String get allDay => 'Sepanjang hari';
+
+  @override
+  String get personalizedContentSchedule => 'Jadwal konten personal Anda';
+
+  @override
+  String get contentCategories => 'Kategori konten';
+
+  @override
+  String get categoryFilter => 'Filter kategori';
+
+  @override
+  String get percentageFilter => 'Filter persentase';
+
+  @override
+  String educationPct(int pct) => 'Edukasi: $pct%';
+
+  @override
+  String entertainmentPct(int pct) => 'Hiburan: $pct%';
+
+  @override
+  String get searchContent => 'Cari konten...';
+
+  @override
+  String get monthView => 'Bulan';
+
+  @override
+  String get weekView => 'Minggu';
+
+  @override
+  String get dayView => 'Hari';
+
+  @override
+  String noFilterContent(String filter) => 'Tidak ada konten $filter';
+
+  @override
+  String get tryDifferentFilter => 'Coba filter atau tanggal berbeda';
+
+  @override
+  String itemsScheduled(int count) => '$count item dijadwalkan';
+
+  @override
+  String get entertainment => 'Hiburan';
+
+  @override
+  String get aiRecommendations => 'Rekomendasi AI';
+
+  @override
+  String suggestedFor(String time) => 'Disarankan untuk $time';
+
+  @override
+  String movedNear(String item, String target) => '"$item" dipindahkan dekat "$target"';
+
+  @override
+  String get unknownTitle => 'Judul tidak diketahui';
+
+  @override
+  String get unknownCreator => 'Kreator tidak diketahui';
+
+  @override
+  String get playback => 'Pemutaran';
+
+  @override
+  String get autoplay => 'Putar otomatis';
+
+  @override
+  String get autoplayHint => 'Putar video berikutnya secara otomatis';
+
+  @override
+  String get videoQuality => 'Kualitas video';
+
+  @override
+  String get dataSaver => 'Penghemat data';
+
+  @override
+  String get dataSaverHint => 'Kurangi penggunaan data saat streaming';
+
+  @override
+  String get pushNotificationsHint => 'Konten baru dari kreator yang diikuti';
+
+  @override
+  String get appearance => 'Tampilan';
+
+  @override
+  String get darkModeHint => 'Gunakan tema gelap di seluruh aplikasi';
+
+  @override
+  String get appLanguage => 'Bahasa aplikasi';
+
+  @override
+  String get contentLanguage => 'Bahasa konten';
+
+  @override
+  String get library => 'Perpustakaan';
+
+  @override
+  String get savedVideos => 'Video tersimpan';
+
+  @override
+  String get previouslyWatchedVideos => 'Video yang sebelumnya ditonton';
+
+  @override
+  String get privacyAndData => 'Privasi & data';
+
+  @override
+  String get usageAnalytics => 'Analitik penggunaan';
+
+  @override
+  String get usageAnalyticsHint => 'Bantu tingkatkan aplikasi dengan data anonim';
+
+  @override
+  String get clearWatchHistory => 'Hapus riwayat tontonan';
+
+  @override
+  String get clearWatchHistoryHint => 'Hapus semua video dari riwayat';
+
+  @override
+  String get clearCache => 'Hapus cache';
+
+  @override
+  String get clearCacheHint => 'Bebaskan ruang penyimpanan';
+
+  @override
+  String get changePassword => 'Ubah kata sandi';
+
+  @override
+  String get appVersion => 'Versi aplikasi';
+
+  @override
+  String get termsOfService => 'Syarat layanan';
+
+  @override
+  String get afeediProActive => 'Afeedi Pro — Aktif';
+
+  @override
+  String get upgradeToPro => 'Tingkatkan ke Pro';
+
+  @override
+  String get proFeatures => 'Bebas iklan · Simpan tak terbatas · Feed AI';
+
+  @override
+  String get freeFeatures => 'Bebas iklan, feed AI, simpan tak terbatas';
+
+  @override
+  String get clearHistoryConfirm => 'Ini akan menghapus semua video dari riwayat tontonan Anda. Tindakan ini tidak dapat dibatalkan.';
+
+  @override
+  String get watchHistoryClearedSnackbar => 'Riwayat tontonan dihapus';
+
+  @override
+  String get cacheClearedSnackbar => 'Cache berhasil dihapus';
+
+  @override
+  String get currentPassword => 'Kata sandi saat ini';
+
+  @override
+  String get newPassword => 'Kata sandi baru';
+
+  @override
+  String get confirmNewPassword => 'Konfirmasi kata sandi baru';
+
+  @override
+  String get minEightChars => 'Min. 8 karakter';
+
+  @override
+  String get passwordsDoNotMatch => 'Kata sandi tidak cocok';
+
+  @override
+  String get required => 'Wajib';
+
+  @override
+  String get passwordChangedSuccessfully => 'Kata sandi berhasil diubah';
+
+  @override
+  String get currentPasswordIncorrect => 'Kata sandi saat ini salah';
+
+  @override
+  String get signOutConfirm => 'Apakah Anda yakin ingin keluar?';
+
+  @override
+  String get deleteAccountConfirm => 'Apakah Anda yakin? Ini tidak dapat dibatalkan.';
+
+  @override
+  String get videosWatchedLabel => 'Video\nDitonton';
+
+  @override
+  String get watchTimeLabel => 'Waktu\nTonton';
 }

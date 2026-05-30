@@ -470,4 +470,316 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get resetAll => '모두 초기화';
+
+  @override
+  String get back => '뒤로';
+
+  @override
+  String get cancel => '취소';
+
+  @override
+  String get delete => '삭제';
+
+  @override
+  String get clear => '지우기';
+
+  @override
+  String get update => '업데이트';
+
+  @override
+  String get play => '재생';
+
+  @override
+  String get manage => '관리';
+
+  @override
+  String get seePlans => '플랜 보기';
+
+  @override
+  String get disconnect => '연결 해제';
+
+  @override
+  String get viewAll => '모두 보기';
+
+  @override
+  String get showMore => '더 보기';
+
+  @override
+  String get showLess => '접기';
+
+  @override
+  String memberSince(String date) => '$date 부터 회원';
+
+  @override
+  String get noLikedContent => '좋아한 콘텐츠 없음';
+
+  @override
+  String get noLikedContentHint => '좋아하는 동영상이 여기에 표시됩니다';
+
+  @override
+  String get nothingSavedYet => '아직 저장된 것 없음';
+
+  @override
+  String get bookmarkContentHint => '콘텐츠를 북마크하여 여기서 확인하세요';
+
+  @override
+  String get noHistoryYet => '아직 기록 없음';
+
+  @override
+  String get noHistoryHint => '시청한 동영상이 여기에 표시됩니다';
+
+  @override
+  String watchedOf(String watched, String total) => '$total 중 $watched 시청';
+
+  @override
+  String get removeFromHistory => '기록에서 제거';
+
+  @override
+  String get engagementScore => '참여 점수';
+
+  @override
+  String ofMaxKeepWatching(int pct) => '최대의 $pct% — 계속 시청하세요!';
+
+  @override
+  String get watchedLabel => '시청';
+
+  @override
+  String get displayName => '표시 이름';
+
+  @override
+  String get nameCannotBeEmpty => '이름을 입력해주세요';
+
+  @override
+  String get nameTooLong => '이름이 너무 깁니다 (최대 50자)';
+
+  @override
+  String get bio => '소개';
+
+  @override
+  String get defaultBio => '호기심 많은 마음. 콘텐츠 탐험가. 하나의 피드로 세상을 봅니다.';
+
+  @override
+  String get editProfileTooltip => '프로필 편집';
+
+  @override
+  String get googleCalendar => 'Google 캘린더';
+
+  @override
+  String get readOnlyAccess => '읽기 전용 접근';
+
+  @override
+  String get readOnlyAccessHint => '이벤트를 읽기만 하고 수정하지 않습니다';
+
+  @override
+  String get seeEventsInApp => '앱에서 이벤트 보기';
+
+  @override
+  String get seeEventsInAppHint => '캘린더가 콘텐츠 일정과 함께 표시됩니다';
+
+  @override
+  String get privateAndLocal => '비공개 및 로컬';
+
+  @override
+  String get privateAndLocalHint => '데이터는 기기에 보관되며 공유되지 않습니다';
+
+  @override
+  String get connecting => '연결 중...';
+
+  @override
+  String get connectWithGoogle => 'Google 연결';
+
+  @override
+  String get couldNotConnect => '연결할 수 없음 — 권한을 확인하고 다시 시도하세요.';
+
+  @override
+  String get noUpcomingEvents => '예정된 이벤트 없음';
+
+  @override
+  String get allDay => '종일';
+
+  @override
+  String get personalizedContentSchedule => '개인화된 콘텐츠 일정';
+
+  @override
+  String get contentCategories => '콘텐츠 카테고리';
+
+  @override
+  String get categoryFilter => '카테고리 필터';
+
+  @override
+  String get percentageFilter => '비율 필터';
+
+  @override
+  String educationPct(int pct) => '교육: $pct%';
+
+  @override
+  String entertainmentPct(int pct) => '오락: $pct%';
+
+  @override
+  String get searchContent => '콘텐츠 검색...';
+
+  @override
+  String get monthView => '월';
+
+  @override
+  String get weekView => '주';
+
+  @override
+  String get dayView => '일';
+
+  @override
+  String noFilterContent(String filter) => '$filter 콘텐츠 없음';
+
+  @override
+  String get tryDifferentFilter => '다른 필터나 날짜를 선택해보세요';
+
+  @override
+  String itemsScheduled(int count) => '$count 개 예약됨';
+
+  @override
+  String get entertainment => '오락';
+
+  @override
+  String get aiRecommendations => 'AI 추천';
+
+  @override
+  String suggestedFor(String time) => '$time 에 추천';
+
+  @override
+  String movedNear(String item, String target) => '"$item"을 "$target" 근처로 이동했습니다';
+
+  @override
+  String get unknownTitle => '알 수 없는 제목';
+
+  @override
+  String get unknownCreator => '알 수 없는 크리에이터';
+
+  @override
+  String get playback => '재생';
+
+  @override
+  String get autoplay => '자동 재생';
+
+  @override
+  String get autoplayHint => '다음 동영상 자동 재생';
+
+  @override
+  String get videoQuality => '동영상 품질';
+
+  @override
+  String get dataSaver => '데이터 절약';
+
+  @override
+  String get dataSaverHint => '스트리밍 시 데이터 사용량 절약';
+
+  @override
+  String get pushNotificationsHint => '팔로우한 크리에이터의 새 콘텐츠';
+
+  @override
+  String get appearance => '외관';
+
+  @override
+  String get darkModeHint => '앱 전체에 다크 테마 사용';
+
+  @override
+  String get appLanguage => '앱 언어';
+
+  @override
+  String get contentLanguage => '콘텐츠 언어';
+
+  @override
+  String get library => '라이브러리';
+
+  @override
+  String get savedVideos => '저장된 동영상';
+
+  @override
+  String get previouslyWatchedVideos => '이전에 시청한 동영상';
+
+  @override
+  String get privacyAndData => '개인 정보 및 데이터';
+
+  @override
+  String get usageAnalytics => '사용 분석';
+
+  @override
+  String get usageAnalyticsHint => '익명 데이터로 앱 개선에 도움을 주세요';
+
+  @override
+  String get clearWatchHistory => '시청 기록 지우기';
+
+  @override
+  String get clearWatchHistoryHint => '기록에서 모든 동영상 제거';
+
+  @override
+  String get clearCache => '캐시 지우기';
+
+  @override
+  String get clearCacheHint => '저장 공간 확보';
+
+  @override
+  String get changePassword => '비밀번호 변경';
+
+  @override
+  String get appVersion => '앱 버전';
+
+  @override
+  String get termsOfService => '서비스 약관';
+
+  @override
+  String get afeediProActive => 'Afeedi Pro — 활성';
+
+  @override
+  String get upgradeToPro => 'Pro 업그레이드';
+
+  @override
+  String get proFeatures => '광고 없음 · 무제한 저장 · AI 피드';
+
+  @override
+  String get freeFeatures => '광고 없음, AI 피드, 무제한 저장';
+
+  @override
+  String get clearHistoryConfirm => '시청 기록의 모든 동영상이 삭제됩니다. 이 작업은 취소할 수 없습니다.';
+
+  @override
+  String get watchHistoryClearedSnackbar => '시청 기록이 지워졌습니다';
+
+  @override
+  String get cacheClearedSnackbar => '캐시가 성공적으로 지워졌습니다';
+
+  @override
+  String get currentPassword => '현재 비밀번호';
+
+  @override
+  String get newPassword => '새 비밀번호';
+
+  @override
+  String get confirmNewPassword => '새 비밀번호 확인';
+
+  @override
+  String get minEightChars => '최소 8자';
+
+  @override
+  String get passwordsDoNotMatch => '비밀번호가 일치하지 않습니다';
+
+  @override
+  String get required => '필수';
+
+  @override
+  String get passwordChangedSuccessfully => '비밀번호가 성공적으로 변경되었습니다';
+
+  @override
+  String get currentPasswordIncorrect => '현재 비밀번호가 올바르지 않습니다';
+
+  @override
+  String get signOutConfirm => '로그아웃 하시겠습니까?';
+
+  @override
+  String get deleteAccountConfirm => '정말 삭제하시겠습니까? 취소할 수 없습니다.';
+
+  @override
+  String get videosWatchedLabel => '시청한\n동영상';
+
+  @override
+  String get watchTimeLabel => '시청\n시간';
 }

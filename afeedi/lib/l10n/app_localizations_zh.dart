@@ -469,4 +469,316 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get resetAll => '全部重置';
+
+  @override
+  String get back => '返回';
+
+  @override
+  String get cancel => '取消';
+
+  @override
+  String get delete => '删除';
+
+  @override
+  String get clear => '清除';
+
+  @override
+  String get update => '更新';
+
+  @override
+  String get play => '播放';
+
+  @override
+  String get manage => '管理';
+
+  @override
+  String get seePlans => '查看套餐';
+
+  @override
+  String get disconnect => '断开连接';
+
+  @override
+  String get viewAll => '查看全部';
+
+  @override
+  String get showMore => '显示更多';
+
+  @override
+  String get showLess => '收起';
+
+  @override
+  String memberSince(String date) => '成员自 $date';
+
+  @override
+  String get noLikedContent => '没有喜欢的内容';
+
+  @override
+  String get noLikedContentHint => '您喜欢的视频将显示在这里';
+
+  @override
+  String get nothingSavedYet => '暂无保存内容';
+
+  @override
+  String get bookmarkContentHint => '收藏内容以在此查看';
+
+  @override
+  String get noHistoryYet => '暂无历史记录';
+
+  @override
+  String get noHistoryHint => '您观看的视频将显示在这里';
+
+  @override
+  String watchedOf(String watched, String total) => '已看 $watched / $total';
+
+  @override
+  String get removeFromHistory => '从历史记录中删除';
+
+  @override
+  String get engagementScore => '互动分数';
+
+  @override
+  String ofMaxKeepWatching(int pct) => '最高分的 $pct% — 继续观看！';
+
+  @override
+  String get watchedLabel => '已看';
+
+  @override
+  String get displayName => '显示名称';
+
+  @override
+  String get nameCannotBeEmpty => '名称不能为空';
+
+  @override
+  String get nameTooLong => '名称过长（最多 50 个字符）';
+
+  @override
+  String get bio => '简介';
+
+  @override
+  String get defaultBio => '好奇的心灵。内容探索者。一个动态一步步看世界。';
+
+  @override
+  String get editProfileTooltip => '编辑资料';
+
+  @override
+  String get googleCalendar => 'Google 日历';
+
+  @override
+  String get readOnlyAccess => '只读访问';
+
+  @override
+  String get readOnlyAccessHint => '我们只读取事件，从不修改';
+
+  @override
+  String get seeEventsInApp => '在应用中查看事件';
+
+  @override
+  String get seeEventsInAppHint => '您的日历与内容计划并排显示';
+
+  @override
+  String get privateAndLocal => '私密且本地';
+
+  @override
+  String get privateAndLocalHint => '数据保留在设备上；我们从不分享';
+
+  @override
+  String get connecting => '连接中...';
+
+  @override
+  String get connectWithGoogle => '连接 Google';
+
+  @override
+  String get couldNotConnect => '无法连接 — 请检查权限并重试。';
+
+  @override
+  String get noUpcomingEvents => '暂无即将到来的事件';
+
+  @override
+  String get allDay => '全天';
+
+  @override
+  String get personalizedContentSchedule => '您的个性化内容计划';
+
+  @override
+  String get contentCategories => '内容分类';
+
+  @override
+  String get categoryFilter => '分类筛选';
+
+  @override
+  String get percentageFilter => '百分比筛选';
+
+  @override
+  String educationPct(int pct) => '教育: $pct%';
+
+  @override
+  String entertainmentPct(int pct) => '娱乐: $pct%';
+
+  @override
+  String get searchContent => '搜索内容...';
+
+  @override
+  String get monthView => '月';
+
+  @override
+  String get weekView => '周';
+
+  @override
+  String get dayView => '日';
+
+  @override
+  String noFilterContent(String filter) => '没有 $filter 内容';
+
+  @override
+  String get tryDifferentFilter => '请尝试不同的筛选条件或日期';
+
+  @override
+  String itemsScheduled(int count) => '$count 个已安排';
+
+  @override
+  String get entertainment => '娱乐';
+
+  @override
+  String get aiRecommendations => 'AI 推荐';
+
+  @override
+  String suggestedFor(String time) => '推荐于 $time';
+
+  @override
+  String movedNear(String item, String target) => '已将"$item"移至"$target"附近';
+
+  @override
+  String get unknownTitle => '未知标题';
+
+  @override
+  String get unknownCreator => '未知创作者';
+
+  @override
+  String get playback => '播放';
+
+  @override
+  String get autoplay => '自动播放';
+
+  @override
+  String get autoplayHint => '自动播放下一个视频';
+
+  @override
+  String get videoQuality => '视频质量';
+
+  @override
+  String get dataSaver => '省流模式';
+
+  @override
+  String get dataSaverHint => '减少流媒体播放时的数据使用';
+
+  @override
+  String get pushNotificationsHint => '来自关注创作者的新内容';
+
+  @override
+  String get appearance => '外观';
+
+  @override
+  String get darkModeHint => '在整个应用中使用深色主题';
+
+  @override
+  String get appLanguage => '应用语言';
+
+  @override
+  String get contentLanguage => '内容语言';
+
+  @override
+  String get library => '库';
+
+  @override
+  String get savedVideos => '已保存视频';
+
+  @override
+  String get previouslyWatchedVideos => '之前观看的视频';
+
+  @override
+  String get privacyAndData => '隐私与数据';
+
+  @override
+  String get usageAnalytics => '使用分析';
+
+  @override
+  String get usageAnalyticsHint => '使用匿名数据帮助改进应用';
+
+  @override
+  String get clearWatchHistory => '清除观看历史';
+
+  @override
+  String get clearWatchHistoryHint => '从历史记录中删除所有视频';
+
+  @override
+  String get clearCache => '清除缓存';
+
+  @override
+  String get clearCacheHint => '释放存储空间';
+
+  @override
+  String get changePassword => '更改密码';
+
+  @override
+  String get appVersion => '应用版本';
+
+  @override
+  String get termsOfService => '服务条款';
+
+  @override
+  String get afeediProActive => 'Afeedi Pro — 已激活';
+
+  @override
+  String get upgradeToPro => '升级到 Pro';
+
+  @override
+  String get proFeatures => '无广告 · 无限保存 · AI 动态';
+
+  @override
+  String get freeFeatures => '无广告、AI 动态、无限保存';
+
+  @override
+  String get clearHistoryConfirm => '这将删除您观看历史中的所有视频。此操作无法撤销。';
+
+  @override
+  String get watchHistoryClearedSnackbar => '观看历史已清除';
+
+  @override
+  String get cacheClearedSnackbar => '缓存已成功清除';
+
+  @override
+  String get currentPassword => '当前密码';
+
+  @override
+  String get newPassword => '新密码';
+
+  @override
+  String get confirmNewPassword => '确认新密码';
+
+  @override
+  String get minEightChars => '最少 8 个字符';
+
+  @override
+  String get passwordsDoNotMatch => '密码不匹配';
+
+  @override
+  String get required => '必填';
+
+  @override
+  String get passwordChangedSuccessfully => '密码已成功更改';
+
+  @override
+  String get currentPasswordIncorrect => '当前密码不正确';
+
+  @override
+  String get signOutConfirm => '您确定要退出吗？';
+
+  @override
+  String get deleteAccountConfirm => '您确定吗？此操作无法撤销。';
+
+  @override
+  String get videosWatchedLabel => '已看\n视频';
+
+  @override
+  String get watchTimeLabel => '观看\n时间';
 }

@@ -472,4 +472,316 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get resetAll => 'Сбросить всё';
+
+  @override
+  String get back => 'Назад';
+
+  @override
+  String get cancel => 'Отмена';
+
+  @override
+  String get delete => 'Удалить';
+
+  @override
+  String get clear => 'Очистить';
+
+  @override
+  String get update => 'Обновить';
+
+  @override
+  String get play => 'Воспроизвести';
+
+  @override
+  String get manage => 'Управлять';
+
+  @override
+  String get seePlans => 'Посмотреть планы';
+
+  @override
+  String get disconnect => 'Отключить';
+
+  @override
+  String get viewAll => 'Смотреть всё';
+
+  @override
+  String get showMore => 'Показать больше';
+
+  @override
+  String get showLess => 'Свернуть';
+
+  @override
+  String memberSince(String date) => 'Участник с $date';
+
+  @override
+  String get noLikedContent => 'Нет понравившегося контента';
+
+  @override
+  String get noLikedContentHint => 'Видео, которые вам понравятся, появятся здесь';
+
+  @override
+  String get nothingSavedYet => 'Ничего не сохранено';
+
+  @override
+  String get bookmarkContentHint => 'Добавьте контент в закладки, чтобы увидеть его здесь';
+
+  @override
+  String get noHistoryYet => 'История пуста';
+
+  @override
+  String get noHistoryHint => 'Просмотренные видео появятся здесь';
+
+  @override
+  String watchedOf(String watched, String total) => 'Просмотрено $watched из $total';
+
+  @override
+  String get removeFromHistory => 'Удалить из истории';
+
+  @override
+  String get engagementScore => 'Оценка вовлечённости';
+
+  @override
+  String ofMaxKeepWatching(int pct) => '$pct% от максимума — продолжайте смотреть!';
+
+  @override
+  String get watchedLabel => 'Просмотрено';
+
+  @override
+  String get displayName => 'Отображаемое имя';
+
+  @override
+  String get nameCannotBeEmpty => 'Имя не может быть пустым';
+
+  @override
+  String get nameTooLong => 'Имя слишком длинное (макс. 50 символов)';
+
+  @override
+  String get bio => 'О себе';
+
+  @override
+  String get defaultBio => 'Любопытный ум. Исследователь контента. Вижу мир через один фид.';
+
+  @override
+  String get editProfileTooltip => 'Редактировать профиль';
+
+  @override
+  String get googleCalendar => 'Google Календарь';
+
+  @override
+  String get readOnlyAccess => 'Доступ только для чтения';
+
+  @override
+  String get readOnlyAccessHint => 'Мы только читаем события, никогда не изменяем их';
+
+  @override
+  String get seeEventsInApp => 'Просматривать события в приложении';
+
+  @override
+  String get seeEventsInAppHint => 'Ваш календарь отображается рядом с расписанием контента';
+
+  @override
+  String get privateAndLocal => 'Приватно и локально';
+
+  @override
+  String get privateAndLocalHint => 'Данные хранятся на устройстве, мы никогда не делимся ими';
+
+  @override
+  String get connecting => 'Подключение...';
+
+  @override
+  String get connectWithGoogle => 'Подключить Google';
+
+  @override
+  String get couldNotConnect => 'Не удалось подключиться — проверьте разрешения и попробуйте снова.';
+
+  @override
+  String get noUpcomingEvents => 'Предстоящих событий нет';
+
+  @override
+  String get allDay => 'Весь день';
+
+  @override
+  String get personalizedContentSchedule => 'Ваше персональное расписание контента';
+
+  @override
+  String get contentCategories => 'Категории контента';
+
+  @override
+  String get categoryFilter => 'Фильтр по категории';
+
+  @override
+  String get percentageFilter => 'Фильтр по проценту';
+
+  @override
+  String educationPct(int pct) => 'Образование: $pct%';
+
+  @override
+  String entertainmentPct(int pct) => 'Развлечения: $pct%';
+
+  @override
+  String get searchContent => 'Поиск контента...';
+
+  @override
+  String get monthView => 'Месяц';
+
+  @override
+  String get weekView => 'Неделя';
+
+  @override
+  String get dayView => 'День';
+
+  @override
+  String noFilterContent(String filter) => 'Нет контента: $filter';
+
+  @override
+  String get tryDifferentFilter => 'Попробуйте другой фильтр или дату';
+
+  @override
+  String itemsScheduled(int count) => '$count запланировано';
+
+  @override
+  String get entertainment => 'Развлечения';
+
+  @override
+  String get aiRecommendations => 'Рекомендации ИИ';
+
+  @override
+  String suggestedFor(String time) => 'Предложено на $time';
+
+  @override
+  String movedNear(String item, String target) => '"$item" перемещён рядом с "$target"';
+
+  @override
+  String get unknownTitle => 'Неизвестное название';
+
+  @override
+  String get unknownCreator => 'Неизвестный автор';
+
+  @override
+  String get playback => 'Воспроизведение';
+
+  @override
+  String get autoplay => 'Автовоспроизведение';
+
+  @override
+  String get autoplayHint => 'Автоматически воспроизводить следующее видео';
+
+  @override
+  String get videoQuality => 'Качество видео';
+
+  @override
+  String get dataSaver => 'Экономия данных';
+
+  @override
+  String get dataSaverHint => 'Уменьшить использование данных при потоковом воспроизведении';
+
+  @override
+  String get pushNotificationsHint => 'Новый контент от подписок';
+
+  @override
+  String get appearance => 'Внешний вид';
+
+  @override
+  String get darkModeHint => 'Использовать тёмную тему во всём приложении';
+
+  @override
+  String get appLanguage => 'Язык приложения';
+
+  @override
+  String get contentLanguage => 'Язык контента';
+
+  @override
+  String get library => 'Библиотека';
+
+  @override
+  String get savedVideos => 'Сохранённые видео';
+
+  @override
+  String get previouslyWatchedVideos => 'Ранее просмотренные видео';
+
+  @override
+  String get privacyAndData => 'Конфиденциальность и данные';
+
+  @override
+  String get usageAnalytics => 'Аналитика использования';
+
+  @override
+  String get usageAnalyticsHint => 'Помогите улучшить приложение с помощью анонимных данных';
+
+  @override
+  String get clearWatchHistory => 'Очистить историю просмотров';
+
+  @override
+  String get clearWatchHistoryHint => 'Удалить все видео из истории';
+
+  @override
+  String get clearCache => 'Очистить кэш';
+
+  @override
+  String get clearCacheHint => 'Освободить место в памяти';
+
+  @override
+  String get changePassword => 'Изменить пароль';
+
+  @override
+  String get appVersion => 'Версия приложения';
+
+  @override
+  String get termsOfService => 'Условия использования';
+
+  @override
+  String get afeediProActive => 'Afeedi Pro — Активен';
+
+  @override
+  String get upgradeToPro => 'Перейти на Pro';
+
+  @override
+  String get proFeatures => 'Без рекламы · Безлимитное сохранение · ИИ-лента';
+
+  @override
+  String get freeFeatures => 'Без рекламы, ИИ-лента, безлимитное сохранение';
+
+  @override
+  String get clearHistoryConfirm => 'Это удалит все видео из вашей истории просмотров. Это действие нельзя отменить.';
+
+  @override
+  String get watchHistoryClearedSnackbar => 'История просмотров очищена';
+
+  @override
+  String get cacheClearedSnackbar => 'Кэш успешно очищен';
+
+  @override
+  String get currentPassword => 'Текущий пароль';
+
+  @override
+  String get newPassword => 'Новый пароль';
+
+  @override
+  String get confirmNewPassword => 'Подтвердите новый пароль';
+
+  @override
+  String get minEightChars => 'Мин. 8 символов';
+
+  @override
+  String get passwordsDoNotMatch => 'Пароли не совпадают';
+
+  @override
+  String get required => 'Обязательно';
+
+  @override
+  String get passwordChangedSuccessfully => 'Пароль успешно изменён';
+
+  @override
+  String get currentPasswordIncorrect => 'Текущий пароль неверен';
+
+  @override
+  String get signOutConfirm => 'Вы уверены, что хотите выйти?';
+
+  @override
+  String get deleteAccountConfirm => 'Вы уверены? Это действие нельзя отменить.';
+
+  @override
+  String get videosWatchedLabel => 'Просмотрено\nвидео';
+
+  @override
+  String get watchTimeLabel => 'Время\nпросмотра';
 }

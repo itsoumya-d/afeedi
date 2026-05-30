@@ -471,4 +471,316 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resetAll => 'إعادة تعيين الكل';
+
+  @override
+  String get back => 'رجوع';
+
+  @override
+  String get cancel => 'إلغاء';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get clear => 'مسح';
+
+  @override
+  String get update => 'تحديث';
+
+  @override
+  String get play => 'تشغيل';
+
+  @override
+  String get manage => 'إدارة';
+
+  @override
+  String get seePlans => 'عرض الخطط';
+
+  @override
+  String get disconnect => 'قطع الاتصال';
+
+  @override
+  String get viewAll => 'عرض الكل';
+
+  @override
+  String get showMore => 'عرض المزيد';
+
+  @override
+  String get showLess => 'عرض أقل';
+
+  @override
+  String memberSince(String date) => 'عضو منذ $date';
+
+  @override
+  String get noLikedContent => 'لا يوجد محتوى معجب به';
+
+  @override
+  String get noLikedContentHint => 'ستظهر مقاطع الفيديو التي تعجبك هنا';
+
+  @override
+  String get nothingSavedYet => 'لم يتم حفظ أي شيء بعد';
+
+  @override
+  String get bookmarkContentHint => 'احفظ المحتوى لرؤيته هنا';
+
+  @override
+  String get noHistoryYet => 'لا يوجد سجل بعد';
+
+  @override
+  String get noHistoryHint => 'ستظهر مقاطع الفيديو التي شاهدتها هنا';
+
+  @override
+  String watchedOf(String watched, String total) => 'شاهدت $watched من $total';
+
+  @override
+  String get removeFromHistory => 'إزالة من السجل';
+
+  @override
+  String get engagementScore => 'نقاط التفاعل';
+
+  @override
+  String ofMaxKeepWatching(int pct) => '$pct% من الحد الأقصى — واصل المشاهدة!';
+
+  @override
+  String get watchedLabel => 'شوهد';
+
+  @override
+  String get displayName => 'اسم العرض';
+
+  @override
+  String get nameCannotBeEmpty => 'لا يمكن أن يكون الاسم فارغاً';
+
+  @override
+  String get nameTooLong => 'الاسم طويل جداً (الحد الأقصى 50 حرفاً)';
+
+  @override
+  String get bio => 'نبذة';
+
+  @override
+  String get defaultBio => 'عقل فضولي. مستكشف محتوى. أشاهد العالم خطوة بخطوة.';
+
+  @override
+  String get editProfileTooltip => 'تعديل الملف الشخصي';
+
+  @override
+  String get googleCalendar => 'تقويم Google';
+
+  @override
+  String get readOnlyAccess => 'وصول للقراءة فقط';
+
+  @override
+  String get readOnlyAccessHint => 'نقرأ الأحداث فقط ولا نعدّلها أبداً';
+
+  @override
+  String get seeEventsInApp => 'عرض الأحداث في التطبيق';
+
+  @override
+  String get seeEventsInAppHint => 'يظهر تقويمك جنباً إلى جنب مع جدول المحتوى';
+
+  @override
+  String get privateAndLocal => 'خاص ومحلي';
+
+  @override
+  String get privateAndLocalHint => 'تبقى البيانات على الجهاز ولا نشاركها أبداً';
+
+  @override
+  String get connecting => 'جارٍ الاتصال...';
+
+  @override
+  String get connectWithGoogle => 'الاتصال بـ Google';
+
+  @override
+  String get couldNotConnect => 'تعذّر الاتصال — تحقق من الأذونات وحاول مجدداً.';
+
+  @override
+  String get noUpcomingEvents => 'لا توجد أحداث قادمة';
+
+  @override
+  String get allDay => 'طوال اليوم';
+
+  @override
+  String get personalizedContentSchedule => 'جدول المحتوى الشخصي';
+
+  @override
+  String get contentCategories => 'فئات المحتوى';
+
+  @override
+  String get categoryFilter => 'تصفية الفئة';
+
+  @override
+  String get percentageFilter => 'تصفية النسبة';
+
+  @override
+  String educationPct(int pct) => 'التعليم: $pct%';
+
+  @override
+  String entertainmentPct(int pct) => 'الترفيه: $pct%';
+
+  @override
+  String get searchContent => 'ابحث عن محتوى...';
+
+  @override
+  String get monthView => 'شهر';
+
+  @override
+  String get weekView => 'أسبوع';
+
+  @override
+  String get dayView => 'يوم';
+
+  @override
+  String noFilterContent(String filter) => 'لا يوجد محتوى $filter';
+
+  @override
+  String get tryDifferentFilter => 'جرّب تصفية أو تاريخاً مختلفاً';
+
+  @override
+  String itemsScheduled(int count) => '$count عنصر مجدوَل';
+
+  @override
+  String get entertainment => 'ترفيه';
+
+  @override
+  String get aiRecommendations => 'توصيات الذكاء الاصطناعي';
+
+  @override
+  String suggestedFor(String time) => 'مقترح لـ $time';
+
+  @override
+  String movedNear(String item, String target) => 'تم نقل "$item" بالقرب من "$target"';
+
+  @override
+  String get unknownTitle => 'عنوان غير معروف';
+
+  @override
+  String get unknownCreator => 'منشئ غير معروف';
+
+  @override
+  String get playback => 'التشغيل';
+
+  @override
+  String get autoplay => 'التشغيل التلقائي';
+
+  @override
+  String get autoplayHint => 'تشغيل الفيديو التالي تلقائياً';
+
+  @override
+  String get videoQuality => 'جودة الفيديو';
+
+  @override
+  String get dataSaver => 'توفير البيانات';
+
+  @override
+  String get dataSaverHint => 'تقليل استهلاك البيانات أثناء البث';
+
+  @override
+  String get pushNotificationsHint => 'محتوى جديد من المنشئين المتابَعين';
+
+  @override
+  String get appearance => 'المظهر';
+
+  @override
+  String get darkModeHint => 'استخدام السمة الداكنة في التطبيق';
+
+  @override
+  String get appLanguage => 'لغة التطبيق';
+
+  @override
+  String get contentLanguage => 'لغة المحتوى';
+
+  @override
+  String get library => 'المكتبة';
+
+  @override
+  String get savedVideos => 'الفيديوهات المحفوظة';
+
+  @override
+  String get previouslyWatchedVideos => 'الفيديوهات المشاهدة سابقاً';
+
+  @override
+  String get privacyAndData => 'الخصوصية والبيانات';
+
+  @override
+  String get usageAnalytics => 'تحليلات الاستخدام';
+
+  @override
+  String get usageAnalyticsHint => 'ساعد في تحسين التطبيق ببيانات مجهولة';
+
+  @override
+  String get clearWatchHistory => 'مسح سجل المشاهدة';
+
+  @override
+  String get clearWatchHistoryHint => 'إزالة جميع الفيديوهات من سجل المشاهدة';
+
+  @override
+  String get clearCache => 'مسح ذاكرة التخزين المؤقت';
+
+  @override
+  String get clearCacheHint => 'تحرير مساحة التخزين';
+
+  @override
+  String get changePassword => 'تغيير كلمة المرور';
+
+  @override
+  String get appVersion => 'إصدار التطبيق';
+
+  @override
+  String get termsOfService => 'شروط الخدمة';
+
+  @override
+  String get afeediProActive => 'أفيدي برو — نشط';
+
+  @override
+  String get upgradeToPro => 'الترقية إلى برو';
+
+  @override
+  String get proFeatures => 'بدون إعلانات · حفظ غير محدود · خلاصة ذكاء اصطناعي';
+
+  @override
+  String get freeFeatures => 'بدون إعلانات، خلاصة ذكاء اصطناعي، حفظ غير محدود';
+
+  @override
+  String get clearHistoryConfirm => 'سيزيل هذا جميع الفيديوهات من سجل مشاهدتك. لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get watchHistoryClearedSnackbar => 'تم مسح سجل المشاهدة';
+
+  @override
+  String get cacheClearedSnackbar => 'تم مسح ذاكرة التخزين المؤقت بنجاح';
+
+  @override
+  String get currentPassword => 'كلمة المرور الحالية';
+
+  @override
+  String get newPassword => 'كلمة المرور الجديدة';
+
+  @override
+  String get confirmNewPassword => 'تأكيد كلمة المرور الجديدة';
+
+  @override
+  String get minEightChars => 'الحد الأدنى 8 أحرف';
+
+  @override
+  String get passwordsDoNotMatch => 'كلمات المرور غير متطابقة';
+
+  @override
+  String get required => 'مطلوب';
+
+  @override
+  String get passwordChangedSuccessfully => 'تم تغيير كلمة المرور بنجاح';
+
+  @override
+  String get currentPasswordIncorrect => 'كلمة المرور الحالية غير صحيحة';
+
+  @override
+  String get signOutConfirm => 'هل أنت متأكد من تسجيل الخروج؟';
+
+  @override
+  String get deleteAccountConfirm => 'هل أنت متأكد؟ لا يمكن التراجع عن هذا.';
+
+  @override
+  String get videosWatchedLabel => 'فيديوهات\nمشاهَدة';
+
+  @override
+  String get watchTimeLabel => 'وقت\nالمشاهدة';
 }

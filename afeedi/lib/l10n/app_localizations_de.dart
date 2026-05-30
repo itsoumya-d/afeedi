@@ -472,4 +472,316 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get resetAll => 'Alle zurücksetzen';
+
+  @override
+  String get back => 'Zurück';
+
+  @override
+  String get cancel => 'Abbrechen';
+
+  @override
+  String get delete => 'Löschen';
+
+  @override
+  String get clear => 'Leeren';
+
+  @override
+  String get update => 'Aktualisieren';
+
+  @override
+  String get play => 'Abspielen';
+
+  @override
+  String get manage => 'Verwalten';
+
+  @override
+  String get seePlans => 'Pläne ansehen';
+
+  @override
+  String get disconnect => 'Trennen';
+
+  @override
+  String get viewAll => 'Alle anzeigen';
+
+  @override
+  String get showMore => 'Mehr anzeigen';
+
+  @override
+  String get showLess => 'Weniger anzeigen';
+
+  @override
+  String memberSince(String date) => 'Mitglied seit $date';
+
+  @override
+  String get noLikedContent => 'Keine gemochten Inhalte';
+
+  @override
+  String get noLikedContentHint => 'Videos, die du magst, erscheinen hier';
+
+  @override
+  String get nothingSavedYet => 'Noch nichts gespeichert';
+
+  @override
+  String get bookmarkContentHint => 'Lesezeichen setzen, um Inhalte hier zu sehen';
+
+  @override
+  String get noHistoryYet => 'Noch kein Verlauf';
+
+  @override
+  String get noHistoryHint => 'Videos, die du ansiehst, erscheinen hier';
+
+  @override
+  String watchedOf(String watched, String total) => '$watched von $total gesehen';
+
+  @override
+  String get removeFromHistory => 'Aus Verlauf entfernen';
+
+  @override
+  String get engagementScore => 'Engagement-Punkte';
+
+  @override
+  String ofMaxKeepWatching(int pct) => '$pct% des Maximums — weiter anschauen!';
+
+  @override
+  String get watchedLabel => 'Gesehen';
+
+  @override
+  String get displayName => 'Anzeigename';
+
+  @override
+  String get nameCannotBeEmpty => 'Name darf nicht leer sein';
+
+  @override
+  String get nameTooLong => 'Name zu lang (max. 50 Zeichen)';
+
+  @override
+  String get bio => 'Bio';
+
+  @override
+  String get defaultBio => 'Neugieriger Geist. Content-Entdecker. Die Welt ein Feed nach dem anderen erkunden.';
+
+  @override
+  String get editProfileTooltip => 'Profil bearbeiten';
+
+  @override
+  String get googleCalendar => 'Google Kalender';
+
+  @override
+  String get readOnlyAccess => 'Nur-Lese-Zugriff';
+
+  @override
+  String get readOnlyAccessHint => 'Wir lesen nur Ereignisse, ändern sie nie';
+
+  @override
+  String get seeEventsInApp => 'Ereignisse in der App sehen';
+
+  @override
+  String get seeEventsInAppHint => 'Dein Kalender erscheint neben deinem Inhaltsplan';
+
+  @override
+  String get privateAndLocal => 'Privat & lokal';
+
+  @override
+  String get privateAndLocalHint => 'Daten bleiben auf dem Gerät; wir teilen sie nie';
+
+  @override
+  String get connecting => 'Verbinden...';
+
+  @override
+  String get connectWithGoogle => 'Mit Google verbinden';
+
+  @override
+  String get couldNotConnect => 'Verbindung fehlgeschlagen — Berechtigungen prüfen und erneut versuchen.';
+
+  @override
+  String get noUpcomingEvents => 'Keine bevorstehenden Ereignisse';
+
+  @override
+  String get allDay => 'Ganztägig';
+
+  @override
+  String get personalizedContentSchedule => 'Dein personalisierter Inhaltsplan';
+
+  @override
+  String get contentCategories => 'Inhaltskategorien';
+
+  @override
+  String get categoryFilter => 'Kategoriefilter';
+
+  @override
+  String get percentageFilter => 'Prozentfilter';
+
+  @override
+  String educationPct(int pct) => 'Bildung: $pct%';
+
+  @override
+  String entertainmentPct(int pct) => 'Unterhaltung: $pct%';
+
+  @override
+  String get searchContent => 'Inhalte suchen...';
+
+  @override
+  String get monthView => 'Monat';
+
+  @override
+  String get weekView => 'Woche';
+
+  @override
+  String get dayView => 'Tag';
+
+  @override
+  String noFilterContent(String filter) => 'Kein $filter Inhalt';
+
+  @override
+  String get tryDifferentFilter => 'Versuche einen anderen Filter oder ein anderes Datum';
+
+  @override
+  String itemsScheduled(int count) => '$count Elemente geplant';
+
+  @override
+  String get entertainment => 'Unterhaltung';
+
+  @override
+  String get aiRecommendations => 'KI-Empfehlungen';
+
+  @override
+  String suggestedFor(String time) => 'Vorgeschlagen für $time';
+
+  @override
+  String movedNear(String item, String target) => '"$item" in die Nähe von "$target" verschoben';
+
+  @override
+  String get unknownTitle => 'Unbekannter Titel';
+
+  @override
+  String get unknownCreator => 'Unbekannter Creator';
+
+  @override
+  String get playback => 'Wiedergabe';
+
+  @override
+  String get autoplay => 'Automatisch abspielen';
+
+  @override
+  String get autoplayHint => 'Nächstes Video automatisch abspielen';
+
+  @override
+  String get videoQuality => 'Videoqualität';
+
+  @override
+  String get dataSaver => 'Datensparfunktion';
+
+  @override
+  String get dataSaverHint => 'Datenverbrauch beim Streaming reduzieren';
+
+  @override
+  String get pushNotificationsHint => 'Neue Inhalte von gefolgten Creators';
+
+  @override
+  String get appearance => 'Erscheinungsbild';
+
+  @override
+  String get darkModeHint => 'Dunkles Design in der gesamten App verwenden';
+
+  @override
+  String get appLanguage => 'App-Sprache';
+
+  @override
+  String get contentLanguage => 'Inhaltssprache';
+
+  @override
+  String get library => 'Bibliothek';
+
+  @override
+  String get savedVideos => 'Gespeicherte Videos';
+
+  @override
+  String get previouslyWatchedVideos => 'Zuvor angesehene Videos';
+
+  @override
+  String get privacyAndData => 'Datenschutz & Daten';
+
+  @override
+  String get usageAnalytics => 'Nutzungsanalysen';
+
+  @override
+  String get usageAnalyticsHint => 'Hilf, die App mit anonymen Daten zu verbessern';
+
+  @override
+  String get clearWatchHistory => 'Verlauf leeren';
+
+  @override
+  String get clearWatchHistoryHint => 'Alle angesehenen Videos aus dem Verlauf entfernen';
+
+  @override
+  String get clearCache => 'Cache leeren';
+
+  @override
+  String get clearCacheHint => 'Speicherplatz freigeben';
+
+  @override
+  String get changePassword => 'Passwort ändern';
+
+  @override
+  String get appVersion => 'App-Version';
+
+  @override
+  String get termsOfService => 'Nutzungsbedingungen';
+
+  @override
+  String get afeediProActive => 'Afeedi Pro — Aktiv';
+
+  @override
+  String get upgradeToPro => 'Auf Pro upgraden';
+
+  @override
+  String get proFeatures => 'Werbefrei · Unbegrenztes Speichern · KI-Feed';
+
+  @override
+  String get freeFeatures => 'Werbefrei, KI-Feed, unbegrenztes Speichern';
+
+  @override
+  String get clearHistoryConfirm => 'Dadurch werden alle Videos aus deinem Verlauf entfernt. Diese Aktion kann nicht rückgängig gemacht werden.';
+
+  @override
+  String get watchHistoryClearedSnackbar => 'Verlauf geleert';
+
+  @override
+  String get cacheClearedSnackbar => 'Cache erfolgreich geleert';
+
+  @override
+  String get currentPassword => 'Aktuelles Passwort';
+
+  @override
+  String get newPassword => 'Neues Passwort';
+
+  @override
+  String get confirmNewPassword => 'Neues Passwort bestätigen';
+
+  @override
+  String get minEightChars => 'Min. 8 Zeichen';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwörter stimmen nicht überein';
+
+  @override
+  String get required => 'Erforderlich';
+
+  @override
+  String get passwordChangedSuccessfully => 'Passwort erfolgreich geändert';
+
+  @override
+  String get currentPasswordIncorrect => 'Aktuelles Passwort ist falsch';
+
+  @override
+  String get signOutConfirm => 'Bist du sicher, dass du dich abmelden möchtest?';
+
+  @override
+  String get deleteAccountConfirm => 'Bist du sicher? Dies kann nicht rückgängig gemacht werden.';
+
+  @override
+  String get videosWatchedLabel => 'Videos\ngesehen';
+
+  @override
+  String get watchTimeLabel => 'Seh-\nzeit';
 }

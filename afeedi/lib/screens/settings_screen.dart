@@ -92,19 +92,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildPremiumBanner(context),
 
           // ── PLAYBACK ────────────────────────────────────────────────
-          _sectionHeader('Playback'),
+          _sectionHeader(AppLocalizations.of(context)?.playback ?? 'Playback'),
           SwitchListTile(
             secondary:
                 const Icon(Icons.play_circle_outline, color: Colors.white70),
-            title: const Text(
-              'Autoplay',
-              style: TextStyle(color: Colors.white, fontSize: 15),
+            title: Text(
+              AppLocalizations.of(context)?.autoplay ?? 'Autoplay',
+              style: const TextStyle(color: Colors.white, fontSize: 15),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            subtitle: const Text(
-              'Automatically play next video',
-              style: TextStyle(color: Colors.white60, fontSize: 12),
+            subtitle: Text(
+              AppLocalizations.of(context)?.autoplayHint ?? 'Automatically play next video',
+              style: const TextStyle(color: Colors.white60, fontSize: 12),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -121,7 +121,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           _dropdownTile(
             icon: Icons.hd,
-            title: 'Video Quality',
+            title: AppLocalizations.of(context)?.videoQuality ?? 'Video Quality',
             value: _videoQuality,
             options: ['Auto', '1080p', '720p', '480p', '360p'],
             onChanged: (v) {
@@ -132,15 +132,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           SwitchListTile(
             secondary:
                 const Icon(Icons.data_saver_on, color: Colors.white70),
-            title: const Text(
-              'Data Saver',
-              style: TextStyle(color: Colors.white, fontSize: 15),
+            title: Text(
+              AppLocalizations.of(context)?.dataSaver ?? 'Data Saver',
+              style: const TextStyle(color: Colors.white, fontSize: 15),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            subtitle: const Text(
-              'Reduce data usage while streaming',
-              style: TextStyle(color: Colors.white60, fontSize: 12),
+            subtitle: Text(
+              AppLocalizations.of(context)?.dataSaverHint ?? 'Reduce data usage while streaming',
+              style: const TextStyle(color: Colors.white60, fontSize: 12),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -162,15 +162,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           SwitchListTile(
             secondary: const Icon(Icons.notifications_outlined,
                 color: Colors.white70),
-            title: const Text(
-              'Push Notifications',
-              style: TextStyle(color: Colors.white, fontSize: 15),
+            title: Text(
+              AppLocalizations.of(context)?.pushNotifications ?? 'Push Notifications',
+              style: const TextStyle(color: Colors.white, fontSize: 15),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            subtitle: const Text(
-              'New content from followed creators',
-              style: TextStyle(color: Colors.white60, fontSize: 12),
+            subtitle: Text(
+              AppLocalizations.of(context)?.pushNotificationsHint ?? 'New content from followed creators',
+              style: const TextStyle(color: Colors.white60, fontSize: 12),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -192,7 +192,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(color: Colors.white10, height: 1),
 
           // ── APPEARANCE ───────────────────────────────────────────────
-          _sectionHeader('Appearance'),
+          _sectionHeader(AppLocalizations.of(context)?.appearance ?? 'Appearance'),
           SwitchListTile(
             secondary: const Icon(Icons.dark_mode_outlined,
                 color: Colors.white70),
@@ -202,9 +202,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            subtitle: const Text(
-              'Use dark theme throughout the app',
-              style: TextStyle(color: Colors.white60, fontSize: 12),
+            subtitle: Text(
+              AppLocalizations.of(context)?.darkModeHint ?? 'Use dark theme throughout the app',
+              style: const TextStyle(color: Colors.white60, fontSize: 12),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -230,7 +230,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
               return _navTile(
                 icon: Icons.translate,
-                title: 'App Language',
+                title: AppLocalizations.of(context)?.appLanguage ?? 'App Language',
                 subtitle: '${lang["flag"]} ${lang["nativeName"]}',
                 onTap: () => LanguageSelectorSheet.show(context),
               );
@@ -238,7 +238,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           _dropdownTile(
             icon: Icons.language,
-            title: 'Content Language',
+            title: AppLocalizations.of(context)?.contentLanguage ?? 'Content Language',
             value: _contentLanguage,
             options: [
               'English',
@@ -262,35 +262,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(color: Colors.white10, height: 1),
 
           // ── LIBRARY ──────────────────────────────────────────────────
-          _sectionHeader('Library'),
+          _sectionHeader(AppLocalizations.of(context)?.library ?? 'Library'),
           _navTile(
             icon: Icons.bookmark_outline,
-            title: 'Bookmarks',
-            subtitle: 'Saved videos',
+            title: AppLocalizations.of(context)?.bookmarks ?? 'Bookmarks',
+            subtitle: AppLocalizations.of(context)?.savedVideos ?? 'Saved videos',
             onTap: () => Navigator.pushNamed(context, AppRoutes.bookmarks),
           ),
           _navTile(
             icon: Icons.history,
-            title: 'Watch History',
-            subtitle: 'Previously watched videos',
+            title: AppLocalizations.of(context)?.watchHistory ?? 'Watch History',
+            subtitle: AppLocalizations.of(context)?.previouslyWatchedVideos ?? 'Previously watched videos',
             onTap: () => Navigator.pushNamed(context, AppRoutes.history),
           ),
           const Divider(color: Colors.white10, height: 1),
 
           // ── PRIVACY & DATA ───────────────────────────────────────────
-          _sectionHeader('Privacy & Data'),
+          _sectionHeader(AppLocalizations.of(context)?.privacyAndData ?? 'Privacy & Data'),
           SwitchListTile(
             secondary: const Icon(Icons.analytics_outlined,
                 color: Colors.white70),
-            title: const Text(
-              'Usage Analytics',
-              style: TextStyle(color: Colors.white, fontSize: 15),
+            title: Text(
+              AppLocalizations.of(context)?.usageAnalytics ?? 'Usage Analytics',
+              style: const TextStyle(color: Colors.white, fontSize: 15),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            subtitle: const Text(
-              'Help improve the app with anonymous data',
-              style: TextStyle(color: Colors.white60, fontSize: 12),
+            subtitle: Text(
+              AppLocalizations.of(context)?.usageAnalyticsHint ?? 'Help improve the app with anonymous data',
+              style: const TextStyle(color: Colors.white60, fontSize: 12),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -307,34 +307,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           _navTile(
             icon: Icons.delete_outline,
-            title: 'Clear Watch History',
-            subtitle: 'Remove all watched videos from history',
+            title: AppLocalizations.of(context)?.clearWatchHistory ?? 'Clear Watch History',
+            subtitle: AppLocalizations.of(context)?.clearWatchHistoryHint ?? 'Remove all watched videos from history',
             iconColor: Colors.orange,
             onTap: _confirmClearHistory,
           ),
           _navTile(
             icon: Icons.download_done_outlined,
-            title: 'Clear Cache',
-            subtitle: 'Free up storage space',
+            title: AppLocalizations.of(context)?.clearCache ?? 'Clear Cache',
+            subtitle: AppLocalizations.of(context)?.clearCacheHint ?? 'Free up storage space',
             onTap: _clearCache,
           ),
           const Divider(color: Colors.white10, height: 1),
 
           // ── ACCOUNT ──────────────────────────────────────────────────
-          _sectionHeader('Account'),
+          _sectionHeader(AppLocalizations.of(context)?.account ?? 'Account'),
           _navTile(
             icon: Icons.person_outline,
-            title: 'Edit Profile',
+            title: AppLocalizations.of(context)?.editProfile ?? 'Edit Profile',
             onTap: () => Navigator.pushNamed(context, AppRoutes.profile),
           ),
           _navTile(
             icon: Icons.lock_outline,
-            title: 'Change Password',
+            title: AppLocalizations.of(context)?.changePassword ?? 'Change Password',
             onTap: _showChangePasswordDialog,
           ),
           _navTile(
             icon: Icons.logout,
-            title: 'Sign Out',
+            title: AppLocalizations.of(context)?.signOut ?? 'Sign Out',
             iconColor: const Color(0xFFFF6B6B),
             titleColor: const Color(0xFFFF6B6B),
             onTap: _confirmSignOut,
@@ -342,7 +342,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           _navTile(
             icon: Icons.delete_forever,
-            title: 'Delete Account',
+            title: AppLocalizations.of(context)?.deleteAccount ?? 'Delete Account',
             iconColor: Colors.red,
             titleColor: Colors.red,
             onTap: _confirmDeleteAccount,
@@ -351,10 +351,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(color: Colors.white10, height: 1),
 
           // ── ABOUT ────────────────────────────────────────────────────
-          _sectionHeader('About'),
+          _sectionHeader(AppLocalizations.of(context)?.about ?? 'About'),
           _navTile(
             icon: Icons.info_outline,
-            title: 'App Version',
+            title: AppLocalizations.of(context)?.appVersion ?? 'App Version',
             subtitle: '1.0.0 (Build 1)',
             onTap: null,
             showChevron: false,
@@ -367,7 +367,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           _navTile(
             icon: Icons.description_outlined,
-            title: 'Terms of Service',
+            title: AppLocalizations.of(context)?.termsOfService ?? 'Terms of Service',
             onTap: () => Navigator.pushNamed(context, AppRoutes.termsOfService),
           ),
 
@@ -418,7 +418,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isPremium ? 'Afeedi Pro — Active' : 'Upgrade to Pro',
+                        isPremium ? (AppLocalizations.of(context)?.afeediProActive ?? 'Afeedi Pro — Active') : (AppLocalizations.of(context)?.upgradeToPro ?? 'Upgrade to Pro'),
                         style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -429,8 +429,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(height: 2),
                       Text(
                         isPremium
-                            ? 'Ad-free · Unlimited saves · AI feed'
-                            : 'Ad-free, AI feed, unlimited saves',
+                            ? (AppLocalizations.of(context)?.proFeatures ?? 'Ad-free · Unlimited saves · AI feed')
+                            : (AppLocalizations.of(context)?.freeFeatures ?? 'Ad-free, AI feed, unlimited saves'),
                         style:
                             const TextStyle(color: Colors.white54, fontSize: 12),
                         maxLines: 1,
@@ -447,7 +447,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    isPremium ? 'Manage' : 'See Plans',
+                    isPremium ? (AppLocalizations.of(context)?.manage ?? 'Manage') : (AppLocalizations.of(context)?.seePlans ?? 'See Plans'),
                     style: const TextStyle(
                         color: Colors.black,
                         fontSize: 12,
@@ -555,21 +555,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1A1A2E),
-        title: const Text('Clear Watch History',
-            style: TextStyle(color: Colors.white),
+        title: Text(AppLocalizations.of(context)?.clearWatchHistory ?? 'Clear Watch History',
+            style: const TextStyle(color: Colors.white),
             maxLines: 1,
             overflow: TextOverflow.ellipsis),
-        content: const Text(
-          'This will remove all videos from your watch history. This action cannot be undone.',
-          style: TextStyle(color: Colors.white70),
+        content: Text(
+          AppLocalizations.of(context)?.clearHistoryConfirm ?? 'This will remove all videos from your watch history. This action cannot be undone.',
+          style: const TextStyle(color: Colors.white70),
           maxLines: 4,
           overflow: TextOverflow.ellipsis,
         ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel',
-                  style: TextStyle(color: Colors.white54))),
+              child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel',
+                  style: const TextStyle(color: Colors.white54))),
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
@@ -583,15 +583,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               await prefs.setInt('stat_videos_watched', 0);
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Watch history cleared'),
-                    backgroundColor: Color(0xFF1A1A2E),
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context)?.watchHistoryClearedSnackbar ?? 'Watch history cleared'),
+                    backgroundColor: const Color(0xFF1A1A2E),
                   ),
                 );
               }
             },
-            child: const Text('Clear',
-                style: TextStyle(color: Color(0xFFFF6B6B))),
+            child: Text(AppLocalizations.of(context)?.clear ?? 'Clear',
+                style: const TextStyle(color: Color(0xFFFF6B6B))),
           ),
         ],
       ),
@@ -602,10 +602,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     PaintingBinding.instance.imageCache.clear();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cache cleared successfully'),
-          backgroundColor: Color(0xFF1A1A2E),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)?.cacheClearedSnackbar ?? 'Cache cleared successfully'),
+          backgroundColor: const Color(0xFF1A1A2E),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -624,8 +624,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         builder: (ctx, setDialogState) => AlertDialog(
           backgroundColor: const Color(0xFF1A1A2E),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Change Password',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          title: Text(AppLocalizations.of(context)?.changePassword ?? 'Change Password',
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           content: Form(
             key: formKey,
             child: Column(
@@ -642,15 +642,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 12),
                 ],
-                _pwField(currentPwController, 'Current Password'),
+                _pwField(currentPwController, AppLocalizations.of(context)?.currentPassword ?? 'Current Password'),
                 const SizedBox(height: 12),
-                _pwField(newPwController, 'New Password', validator: (v) {
-                  if (v == null || v.length < 8) return 'Min 8 characters';
+                _pwField(newPwController, AppLocalizations.of(context)?.newPassword ?? 'New Password', validator: (v) {
+                  if (v == null || v.length < 8) return AppLocalizations.of(context)?.minEightChars ?? 'Min 8 characters';
                   return null;
                 }),
                 const SizedBox(height: 12),
-                _pwField(confirmPwController, 'Confirm New Password', validator: (v) {
-                  if (v != newPwController.text) return 'Passwords do not match';
+                _pwField(confirmPwController, AppLocalizations.of(context)?.confirmNewPassword ?? 'Confirm New Password', validator: (v) {
+                  if (v != newPwController.text) return AppLocalizations.of(context)?.passwordsDoNotMatch ?? 'Passwords do not match';
                   return null;
                 }),
               ],
@@ -659,7 +659,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+              child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel', style: const TextStyle(color: Colors.white54)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -677,13 +677,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 if (ok) {
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Password changed successfully')),
+                    SnackBar(content: Text(AppLocalizations.of(context)?.passwordChangedSuccessfully ?? 'Password changed successfully')),
                   );
                 } else {
-                  setDialogState(() => errorText = 'Current password is incorrect');
+                  setDialogState(() => errorText = AppLocalizations.of(context)?.currentPasswordIncorrect ?? 'Current password is incorrect');
                 }
               },
-              child: const Text('Update', style: TextStyle(fontWeight: FontWeight.w600)),
+              child: Text(AppLocalizations.of(context)?.update ?? 'Update', style: const TextStyle(fontWeight: FontWeight.w600)),
             ),
           ],
         ),
@@ -717,7 +717,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
       validator: validator ?? (v) {
-        if (v == null || v.isEmpty) return 'Required';
+        if (v == null || v.isEmpty) return AppLocalizations.of(context)?.required ?? 'Required';
         return null;
       },
     );
@@ -728,19 +728,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1A1A2E),
-        title: const Text('Sign Out',
-            style: TextStyle(color: Colors.white),
+        title: Text(AppLocalizations.of(context)?.signOut ?? 'Sign Out',
+            style: const TextStyle(color: Colors.white),
             maxLines: 1,
             overflow: TextOverflow.ellipsis),
-        content: const Text('Are you sure you want to sign out?',
-            style: TextStyle(color: Colors.white70),
+        content: Text(AppLocalizations.of(context)?.signOutConfirm ?? 'Are you sure you want to sign out?',
+            style: const TextStyle(color: Colors.white70),
             maxLines: 2,
             overflow: TextOverflow.ellipsis),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel',
-                  style: TextStyle(color: Colors.white54))),
+              child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel',
+                  style: const TextStyle(color: Colors.white54))),
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
@@ -750,8 +750,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     context, AppRoutes.welcome, (_) => false);
               }
             },
-            child: const Text('Sign Out',
-                style: TextStyle(color: Color(0xFFFF6B6B))),
+            child: Text(AppLocalizations.of(context)?.signOut ?? 'Sign Out',
+                style: const TextStyle(color: Color(0xFFFF6B6B))),
           ),
         ],
       ),
@@ -763,21 +763,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1A1A2E),
-        title: const Text('Delete Account',
-            style: TextStyle(color: Colors.white),
+        title: Text(AppLocalizations.of(context)?.deleteAccount ?? 'Delete Account',
+            style: const TextStyle(color: Colors.white),
             maxLines: 1,
             overflow: TextOverflow.ellipsis),
-        content: const Text(
-          'Are you sure? This cannot be undone.',
-          style: TextStyle(color: Colors.white70),
+        content: Text(
+          AppLocalizations.of(context)?.deleteAccountConfirm ?? 'Are you sure? This cannot be undone.',
+          style: const TextStyle(color: Colors.white70),
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
         ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel',
-                  style: TextStyle(color: Colors.white54))),
+              child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel',
+                  style: const TextStyle(color: Colors.white54))),
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
@@ -787,8 +787,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     context, AppRoutes.welcome, (route) => false);
               }
             },
-            child: const Text('Delete',
-                style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)?.delete ?? 'Delete',
+                style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),

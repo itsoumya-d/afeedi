@@ -10,6 +10,7 @@ import '../services/user_interaction_service.dart';
 import '../services/content_service.dart';
 import '../services/navigation_service.dart';
 import '../models/content_model.dart';
+import '../l10n/app_localizations.dart';
 
 // ─── Color palette ───────────────────────────────────────────────────────────
 const Color _bgPrimary       = Color(0xFF0D0B1E);
@@ -93,8 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   bool _isLoading = true;
   String? _localAvatarPath;
 
-  String _bioText =
-      'Curious mind. Content explorer. Watching the world one feed at a time.';
+  String _bioText = '';
 
   @override
   void initState() {
@@ -307,7 +307,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     borderRadius: BorderRadius.circular(12)),
               ),
               icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
-              tooltip: 'Back',
+              tooltip: AppLocalizations.of(context)?.back ?? 'Back',
             ),
           ),
         ),
@@ -327,7 +327,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     borderRadius: BorderRadius.circular(12)),
               ),
               icon: const Icon(Icons.edit, color: Colors.white, size: 20),
-              tooltip: 'Edit profile',
+              tooltip: AppLocalizations.of(context)?.editProfileTooltip ?? 'Edit profile',
             ),
           ),
         ),
@@ -546,7 +546,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                         color: _accent, size: 13),
                     const SizedBox(width: 5),
                     Text(
-                      'Member since $joinDate',
+                      AppLocalizations.of(context)?.memberSince(joinDate) ?? 'Member since $joinDate',
                       style: const TextStyle(
                         color: _accent,
                         fontSize: 12,
@@ -574,7 +574,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            _bioText,
+            _bioText.isNotEmpty ? _bioText : (AppLocalizations.of(context)?.defaultBio ?? 'Curious mind. Content explorer. Watching the world one feed at a time.'),
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 14,
@@ -586,7 +586,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           ),
           const SizedBox(height: 2),
           Text(
-            _bioExpanded ? 'Show less' : 'Show more',
+            _bioExpanded ? (AppLocalizations.of(context)?.showLess ?? 'Show less') : (AppLocalizations.of(context)?.showMore ?? 'Show more'),
             style: const TextStyle(color: _accent, fontSize: 13),
           ),
         ],
@@ -612,13 +612,13 @@ class _ProfileScreenState extends State<ProfileScreen>
       ),
       child: Row(
         children: [
-          _buildStatItem('$videosWatched', 'Videos\nWatched'),
+          _buildStatItem('$videosWatched', AppLocalizations.of(context)?.videosWatchedLabel ?? 'Videos\nWatched'),
           _buildStatDivider(),
-          _buildStatItem(totalWatchTime, 'Watch\nTime'),
+          _buildStatItem(totalWatchTime, AppLocalizations.of(context)?.watchTimeLabel ?? 'Watch\nTime'),
           _buildStatDivider(),
-          _buildStatItem('${streakDays}d', 'Streak'),
+          _buildStatItem('${streakDays}d', AppLocalizations.of(context)?.streak ?? 'Streak'),
           _buildStatDivider(),
-          _buildStatItem('$savedCount', 'Saved'),
+          _buildStatItem('$savedCount', AppLocalizations.of(context)?.saved ?? 'Saved'),
         ],
       ),
     );
@@ -682,11 +682,11 @@ class _ProfileScreenState extends State<ProfileScreen>
           fontWeight: FontWeight.w400,
         ),
         isScrollable: false,
-        tabs: const [
-          Tab(text: 'Liked'),
-          Tab(text: 'Saved'),
-          Tab(text: 'History'),
-          Tab(text: 'Achievements'),
+        tabs: [
+          Tab(text: AppLocalizations.of(context)?.liked ?? 'Liked'),
+          Tab(text: AppLocalizations.of(context)?.saved ?? 'Saved'),
+          Tab(text: AppLocalizations.of(context)?.history ?? 'History'),
+          Tab(text: AppLocalizations.of(context)?.achievements ?? 'Achievements'),
         ],
       ),
     );
@@ -699,8 +699,8 @@ class _ProfileScreenState extends State<ProfileScreen>
     if (_likedItems.isEmpty) {
       return _buildEmptyState(
         icon: Icons.favorite_outline,
-        title: 'No liked content',
-        subtitle: 'Videos you like will appear here',
+        title: AppLocalizations.of(context)?.noLikedContent ?? 'No liked content',
+        subtitle: AppLocalizations.of(context)?.noLikedContentHint ?? 'Videos you like will appear here',
       );
     }
     return GridView.builder(
@@ -726,18 +726,18 @@ class _ProfileScreenState extends State<ProfileScreen>
           padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
           child: Row(
             children: [
-              const Text('Bookmarks', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+              Text(AppLocalizations.of(context)?.bookmarks ?? 'Bookmarks', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
               const Spacer(),
               TextButton(
                 onPressed: () => Navigator.pushNamed(context, AppRoutes.bookmarks),
-                child: const Text('View All', style: TextStyle(color: _accent, fontSize: 13)),
+                child: Text(AppLocalizations.of(context)?.viewAll ?? 'View All', style: const TextStyle(color: _accent, fontSize: 13)),
               ),
             ],
           ),
         ),
         Expanded(
           child: _savedItems.isEmpty
-              ? _buildEmptyState(icon: Icons.bookmark_outline, title: 'Nothing saved yet', subtitle: 'Bookmark content to see it here')
+              ? _buildEmptyState(icon: Icons.bookmark_outline, title: AppLocalizations.of(context)?.nothingSavedYet ?? 'Nothing saved yet', subtitle: AppLocalizations.of(context)?.bookmarkContentHint ?? 'Bookmark content to see it here')
               : GridView.builder(
                   padding: const EdgeInsets.all(12),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -818,9 +818,9 @@ class _ProfileScreenState extends State<ProfileScreen>
           padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
           child: Row(
             children: [
-              const Text(
-                'Watch History',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)?.watchHistory ?? 'Watch History',
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -829,9 +829,9 @@ class _ProfileScreenState extends State<ProfileScreen>
               const Spacer(),
               TextButton(
                 onPressed: () => Navigator.pushNamed(context, AppRoutes.history),
-                child: const Text(
-                  'View All',
-                  style: TextStyle(color: _accent, fontSize: 13),
+                child: Text(
+                  AppLocalizations.of(context)?.viewAll ?? 'View All',
+                  style: const TextStyle(color: _accent, fontSize: 13),
                 ),
               ),
             ],
@@ -841,8 +841,8 @@ class _ProfileScreenState extends State<ProfileScreen>
           child: _viewingHistory.isEmpty
               ? _buildEmptyState(
                   icon: Icons.history,
-                  title: 'No history yet',
-                  subtitle: 'Videos you watch will appear here',
+                  title: AppLocalizations.of(context)?.noHistoryYet ?? 'No history yet',
+                  subtitle: AppLocalizations.of(context)?.noHistoryHint ?? 'Videos you watch will appear here',
                 )
               : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -1015,7 +1015,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 if (!completed && watchedDuration.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
-                    'Watched $watchedDuration of $totalDuration',
+                    AppLocalizations.of(context)?.watchedOf(watchedDuration, totalDuration) ?? 'Watched $watchedDuration of $totalDuration',
                     style: const TextStyle(color: _accent, fontSize: 10),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -1044,21 +1044,21 @@ class _ProfileScreenState extends State<ProfileScreen>
                 }
               }
             },
-            itemBuilder: (_) => [
-              const PopupMenuItem(
+            itemBuilder: (ctx) => [
+              PopupMenuItem(
                 value: 'play',
                 child: Row(children: [
-                  Icon(Icons.play_arrow, color: Colors.white70, size: 18),
-                  SizedBox(width: 8),
-                  Text('Play', style: TextStyle(color: Colors.white70)),
+                  const Icon(Icons.play_arrow, color: Colors.white70, size: 18),
+                  const SizedBox(width: 8),
+                  Text(AppLocalizations.of(ctx)?.play ?? 'Play', style: const TextStyle(color: Colors.white70)),
                 ]),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'remove',
                 child: Row(children: [
-                  Icon(Icons.delete_outline, color: Colors.redAccent, size: 18),
-                  SizedBox(width: 8),
-                  Text('Remove from history', style: TextStyle(color: Colors.redAccent)),
+                  const Icon(Icons.delete_outline, color: Colors.redAccent, size: 18),
+                  const SizedBox(width: 8),
+                  Text(AppLocalizations.of(ctx)?.removeFromHistory ?? 'Remove from history', style: const TextStyle(color: Colors.redAccent)),
                 ]),
               ),
             ],
@@ -1119,9 +1119,9 @@ class _ProfileScreenState extends State<ProfileScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Engagement Score',
-                  style: TextStyle(color: Colors.white60, fontSize: 12),
+                Text(
+                  AppLocalizations.of(context)?.engagementScore ?? 'Engagement Score',
+                  style: const TextStyle(color: Colors.white60, fontSize: 12),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1138,7 +1138,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${(score / 10).clamp(0, 100).toInt()}% of max — keep watching!',
+                  AppLocalizations.of(context)?.ofMaxKeepWatching((score / 10).clamp(0, 100).toInt()) ?? '${(score / 10).clamp(0, 100).toInt()}% of max — keep watching!',
                   style: const TextStyle(color: _accent, fontSize: 12),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1149,11 +1149,11 @@ class _ProfileScreenState extends State<ProfileScreen>
           const SizedBox(width: 12),
           Column(
             children: [
-              _miniStat('$videos', 'Watched'),
+              _miniStat('$videos', AppLocalizations.of(context)?.watchedLabel ?? 'Watched'),
               const SizedBox(height: 8),
-              _miniStat('${streak}d', 'Streak'),
+              _miniStat('${streak}d', AppLocalizations.of(context)?.streak ?? 'Streak'),
               const SizedBox(height: 8),
-              _miniStat('$saved', 'Saved'),
+              _miniStat('$saved', AppLocalizations.of(context)?.saved ?? 'Saved'),
             ],
           ),
         ],
@@ -1339,7 +1339,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   void _showEditProfileDialog() {
     final nameController = TextEditingController(
         text: _userProfile['name'] as String? ?? '');
-    final bioController = TextEditingController(text: _bioText);
+    final bioController = TextEditingController(text: _bioText.isNotEmpty ? _bioText : (AppLocalizations.of(context)?.defaultBio ?? 'Curious mind. Content explorer. Watching the world one feed at a time.'));
     final formKey = GlobalKey<FormState>();
 
     showDialog(
@@ -1347,9 +1347,9 @@ class _ProfileScreenState extends State<ProfileScreen>
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1A1A2E),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Edit Profile',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        title: Text(
+          AppLocalizations.of(context)?.editProfile ?? 'Edit Profile',
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         content: Form(
           key: formKey,
@@ -1361,7 +1361,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 autofocus: true,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  labelText: 'Display Name',
+                  labelText: AppLocalizations.of(context)?.displayName ?? 'Display Name',
                   labelStyle: const TextStyle(color: Colors.white60),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -1381,8 +1381,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                   ),
                 ),
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Name cannot be empty';
-                  if (v.trim().length > 50) return 'Name too long (max 50 chars)';
+                  if (v == null || v.trim().isEmpty) return AppLocalizations.of(context)?.nameCannotBeEmpty ?? 'Name cannot be empty';
+                  if (v.trim().length > 50) return AppLocalizations.of(context)?.nameTooLong ?? 'Name too long (max 50 chars)';
                   return null;
                 },
               ),
@@ -1393,7 +1393,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 maxLines: 3,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  labelText: 'Bio',
+                  labelText: AppLocalizations.of(context)?.bio ?? 'Bio',
                   labelStyle: const TextStyle(color: Colors.white60),
                   counterStyle: const TextStyle(color: Colors.white38),
                   enabledBorder: OutlineInputBorder(
@@ -1412,7 +1412,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white60)),
+            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel', style: const TextStyle(color: Colors.white60)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -1433,12 +1433,12 @@ class _ProfileScreenState extends State<ProfileScreen>
                 setState(() {
                   _userProfile['name'] = newName;
                   _bioText = bioController.text.trim().isEmpty
-                      ? 'Curious mind. Content explorer. Watching the world one feed at a time.'
+                      ? (AppLocalizations.of(context)?.defaultBio ?? 'Curious mind. Content explorer. Watching the world one feed at a time.')
                       : bioController.text.trim();
                 });
               }
             },
-            child: const Text('Save'),
+            child: Text(AppLocalizations.of(context)?.save ?? 'Save'),
           ),
         ],
       ),

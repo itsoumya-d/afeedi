@@ -5,6 +5,7 @@ import '../../services/enhanced_calendar_service.dart';
 import '../../services/analytics_service.dart';
 import '../../services/google_calendar_service.dart';
 import '../../models/calendar_event.dart';
+import '../../l10n/app_localizations.dart';
 
 class CalendarTab extends StatefulWidget {
   const CalendarTab({super.key});
@@ -251,7 +252,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     } else if (mounted) {
       setState(() => _gcalConnecting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not connect — check permissions and try again.')),
+        SnackBar(content: Text(AppLocalizations.of(context)?.couldNotConnect ?? 'Could not connect — check permissions and try again.')),
       );
     }
   }
@@ -373,16 +374,16 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           children: [
             const Icon(Icons.calendar_today, color: Color(0xFF4285F4), size: 20),
             const SizedBox(width: 10),
-            const Text(
-              'Google Calendar',
-              style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+            Text(
+              AppLocalizations.of(context)?.googleCalendar ?? 'Google Calendar',
+              style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
             ),
           ],
         ),
         const SizedBox(height: 12),
-        _buildConnectStep(Icons.lock_outline, 'Read-only access', 'We only read events, never modify them'),
-        _buildConnectStep(Icons.event, 'See events in-app', 'Your calendar appears alongside your content schedule'),
-        _buildConnectStep(Icons.privacy_tip_outlined, 'Private & local', 'Data stays on-device; we never share it'),
+        _buildConnectStep(Icons.lock_outline, AppLocalizations.of(context)?.readOnlyAccess ?? 'Read-only access', AppLocalizations.of(context)?.readOnlyAccessHint ?? 'We only read events, never modify them'),
+        _buildConnectStep(Icons.event, AppLocalizations.of(context)?.seeEventsInApp ?? 'See events in-app', AppLocalizations.of(context)?.seeEventsInAppHint ?? 'Your calendar appears alongside your content schedule'),
+        _buildConnectStep(Icons.privacy_tip_outlined, AppLocalizations.of(context)?.privateAndLocal ?? 'Private & local', AppLocalizations.of(context)?.privateAndLocalHint ?? 'Data stays on-device; we never share it'),
         const SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
@@ -391,7 +392,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             icon: _gcalConnecting
                 ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                 : const Icon(Icons.login, size: 18),
-            label: Text(_gcalConnecting ? 'Connecting...' : 'Connect with Google'),
+            label: Text(_gcalConnecting ? (AppLocalizations.of(context)?.connecting ?? 'Connecting...') : (AppLocalizations.of(context)?.connectWithGoogle ?? 'Connect with Google')),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF4285F4),
               foregroundColor: Colors.white,
@@ -443,14 +444,14 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             ),
             TextButton(
               onPressed: _disconnectGoogleCalendar,
-              child: const Text('Disconnect', style: TextStyle(color: Colors.white70, fontSize: 12)),
+              child: Text(AppLocalizations.of(context)?.disconnect ?? 'Disconnect', style: const TextStyle(color: Colors.white70, fontSize: 12)),
             ),
           ],
         ),
         if (_gcalEvents.isEmpty)
-          const Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: Text('No upcoming events', style: TextStyle(color: Colors.white38, fontSize: 13)),
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(AppLocalizations.of(context)?.noUpcomingEvents ?? 'No upcoming events', style: const TextStyle(color: Colors.white38, fontSize: 13)),
           )
         else ...[
           const SizedBox(height: 10),
@@ -462,7 +463,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
 
   Widget _buildCalendarEventTile(CalendarEvent event) {
     final time = event.isAllDay
-        ? 'All day'
+        ? (AppLocalizations.of(context)?.allDay ?? 'All day')
         : '${event.start.hour.toString().padLeft(2, '0')}:${event.start.minute.toString().padLeft(2, '0')}';
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -519,9 +520,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                       size: 18,
                     ),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Content Categories',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context)?.contentCategories ?? 'Content Categories',
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -547,7 +548,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                             ),
                           ),
                           child: Text(
-                            'Category Filter',
+                            AppLocalizations.of(context)?.categoryFilter ?? 'Category Filter',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white,
@@ -573,7 +574,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                             ),
                           ),
                           child: Text(
-                            'Percentage Filter',
+                            AppLocalizations.of(context)?.percentageFilter ?? 'Percentage Filter',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white,
@@ -672,11 +673,11 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Education: ${_educationPercentage.round()}%',
+                  AppLocalizations.of(context)?.educationPct(_educationPercentage.round()) ?? 'Education: ${_educationPercentage.round()}%',
                   style: const TextStyle(color: Colors.white, fontSize: 12),
                 ),
                 Text(
-                  'Entertainment: ${_entertainmentPercentage.round()}%',
+                  AppLocalizations.of(context)?.entertainmentPct(_entertainmentPercentage.round()) ?? 'Entertainment: ${_entertainmentPercentage.round()}%',
                   style: const TextStyle(color: Colors.white, fontSize: 12),
                 ),
               ],
@@ -803,7 +804,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               controller: _searchController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                hintText: 'Search content...',
+                hintText: AppLocalizations.of(context)?.searchContent ?? 'Search content...',
                 hintStyle: TextStyle(
                   color: Colors.white.withValues(alpha: 0.5),
                   fontSize: 14,
@@ -833,9 +834,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Calendar',
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context)?.calendar ?? 'Calendar',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -843,7 +844,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Your personalized content schedule',
+                  AppLocalizations.of(context)?.personalizedContentSchedule ?? 'Your personalized content schedule',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
@@ -901,7 +902,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             if (_isFilterExpanded) ...[
                const SizedBox(width: 8),
                Text(
-                 'Filter',
+                 AppLocalizations.of(context)?.filter ?? 'Filter',
                  style: TextStyle(
                    color: AppTheme.primaryCyan,
                    fontSize: 14,
@@ -934,7 +935,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             ),
           ),
           Text(
-            'Today',
+            AppLocalizations.of(context)?.today ?? 'Today',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
               fontSize: 9,
@@ -955,9 +956,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ),
       child: Row(
         children: [
-          _buildViewModeButton('Month', 'month'),
-          _buildViewModeButton('Week', 'week'),
-          _buildViewModeButton('Day', 'day'),
+          _buildViewModeButton(AppLocalizations.of(context)?.monthView ?? 'Month', 'month'),
+          _buildViewModeButton(AppLocalizations.of(context)?.weekView ?? 'Week', 'week'),
+          _buildViewModeButton(AppLocalizations.of(context)?.dayView ?? 'Day', 'day'),
         ],
       ),
     );
@@ -1095,7 +1096,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'No content scheduled for this day',
+                      AppLocalizations.of(context)?.noContentScheduled ?? 'No content scheduled for this day',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 13),
@@ -1421,7 +1422,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         final gcalItems = gcalEventsForDate.map((e) => {
           'id': e.id,
           'title': e.title,
-          'time': e.isAllDay ? 'All day' :
+          'time': e.isAllDay ? (AppLocalizations.of(context)?.allDay ?? 'All day') :
               '${e.start.hour.toString().padLeft(2, '0')}:${e.start.minute.toString().padLeft(2, '0')}',
           'duration': e.end != null ? e.end!.difference(e.start).inMinutes : 60,
           'platform': 'Google Calendar',
@@ -1614,7 +1615,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               ),
               const SizedBox(width: 8),
               Text(
-                '${filteredContent.length} items scheduled',
+                AppLocalizations.of(context)?.itemsScheduled(filteredContent.length) ?? '${filteredContent.length} items scheduled',
                 style: TextStyle(
                   color: AppTheme.primaryCyan,
                   fontSize: 14,
@@ -1660,8 +1661,8 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           const SizedBox(height: 16),
           Text(
             _selectedFilter == 'all'
-                ? 'No content scheduled'
-                : 'No ${_selectedFilter} content',
+                ? (AppLocalizations.of(context)?.noContentScheduled ?? 'No content scheduled')
+                : (AppLocalizations.of(context)?.noFilterContent(_selectedFilter) ?? 'No $_selectedFilter content'),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.6),
               fontSize: 16,
@@ -1670,7 +1671,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           ),
           const SizedBox(height: 8),
           Text(
-            'Try selecting a different filter or date',
+            AppLocalizations.of(context)?.tryDifferentFilter ?? 'Try selecting a different filter or date',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.4),
               fontSize: 12,
@@ -1776,7 +1777,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                       children: [
                         Expanded(
                           child: Text(
-                            content['title']?.toString() ?? 'Unknown Title',
+                            content['title']?.toString() ?? (AppLocalizations.of(context)?.unknownTitle ?? 'Unknown Title'),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -1811,7 +1812,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      content['creator']?.toString() ?? 'Unknown Creator',
+                      content['creator']?.toString() ?? (AppLocalizations.of(context)?.unknownCreator ?? 'Unknown Creator'),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 12,
@@ -1894,8 +1895,8 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'Education',
-                            style: TextStyle(
+                            AppLocalizations.of(context)?.education ?? 'Education',
+                            style: const TextStyle(
                               color: Colors.blue,
                               fontSize: 10,
                               fontWeight: FontWeight.w500,
@@ -1935,8 +1936,8 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'Entertainment',
-                            style: TextStyle(
+                            AppLocalizations.of(context)?.entertainment ?? 'Entertainment',
+                            style: const TextStyle(
                               color: Colors.orange,
                               fontSize: 10,
                               fontWeight: FontWeight.w500,
@@ -1969,7 +1970,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Moved "${draggedContent['title']}" near "${targetContent['title']}"',
+          AppLocalizations.of(context)?.movedNear(draggedContent['title']?.toString() ?? '', targetContent['title']?.toString() ?? '') ?? 'Moved "${draggedContent['title']}" near "${targetContent['title']}"',
           style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.black.withValues(alpha: 0.8),
@@ -1992,9 +1993,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                 size: 20,
               ),
               const SizedBox(width: 8),
-              const Text(
-                'AI Recommendations',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)?.aiRecommendations ?? 'AI Recommendations',
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -2063,7 +2064,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                   ),
                 ),
                 Text(
-                  'Suggested for ${recommendation['time']}',
+                  AppLocalizations.of(context)?.suggestedFor(recommendation['time']?.toString() ?? '') ?? 'Suggested for ${recommendation['time']}',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,

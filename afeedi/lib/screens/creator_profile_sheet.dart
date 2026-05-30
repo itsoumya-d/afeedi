@@ -40,8 +40,23 @@ class CreatorProfileSheet extends StatefulWidget {
 class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
   late bool _isFollowed;
   List<Content> _recentContent = [];
+  // Platform → content items for this creator (cross-platform aggregation)
+  Map<PlatformType, List<Content>> _byPlatform = {};
   bool _loading = true;
   bool _loadError = false;
+
+  static const _platformColors = {
+    PlatformType.youtube: Color(0xFFFF0000),
+    PlatformType.tiktok: Color(0xFF69C9D0),
+    PlatformType.instagram: Color(0xFFE1306C),
+    PlatformType.facebook: Color(0xFF1877F2),
+  };
+  static const _platformNames = {
+    PlatformType.youtube: 'YouTube',
+    PlatformType.tiktok: 'TikTok',
+    PlatformType.instagram: 'Instagram',
+    PlatformType.facebook: 'Facebook',
+  };
 
   @override
   void initState() {
@@ -49,21 +64,40 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
     _isFollowed = widget.creatorId != null
         ? UserInteractionService.instance.isFollowed(widget.creatorId!)
         : false;
-    _loadRecentContent();
+    _loadCreatorContent();
   }
 
-  Future<void> _loadRecentContent() async {
+  Future<void> _loadCreatorContent() async {
     try {
-      final all = await ContentService.instance.getFeedContent(limit: 50);
-      final filtered = all
+      // Load a larger pool to find cross-platform content
+      final all = await ContentService.instance.getFeedContent(limit: 200);
+      final creatorItems = all
           .where((c) =>
-              c.creatorName?.toLowerCase() ==
-              widget.creatorName.toLowerCase())
-          .take(3)
+              c.creatorName?.toLowerCase() == widget.creatorName.toLowerCase())
           .toList();
+
+      // Group by platform
+      final Map<PlatformType, List<Content>> grouped = {};
+      for (final c in creatorItems) {
+        grouped.putIfAbsent(c.platform, () => []).add(c);
+      }
+
+      // Recent content: up to 2 per platform, sorted by platform priority
+      final recent = <Content>[];
+      for (final platform in [
+        PlatformType.youtube,
+        PlatformType.tiktok,
+        PlatformType.instagram,
+        PlatformType.facebook,
+      ]) {
+        recent.addAll((grouped[platform] ?? []).take(2));
+        if (recent.length >= 6) break;
+      }
+
       if (mounted) {
         setState(() {
-          _recentContent = filtered;
+          _byPlatform = grouped;
+          _recentContent = recent;
           _loading = false;
         });
       }
@@ -72,12 +106,27 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
     }
   }
 
-  /// Deterministic mock follower count from creatorId hash.
-  int _mockFollowers() {
-    final seed = (widget.creatorId ?? widget.creatorName).hashCode.abs();
-    // Range 1 000 – 9 999 999
-    return 1000 + (seed % 9998999);
+  /// Deterministic mock follower count for a specific platform.
+  int _platformFollowers(PlatformType platform) {
+    final seed = ('${widget.creatorId ?? widget.creatorName}_${platform.name}').hashCode.abs();
+    switch (platform) {
+      case PlatformType.youtube:
+        return 10000 + (seed % 4990000);   // 10K – 5M
+      case PlatformType.tiktok:
+        return 5000 + (seed % 2995000);    // 5K – 3M
+      case PlatformType.instagram:
+        return 8000 + (seed % 1992000);    // 8K – 2M
+      case PlatformType.facebook:
+        return 3000 + (seed % 997000);     // 3K – 1M
+    }
   }
+
+  int _totalFollowers() =>
+      _activeplatforms.fold(0, (sum, p) => sum + _platformFollowers(p));
+
+  List<PlatformType> get _activeplatforms => _byPlatform.isNotEmpty
+      ? _byPlatform.keys.toList()
+      : (widget.platform != null ? [widget.platform!] : [PlatformType.youtube]);
 
   /// Deterministic mock video count from creatorId hash.
   int _mockVideoCount() {
@@ -131,7 +180,7 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final followers = _mockFollowers();
+    final totalFollowers = _totalFollowers();
     final videos = _mockVideoCount();
     final platformColor = _platformColor(widget.platform);
 
@@ -227,19 +276,26 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Stats row
+                  // Total reach headline
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _Stat(
-                          label: 'Followers',
-                          value: _formatCount(followers)),
+                          label: 'Total Reach',
+                          value: _formatCount(totalFollowers)),
                       _StatDivider(),
                       _Stat(
                           label: 'Videos',
                           value: _formatCount(videos)),
+                      _StatDivider(),
+                      _Stat(
+                          label: 'Platforms',
+                          value: '${_activeplatforms.length}'),
                     ],
                   ),
+                  const SizedBox(height: 16),
+                  // Per-platform breakdown
+                  _buildPlatformBreakdown(),
                   const SizedBox(height: 20),
                   // Follow / Following button
                   SizedBox(
@@ -272,9 +328,11 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                   ),
                   const SizedBox(height: 28),
                   // Recent content section
-                  const Text(
-                    'Recent Content',
-                    style: TextStyle(
+                  Text(
+                    _activeplatforms.length > 1
+                        ? 'Recent Content (${_activeplatforms.length} platforms)'
+                        : 'Recent Content',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -314,6 +372,85 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPlatformBreakdown() {
+    final platforms = _activeplatforms;
+    if (platforms.length <= 1) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.public, color: Color(0xFF00D4FF), size: 14),
+              const SizedBox(width: 6),
+              Text(
+                'Cross-Platform Reach',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.55),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ...platforms.map((platform) {
+            final count = _platformFollowers(platform);
+            final total = _totalFollowers();
+            final fraction = total > 0 ? count / total : 0.0;
+            final color = _platformColors[platform] ?? const Color(0xFF00D4FF);
+            final name = _platformNames[platform] ?? platform.name;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 72,
+                    child: Text(
+                      name,
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(3),
+                      child: LinearProgressIndicator(
+                        value: fraction,
+                        backgroundColor: Colors.white.withValues(alpha: 0.08),
+                        valueColor: AlwaysStoppedAnimation<Color>(color.withValues(alpha: 0.7)),
+                        minHeight: 6,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    _formatCount(count),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.6),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
       ),
     );
   }

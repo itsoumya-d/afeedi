@@ -25,9 +25,12 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
   bool _isFullscreen = false;
   bool _isDescriptionExpanded = false;
   bool _dataSaverMode = false;
+  double _playbackSpeed = 1.0;
   late DateTime _watchStartTime;
   List<Content> _relatedContent = [];
   Timer? _progressTimer;
+
+  static const List<double> _speedOptions = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
 
   @override
   void initState() {
@@ -144,6 +147,97 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
         const SnackBar(content: Text('Link copied to clipboard')),
       );
     }
+  }
+
+  String _speedLabel(double speed) {
+    if (speed == speed.truncateToDouble()) {
+      return '${speed.toInt()}×';
+    }
+    return '$speed×';
+  }
+
+  void _showSpeedSelector() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF1A1A2E),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Playback Speed',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  alignment: WrapAlignment.center,
+                  children: _speedOptions.map((speed) {
+                    final isSelected = _playbackSpeed == speed;
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() => _playbackSpeed = speed);
+                        Navigator.pop(ctx);
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: 72,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(0xFF00D4FF)
+                              : Colors.white.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: isSelected
+                                ? const Color(0xFF00D4FF)
+                                : Colors.white24,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            _speedLabel(speed),
+                            style: TextStyle(
+                              color: isSelected ? Colors.black : Colors.white,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -288,6 +382,11 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
                                   label: 'Share',
                                   onTap: _share,
                                 ),
+                                const SizedBox(width: 20),
+                                _SpeedButton(
+                                  speed: _playbackSpeed,
+                                  onTap: _showSpeedSelector,
+                                ),
                               ],
                             ),
 
@@ -389,6 +488,58 @@ class _ActionButton extends StatelessWidget {
                 label,
                 style: TextStyle(
                   color: color,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Speed button ────────────────────────────────────────────────────────────
+class _SpeedButton extends StatelessWidget {
+  final double speed;
+  final VoidCallback onTap;
+
+  const _SpeedButton({required this.speed, required this.onTap});
+
+  String get _label {
+    if (speed == speed.truncateToDouble()) {
+      return '${speed.toInt()}×';
+    }
+    return '$speed×';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isNonDefault = speed != 1.0;
+    return Semantics(
+      label: 'Playback speed: $_label',
+      button: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.speed,
+                color: isNonDefault ? const Color(0xFF00D4FF) : Colors.white,
+                size: 22,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                _label,
+                style: TextStyle(
+                  color: isNonDefault ? const Color(0xFF00D4FF) : Colors.white,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),

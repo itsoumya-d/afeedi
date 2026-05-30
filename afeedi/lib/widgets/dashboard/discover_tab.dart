@@ -17,6 +17,7 @@ class DiscoverTab extends StatefulWidget {
 class _DiscoverTabState extends State<DiscoverTab> {
   String _selectedCategory = 'All';
   String _selectedTimeWindow = '7d';
+  String _selectedTimeFilter = 'Today';
   List<Content> _content = [];
   List<Content> _trending = [];
   bool _isLoading = true;
@@ -29,6 +30,13 @@ class _DiscoverTabState extends State<DiscoverTab> {
     '60d':   'Last 60 Days',
     '1y':    'Last Year',
   };
+
+  static const List<String> _timeFilters = [
+    'Today',
+    'This Week',
+    'This Month',
+    'All Time',
+  ];
 
   static const List<String> _categories = [
     'All',
@@ -83,7 +91,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
       if (mounted) {
         setState(() {
           _trending = data;
-          _content = data;
+          _content = _applyTimeFilter(data);
           _isLoading = false;
         });
       }
@@ -104,6 +112,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
       if (mounted) {
         setState(() {
           _trending = data;
+          _content = _applyTimeFilter(data);
           _isLoading = false;
         });
       }
@@ -114,7 +123,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
     setState(() {
       _selectedCategory = category;
       _hasError = false;
-      if (category == 'All') _content = _trending; // reset to trending baseline
+      if (category == 'All') _content = _applyTimeFilter(_trending);
     });
     if (category == 'All' || category == 'Trending') return;
     ContentService.instance
@@ -122,7 +131,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
         .then((data) {
       if (mounted) {
         setState(() {
-          _content = data.isEmpty
+          final base = data.isEmpty
               ? _trending
                   .where((c) =>
                       c.categories.any(
@@ -131,9 +140,43 @@ class _DiscoverTabState extends State<DiscoverTab> {
                           .any((t) => t.toLowerCase() == category.toLowerCase()))
                   .toList()
               : data;
+          _content = _applyTimeFilter(base);
         });
       }
     });
+  }
+
+  List<Content> _applyTimeFilter(List<Content> items) {
+    if (_selectedTimeFilter == 'All Time') return items;
+    final now = DateTime.now();
+    final DateTime cutoff;
+    switch (_selectedTimeFilter) {
+      case 'Today':
+        cutoff = now.subtract(const Duration(hours: 24));
+      case 'This Week':
+        cutoff = now.subtract(const Duration(days: 7));
+      case 'This Month':
+        cutoff = now.subtract(const Duration(days: 30));
+      default:
+        return items;
+    }
+    return items
+        .where((c) => c.publishedAt == null || c.publishedAt!.isAfter(cutoff))
+        .toList();
+  }
+
+  void _onTimeFilterSelected(String filter) {
+    setState(() {
+      _selectedTimeFilter = filter;
+      _content = _applyTimeFilter(_trending);
+    });
+  }
+
+  int get _filteredCount {
+    if (_selectedCategory == 'Trending') {
+      return _applyTimeFilter(_trending).length;
+    }
+    return _content.length;
   }
 
   Color _getPlatformColor(PlatformType platform) {
@@ -169,10 +212,79 @@ class _DiscoverTabState extends State<DiscoverTab> {
       child: Column(
         children: [
           _buildSearchBar(),
+          _buildTimeFilterChips(),
           _buildCategoryChips(),
           Expanded(
             child: _buildContent(),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimeFilterChips() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 36,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              itemCount: _timeFilters.length,
+              itemBuilder: (context, index) {
+                final filter = _timeFilters[index];
+                final isSelected = _selectedTimeFilter == filter;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: GestureDetector(
+                    onTap: () => _onTimeFilterSelected(filter),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? const Color(0xFF00D4FF)
+                            : Colors.white24,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isSelected
+                              ? const Color(0xFF00D4FF)
+                              : Colors.white24,
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        filter,
+                        style: TextStyle(
+                          color:
+                              isSelected ? Colors.black : Colors.white,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w400,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          if (!_isLoading && !_hasError)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: Text(
+                'Showing $_filteredCount trending items • $_selectedTimeFilter',
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 11,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -610,7 +722,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
               ContentService.instance
                   .getTrendingVideos(limit: 20, timeWindow: _selectedTimeWindow)
                   .then((data) {
-                if (mounted) setState(() { _trending = data; _content = data; _isLoading = false; });
+                if (mounted) setState(() { _trending = data; _content = _applyTimeFilter(data); _isLoading = false; });
               }).catchError((e) {
                 if (mounted) setState(() { _isLoading = false; _hasError = true; });
               });

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../services/analytics_service.dart';
+import '../services/navigation_service.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -268,6 +269,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
     );
   }
 
+  void _handleNotificationTap(Map<String, dynamic> notification) {
+    _markRead(notification);
+    final type = notification['type'] as String?;
+    switch (type) {
+      case 'new_content':
+      case 'recommendation':
+        Navigator.of(context).pushNamed(AppRoutes.search);
+      case 'trending':
+        Navigator.of(context).pushNamed(AppRoutes.dashboard);
+      default:
+        break;
+    }
+  }
+
   Widget _buildNotificationTile(Map<String, dynamic> notification) {
     final isUnread = !(notification['read'] as bool);
     final title = notification['title'] as String;
@@ -275,7 +290,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
       label: '$title, ${isUnread ? 'unread' : 'read'} notification',
       button: true,
       child: InkWell(
-        onTap: () => _markRead(notification),
+        onTap: () => _handleNotificationTap(notification),
       child: Container(
         color: isUnread ? const Color(0xFF00D4FF).withValues(alpha: 0.04) : Colors.transparent,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

@@ -3,8 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:flutter/services.dart';
 
-import '../../lib/services/content_service.dart';
-import '../../lib/models/content_model.dart';
+import 'package:afeedi/services/content_service.dart';
+import 'package:afeedi/models/content_model.dart';
 
 void main() {
   late Directory tempDir;

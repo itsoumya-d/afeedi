@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
-import '../../lib/models/content_model.dart';
-import '../../lib/services/user_interaction_service.dart';
-import '../../lib/widgets/feed/feed_post_card.dart';
+import 'package:afeedi/models/content_model.dart';
+import 'package:afeedi/services/user_interaction_service.dart';
+import 'package:afeedi/widgets/feed/feed_post_card.dart';
 
 // ---------------------------------------------------------------------------
 // Helper: create a Content object suitable for widget tests

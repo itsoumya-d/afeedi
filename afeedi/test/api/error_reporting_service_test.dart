@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../lib/services/error_reporting_service.dart';
+import 'package:afeedi/services/error_reporting_service.dart';
 
 void main() {
   late ErrorReportingService svc;

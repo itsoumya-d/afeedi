@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
-import '../../lib/services/user_interaction_service.dart';
+import 'package:afeedi/services/user_interaction_service.dart';
 
 // ---------------------------------------------------------------------------
 // NOTE ON SINGLETON DESIGN

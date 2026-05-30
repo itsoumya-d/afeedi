@@ -916,6 +916,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   }
   
   Widget _buildQuickCalendarStats() {
+    final todayCount = _getContentForDate(DateTime.now()).length;
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
@@ -925,7 +926,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       child: Column(
         children: [
           Text(
-            '12',
+            todayCount.toString(),
             style: TextStyle(
               color: AppTheme.primaryPink,
               fontSize: 14,

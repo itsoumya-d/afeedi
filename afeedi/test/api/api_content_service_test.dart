@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../lib/services/api_content_service.dart';
+import 'package:afeedi/services/api_content_service.dart';
 
 /// API-layer tests for ApiContentService.
 ///

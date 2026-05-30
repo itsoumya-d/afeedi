@@ -6,11 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../lib/models/content_model.dart';
-import '../../lib/services/auth_service.dart';
-import '../../lib/services/content_service.dart';
-import '../../lib/services/onboarding_service.dart';
-import '../../lib/services/user_interaction_service.dart';
+import 'package:afeedi/models/content_model.dart';
+import 'package:afeedi/services/auth_service.dart';
+import 'package:afeedi/services/content_service.dart';
+import 'package:afeedi/services/onboarding_service.dart';
+import 'package:afeedi/services/user_interaction_service.dart';
 
 // ---------------------------------------------------------------------------
 // Feed Accuracy Test Suite

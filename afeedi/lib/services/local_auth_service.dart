@@ -178,13 +178,9 @@ class LocalAuthService {
   Future<void> signOut() async {
     try {
       if (_currentUser != null) {
-        // Track analytics
         await AnalyticsService.instance.trackUserInteraction(
           action: 'user_signout',
           screen: 'auth',
-          additionalData: {
-            'user_id': _currentUser!.id,
-          },
         );
       }
 

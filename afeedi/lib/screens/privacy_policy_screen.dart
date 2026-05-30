@@ -24,7 +24,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _header('Afeedi Privacy Policy'),
-            _body('Last updated: June 1, 2026'),
+            _body('Last updated: May 30, 2026'),
             const SizedBox(height: 20),
             _section(
               '1. Information We Collect',
@@ -131,8 +131,6 @@ class PrivacyPolicyScreen extends StatelessWidget {
             content,
             style: const TextStyle(
                 color: Colors.white70, fontSize: 14, height: 1.6),
-            maxLines: 10,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

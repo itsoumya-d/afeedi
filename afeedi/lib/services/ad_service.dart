@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AdService {
   static final AdService instance = AdService._();
@@ -55,6 +56,20 @@ class AdService {
         return;
       }
     }
+
+    // Respect user's personalized-ads consent toggle (GDPR Art. 7 / CCPA).
+    final prefs = await SharedPreferences.getInstance();
+    final personalizedAdsEnabled = prefs.getBool('setting_personalized_ads') ?? true;
+    if (!personalizedAdsEnabled) {
+      final config = RequestConfiguration(
+        tagForChildDirectedTreatment: TagForChildDirectedTreatment.unspecified,
+        tagForUnderAgeOfConsent: TagForUnderAgeOfConsent.unspecified,
+        maxAdContentRating: MaxAdContentRating.g,
+      );
+      MobileAds.instance.updateRequestConfiguration(config);
+      debugPrint('AdService: personalized ads disabled by user preference');
+    }
+
     await MobileAds.instance.initialize();
     debugPrint('AdService: MobileAds initialized');
   }

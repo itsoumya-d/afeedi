@@ -71,8 +71,8 @@ dependencies:
   in_app_purchase: ^3.2.0
 
   # Push Notifications
-  firebase_core: ^2.31.0
-  # firebase_messaging: ^14.9.2  # Keep disabled for now, only enable core for OAuth
+  # firebase_core removed: no Google{Service-Info.plist,services.json} config files exist and no
+  # Firebase API is called — keeping the SDK in pubspec causes a launch crash on release builds.
   flutter_local_notifications: ^18.0.1
   timezone: ^0.9.4
   

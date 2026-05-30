@@ -1654,19 +1654,34 @@ abstract class AppLocalizations {
   /// **'Watch\nTime'**
   String get watchTimeLabel;
 
-  /// In en, this message translates to: **'Good morning!'**
+  /// No description provided for @goodMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning!'**
   String get goodMorning;
 
-  /// In en, this message translates to: **'Good afternoon!'**
+  /// No description provided for @goodAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon!'**
   String get goodAfternoon;
 
-  /// In en, this message translates to: **'Good evening!'**
+  /// No description provided for @goodEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening!'**
   String get goodEvening;
 
-  /// In en, this message translates to: **'No notifications'**
+  /// No description provided for @noNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications'**
   String get noNotifications;
 
-  /// In en, this message translates to: **"You're all caught up!"**
+  /// No description provided for @allCaughtUp.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all caught up!'**
   String get allCaughtUp;
 }
 

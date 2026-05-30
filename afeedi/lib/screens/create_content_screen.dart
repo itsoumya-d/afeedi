@@ -37,8 +37,8 @@ class CreateContentScreen extends StatelessWidget {
           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
         ),
         content: Text(
-          '$platformName connection coming soon. '
-          'Your feed will automatically personalize when connected.',
+          'Connect $platformName from Settings → Connected Platforms '
+          'to personalise your feed with $platformName content.',
           style: TextStyle(color: Colors.white.withValues(alpha: 0.8), height: 1.5),
         ),
         actions: [

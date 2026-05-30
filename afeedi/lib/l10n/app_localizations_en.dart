@@ -820,5 +820,5 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noNotifications => 'No notifications';
 
   @override
-  String get allCaughtUp => "You're all caught up!";
+  String get allCaughtUp => 'You\'re all caught up!';
 }

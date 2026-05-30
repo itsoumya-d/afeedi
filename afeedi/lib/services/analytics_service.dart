@@ -302,6 +302,11 @@ class AnalyticsService with WidgetsBindingObserver {
 
   // Private helper methods
   Future<void> _queueEvent(Map<String, dynamic> event) async {
+    // Respect user's data-collection consent toggle (GDPR Art. 7).
+    final dataCollectionEnabled =
+        _prefs?.getBool('setting_data_collection') ?? true;
+    if (!dataCollectionEnabled) return;
+
     _eventQueue.add(event);
 
     // Get all events including the new one

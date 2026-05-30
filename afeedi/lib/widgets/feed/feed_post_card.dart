@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/content_model.dart';
 import '../../services/content_service.dart';
@@ -504,6 +505,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
             label: _formatCount(
                 widget.content.likeCount + (_isLiked ? 1 : 0)),
             onTap: () async {
+              HapticFeedback.lightImpact();
               setState(() => _isLiked = !_isLiked);
               await ContentService.instance.trackContentInteraction(
                 contentId: widget.content.id,
@@ -558,6 +560,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
               color: _isSaved ? Colors.cyan : null,
             ),
             onPressed: () async {
+              HapticFeedback.lightImpact();
               setState(() => _isSaved = !_isSaved);
               await ContentService.instance.trackContentInteraction(
                 contentId: widget.content.id,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../services/content_service.dart';
+import '../../services/navigation_service.dart';
 import '../../models/content_model.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/responsive/responsive_layout.dart';
@@ -85,6 +86,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
           _isLoading = false;
         });
       }
+    }).catchError((e) {
+      if (mounted) setState(() => _isLoading = false);
     });
   }
 
@@ -601,6 +604,13 @@ class _DiscoverTabState extends State<DiscoverTab> {
   }
 
   Widget _buildContentCard(Content content) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
+      child: _buildContentCardInner(content),
+    );
+  }
+
+  Widget _buildContentCardInner(Content content) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF1A1A2E),

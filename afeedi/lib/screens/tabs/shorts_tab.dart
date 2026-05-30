@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -224,6 +225,7 @@ class _ShortsTabState extends State<ShortsTab> {
             controller: _pageController,
             scrollDirection: Axis.vertical,
             onPageChanged: (index) {
+              HapticFeedback.selectionClick();
               setState(() {
                 _currentIndex = index;
                 _scrollCount++;
@@ -1107,6 +1109,7 @@ class _ShortsTabState extends State<ShortsTab> {
 
   /// Toggles the like state for [content] and persists via [UserInteractionService].
   void _handleLike(Content content) {
+    HapticFeedback.lightImpact();
     final wasLiked = _likedContent.contains(content.id);
     setState(() {
       if (wasLiked) {

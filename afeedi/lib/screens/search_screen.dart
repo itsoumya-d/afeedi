@@ -511,10 +511,27 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
         ),
       );
     }
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: results.length,
-      itemBuilder: (context, i) => _buildResultCard(results[i]),
+    final filterSuffix = _activeFilterCount > 0
+        ? ' · $_activeFilterCount filter${_activeFilterCount == 1 ? '' : 's'} active'
+        : '';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+          child: Text(
+            '${results.length} result${results.length == 1 ? '' : 's'}$filterSuffix',
+            style: const TextStyle(color: Colors.white60, fontSize: 12),
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            itemCount: results.length,
+            itemBuilder: (context, i) => _buildResultCard(results[i]),
+          ),
+        ),
+      ],
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../src/stubs/html.dart' if (dart.library.html) 'dart:html' as html;
 import 'dart:math';
 import '../../models/content_model.dart';
@@ -37,11 +38,17 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
   bool _showFallbackOptions = false;
   int _retryCount = 0;
   static const _maxRetries = 3;
+  String _quality = 'Auto';
   
   @override
   void initState() {
     super.initState();
-    _initializePlayer();
+    _loadQualitySetting().then((_) => _initializePlayer());
+  }
+
+  Future<void> _loadQualitySetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    _quality = prefs.getString('setting_video_quality') ?? 'Auto';
   }
   
   @override
@@ -90,6 +97,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
         containerId: _containerId ?? 'youtube-player-fallback',
         autoplay: widget.autoPlay,
         showControls: widget.showControls,
+        quality: _quality,
       );
       
       setState(() {

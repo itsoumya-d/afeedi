@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import '../l10n/app_localizations.dart';
 import '../services/navigation_service.dart';
+import '../services/local_auth_service.dart';
 
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({super.key});
@@ -80,14 +81,23 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     try {
-      // Placeholder: replace with real sign-up call
-      await Future.delayed(const Duration(milliseconds: 500));
+      final user = await LocalAuthService.instance.signUp(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        fullName: _nameController.text.trim(),
+      );
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
+      if (user != null) {
+        Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
+      } else {
+        setState(() {
+          _serverError = 'Account creation failed. Email may already be in use.';
+        });
+      }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _serverError = 'Account creation failed. Email may already be in use.';
+          _serverError = 'Account creation failed. Please try again.';
         });
       }
     } finally {

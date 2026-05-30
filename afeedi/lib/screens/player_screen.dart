@@ -252,6 +252,7 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
                                   color: _isLiked ? Colors.red : Colors.white,
                                   label: _formatCount(widget.content.likeCount),
                                   onTap: () async {
+                                    HapticFeedback.lightImpact();
                                     await ContentService.instance
                                         .trackContentInteraction(
                                       contentId: widget.content.id,
@@ -270,6 +271,7 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
                                       : Colors.white,
                                   label: _isSaved ? 'Saved' : 'Save',
                                   onTap: () async {
+                                    HapticFeedback.lightImpact();
                                     await ContentService.instance
                                         .trackContentInteraction(
                                       contentId: widget.content.id,

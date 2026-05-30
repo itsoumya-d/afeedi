@@ -340,14 +340,18 @@ class EnhancedRecommendationService {
     return score;
   }
 
-  /// Applies watch-time weight: content the user has watched >80% of gets
-  /// its score multiplied by 2 to surface similar content more prominently.
+  /// Applies continuous watch-time weight: completion rate is used as a
+  /// continuous 0–2x multiplier rather than a binary >80% gate.
+  /// Formula: 1.0 + (completionRate ^ 0.5) so that:
+  ///   0% watched  → 1.0× (no boost)
+  ///   25% watched → 1.5× (light boost)
+  ///   50% watched → 1.71×
+  ///   80% watched → 1.89×
+  ///  100% watched → 2.0× (full boost, matches prior max)
   double _applyWatchTimeWeight(double score, String contentId, SharedPreferences sp) {
-    final progress = sp.getDouble('watch_progress_$contentId') ?? 0.0;
-    if (progress > 0.8) {
-      return score * 2.0;
-    }
-    return score;
+    final progress = (sp.getDouble('watch_progress_$contentId') ?? 0.0).clamp(0.0, 1.0);
+    final multiplier = 1.0 + progress.toDouble();
+    return score * multiplier;
   }
   
   // Track content interaction for future recommendations

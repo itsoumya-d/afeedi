@@ -13,19 +13,30 @@ class YouTubePlayerService {
   YouTubePlayerService._();
   
   // Create YouTube player with fallback to external app
+  static String _qualityToVq(String quality) {
+    switch (quality) {
+      case '1080p': return 'hd1080';
+      case '720p':  return 'hd720';
+      case '480p':  return 'large';
+      case '360p':  return 'medium';
+      default:      return '';
+    }
+  }
+
   Future<YouTubePlayerResult> createPlayer({
     required Content content,
     required String containerId,
     bool autoplay = false,
     bool showControls = true,
+    String quality = 'Auto',
   }) async {
     try {
       if (content.platform != PlatformType.youtube) {
         throw Exception('Content is not from YouTube platform');
       }
-      
+
       final videoId = content.platformContentId;
-      
+
       if (kIsWeb) {
         return await _createWebPlayer(
           videoId: videoId,
@@ -33,6 +44,7 @@ class YouTubePlayerService {
           autoplay: autoplay,
           showControls: showControls,
           content: content,
+          quality: quality,
         );
       } else {
         return await _createMobilePlayer(
@@ -63,12 +75,15 @@ class YouTubePlayerService {
     required bool autoplay,
     required bool showControls,
     required Content content,
+    String quality = 'Auto',
   }) async {
     try {
+      final vq = _qualityToVq(quality);
       final embedUrl = _buildEmbedUrl(
         videoId: videoId,
         autoplay: autoplay,
         showControls: showControls,
+        additionalParams: vq.isNotEmpty ? {'vq': vq} : null,
       );
 
       await AnalyticsService.instance.trackUserInteraction(

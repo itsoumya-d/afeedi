@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
 import 'package:afeedi/widgets/dashboard/home_tab.dart';
+import 'package:afeedi/l10n/app_localizations.dart';
 
 void main() {
   late Directory tempDir;
@@ -45,6 +46,8 @@ void main() {
 
   Widget buildApp() {
     return MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       routes: {
         '/dashboard': (_) => const Scaffold(body: Text('Dashboard')),
         '/premium': (_) => const Scaffold(body: Text('Premium')),

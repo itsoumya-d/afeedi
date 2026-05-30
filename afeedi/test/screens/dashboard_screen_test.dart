@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:afeedi/screens/dashboard_screen.dart';
 import 'package:afeedi/widgets/common/shared_bottom_navigation.dart';
+import 'package:afeedi/l10n/app_localizations.dart';
 
 void main() {
   late Directory tempDir;
@@ -38,7 +39,11 @@ void main() {
 
   group('DashboardScreen', () {
     testWidgets('DashboardScreen renders with bottom navigation', (tester) async {
-      await tester.pumpWidget(const MaterialApp(home: DashboardScreen()));
+      await tester.pumpWidget(MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const DashboardScreen(),
+        ));
       // Pump once to build the widget tree without waiting for async content
       await tester.pump();
 
@@ -47,7 +52,11 @@ void main() {
     });
 
     testWidgets('DashboardScreen has 5 tabs', (tester) async {
-      await tester.pumpWidget(const MaterialApp(home: DashboardScreen()));
+      await tester.pumpWidget(MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const DashboardScreen(),
+        ));
       await tester.pump();
 
       // The SharedBottomNavigation displays the 5 tab labels
@@ -59,7 +68,11 @@ void main() {
     });
 
     testWidgets('DashboardScreen shows Home tab by default', (tester) async {
-      await tester.pumpWidget(const MaterialApp(home: DashboardScreen()));
+      await tester.pumpWidget(MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const DashboardScreen(),
+        ));
       await tester.pump();
 
       // The initial page is 0 (Home). PageController starts at page 0 by default.
@@ -69,7 +82,11 @@ void main() {
 
     testWidgets('DashboardScreen shows app bar with Afeedi branding',
         (tester) async {
-      await tester.pumpWidget(const MaterialApp(home: DashboardScreen()));
+      await tester.pumpWidget(MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const DashboardScreen(),
+        ));
       await tester.pump();
 
       expect(find.text('Afeedi'), findsOneWidget);
@@ -77,7 +94,11 @@ void main() {
 
     testWidgets('DashboardScreen contains PageView for tab content',
         (tester) async {
-      await tester.pumpWidget(const MaterialApp(home: DashboardScreen()));
+      await tester.pumpWidget(MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const DashboardScreen(),
+        ));
       await tester.pump();
 
       expect(find.byType(PageView), findsOneWidget);

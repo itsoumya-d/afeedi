@@ -2,6 +2,7 @@ import 'dart:math' show min;
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_theme.dart';
 import '../common/loading_shimmer.dart';
 import '../feed/feed_post_card.dart';
@@ -388,9 +389,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         Expanded(
           child: Row(
             children: [
-              _buildFeedTab('For You', !_showFollowing),
+              _buildFeedTab(AppLocalizations.of(context)!.forYou, !_showFollowing, isForYou: true),
               const SizedBox(width: 24),
-              _buildFeedTab('Following', _showFollowing),
+              _buildFeedTab(AppLocalizations.of(context)!.following, _showFollowing, isForYou: false),
             ],
           ),
         ),
@@ -452,7 +453,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     );
   }
 
-  Widget _buildFeedTab(String label, bool isActive) {
+  Widget _buildFeedTab(String label, bool isActive, {bool isForYou = true}) {
     return Semantics(
       label: '$label tab',
       selected: isActive,
@@ -460,7 +461,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       child: GestureDetector(
       onTap: () {
         setState(() {
-          _showFollowing = label == 'Following';
+          _showFollowing = !isForYou;
         });
       },
       child: Column(
@@ -796,11 +797,11 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 8),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
             child: Text(
-              'Continue Watching',
-              style: TextStyle(
+              AppLocalizations.of(context)!.continueWatching,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.w700,

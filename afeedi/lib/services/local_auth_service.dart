@@ -239,7 +239,7 @@ class LocalAuthService {
   // Check if user is authenticated
   bool get isAuthenticated => _currentUser != null;
   
-  static const int _pbkdf2Iterations = 10000;
+  static const int _pbkdf2Iterations = 100000;
   static const int _saltLength = 32;
 
   String _generateSalt() {

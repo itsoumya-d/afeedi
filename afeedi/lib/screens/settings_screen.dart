@@ -655,6 +655,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
+              await LocalAuthService.instance.signOut();
               if (mounted) {
                 Navigator.pushNamedAndRemoveUntil(
                     context, AppRoutes.welcome, (_) => false);

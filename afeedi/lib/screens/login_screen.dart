@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import '../l10n/app_localizations.dart';
 import '../services/navigation_service.dart';
+import '../services/local_auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -82,14 +83,22 @@ class _LoginScreenState extends State<LoginScreen>
 
     setState(() => _isLoading = true);
     try {
-      // Placeholder: replace with real auth call when service is wired
-      await Future.delayed(const Duration(milliseconds: 500));
+      final user = await LocalAuthService.instance.signIn(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
       if (!mounted) return;
-      NavigationService.navigateToHome();
+      if (user != null) {
+        NavigationService.navigateToHome();
+      } else {
+        setState(() {
+          _emailError = 'Invalid email or password';
+        });
+      }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _emailError = 'Invalid email or password';
+          _emailError = 'Sign-in failed. Please try again.';
         });
       }
     } finally {

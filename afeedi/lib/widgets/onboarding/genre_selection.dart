@@ -119,6 +119,21 @@ class GenreSelection extends StatelessWidget {
   }
 
   Widget _buildGenreGrid() {
+    if (filteredGenres.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32),
+        child: Column(
+          children: [
+            const Icon(Icons.search_off, color: Colors.white38, size: 40),
+            const SizedBox(height: 12),
+            Text(
+              'No genres match your search',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 14),
+            ),
+          ],
+        ),
+      );
+    }
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -129,7 +144,11 @@ class GenreSelection extends StatelessWidget {
   Widget _buildGenreChip(Genre genre) {
     final isSelected = selectedGenres.contains(genre);
     
-    return Material(
+    return Semantics(
+      label: '${genre.name}${isSelected ? ', selected' : ''}',
+      button: true,
+      selected: isSelected,
+      child: Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () => onGenreToggle(genre),
@@ -176,6 +195,7 @@ class GenreSelection extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

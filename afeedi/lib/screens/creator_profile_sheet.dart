@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/content_model.dart';
 import '../services/content_service.dart';
 import '../services/user_interaction_service.dart';
@@ -40,6 +41,7 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
   late bool _isFollowed;
   List<Content> _recentContent = [];
   bool _loading = true;
+  bool _loadError = false;
 
   @override
   void initState() {
@@ -66,7 +68,7 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
         });
       }
     } catch (_) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() { _loading = false; _loadError = true; });
     }
   }
 
@@ -167,7 +169,7 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                           radius: 40,
                           backgroundColor: platformColor.withValues(alpha: 0.2),
                           backgroundImage: widget.content.creatorAvatarUrl != null
-                              ? NetworkImage(widget.content.creatorAvatarUrl!)
+                              ? CachedNetworkImageProvider(widget.content.creatorAvatarUrl!)
                               : null,
                           child: widget.content.creatorAvatarUrl == null
                               ? Text(
@@ -283,6 +285,20 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                     const Center(
                         child: CircularProgressIndicator(
                             color: Color(0xFF00BCD4)))
+                  else if (_loadError)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.error_outline, color: Colors.white38, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Could not load content. Tap to retry.',
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    )
                   else if (_recentContent.isEmpty)
                     Text(
                       'No recent content found.',
@@ -356,13 +372,12 @@ class _ContentRow extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: content.thumbnailUrl != null
-                ? Image.network(
-                    content.thumbnailUrl!,
+                ? CachedNetworkImage(
+                    imageUrl: content.thumbnailUrl!,
                     width: 56,
                     height: 56,
                     fit: BoxFit.cover,
-                    semanticLabel: content.title ?? 'Video thumbnail',
-                    errorBuilder: (_, __, ___) => _placeholder(),
+                    errorWidget: (_, __, ___) => _placeholder(),
                   )
                 : _placeholder(),
           ),

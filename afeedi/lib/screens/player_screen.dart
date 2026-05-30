@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/content_model.dart';
 import '../services/content_service.dart';
@@ -14,16 +15,40 @@ class PlayerScreen extends StatefulWidget {
   State<PlayerScreen> createState() => _PlayerScreenState();
 }
 
-class _PlayerScreenState extends State<PlayerScreen> {
+class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver {
   bool _isLiked = false;
   bool _isSaved = false;
+  bool _isFullscreen = false;
   late DateTime _watchStartTime;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _watchStartTime = DateTime.now();
     _incrementVideoCount();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Players handle their own pause internally on web; on mobile we reset watch time
+    if (state == AppLifecycleState.paused) {
+      _saveWatchTime();
+    }
+  }
+
+  void _toggleFullscreen() {
+    if (_isFullscreen) {
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    } else {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
+    setState(() => _isFullscreen = !_isFullscreen);
   }
 
   Future<void> _incrementVideoCount() async {
@@ -34,6 +59,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    // Restore portrait and UI on exit
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     _saveWatchTime();
     super.dispose();
   }
@@ -96,7 +125,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
             Expanded(
               child: widget.content.platform == PlatformType.youtube
                   ? EnhancedYouTubePlayer(content: widget.content, autoPlay: true)
-                  : SocialMediaVideoPlayer(content: widget.content, autoPlay: true),
+                  : SocialMediaVideoPlayer(
+                      content: widget.content,
+                      autoPlay: true,
+                      onFullscreen: _toggleFullscreen,
+                    ),
             ),
             // Info section
             Container(

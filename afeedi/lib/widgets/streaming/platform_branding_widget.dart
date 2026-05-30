@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/content_model.dart';
 
 class PlatformBrandingWidget extends StatelessWidget {
@@ -187,7 +188,7 @@ class PlatformAttributionWidget extends StatelessWidget {
                   if (creatorAvatar != null) ...<Widget>[
                     CircleAvatar(
                       radius: 10,
-                      backgroundImage: NetworkImage(creatorAvatar!),
+                      backgroundImage: CachedNetworkImageProvider(creatorAvatar!),
                     ),
                     const SizedBox(width: 6),
                   ],

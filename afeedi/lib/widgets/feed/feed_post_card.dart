@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/content_model.dart';
 import '../../services/content_service.dart';
+import '../../screens/creator_profile_sheet.dart';
 
 class FeedPostCard extends StatefulWidget {
   final Content content;
@@ -132,8 +133,13 @@ class _FeedPostCardState extends State<FeedPostCard> {
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          // Creator avatar (24 dp radius circle)
-          SizedBox(
+          // Creator avatar (24 dp radius circle) — taps open creator profile
+          GestureDetector(
+          onTap: () => CreatorProfileSheet.show(context, widget.content),
+          child: Semantics(
+            label: 'View creator: ${widget.content.creatorName ?? 'Unknown'}',
+            button: true,
+            child: SizedBox(
             width: 32,
             height: 32,
             child: CircleAvatar(
@@ -152,6 +158,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
                     )
                   : _avatarInitial(initial, color),
             ),
+            ),
+          ),
           ),
           const SizedBox(width: 10),
           Expanded(

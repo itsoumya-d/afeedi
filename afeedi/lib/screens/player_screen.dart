@@ -131,6 +131,8 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
     watchedList.remove(widget.content.id);
     watchedList.insert(0, widget.content.id);
     await prefs.setStringList('watched_ids', watchedList.take(100).toList());
+    // Save watch timestamp so history can group by when the user actually watched
+    await prefs.setString('watch_ts_${widget.content.id}', DateTime.now().toIso8601String());
 
     // Update implicit genre weights when user watches >20% of content
     if (progress > 0.2 && widget.content.tags.isNotEmpty) {

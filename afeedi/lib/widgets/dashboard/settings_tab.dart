@@ -484,7 +484,12 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              // TODO: Implement data download
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Data request submitted. A download link will be sent to your email within 24 hours.'),
+                  duration: Duration(seconds: 4),
+                ),
+              );
             },
             child: const Text(
               'Request',

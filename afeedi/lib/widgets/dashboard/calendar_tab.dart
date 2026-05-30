@@ -173,39 +173,18 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
 
   // Enhanced calendar methods
   Future<void> _loadContentForSelectedDate() async {
-    try {
-      final content = await EnhancedCalendarService.instance.getContentForDate(
-        _selectedDate,
-        categoryFilter: _selectedFilter,
-        educationPercentage: _isPercentageFilterActive ? _educationPercentage : null,
-        entertainmentPercentage: _isPercentageFilterActive ? _entertainmentPercentage : null,
-      );
-
-      final scheduled = await EnhancedCalendarService.instance.getScheduledContent(
-        _selectedDate,
-        _selectedDate.add(const Duration(days: 1)),
-      );
-
-      setState(() {});
-      
-      // Track calendar date selection
-      await AnalyticsService.instance.trackUserInteraction(
-        action: 'calendar_date_selected',
-        screen: 'calendar',
-        additionalData: {
-          'selected_date': _selectedDate.toIso8601String(),
-          'content_count': content.length,
-          'scheduled_count': scheduled.length,
-        },
-      );
-    } catch (error) {
-      
-      await AnalyticsService.instance.trackError(
-        errorType: 'calendar_content_load_error',
-        errorMessage: error.toString(),
-        screen: 'calendar',
-      );
-    }
+    // _getContentForDate() already reads from _scheduledContent + _gcalEvents —
+    // just trigger a rebuild so the day view reflects the new _selectedDate.
+    setState(() {});
+    final items = _getContentForDate(_selectedDate);
+    await AnalyticsService.instance.trackUserInteraction(
+      action: 'calendar_date_selected',
+      screen: 'calendar',
+      additionalData: {
+        'selected_date': _selectedDate.toIso8601String(),
+        'content_count': items.length,
+      },
+    );
   }
   
   void _onFilterChanged() {

@@ -586,7 +586,11 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                 label: 'Trending topic ${topics[index]}',
                 button: true,
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    AppRoutes.search,
+                    arguments: {'query': topics[index].replaceAll('#', '')},
+                  ),
                   child: Container(
                     margin: const EdgeInsets.only(right: 8),
                     padding:
@@ -725,7 +729,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             label: 'See all $title content',
             button: true,
             child: GestureDetector(
-              onTap: () {},
+              onTap: () => Navigator.pushNamed(context, AppRoutes.search),
               child: Text(
                 'See all',
                 style: TextStyle(
@@ -1061,7 +1065,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.history),
                   child: const Text(
                     'See all',
                     style: TextStyle(

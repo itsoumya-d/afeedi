@@ -58,6 +58,15 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
     _loadContent();
     _loadRecentSearches();
     _loadTrending();
+    // Support initial query from route arguments (e.g., from trending hashtag taps)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is Map<String, dynamic> && args['query'] is String) {
+        final q = args['query'] as String;
+        _searchController.text = q;
+        _search(q);
+      }
+    });
   }
 
   @override

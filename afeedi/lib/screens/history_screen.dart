@@ -18,6 +18,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   List<Content> _history = [];
   List<Content> _continueWatching = [];
   Map<String, double> _progressMap = {};
+  Map<String, DateTime> _watchTimestamps = {};
   bool _isLoading = true;
 
   @override
@@ -43,13 +44,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
       }
     }
 
-    // Load all progress keys
+    // Load all progress keys and watch timestamps
     final keys = prefs.getKeys();
     final Map<String, double> progressMap = {};
+    final Map<String, DateTime> watchTimestamps = {};
     for (final key in keys) {
       if (key.startsWith('watch_progress_')) {
         final id = key.replaceFirst('watch_progress_', '');
         progressMap[id] = prefs.getDouble(key) ?? 0.0;
+      } else if (key.startsWith('watch_ts_')) {
+        final id = key.replaceFirst('watch_ts_', '');
+        final tsStr = prefs.getString(key);
+        if (tsStr != null) {
+          try { watchTimestamps[id] = DateTime.parse(tsStr); } catch (_) {}
+        }
       }
     }
 
@@ -97,6 +105,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       if (mounted) {
         setState(() {
           _progressMap = progressMap;
+          _watchTimestamps = watchTimestamps;
           _continueWatching = continueWatching;
           _history = history;
           _isLoading = false;
@@ -362,7 +371,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final groupOrder = <String>[];
     final groupedHistory = <String, List<Content>>{};
     for (final item in _history) {
-      final label = _dateGroupLabel(item.publishedAt);
+      // Use actual watch timestamp if available; fall back to publishedAt
+      final label = _dateGroupLabel(_watchTimestamps[item.id] ?? item.publishedAt);
       if (!groupedHistory.containsKey(label)) {
         groupedHistory[label] = [];
         groupOrder.add(label);

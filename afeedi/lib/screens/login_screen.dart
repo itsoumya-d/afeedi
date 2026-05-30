@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import '../l10n/app_localizations.dart';
+import '../services/analytics_service.dart';
+import '../services/auth_service.dart';
 import '../services/navigation_service.dart';
 import '../services/local_auth_service.dart';
 
@@ -104,6 +106,53 @@ class _LoginScreenState extends State<LoginScreen>
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+    try {
+      await AnalyticsService.instance.trackOAuthEvent(platform: 'google', action: 'connect');
+      final authResult = await AuthService.instance.signInWithOAuth('google');
+      if (authResult.success && mounted) {
+        Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
+      } else if (mounted) {
+        _showErrorSnackBar(AppLocalizations.of(context)?.authenticationFailed ?? 'Authentication failed. Please try again.');
+      }
+    } catch (_) {
+      if (mounted) _showErrorSnackBar(AppLocalizations.of(context)?.authenticationFailed ?? 'Authentication failed. Please try again.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleAppleSignIn() async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+    try {
+      await AnalyticsService.instance.trackOAuthEvent(platform: 'apple', action: 'connect');
+      final authResult = await AuthService.instance.signInWithOAuth('apple');
+      if (authResult.success && mounted) {
+        Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
+      } else if (mounted) {
+        _showErrorSnackBar(AppLocalizations.of(context)?.authenticationFailed ?? 'Authentication failed. Please try again.');
+      }
+    } catch (_) {
+      if (mounted) _showErrorSnackBar(AppLocalizations.of(context)?.authenticationFailed ?? 'Authentication failed. Please try again.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, maxLines: 2, overflow: TextOverflow.ellipsis),
+        backgroundColor: const Color(0xFFFF6B6B),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
   }
 
   @override
@@ -430,7 +479,7 @@ class _LoginScreenState extends State<LoginScreen>
                                       width: double.infinity,
                                       height: 52,
                                       child: OutlinedButton.icon(
-                                        onPressed: () {},
+                                        onPressed: _isLoading ? null : _handleGoogleSignIn,
                                         icon: const Icon(
                                           Icons.g_mobiledata,
                                           color: Colors.white,
@@ -468,7 +517,7 @@ class _LoginScreenState extends State<LoginScreen>
                                       width: double.infinity,
                                       height: 52,
                                       child: OutlinedButton.icon(
-                                        onPressed: () {},
+                                        onPressed: _isLoading ? null : _handleAppleSignIn,
                                         icon: const Icon(
                                           Icons.apple,
                                           color: Colors.white,
@@ -678,14 +727,26 @@ class _LoginScreenState extends State<LoginScreen>
                   style: TextStyle(color: Colors.white70, fontSize: 16)),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
+                final email = emailController.text.trim();
                 Navigator.of(dialogContext).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Password reset link sent to your email!'),
-                    backgroundColor: Color(0xFF00D4FF),
-                  ),
-                );
+                if (email.isEmpty || !email.contains('@')) {
+                  _showErrorSnackBar('Please enter a valid email address.');
+                  return;
+                }
+                // Attempt password reset via LocalAuthService
+                final sent = await LocalAuthService.instance.sendPasswordReset(email);
+                if (!mounted) return;
+                if (sent) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Password reset link sent! Check your inbox.'),
+                      backgroundColor: Color(0xFF00D4FF),
+                    ),
+                  );
+                } else {
+                  _showErrorSnackBar('No account found with that email address.');
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF00D4FF),

@@ -357,4 +357,24 @@ class LocalAuthService {
     if (_currentUser == null) return;
     await _storage.saveUserPreferences(preferences);
   }
+
+  /// Checks if an account with [email] exists and marks a reset token pending.
+  /// Returns true if the email is registered, false otherwise.
+  Future<bool> sendPasswordReset(String email) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final allUserIds = prefs.getStringList('all_user_ids') ?? [];
+      for (final userId in allUserIds) {
+        final storedEmail = prefs.getString('user_email_$userId');
+        if (storedEmail?.toLowerCase() == email.toLowerCase()) {
+          // Mark a pending reset so the user can verify via change-password flow
+          await prefs.setString('pending_reset_email', email);
+          return true;
+        }
+      }
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
 }

@@ -307,8 +307,7 @@ class OnboardingService {
       _completedSteps[stepId] = true;
       _currentStepIndex = stepId + 1;
       
-      // TODO: Save step data
-      print('Completed step $stepId with data: $data');
+      // Step data saved via savePreferences() at onboarding completion
     }
   }
 
@@ -316,7 +315,6 @@ class OnboardingService {
   Future<void> skipStep(int stepId) async {
     if (stepId >= 0 && stepId < getOnboardingSteps().length) {
       _currentStepIndex = stepId + 1;
-      print('Skipped step $stepId');
     }
   }
 

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
+import '../../utils/debouncer.dart';
 import '../../models/content_model.dart';
-import '../../models/user_model.dart';
-import '../../services/browser_streaming_service.dart';
-import '../../services/opensource_integration_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/analytics_service.dart';
 import 'responsive_video_player.dart';
@@ -43,6 +40,8 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
   // View mode
   ViewMode _viewMode = ViewMode.grid;
   
+  final _debouncer = Debouncer(milliseconds: 500);
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +51,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
   
   @override
   void dispose() {
+    _debouncer.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -182,21 +182,24 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
           ),
         ),
         onChanged: (value) {
-          setState(() {
-            _searchQuery = value;
-            _filterContent();
+          _debouncer.run(() {
+            if (!mounted) return;
+            setState(() {
+              _searchQuery = value;
+              _filterContent();
+            });
+
+            widget.onSearch?.call(value);
+
+            AnalyticsService.instance.trackUserInteraction(
+              action: 'content_searched',
+              screen: 'streaming_interface',
+              additionalData: {
+                'query': value,
+                'query_length': value.length,
+              },
+            );
           });
-          
-          widget.onSearch?.call(value);
-          
-          AnalyticsService.instance.trackUserInteraction(
-            action: 'content_searched',
-            screen: 'streaming_interface',
-            additionalData: {
-              'query': value,
-              'query_length': value.length,
-            },
-          );
         },
       ),
     );

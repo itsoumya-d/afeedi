@@ -280,6 +280,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: AppLocalizations.of(context)?.previouslyWatchedVideos ?? 'Previously watched videos',
             onTap: () => Navigator.pushNamed(context, AppRoutes.history),
           ),
+          _navTile(
+            icon: Icons.card_giftcard_outlined,
+            title: 'Invite Friends',
+            subtitle: 'Get 7 days Pro free for every friend who joins',
+            onTap: () => Navigator.pushNamed(context, AppRoutes.referral),
+          ),
           const Divider(color: Colors.white10, height: 1),
 
           // ── PRIVACY & DATA ───────────────────────────────────────────

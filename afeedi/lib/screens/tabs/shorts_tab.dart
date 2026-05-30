@@ -1130,7 +1130,43 @@ class _ShortsTabState extends State<ShortsTab> {
     // Liking a short is a strong engagement signal — update implicit weights
     if (!wasLiked && content.tags.isNotEmpty) {
       _updateGenreWeights(content.tags, points: 3);
+      // Viral loop: after liking, nudge the user to share (peak emotional moment)
+      _maybeShowShareNudge(content);
     }
+  }
+
+  void _maybeShowShareNudge(Content content) {
+    final likedCount = UserInteractionService.instance.getLikedContentIds().length;
+    // Show the nudge on the 3rd and every 10th like (not too often)
+    if (likedCount != 3 && likedCount % 10 != 0) return;
+    final url = content.videoUrl ?? content.embedUrl;
+    if (url == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Loved it? Share it with a friend →'),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF1A1A2E),
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: 'Share',
+          textColor: const Color(0xFF00D4FF),
+          onPressed: () async {
+            final title = content.title ?? 'Check this out on Afeedi';
+            final msg = '$title\n$url\n\nFound on Afeedi — AI-curated feed from YouTube, TikTok, Instagram & more.';
+            await Clipboard.setData(ClipboardData(text: msg));
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Share text copied — paste it anywhere!'),
+                  behavior: SnackBarBehavior.floating,
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            }
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> _updateGenreWeights(List<String> tags, {int points = 1}) async {

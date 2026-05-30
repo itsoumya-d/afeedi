@@ -21,6 +21,7 @@ class UserInteractionService {
   final Map<String, bool> _saveCache = {};
   final Map<String, bool> _followCache = {};
   Map<String, Map<String, int>> _countsCache = {};
+  final Set<String> _notInterestedCache = {};
 
   // Change notification stream
   final StreamController<void> _changeController =
@@ -45,8 +46,9 @@ class UserInteractionService {
     _saveCache.clear();
     _followCache.clear();
     _countsCache.clear();
+    _notInterestedCache.clear();
 
-    // Load liked / saved / followed from all stored keys
+    // Load liked / saved / followed / not-interested from all stored keys
     for (final key in prefs.getKeys()) {
       if (key.startsWith('liked_')) {
         _likeCache[key.substring(6)] = prefs.getBool(key) ?? false;
@@ -54,6 +56,10 @@ class UserInteractionService {
         _saveCache[key.substring(6)] = prefs.getBool(key) ?? false;
       } else if (key.startsWith('followed_')) {
         _followCache[key.substring(9)] = prefs.getBool(key) ?? false;
+      } else if (key.startsWith('notinterested_')) {
+        if (prefs.getBool(key) == true) {
+          _notInterestedCache.add(key.substring(14));
+        }
       }
     }
 
@@ -94,6 +100,21 @@ class UserInteractionService {
   bool isLiked(String contentId) => _likeCache[contentId] ?? false;
 
   bool isSaved(String contentId) => _saveCache[contentId] ?? false;
+
+  bool isNotInterested(String contentId) => _notInterestedCache.contains(contentId);
+
+  List<String> getNotInterestedIds() => _notInterestedCache.toList();
+
+  Future<void> markNotInterested(String contentId) async {
+    _notInterestedCache.add(contentId);
+    await _prefs?.setBool('notinterested_$contentId', true);
+    _notify();
+  }
+
+  /// Returns true when the free save limit (20 items) has been reached.
+  bool hasReachedSaveLimit({int limit = 20}) {
+    return _saveCache.values.where((v) => v).length >= limit;
+  }
 
   bool isFollowed(String creatorId) => _followCache[creatorId] ?? false;
 

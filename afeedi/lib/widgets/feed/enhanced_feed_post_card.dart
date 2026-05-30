@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../models/content_model.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/analytics_service.dart';
+import '../../services/user_interaction_service.dart';
 import '../streaming/responsive_video_player.dart';
 import '../streaming/platform_branding_widget.dart';
 
@@ -11,9 +13,10 @@ class EnhancedFeedPostCard extends StatefulWidget {
   final VoidCallback? onLike;
   final VoidCallback? onComment;
   final VoidCallback? onShare;
+  final VoidCallback? onNotInterested;
   final bool showInteractions;
   final bool showPlatformLogo;
-  
+
   const EnhancedFeedPostCard({
     super.key,
     required this.content,
@@ -21,6 +24,7 @@ class EnhancedFeedPostCard extends StatefulWidget {
     this.onLike,
     this.onComment,
     this.onShare,
+    this.onNotInterested,
     this.showInteractions = true,
     this.showPlatformLogo = true,
   });
@@ -35,27 +39,90 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
   
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      color: const Color(0xFF1A1A2E),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: Colors.white.withValues(alpha: 0.1),
-          width: 1,
+    return GestureDetector(
+      onLongPress: _showContextMenu,
+      child: Card(
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        color: const Color(0xFF1A1A2E),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: Colors.white.withValues(alpha: 0.1),
+            width: 1,
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(),
-          _buildContent(),
-          if (widget.showInteractions) _buildInteractions(),
-        ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            _buildContent(),
+            if (widget.showInteractions) _buildInteractions(),
+          ],
+        ),
       ),
     );
   }
-  
+
+  void _showContextMenu() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1A1A2E),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.thumb_down_outlined, color: Colors.white70),
+              title: const Text('Not Interested', style: TextStyle(color: Colors.white)),
+              subtitle: const Text('See less content like this', style: TextStyle(color: Colors.white54, fontSize: 12)),
+              onTap: () {
+                Navigator.pop(ctx);
+                UserInteractionService.instance.markNotInterested(widget.content.id);
+                widget.onNotInterested?.call();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Got it — we\'ll show you less of this'),
+                    duration: Duration(seconds: 2),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.flag_outlined, color: Colors.white70),
+              title: const Text('Report', style: TextStyle(color: Colors.white)),
+              subtitle: const Text('Report inappropriate content', style: TextStyle(color: Colors.white54, fontSize: 12)),
+              onTap: () {
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Thank you for your report'),
+                    duration: Duration(seconds: 2),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -134,10 +201,22 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                     ],
                   ],
                 ),
+                if (widget.content.metadata['recommendationReason'] != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    widget.content.metadata['recommendationReason'] as String,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.45),
+                      fontSize: 11,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ],
             ),
           ),
-          
+
           // More options
           IconButton(
             onPressed: _showMoreOptions,
@@ -488,11 +567,16 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             icon: _isSaved ? Icons.bookmark : Icons.bookmark_border,
             label: '',
             color: _isSaved ? AppTheme.primaryCyan : Colors.white.withValues(alpha: 0.7),
-            onTap: () {
+            onTap: () async {
+              // Show premium paywall when free user hits the save limit
+              if (!_isSaved && UserInteractionService.instance.hasReachedSaveLimit()) {
+                _showSaveLimitPaywall();
+                return;
+              }
               setState(() {
                 _isSaved = !_isSaved;
               });
-              
+
               AnalyticsService.instance.trackUserInteraction(
                 action: _isSaved ? 'content_saved' : 'content_unsaved',
                 screen: 'feed',
@@ -648,6 +732,70 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
     );
   }
   
+  void _showSaveLimitPaywall() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1A1A2E),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Icon(Icons.bookmark_added, color: Color(0xFF00D4FF), size: 48),
+              const SizedBox(height: 16),
+              const Text(
+                'You\'ve saved 20 videos!',
+                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Upgrade to Afeedi Pro for unlimited saves, no ads, and exclusive features.',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF00D4FF),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    Navigator.pushNamed(context, '/premium');
+                  },
+                  child: const Text('Upgrade to Pro — \$4.99/month', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Not now', style: TextStyle(color: Colors.white54)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showShareModal() {
     showModalBottomSheet(
       context: context,
@@ -669,20 +817,45 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             ListTile(
               leading: const Icon(Icons.link, color: Colors.white),
               title: const Text('Copy Link', style: TextStyle(color: Colors.white)),
-              onTap: () {
-                // Copy video URL or embed URL
+              onTap: () async {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Link copied to clipboard')),
-                );
+                final url = widget.content.videoUrl ??
+                    widget.content.embedUrl ??
+                    'https://afeedi.com';
+                await Clipboard.setData(ClipboardData(text: url));
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Link copied to clipboard'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
               },
             ),
             ListTile(
               leading: const Icon(Icons.share, color: Colors.white),
               title: const Text('Share to...', style: TextStyle(color: Colors.white)),
-              onTap: () {
+              subtitle: const Text('Opens your device share sheet', style: TextStyle(color: Colors.white54, fontSize: 12)),
+              onTap: () async {
                 Navigator.pop(context);
-                // Implement native sharing
+                final url = widget.content.videoUrl ??
+                    widget.content.embedUrl ??
+                    'https://afeedi.com';
+                await Clipboard.setData(ClipboardData(text: url));
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Link copied — paste it to share!'),
+                      behavior: SnackBarBehavior.floating,
+                      action: SnackBarAction(
+                        label: 'OK',
+                        textColor: const Color(0xFF00D4FF),
+                        onPressed: () {},
+                      ),
+                    ),
+                  );
+                }
               },
             ),
           ],

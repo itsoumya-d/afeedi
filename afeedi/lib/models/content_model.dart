@@ -19,6 +19,7 @@ enum InteractionType {
   save,
   share,
   schedule,
+  notInterested,
 }
 
 class Content {

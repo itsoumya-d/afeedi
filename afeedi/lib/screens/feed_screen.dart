@@ -112,6 +112,12 @@ class _FeedScreenState extends State<FeedScreen> {
                       content: _posts[index],
                       showPlatformLogo: true,
                       showInteractions: true,
+                      onNotInterested: () {
+                        final removedId = _posts[index].id;
+                        setState(() {
+                          _posts.removeWhere((p) => p.id == removedId);
+                        });
+                      },
                     ),
                   );
                 },

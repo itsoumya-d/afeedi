@@ -274,11 +274,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
     final type = notification['type'] as String?;
     switch (type) {
       case 'new_content':
-        Navigator.of(context).pushNamed(AppRoutes.search);
+        // Deep-link to player when content_id is present, otherwise open discover
+        final contentId = notification['content_id'] as String?;
+        if (contentId != null) {
+          Navigator.of(context).pushNamed(AppRoutes.player, arguments: contentId);
+        } else {
+          Navigator.of(context).pushNamed(AppRoutes.dashboard, arguments: {'initialTab': 1});
+        }
       case 'recommendation':
-        Navigator.of(context).pushNamed(AppRoutes.dashboard);
+        Navigator.of(context).pushNamed(AppRoutes.dashboard, arguments: {'initialTab': 0});
       case 'trending':
-        Navigator.of(context).pushNamed(AppRoutes.search);
+        Navigator.of(context).pushNamed(AppRoutes.dashboard, arguments: {'initialTab': 1});
       case 'achievement':
         Navigator.of(context).pushNamed(AppRoutes.profile);
       case 'system':

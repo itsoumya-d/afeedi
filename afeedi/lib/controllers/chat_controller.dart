@@ -257,6 +257,10 @@ class ChatController extends ChangeNotifier {
   }
 
   void handleGenreContinue() {
+    if (_selectedGenres.length < 3) {
+      showBotMessage('Please pick at least 3 genres so I can build your perfect feed! Try adding a few more categories you enjoy.');
+      return;
+    }
     final genreNames = _selectedGenres.map((g) => g.name).join(', ');
     addUserMessage('I\'m interested in: $genreNames');
     processUserInput('Selected ${_selectedGenres.length} genres');

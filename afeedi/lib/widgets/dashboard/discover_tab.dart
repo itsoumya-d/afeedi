@@ -565,6 +565,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
       padding: EdgeInsets.zero,
       children: [
         _buildTimeWindowChips(),
+        _buildSectionHeader('🌐 Trending Across Platforms'),
+        _buildCrossPlatformTrending(),
         _buildSectionHeader('🔥 Trending Now'),
         _buildTrendingHorizontalScroll(),
         _buildSectionHeader('📈 Rising'),
@@ -573,6 +575,135 @@ class _DiscoverTabState extends State<DiscoverTab> {
         _buildCategoryGrid(),
         const SizedBox(height: 20),
       ],
+    );
+  }
+
+  Widget _buildCrossPlatformTrending() {
+    final platformOrder = [
+      PlatformType.youtube,
+      PlatformType.tiktok,
+      PlatformType.instagram,
+      PlatformType.facebook,
+    ];
+    final platformLabels = {
+      PlatformType.youtube: 'YouTube',
+      PlatformType.tiktok: 'TikTok',
+      PlatformType.instagram: 'Instagram',
+      PlatformType.facebook: 'Facebook',
+    };
+    final platformColors = {
+      PlatformType.youtube: const Color(0xFFFF0000),
+      PlatformType.tiktok: const Color(0xFF69C9D0),
+      PlatformType.instagram: const Color(0xFFE1306C),
+      PlatformType.facebook: const Color(0xFF1877F2),
+    };
+
+    // Pick top-viewed item per platform
+    final byPlatform = <PlatformType, Content?>{};
+    for (final p in platformOrder) {
+      final items = _trending.where((c) => c.platform == p).toList()
+        ..sort((a, b) => b.viewCount.compareTo(a.viewCount));
+      byPlatform[p] = items.isNotEmpty ? items.first : null;
+    }
+
+    final available = platformOrder.where((p) => byPlatform[p] != null).toList();
+    if (available.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Text(
+          'Load trending content to see cross-platform highlights',
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 13),
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 156,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        itemCount: available.length,
+        itemBuilder: (context, i) {
+          final platform = available[i];
+          final content = byPlatform[platform]!;
+          final color = platformColors[platform]!;
+          final label = platformLabels[platform]!;
+          return GestureDetector(
+            onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
+            child: Container(
+              width: 148,
+              margin: const EdgeInsets.only(right: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: color.withValues(alpha: 0.6), width: 1.5),
+                color: const Color(0xFF1A1A2E),
+              ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Thumbnail
+                  if (content.thumbnailUrl != null)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: CachedNetworkImage(
+                        imageUrl: content.thumbnailUrl!,
+                        fit: BoxFit.cover,
+                        errorWidget: (_, __, ___) => _buildThumbnailPlaceholder(content),
+                      ),
+                    )
+                  else
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: _buildThumbnailPlaceholder(content),
+                    ),
+                  // Gradient + info
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.transparent, Colors.black.withValues(alpha: 0.85)],
+                          stops: const [0.4, 1.0],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Platform badge top-left
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        label,
+                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  // Title at bottom
+                  Positioned(
+                    left: 8,
+                    right: 8,
+                    bottom: 8,
+                    child: Text(
+                      content.title ?? label,
+                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 

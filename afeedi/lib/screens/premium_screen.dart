@@ -11,7 +11,7 @@ class PremiumScreen extends StatefulWidget {
 
 class _PremiumScreenState extends State<PremiumScreen> {
   bool _isAnnual = true;
-  int _selectedPlan = 1; // 0=Free, 1=Pro, 2=Creator
+  int _selectedPlan = 1; // 0=Free, 1=Pro
 
   @override
   void initState() {

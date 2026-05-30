@@ -598,39 +598,128 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _clearCache() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Cache cleared successfully'),
-        backgroundColor: Color(0xFF1A1A2E),
-        duration: Duration(seconds: 2),
+  Future<void> _clearCache() async {
+    PaintingBinding.instance.imageCache.clear();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cache cleared successfully'),
+          backgroundColor: Color(0xFF1A1A2E),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void _showChangePasswordDialog() {
+    final currentPwController = TextEditingController();
+    final newPwController     = TextEditingController();
+    final confirmPwController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    String? errorText;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: const Color(0xFF1A1A2E),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Change Password',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (errorText != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(errorText!, style: const TextStyle(color: Colors.redAccent, fontSize: 13)),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                _pwField(currentPwController, 'Current Password'),
+                const SizedBox(height: 12),
+                _pwField(newPwController, 'New Password', validator: (v) {
+                  if (v == null || v.length < 8) return 'Min 8 characters';
+                  return null;
+                }),
+                const SizedBox(height: 12),
+                _pwField(confirmPwController, 'Confirm New Password', validator: (v) {
+                  if (v != newPwController.text) return 'Passwords do not match';
+                  return null;
+                }),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00D4FF),
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: () async {
+                if (!formKey.currentState!.validate()) return;
+                final ok = await LocalAuthService.instance.changePassword(
+                  currentPassword: currentPwController.text,
+                  newPassword: newPwController.text,
+                );
+                if (!ctx.mounted) return;
+                if (ok) {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Password changed successfully')),
+                  );
+                } else {
+                  setDialogState(() => errorText = 'Current password is incorrect');
+                }
+              },
+              child: const Text('Update', style: TextStyle(fontWeight: FontWeight.w600)),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  void _showChangePasswordDialog() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
-        title: const Text('Change Password',
-            style: TextStyle(color: Colors.white),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis),
-        content: const Text(
-          'Password change is managed through your connected account provider.',
-          style: TextStyle(color: Colors.white70),
-          maxLines: 4,
-          overflow: TextOverflow.ellipsis,
+  Widget _pwField(TextEditingController c, String label, {String? Function(String?)? validator}) {
+    return TextFormField(
+      controller: c,
+      obscureText: true,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white60),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.white24),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK',
-                style: TextStyle(color: Color(0xFF00D4FF))),
-          ),
-        ],
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF00D4FF)),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.red),
+        ),
       ),
+      validator: validator ?? (v) {
+        if (v == null || v.isEmpty) return 'Required';
+        return null;
+      },
     );
   }
 

@@ -20,6 +20,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
   List<Content> _content = [];
   List<Content> _trending = [];
   bool _isLoading = true;
+  bool _hasError = false;
 
   static const Map<String, String> _timeWindowLabels = {
     'today': 'Today',
@@ -87,7 +88,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
         });
       }
     }).catchError((e) {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() { _isLoading = false; _hasError = true; });
     });
   }
 
@@ -95,6 +96,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
     setState(() {
       _selectedTimeWindow = window;
       _isLoading = true;
+      _hasError = false;
     });
     ContentService.instance
         .getTrendingVideos(limit: 20, timeWindow: window)
@@ -111,6 +113,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
   void _onCategorySelected(String category) {
     setState(() {
       _selectedCategory = category;
+      _hasError = false;
+      if (category == 'All') _content = _trending; // reset to trending baseline
     });
     if (category == 'All' || category == 'Trending') return;
     ContentService.instance
@@ -186,7 +190,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
               color: const Color(0xFF1A1A2E),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha:0.1),
                 width: 1,
               ),
             ),
@@ -202,7 +206,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                 Text(
                   'Search videos, creators, topics...',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.4),
+                    color: Colors.white.withValues(alpha:0.4),
                     fontSize: 15,
                   ),
                 ),
@@ -239,7 +243,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   border: Border.all(
                     color: isSelected
                         ? AppTheme.primaryCyan
-                        : Colors.white.withOpacity(0.15),
+                        : Colors.white.withValues(alpha:0.15),
                     width: 1,
                   ),
                 ),
@@ -263,6 +267,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
 
   Widget _buildContent() {
     if (_isLoading) return _buildShimmerGrid();
+    if (_hasError) return _buildErrorState();
     if (_selectedCategory == 'Trending') return _buildTrendingSection();
     return _buildDiscoverGrid();
   }
@@ -378,7 +383,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
   }
 
   Widget _buildTrendingCard(Content content) {
-    return Padding(
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
+      child: Padding(
       padding: const EdgeInsets.only(right: 10),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
@@ -411,7 +418,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
                       colors: [
-                        Colors.black.withOpacity(0.85),
+                        Colors.black.withValues(alpha:0.85),
                         Colors.transparent,
                       ],
                     ),
@@ -435,7 +442,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.redAccent.withOpacity(0.85),
+                          color: Colors.redAccent.withValues(alpha:0.85),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Text(
@@ -464,7 +471,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     boxShadow: [
                       BoxShadow(
                         color:
-                            _getPlatformColor(content.platform).withOpacity(0.6),
+                            _getPlatformColor(content.platform).withValues(alpha:0.6),
                         blurRadius: 4,
                         spreadRadius: 1,
                       ),
@@ -476,6 +483,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -486,7 +494,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
       child: Center(
         child: Icon(
           _categoryIcons[guessedCategory] ?? Icons.play_circle,
-          color: _getPlatformColor(content.platform).withOpacity(0.5),
+          color: _getPlatformColor(content.platform).withValues(alpha:0.5),
           size: 40,
         ),
       ),
@@ -550,8 +558,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  color.withOpacity(0.8),
-                  color.withOpacity(0.4),
+                  color.withValues(alpha:0.8),
+                  color.withValues(alpha:0.4),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -579,12 +587,67 @@ class _DiscoverTabState extends State<DiscoverTab> {
     );
   }
 
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.wifi_off_outlined, color: Colors.white38, size: 48),
+          const SizedBox(height: 16),
+          const Text(
+            'Could not load content',
+            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Check your connection and try again',
+            style: TextStyle(color: Colors.white54, fontSize: 13),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              setState(() { _isLoading = true; _hasError = false; });
+              ContentService.instance
+                  .getTrendingVideos(limit: 20, timeWindow: _selectedTimeWindow)
+                  .then((data) {
+                if (mounted) setState(() { _trending = data; _content = data; _isLoading = false; });
+              }).catchError((e) {
+                if (mounted) setState(() { _isLoading = false; _hasError = true; });
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF00D4FF),
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Try Again', style: TextStyle(fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildDiscoverGrid() {
     if (_content.isEmpty) {
-      return const Center(
-        child: Text(
-          'No content found.',
-          style: TextStyle(color: Colors.white54),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.search_off, color: Colors.white38, size: 48),
+            const SizedBox(height: 12),
+            Text(
+              'No $_selectedCategory content found',
+              style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: () => _onCategorySelected('All'),
+              child: const Text(
+                'Show all content',
+                style: TextStyle(color: Color(0xFF00D4FF), fontSize: 13),
+              ),
+            ),
+          ],
         ),
       );
     }

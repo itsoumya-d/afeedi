@@ -62,9 +62,54 @@ class ChatController extends ChangeNotifier {
     _onboardingSteps = _onboardingService.getOnboardingSteps();
     _allGenres = _onboardingService.getAllGenres();
     _filteredGenres = _allGenres;
-    
+
     _initializeAnalytics();
-    startOnboarding();
+    _resumeOrStartOnboarding();
+  }
+
+  Future<void> _resumeOrStartOnboarding() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final draftStep = prefs.getInt('onboarding_draft_step') ?? 0;
+      final draftName = prefs.getString('onboarding_draft_user_name') ?? '';
+      final draftGenreNames = prefs.getStringList('onboarding_draft_genres') ?? [];
+      final savedAt = prefs.getString('onboarding_draft_saved_at');
+
+      bool shouldResume = false;
+      if (draftStep > 0 && savedAt != null) {
+        final savedDate = DateTime.tryParse(savedAt);
+        if (savedDate != null && DateTime.now().difference(savedDate).inDays < 7) {
+          shouldResume = true;
+        }
+      }
+
+      if (shouldResume) {
+        _currentStep = draftStep;
+        _userName = draftName;
+        if (draftGenreNames.isNotEmpty) {
+          _selectedGenres = _allGenres
+              .where((g) => draftGenreNames.contains(g.name))
+              .toList();
+        }
+        Future.delayed(const Duration(milliseconds: 500), () {
+          _messages.add(ChatMessage(
+            text: 'Welcome back! Let\'s continue setting up your feed 👋',
+            isBot: true,
+            timestamp: DateTime.now(),
+          ));
+          notifyListeners();
+          Future.delayed(const Duration(milliseconds: 600), () {
+            if (_currentStep < _onboardingSteps.length) {
+              showBotMessage(_onboardingSteps[_currentStep].botMessage);
+            }
+          });
+        });
+      } else {
+        startOnboarding();
+      }
+    } catch (_) {
+      startOnboarding();
+    }
   }
 
   void _initializeAnalytics() {
@@ -235,6 +280,43 @@ class ChatController extends ChangeNotifier {
   }
 
   void processUserInput(String input) {
+    if (_currentStep < _onboardingSteps.length &&
+        _onboardingSteps[_currentStep].key == 'content_language') {
+      // Map common language names to locale codes
+      final lowerInput = input.toLowerCase();
+      String? localeCode;
+      if (lowerInput.contains('hindi') || lowerInput.contains('हिंदी')) {
+        localeCode = 'hi';
+      } else if (lowerInput.contains('spanish') || lowerInput.contains('español')) {
+        localeCode = 'es';
+      } else if (lowerInput.contains('french') || lowerInput.contains('français')) {
+        localeCode = 'fr';
+      } else if (lowerInput.contains('german') || lowerInput.contains('deutsch')) {
+        localeCode = 'de';
+      } else if (lowerInput.contains('arabic') || lowerInput.contains('عربى')) {
+        localeCode = 'ar';
+      } else if (lowerInput.contains('portuguese') || lowerInput.contains('português')) {
+        localeCode = 'pt';
+      } else if (lowerInput.contains('japanese') || lowerInput.contains('日本語')) {
+        localeCode = 'ja';
+      } else if (lowerInput.contains('korean') || lowerInput.contains('한국어')) {
+        localeCode = 'ko';
+      } else if (lowerInput.contains('chinese') || lowerInput.contains('中文')) {
+        localeCode = 'zh';
+      } else if (lowerInput.contains('indonesian') || lowerInput.contains('bahasa')) {
+        localeCode = 'id';
+      } else if (lowerInput.contains('russian') || lowerInput.contains('русский')) {
+        localeCode = 'ru';
+      } else {
+        localeCode = 'en';
+      }
+      // Save locale preference and switch app language
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.setString('app_locale', localeCode!);
+        prefs.setString('onboarding_content_language', input);
+      });
+    }
+
     if (_currentStep < _onboardingSteps.length &&
         _onboardingSteps[_currentStep].key == 'personal_info' &&
         input.isNotEmpty &&

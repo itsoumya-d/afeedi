@@ -929,25 +929,57 @@ class _ShortsTabState extends State<ShortsTab> {
               _buildActionButton(
                 icon: Icons.favorite_border,
                 label: shortData['likes'] as String? ?? '',
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Tap a short from your personalized feed to interact'),
+                      duration: Duration(seconds: 2),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 22),
               _buildActionButton(
                 icon: Icons.chat_bubble_outline,
                 label: shortData['comments'] as String? ?? '',
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Tap a short from your personalized feed to interact'),
+                      duration: Duration(seconds: 2),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 22),
               _buildActionButton(
                 icon: Icons.reply_outlined,
                 label: shortData['shares'] as String? ?? '',
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Tap a short from your personalized feed to interact'),
+                      duration: Duration(seconds: 2),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 22),
               _buildActionButton(
                 icon: Icons.bookmark_border,
                 label: 'Save',
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Tap a short from your personalized feed to interact'),
+                      duration: Duration(seconds: 2),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -1180,145 +1212,164 @@ class _ShortsTabState extends State<ShortsTab> {
   }
 
   void _showCommentsSheet(BuildContext context, Content content) {
+    final commentController = TextEditingController();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.3,
-        maxChildSize: 0.9,
-        builder: (_, controller) => Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF1A1A2E),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              const SizedBox(height: 8),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.white24,
-                  borderRadius: BorderRadius.circular(2),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) => DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.3,
+          maxChildSize: 0.9,
+          builder: (_, controller) => Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFF1A1A2E),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 8),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Text(
-                      '${_formatCount(content.likeCount ~/ 10)} Comments',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      const Text(
+                        'Comments',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white54),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(color: Colors.white12),
+                Expanded(
+                  child: ListView.builder(
+                    controller: controller,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    itemCount: 5,
+                    itemBuilder: (_, i) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundColor: const Color(0xFF00D4FF).withValues(alpha: 0.3),
+                            child: Text(
+                              String.fromCharCode(65 + i),
+                              style: const TextStyle(color: Colors.white, fontSize: 13),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'User ${i + 1}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                const Text(
+                                  'Great content! Really enjoyed this one.',
+                                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                                ),
+                                const SizedBox(height: 4),
+                                const Text(
+                                  '2h ago',
+                                  style: TextStyle(color: Colors.white38, fontSize: 11),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white54),
-                      onPressed: () => Navigator.pop(ctx),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-              const Divider(color: Colors.white12),
-              Expanded(
-                child: ListView.builder(
-                  controller: controller,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  itemCount: 5,
-                  itemBuilder: (_, i) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
+                SafeArea(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      bottom: MediaQuery.of(ctx).viewInsets.bottom + 8,
+                      top: 8,
+                    ),
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CircleAvatar(
-                          radius: 16,
-                          backgroundColor: const Color(0xFF00D4FF).withValues(alpha: 0.3),
-                          child: Text(
-                            String.fromCharCode(65 + i),
-                            style: const TextStyle(color: Colors.white, fontSize: 13),
+                        Expanded(
+                          child: Container(
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0D0B1E),
+                              borderRadius: BorderRadius.circular(22),
+                              border: Border.all(color: Colors.white12),
+                            ),
+                            child: TextField(
+                              controller: commentController,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: const InputDecoration(
+                                hintText: 'Add a comment...',
+                                hintStyle: TextStyle(color: Colors.white38),
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              ),
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'User ${i + 1}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () {
+                            final text = commentController.text.trim();
+                            if (text.isEmpty) return;
+                            commentController.clear();
+                            FocusScope.of(ctx).unfocus();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Comment posted!'),
+                                duration: Duration(seconds: 2),
+                                behavior: SnackBarBehavior.floating,
                               ),
-                              const SizedBox(height: 2),
-                              const Text(
-                                'Great content! Really enjoyed this one.',
-                                style: TextStyle(color: Colors.white70, fontSize: 13),
-                              ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                '2h ago',
-                                style: TextStyle(color: Colors.white38, fontSize: 11),
-                              ),
-                            ],
+                            );
+                          },
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF00D4FF),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.send, color: Colors.white, size: 20),
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-              ),
-              SafeArea(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: 16,
-                    right: 16,
-                    bottom: MediaQuery.of(ctx).viewInsets.bottom + 8,
-                    top: 8,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0D0B1E),
-                            borderRadius: BorderRadius.circular(22),
-                            border: Border.all(color: Colors.white12),
-                          ),
-                          child: const TextField(
-                            style: TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                              hintText: 'Add a comment...',
-                              hintStyle: TextStyle(color: Colors.white38),
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF00D4FF),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.send, color: Colors.white, size: 20),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

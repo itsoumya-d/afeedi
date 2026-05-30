@@ -203,6 +203,34 @@ class LocalAuthService {
     }
   }
   
+  // Change password — verifies current password then saves new hash
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      if (_currentUser == null) return false;
+      final prefs = await SharedPreferences.getInstance();
+      final credJson = prefs.getString('user_credentials_${_currentUser!.id}');
+      if (credJson == null) return false;
+      final cred = jsonDecode(credJson) as Map<String, dynamic>;
+      final candidateHash = _pbkdf2Hash(currentPassword, cred['salt'] as String);
+      if (candidateHash != cred['hash']) return false;
+      final newSalt = _generateSalt();
+      await prefs.setString('user_credentials_${_currentUser!.id}', jsonEncode({
+        'email': cred['email'],
+        'kdf': 'pbkdf2-sha256',
+        'iterations': _pbkdf2Iterations,
+        'salt': newSalt,
+        'hash': _pbkdf2Hash(newPassword, newSalt),
+      }));
+      return true;
+    } catch (e) {
+      debugPrint('Error changing password: $e');
+      return false;
+    }
+  }
+
   // Delete account
   Future<bool> deleteAccount() async {
     try {

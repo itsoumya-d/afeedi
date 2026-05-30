@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../services/local_auth_service.dart';
+import '../services/subscription_service.dart';
 import '../services/user_interaction_service.dart';
 import '../services/content_service.dart';
 import '../services/navigation_service.dart';
@@ -89,7 +90,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   bool _bioExpanded = false;
   bool _isLoading = true;
 
-  static const String _bioText =
+  String _bioText =
       'Curious mind. Content explorer. Watching the world one feed at a time.';
 
   @override
@@ -192,6 +193,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         _userProfile['savedCount']     = savedContent.isEmpty ? savedCount : savedContent.length;
         _userProfile['followingCount'] = followingCount;
         _userProfile['likedCount']     = likedContent.isEmpty ? likedCount : likedContent.length;
+        _userProfile['isPremium']      = SubscriptionService.instance.isPremium;
         _savedItems
           ..clear()
           ..addAll(savedContent);
@@ -199,6 +201,8 @@ class _ProfileScreenState extends State<ProfileScreen>
           ..clear()
           ..addAll(likedContent);
         _viewingHistory = historyItems;
+        final bio = prefs.getString('user_bio');
+        if (bio != null && bio.isNotEmpty) _bioText = bio;
         _isLoading = false;
       });
     }
@@ -1267,6 +1271,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   void _showEditProfileDialog() {
     final nameController = TextEditingController(
         text: _userProfile['name'] as String? ?? '');
+    final bioController = TextEditingController(text: _bioText);
     final formKey = GlobalKey<FormState>();
 
     showDialog(
@@ -1280,35 +1285,60 @@ class _ProfileScreenState extends State<ProfileScreen>
         ),
         content: Form(
           key: formKey,
-          child: TextFormField(
-            controller: nameController,
-            autofocus: true,
-            style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              labelText: 'Display Name',
-              labelStyle: const TextStyle(color: Colors.white60),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Colors.white24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: nameController,
+                autofocus: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: 'Display Name',
+                  labelStyle: const TextStyle(color: Colors.white60),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.white24),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: _accent),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.red),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.red),
+                  ),
+                ),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) return 'Name cannot be empty';
+                  if (v.trim().length > 50) return 'Name too long (max 50 chars)';
+                  return null;
+                },
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: _accent),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: bioController,
+                maxLength: 150,
+                maxLines: 3,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: 'Bio',
+                  labelStyle: const TextStyle(color: Colors.white60),
+                  counterStyle: const TextStyle(color: Colors.white38),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.white24),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFF00D4FF)),
+                  ),
+                ),
               ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Colors.red),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Colors.red),
-              ),
-            ),
-            validator: (v) {
-              if (v == null || v.trim().isEmpty) return 'Name cannot be empty';
-              if (v.trim().length > 50) return 'Name too long (max 50 chars)';
-              return null;
-            },
+            ],
           ),
         ),
         actions: [
@@ -1330,8 +1360,14 @@ class _ProfileScreenState extends State<ProfileScreen>
               final prefs = await SharedPreferences.getInstance();
               await prefs.setString('user_name', newName);
               await prefs.setString('onboarding_user_name', newName);
+              await prefs.setString('user_bio', bioController.text.trim());
               if (mounted) {
-                setState(() => _userProfile['name'] = newName);
+                setState(() {
+                  _userProfile['name'] = newName;
+                  _bioText = bioController.text.trim().isEmpty
+                      ? 'Curious mind. Content explorer. Watching the world one feed at a time.'
+                      : bioController.text.trim();
+                });
               }
             },
             child: const Text('Save'),

@@ -8,6 +8,7 @@ import '../services/content_service.dart';
 import '../services/user_interaction_service.dart';
 import '../widgets/streaming/enhanced_youtube_player.dart';
 import '../widgets/streaming/social_media_video_player.dart';
+import '../l10n/app_localizations.dart';
 
 class PlayerScreen extends StatefulWidget {
   final Content content;
@@ -329,11 +330,11 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
 
                       // ── Up Next ────────────────────────────────────────────
                       if (_relatedContent.isNotEmpty) ...[
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                           child: Text(
-                            'Up Next',
-                            style: TextStyle(
+                            AppLocalizations.of(context)?.recommended ?? 'Up Next',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,

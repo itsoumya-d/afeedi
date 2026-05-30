@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
+import '../../l10n/app_localizations.dart';
 
 class SharedBottomNavigation extends StatefulWidget {
   final int currentIndex;
@@ -98,8 +99,8 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildNavItem(0), // Home
-                        _buildNavItem(1), // Videos
+                        _buildNavItem(context, 0), // Home
+                        _buildNavItem(context, 1), // Videos
                       ],
                     ),
                   ),
@@ -109,7 +110,7 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
                     child: Center(
                       child: widget.showFloatingActionButton 
                           ? const SizedBox(width: 48) // Space for FAB
-                          : _buildNavItem(2), // Calendar without FAB
+                          : _buildNavItem(context, 2), // Calendar without FAB
                     ),
                   ),
                   // Right side: Shorts and Profile
@@ -118,8 +119,8 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildNavItem(3), // Shorts
-                        _buildNavItem(4), // Profile
+                        _buildNavItem(context, 3), // Shorts
+                        _buildNavItem(context, 4), // Profile
                       ],
                     ),
                   ),
@@ -158,12 +159,21 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
     );
   }
 
-  Widget _buildNavItem(int index) {
+  Widget _buildNavItem(BuildContext context, int index) {
     if (index >= _tabs.length) return const SizedBox.shrink();
-    
+
     final tab = _tabs[index];
     final isActive = widget.currentIndex == index;
-    
+    final loc = AppLocalizations.of(context)!;
+    final titles = [
+      loc.home,
+      loc.discover,
+      loc.calendar,
+      loc.shorts,
+      loc.profile,
+    ];
+    final title = index < titles.length ? titles[index] : tab['title'] as String;
+
     return GestureDetector(
       onTap: () => widget.onTabChanged(index),
       behavior: HitTestBehavior.opaque,
@@ -171,7 +181,7 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
         decoration: BoxDecoration(
-          color: isActive 
+          color: isActive
               ? AppTheme.primaryCyan.withValues(alpha: 0.2)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
@@ -184,7 +194,7 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
               child: Icon(
                 isActive ? tab['activeIcon'] : tab['icon'],
                 key: ValueKey(isActive),
-                color: isActive 
+                color: isActive
                     ? AppTheme.primaryCyan
                     : Colors.white.withValues(alpha: 0.6),
                 size: 22,
@@ -192,9 +202,9 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
             ),
             const SizedBox(height: 2),
             Text(
-              tab['title'],
+              title,
               style: TextStyle(
-                color: isActive 
+                color: isActive
                     ? AppTheme.primaryCyan
                     : Colors.white.withValues(alpha: 0.6),
                 fontSize: 10,

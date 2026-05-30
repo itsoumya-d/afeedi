@@ -1,4 +1,3 @@
-import 'dart:math' show min;
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,6 +29,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   List<Content> _allPosts = [];
   bool _isLoading = false;
   bool _hasMore = true;
+  bool _loadError = false;
   PlatformType? _selectedPlatform;
   bool _showFollowing = false;
   bool _showFollowSuggestion = false;
@@ -97,8 +97,11 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   Future<void> _checkProactivePaywall() async {
     final shouldShow = await SubscriptionService.instance.shouldShowProactivePaywall();
     if (shouldShow && mounted) {
-      await Future.delayed(const Duration(milliseconds: 800));
-      if (mounted) Navigator.of(context).pushNamed(AppRoutes.premium);
+      // Wait until content has loaded before showing paywall to avoid racing with _isLoading
+      await Future.delayed(const Duration(milliseconds: 3000));
+      if (mounted && !_isLoading) {
+        Navigator.of(context).pushNamed(AppRoutes.premium);
+      }
     }
   }
 
@@ -151,8 +154,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   Future<void> _loadInitialPosts() async {
     setState(() {
       _isLoading = true;
+      _loadError = false;
     });
-    
+
     try {
       // Check if user is authenticated and onboarding is completed
       final authService = AuthService.instance;
@@ -188,10 +192,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           .take(6)
           .map((e) => '#${e.key}')
           .toList();
-      int newCount = feedContent.where((p) =>
+      final newCount = feedContent.where((p) =>
           p.publishedAt != null &&
           DateTime.now().difference(p.publishedAt!).inHours < 24).length;
-      if (newCount == 0) newCount = min(feedContent.length, 9);
       setState(() {
         _allPosts = feedContent;
         _posts = List.from(_allPosts);
@@ -221,6 +224,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         _allPosts = [];
         _posts = [];
         _isLoading = false;
+        _loadError = true;
       });
       
       // Track error
@@ -267,10 +271,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         return;
       }
       _allPosts.addAll(deduped);
-      int newCount = _allPosts.where((p) =>
+      final newCount = _allPosts.where((p) =>
           p.publishedAt != null &&
           DateTime.now().difference(p.publishedAt!).inHours < 24).length;
-      if (newCount == 0) newCount = min(_allPosts.length, 9);
       setState(() {
         // Apply current filter to new posts
         if (_selectedPlatform == null) {
@@ -642,16 +645,22 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.video_library_outlined, size: 64, color: Colors.white24),
+            Icon(
+              _loadError ? Icons.wifi_off_outlined : Icons.video_library_outlined,
+              size: 64,
+              color: Colors.white24,
+            ),
             const SizedBox(height: 16),
-            const Text(
-              'No content available',
-              style: TextStyle(color: Colors.white54, fontSize: 18),
+            Text(
+              _loadError ? 'Could not load content' : 'No content available',
+              style: const TextStyle(color: Colors.white54, fontSize: 18),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Pull down to refresh',
-              style: TextStyle(color: Colors.white60, fontSize: 14),
+            Text(
+              _loadError
+                  ? 'Check your connection and try again'
+                  : 'Pull down to refresh',
+              style: const TextStyle(color: Colors.white60, fontSize: 14),
             ),
             const SizedBox(height: 24),
             ElevatedButton(

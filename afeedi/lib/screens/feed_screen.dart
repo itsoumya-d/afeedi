@@ -96,33 +96,35 @@ class _FeedScreenState extends State<FeedScreen> {
       ),
       body: _isLoading
           ? const LoadingShimmer()
-          : SmartRefresher(
-              controller: _refreshController,
-              enablePullDown: true,
-              enablePullUp: true,
-              onRefresh: _onRefresh,
-              onLoading: _onLoading,
-              child: ListView.builder(
-                padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding + 16),
-                itemCount: _posts.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: EnhancedFeedPostCard(
-                      content: _posts[index],
-                      showPlatformLogo: true,
-                      showInteractions: true,
-                      onNotInterested: () {
-                        final removedId = _posts[index].id;
-                        setState(() {
-                          _posts.removeWhere((p) => p.id == removedId);
-                        });
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
+          : _posts.isEmpty
+              ? _buildEmptyState()
+              : SmartRefresher(
+                  controller: _refreshController,
+                  enablePullDown: true,
+                  enablePullUp: true,
+                  onRefresh: _onRefresh,
+                  onLoading: _onLoading,
+                  child: ListView.builder(
+                    padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding + 16),
+                    itemCount: _posts.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: EnhancedFeedPostCard(
+                          content: _posts[index],
+                          showPlatformLogo: true,
+                          showInteractions: true,
+                          onNotInterested: () {
+                            final removedId = _posts[index].id;
+                            setState(() {
+                              _posts.removeWhere((p) => p.id == removedId);
+                            });
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
       bottomNavigationBar: SharedBottomNavigation(
         currentIndex: 0, // Assuming feed is accessed from Home tab
         onTabChanged: (index) {
@@ -134,6 +136,53 @@ class _FeedScreenState extends State<FeedScreen> {
           );
         },
         showFloatingActionButton: false,
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.video_library_outlined, size: 72, color: Colors.white24),
+            const SizedBox(height: 20),
+            const Text(
+              'No content yet',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Pull down to refresh, or check your internet connection.',
+              style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  fontSize: 14,
+                  height: 1.5),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 28),
+            ElevatedButton.icon(
+              onPressed: _loadPosts,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Try Again'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00D4FF),
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                elevation: 0,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

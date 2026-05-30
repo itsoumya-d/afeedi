@@ -156,10 +156,7 @@ class _LanguageCard extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  language.flag,
-                  style: const TextStyle(fontSize: 24),
-                ),
+                Text(language.flag, style: const TextStyle(fontSize: 24)),
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(

@@ -53,7 +53,10 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget> {
       if (!mounted) return;
       final state = event.playerState;
       if (state == PlayerState.playing && !_isReady) {
-        setState(() { _isReady = true; _isBuffering = false; });
+        setState(() {
+          _isReady = true;
+          _isBuffering = false;
+        });
         widget.onReady?.call();
         AnalyticsService.instance.trackUserInteraction(
           action: 'youtube_player_ready',

@@ -19,41 +19,44 @@ class PersonalizedHomeScreen extends StatefulWidget {
 }
 
 class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
-  final RecommendationIntegrationService _recommendationService = RecommendationIntegrationService.instance;
+  final RecommendationIntegrationService _recommendationService =
+      RecommendationIntegrationService.instance;
   final OnboardingService _onboardingService = OnboardingService();
   final AnalyticsService _analyticsService = AnalyticsService.instance;
-  
+
   bool _isOnboardingCompleted = false;
   bool _showContextualRecommendations = false;
   Map<String, dynamic>? _personalizationSettings;
-  
+
   @override
   void initState() {
     super.initState();
     _initializeScreen();
   }
-  
+
   Future<void> _initializeScreen() async {
     // Initialize recommendation service
     await _recommendationService.initialize();
-    
+
     // Check if onboarding is completed
     final isCompleted = await _onboardingService.isOnboardingCompleted();
-    
+
     // Get personalization settings
     final preferences = await _onboardingService.getCurrentPreferences();
     final settings = preferences?.personalizationSettings;
-    
+
     // Check if contextual recommendations should be shown
-    final enableCalendarContextual = settings?['enableCalendarContextualContent'] ?? false;
+    final enableCalendarContextual =
+        settings?['enableCalendarContextualContent'] ?? false;
     final enableTimeAware = settings?['enableTimeAwareRecommendations'] ?? true;
-    
+
     setState(() {
       _isOnboardingCompleted = isCompleted;
-      _showContextualRecommendations = enableCalendarContextual || enableTimeAware;
+      _showContextualRecommendations =
+          enableCalendarContextual || enableTimeAware;
       _personalizationSettings = settings;
     });
-    
+
     // Track screen view
     _analyticsService.trackEvent(
       eventName: 'screen_view',
@@ -66,7 +69,7 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
       },
     );
   }
-  
+
   void _handleContentItemTap(ContentItem item) {
     // Track content selection
     _analyticsService.trackEvent(
@@ -79,36 +82,32 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
-    
+
     // Navigate to content player
-    Navigator.of(context).pushNamed(
-      '/player',
-      arguments: item,
-    );
+    Navigator.of(context).pushNamed('/player', arguments: item);
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0D0B1E),
       body: SafeArea(
-        child: Column(children: [
-          // App bar with profile
-          AppBarWithProfile(
-            title: 'For You',
-            showBackButton: false,
-          ),
+        child: Column(
+          children: [
+            // App bar with profile
+            AppBarWithProfile(title: 'For You', showBackButton: false),
 
-          // Main content
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                await _initializeScreen();
-              },
-              child: _buildContent(),
+            // Main content
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  await _initializeScreen();
+                },
+                child: _buildContent(),
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
       ),
     );
   }
@@ -124,7 +123,9 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
         if (_showContextualRecommendations)
           ContextualRecommendationsWidget(
             itemCount: 5,
-            showRecommendationReason: _personalizationSettings?['enableRecommendationReasoning'] ?? true,
+            showRecommendationReason:
+                _personalizationSettings?['enableRecommendationReasoning'] ??
+                true,
             onItemTap: _handleContentItemTap,
           ),
 
@@ -135,7 +136,9 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
           title: 'Recommended for You',
           subtitle: 'Based on your preferences',
           itemCount: 10,
-          showRecommendationReason: _personalizationSettings?['enableRecommendationReasoning'] ?? true,
+          showRecommendationReason:
+              _personalizationSettings?['enableRecommendationReasoning'] ??
+              true,
           onItemTap: _handleContentItemTap,
           recommendationType: 'personalized',
         ),
@@ -145,7 +148,9 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
         // Platform-specific recommendations
         PlatformRecommendationsWidget(
           itemsPerPlatform: 5,
-          showRecommendationReason: _personalizationSettings?['enableRecommendationReasoning'] ?? true,
+          showRecommendationReason:
+              _personalizationSettings?['enableRecommendationReasoning'] ??
+              true,
           onItemTap: _handleContentItemTap,
         ),
 
@@ -156,7 +161,9 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
           title: 'Matches Your Viewing Style',
           subtitle: 'Content that fits how you like to watch',
           itemCount: 10,
-          showRecommendationReason: _personalizationSettings?['enableRecommendationReasoning'] ?? true,
+          showRecommendationReason:
+              _personalizationSettings?['enableRecommendationReasoning'] ??
+              true,
           onItemTap: _handleContentItemTap,
           recommendationType: 'viewing_habits',
         ),

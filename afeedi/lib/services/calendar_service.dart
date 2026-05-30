@@ -77,7 +77,9 @@ class CalendarService {
       }
 
       return allScheduled.where((scheduled) {
-        final scheduledFor = DateTime.parse(scheduled['scheduled_for'] as String);
+        final scheduledFor = DateTime.parse(
+          scheduled['scheduled_for'] as String,
+        );
         if (startDate != null && scheduledFor.isBefore(startDate)) {
           return false;
         }
@@ -100,19 +102,14 @@ class CalendarService {
     final startOfDay = DateTime(now.year, now.month, now.day);
     final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
-    return await getScheduledContent(
-      startDate: startOfDay,
-      endDate: endOfDay,
-    );
+    return await getScheduledContent(startDate: startOfDay, endDate: endOfDay);
   }
 
   // Get upcoming scheduled content
   Future<List<Map<String, dynamic>>> getUpcomingScheduledContent() async {
     final now = DateTime.now();
 
-    return await getScheduledContent(
-      startDate: now,
-    );
+    return await getScheduledContent(startDate: now);
   }
 
   // Update scheduled content
@@ -135,10 +132,12 @@ class CalendarService {
       }
 
       final updated = Map<String, dynamic>.from(existing);
-      if (scheduledFor != null) updated['scheduled_for'] = scheduledFor.toIso8601String();
+      if (scheduledFor != null)
+        updated['scheduled_for'] = scheduledFor.toIso8601String();
       if (notes != null) updated['notes'] = notes;
       if (isRecurring != null) updated['is_recurring'] = isRecurring;
-      if (recurrencePattern != null) updated['recurrence_pattern'] = recurrencePattern;
+      if (recurrencePattern != null)
+        updated['recurrence_pattern'] = recurrencePattern;
       updated['updated_at'] = DateTime.now().toIso8601String();
 
       await _storage.saveScheduledContent(updated);
@@ -174,9 +173,7 @@ class CalendarService {
       await AnalyticsService.instance.trackUserInteraction(
         action: 'cancel_scheduled_content',
         screen: 'calendar',
-        additionalData: {
-          'scheduled_content_id': scheduledContentId,
-        },
+        additionalData: {'scheduled_content_id': scheduledContentId},
       );
 
       return true;
@@ -202,7 +199,8 @@ class CalendarService {
 
     for (final content in scheduledContent) {
       final scheduledFor = DateTime.parse(content['scheduled_for'] as String);
-      final dateKey = '${scheduledFor.year}-${scheduledFor.month.toString().padLeft(2, '0')}-${scheduledFor.day.toString().padLeft(2, '0')}';
+      final dateKey =
+          '${scheduledFor.year}-${scheduledFor.month.toString().padLeft(2, '0')}-${scheduledFor.day.toString().padLeft(2, '0')}';
 
       if (calendarData[dateKey] == null) {
         calendarData[dateKey] = [];
@@ -256,7 +254,8 @@ class CalendarService {
 
       for (final date in dates) {
         final scheduledContent = <String, dynamic>{
-          'id': '${DateTime.now().millisecondsSinceEpoch}_${date.millisecondsSinceEpoch}',
+          'id':
+              '${DateTime.now().millisecondsSinceEpoch}_${date.millisecondsSinceEpoch}',
           'user_id': user.id,
           'content_id': contentId,
           'scheduled_for': date.toIso8601String(),
@@ -355,7 +354,9 @@ class CalendarService {
         'total_scheduled': allScheduled.length,
         'today_scheduled': todaysContent.length,
         'this_week_scheduled': thisWeekContent.length,
-        'recurring_schedules': allScheduled.where((s) => s['is_recurring'] == true).length,
+        'recurring_schedules': allScheduled
+            .where((s) => s['is_recurring'] == true)
+            .length,
       };
     } catch (error) {
       if (kDebugMode) {

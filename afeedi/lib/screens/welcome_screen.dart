@@ -32,21 +32,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
 
     // Start animations
     _fadeController.forward();
@@ -81,7 +74,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
         }
       } else {
-        _showErrorSnackBar(AppLocalizations.of(context)?.authenticationFailed ?? 'Authentication failed. Please try again.');
+        _showErrorSnackBar(
+          AppLocalizations.of(context)?.authenticationFailed ??
+              'Authentication failed. Please try again.',
+        );
       }
     } catch (error) {
       await AnalyticsService.instance.trackOAuthEvent(
@@ -89,7 +85,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         action: 'error',
         errorMessage: error.toString(),
       );
-      _showErrorSnackBar(AppLocalizations.of(context)?.authenticationFailed ?? 'Authentication failed. Please try again.');
+      _showErrorSnackBar(
+        AppLocalizations.of(context)?.authenticationFailed ??
+            'Authentication failed. Please try again.',
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -118,7 +117,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
         }
       } else {
-        _showErrorSnackBar(AppLocalizations.of(context)?.authenticationFailed ?? 'Authentication failed. Please try again.');
+        _showErrorSnackBar(
+          AppLocalizations.of(context)?.authenticationFailed ??
+              'Authentication failed. Please try again.',
+        );
       }
     } catch (error) {
       await AnalyticsService.instance.trackOAuthEvent(
@@ -126,7 +128,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         action: 'error',
         errorMessage: error.toString(),
       );
-      _showErrorSnackBar(AppLocalizations.of(context)?.authenticationFailed ?? 'Authentication failed. Please try again.');
+      _showErrorSnackBar(
+        AppLocalizations.of(context)?.authenticationFailed ??
+            'Authentication failed. Please try again.',
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -140,11 +145,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            message,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
+          content: Text(message, maxLines: 2, overflow: TextOverflow.ellipsis),
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 3),
         ),
@@ -166,10 +167,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF0D0B1E),
-              Color(0xFF2D1B69),
-            ],
+            colors: [Color(0xFF0D0B1E), Color(0xFF2D1B69)],
           ),
         ),
         child: Stack(
@@ -224,318 +222,356 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 child: SingleChildScrollView(
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      minHeight: MediaQuery.of(context).size.height -
+                      minHeight:
+                          MediaQuery.of(context).size.height -
                           MediaQuery.of(context).padding.top -
                           MediaQuery.of(context).padding.bottom,
                     ),
                     child: Column(
                       children: [
-                    // Skip button
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: FadeTransition(
-                        opacity: _fadeAnimation,
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(
-                                context, AppRoutes.onboardingChatbot);
-                          },
-                          child: Text(
-                            AppLocalizations.of(context)!.skip,
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                        // Skip button
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.onboardingChatbot,
+                                );
+                              },
+                              child: Text(
+                                AppLocalizations.of(context)!.skip,
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 60),
-                    // Hero: logo + app name + tagline
-                    SlideTransition(
-                      position: _slideAnimation,
-                      child: FadeTransition(
-                        opacity: _fadeAnimation,
-                        child: Column(
-                          children: [
-                            // Gradient logo badge
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Color(0xFF00D4FF),
-                                    Color(0xFFFF3C7E),
-                                  ],
+                        const SizedBox(height: 60),
+                        // Hero: logo + app name + tagline
+                        SlideTransition(
+                          position: _slideAnimation,
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: Column(
+                              children: [
+                                // Gradient logo badge
+                                Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Color(0xFF00D4FF),
+                                        Color(0xFFFF3C7E),
+                                      ],
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.play_arrow,
+                                    color: Colors.white,
+                                    size: 40,
+                                  ),
                                 ),
-                              ),
-                              child: const Icon(
-                                Icons.play_arrow,
-                                color: Colors.white,
-                                size: 40,
-                              ),
+                                const SizedBox(height: 32),
+                                // App name — large and bold
+                                const Text(
+                                  'Afeedi',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: -0.5,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 12),
+                                // Tagline — muted, 16sp
+                                Text(
+                                  AppLocalizations.of(context)!.tagline,
+                                  style: const TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 16,
+                                    height: 1.5,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 32),
-                            // App name — large and bold
-                            const Text(
-                              'Afeedi',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: -0.5,
-                              ),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 12),
-                            // Tagline — muted, 16sp
-                            Text(
-                              AppLocalizations.of(context)!.tagline,
-                              style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 16,
-                                height: 1.5,
-                              ),
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 48),
-                    // CTA buttons
-                    SlideTransition(
-                      position: _slideAnimation,
-                      child: FadeTransition(
-                        opacity: _fadeAnimation,
-                        child: Column(
-                          children: [
-                            // Continue with Google
-                            SizedBox(
-                              width: double.infinity,
-                              height: 52,
-                              child: OutlinedButton.icon(
-                                onPressed:
-                                    _isLoading ? null : _handleGoogleSignIn,
-                                icon: _isLoading
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Colors.white),
-                                        ),
-                                      )
-                                    : const Icon(
-                                        Icons.g_mobiledata,
+                        const SizedBox(height: 48),
+                        // CTA buttons
+                        SlideTransition(
+                          position: _slideAnimation,
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: Column(
+                              children: [
+                                // Continue with Google
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 52,
+                                  child: OutlinedButton.icon(
+                                    onPressed: _isLoading
+                                        ? null
+                                        : _handleGoogleSignIn,
+                                    icon: _isLoading
+                                        ? const SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    Colors.white,
+                                                  ),
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.g_mobiledata,
+                                            color: Colors.white,
+                                            size: 24,
+                                          ),
+                                    label: Text(
+                                      _isLoading
+                                          ? AppLocalizations.of(
+                                              context,
+                                            )!.signingIn
+                                          : AppLocalizations.of(
+                                              context,
+                                            )!.continueWithGoogle,
+                                      style: const TextStyle(
                                         color: Colors.white,
-                                        size: 24,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                label: Text(
-                                  _isLoading
-                                      ? AppLocalizations.of(context)!.signingIn
-                                      : AppLocalizations.of(context)!.continueWithGoogle,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(
-                                      color: Colors.white24, width: 1),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            // Continue with Apple
-                            SizedBox(
-                              width: double.infinity,
-                              height: 52,
-                              child: OutlinedButton.icon(
-                                onPressed:
-                                    _isLoading ? null : _handleAppleSignIn,
-                                icon: _isLoading
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Colors.white),
-                                        ),
-                                      )
-                                    : const Icon(
-                                        Icons.apple,
-                                        color: Colors.white,
-                                        size: 24,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    style: OutlinedButton.styleFrom(
+                                      side: const BorderSide(
+                                        color: Colors.white24,
+                                        width: 1,
                                       ),
-                                label: Text(
-                                  _isLoading
-                                      ? AppLocalizations.of(context)!.signingIn
-                                      : AppLocalizations.of(context)!.continueWithApple,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(
-                                      color: Colors.white24, width: 1),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            // Get Started — gradient CTA
-                            Semantics(
-                              button: true,
-                              label: 'Get started with Afeedi',
-                              child: SizedBox(
-                              width: double.infinity,
-                              height: 52,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFF00D4FF),
-                                      Color(0xFFFF006E),
-                                    ],
-                                    begin: Alignment.centerLeft,
-                                    end: Alignment.centerRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pushNamed(
-                                        context, AppRoutes.createAccount);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    shadowColor: Colors.transparent,
-                                    foregroundColor: Colors.white,
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
                                     ),
                                   ),
-                                  child: Text(
-                                    AppLocalizations.of(context)!.getStarted,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
+                                ),
+                                const SizedBox(height: 16),
+                                // Continue with Apple
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 52,
+                                  child: OutlinedButton.icon(
+                                    onPressed: _isLoading
+                                        ? null
+                                        : _handleAppleSignIn,
+                                    icon: _isLoading
+                                        ? const SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    Colors.white,
+                                                  ),
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.apple,
+                                            color: Colors.white,
+                                            size: 24,
+                                          ),
+                                    label: Text(
+                                      _isLoading
+                                          ? AppLocalizations.of(
+                                              context,
+                                            )!.signingIn
+                                          : AppLocalizations.of(
+                                              context,
+                                            )!.continueWithApple,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                    style: OutlinedButton.styleFrom(
+                                      side: const BorderSide(
+                                        color: Colors.white24,
+                                        width: 1,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            // Already have an account? Sign in
-                            Semantics(
-                              button: true,
-                              label: 'Sign in to Afeedi',
-                              child: SizedBox(
-                              width: double.infinity,
-                              height: 52,
-                              child: TextButton(
-                                onPressed: () {
-                                  Navigator.pushNamed(context, AppRoutes.login);
-                                },
-                                style: TextButton.styleFrom(
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                const SizedBox(height: 24),
+                                // Get Started — gradient CTA
+                                Semantics(
+                                  button: true,
+                                  label: 'Get started with Afeedi',
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    height: 52,
+                                    child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            Color(0xFF00D4FF),
+                                            Color(0xFFFF006E),
+                                          ],
+                                          begin: Alignment.centerLeft,
+                                          end: Alignment.centerRight,
+                                        ),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.pushNamed(
+                                            context,
+                                            AppRoutes.createAccount,
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shadowColor: Colors.transparent,
+                                          foregroundColor: Colors.white,
+                                          elevation: 0,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          )!.getStarted,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ),
                                   ),
+                                ),
+                                const SizedBox(height: 16),
+                                // Already have an account? Sign in
+                                Semantics(
+                                  button: true,
+                                  label: 'Sign in to Afeedi',
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    height: 52,
+                                    child: TextButton(
+                                      onPressed: () {
+                                        Navigator.pushNamed(
+                                          context,
+                                          AppRoutes.login,
+                                        );
+                                      },
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.alreadyHaveAccount,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white70,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        // Terms & Privacy
+                        FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TextButton(
+                                onPressed: () => Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.termsOfService,
                                 ),
                                 child: Text(
-                                  AppLocalizations.of(context)!.alreadyHaveAccount,
+                                  AppLocalizations.of(context)!.terms,
                                   style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white70,
+                                    color: Colors.white54,
+                                    fontSize: 14,
+                                    decoration: TextDecoration.underline,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              const Text(
+                                ' • ',
+                                style: TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 14,
+                                ),
                               ),
-                            ),
-                          ],
+                              TextButton(
+                                onPressed: () => Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.privacyPolicy,
+                                ),
+                                child: Text(
+                                  AppLocalizations.of(context)!.privacyPolicy,
+                                  style: const TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 14,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Terms & Privacy
-                    FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TextButton(
-                            onPressed: () =>
-                                Navigator.pushNamed(context, AppRoutes.termsOfService),
-                            child: Text(
-                              AppLocalizations.of(context)!.terms,
-                              style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 14,
-                                decoration: TextDecoration.underline,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const Text(
-                            ' • ',
-                            style:
-                                TextStyle(color: Colors.white54, fontSize: 14),
-                          ),
-                          TextButton(
-                            onPressed: () =>
-                                Navigator.pushNamed(context, AppRoutes.privacyPolicy),
-                            child: Text(
-                              AppLocalizations.of(context)!.privacyPolicy,
-                              style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 14,
-                                decoration: TextDecoration.underline,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),

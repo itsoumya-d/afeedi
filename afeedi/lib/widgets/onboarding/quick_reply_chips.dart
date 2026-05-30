@@ -62,9 +62,7 @@ class _QuickReplyChipsState extends State<QuickReplyChips> {
         constraints: const BoxConstraints(minHeight: 40),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
-          color: isPressed
-              ? const Color(0xFF00D4FF)
-              : Colors.transparent,
+          color: isPressed ? const Color(0xFF00D4FF) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isPressed
@@ -76,7 +74,9 @@ class _QuickReplyChipsState extends State<QuickReplyChips> {
         child: Text(
           text,
           style: TextStyle(
-            color: isPressed ? Colors.white : Colors.white.withValues(alpha: 0.9),
+            color: isPressed
+                ? Colors.white
+                : Colors.white.withValues(alpha: 0.9),
             fontSize: 14,
             fontWeight: FontWeight.w500,
             height: 1.2,

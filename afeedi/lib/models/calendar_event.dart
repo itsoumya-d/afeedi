@@ -31,7 +31,10 @@ class CalendarEvent {
     return CalendarEvent(
       id: json['id'] as String? ?? '',
       title: json['summary'] as String? ?? '(No title)',
-      start: parseDate(startMap?['date'] as String?, startMap?['dateTime'] as String?),
+      start: parseDate(
+        startMap?['date'] as String?,
+        startMap?['dateTime'] as String?,
+      ),
       end: endMap != null
           ? parseDate(endMap['date'] as String?, endMap['dateTime'] as String?)
           : null,

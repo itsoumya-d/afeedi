@@ -8,18 +8,24 @@ import 'analytics_service.dart';
 
 class YouTubePlayerService {
   static YouTubePlayerService? _instance;
-  static YouTubePlayerService get instance => _instance ??= YouTubePlayerService._();
-  
+  static YouTubePlayerService get instance =>
+      _instance ??= YouTubePlayerService._();
+
   YouTubePlayerService._();
-  
+
   // Create YouTube player with fallback to external app
   static String _qualityToVq(String quality) {
     switch (quality) {
-      case '1080p': return 'hd1080';
-      case '720p':  return 'hd720';
-      case '480p':  return 'large';
-      case '360p':  return 'medium';
-      default:      return '';
+      case '1080p':
+        return 'hd1080';
+      case '720p':
+        return 'hd720';
+      case '480p':
+        return 'large';
+      case '360p':
+        return 'medium';
+      default:
+        return '';
     }
   }
 
@@ -47,10 +53,7 @@ class YouTubePlayerService {
           quality: quality,
         );
       } else {
-        return await _createMobilePlayer(
-          videoId: videoId,
-          content: content,
-        );
+        return await _createMobilePlayer(videoId: videoId, content: content);
       }
     } catch (error) {
       await AnalyticsService.instance.trackError(
@@ -58,17 +61,18 @@ class YouTubePlayerService {
         errorMessage: error.toString(),
         screen: 'video_player',
       );
-      
+
       // Fallback to external YouTube
       return YouTubePlayerResult(
         success: false,
         playerId: null,
-        fallbackUrl: 'https://www.youtube.com/watch?v=${content.platformContentId}',
+        fallbackUrl:
+            'https://www.youtube.com/watch?v=${content.platformContentId}',
         errorMessage: error.toString(),
       );
     }
   }
-  
+
   Future<YouTubePlayerResult> _createWebPlayer({
     required String videoId,
     required String containerId,
@@ -111,7 +115,7 @@ class YouTubePlayerService {
       );
     }
   }
-  
+
   Future<YouTubePlayerResult> _createMobilePlayer({
     required String videoId,
     required Content content,
@@ -120,10 +124,10 @@ class YouTubePlayerService {
       // For mobile, we'll use URL launcher to open YouTube app or browser
       final youtubeUrl = 'https://www.youtube.com/watch?v=$videoId';
       final youtubeAppUrl = 'youtube://watch?v=$videoId';
-      
+
       // Try YouTube app first, fallback to browser
       bool launched = false;
-      
+
       try {
         if (await canLaunchUrl(Uri.parse(youtubeAppUrl))) {
           launched = await launchUrl(
@@ -134,14 +138,14 @@ class YouTubePlayerService {
       } catch (e) {
         // YouTube app not available, continue to browser fallback
       }
-      
+
       if (!launched) {
         launched = await launchUrl(
           Uri.parse(youtubeUrl),
           mode: LaunchMode.externalApplication,
         );
       }
-      
+
       if (launched) {
         await AnalyticsService.instance.trackUserInteraction(
           action: 'youtube_external_launch',
@@ -152,7 +156,7 @@ class YouTubePlayerService {
             'launch_mode': 'external_app',
           },
         );
-        
+
         return YouTubePlayerResult(
           success: true,
           playerId: 'external',
@@ -170,7 +174,7 @@ class YouTubePlayerService {
       );
     }
   }
-  
+
   String _buildEmbedUrl({
     required String videoId,
     bool autoplay = false,
@@ -180,7 +184,7 @@ class YouTubePlayerService {
     final params = {
       'autoplay': autoplay ? '1' : '0',
       'controls': showControls ? '1' : '0',
-      
+
       'rel': '0',
       'showinfo': '0',
       'iv_load_policy': '3',
@@ -188,40 +192,37 @@ class YouTubePlayerService {
       'origin': 'https://localhost',
       ...?additionalParams,
     };
-    
+
     final queryString = params.entries
         .map((e) => '${e.key}=${e.value}')
         .join('&');
-    
+
     return 'https://www.youtube.com/embed/$videoId?$queryString';
   }
-  
+
   // Open YouTube video externally
   Future<bool> openInYouTube(Content content) async {
     try {
       if (content.platform != PlatformType.youtube) {
         return false;
       }
-      
+
       final videoId = content.platformContentId;
       final youtubeUrl = 'https://www.youtube.com/watch?v=$videoId';
-      
+
       final launched = await launchUrl(
         Uri.parse(youtubeUrl),
         mode: LaunchMode.externalApplication,
       );
-      
+
       if (launched) {
         await AnalyticsService.instance.trackUserInteraction(
           action: 'youtube_external_open',
           screen: 'video_player',
-          additionalData: {
-            'video_id': videoId,
-            'content_id': content.id,
-          },
+          additionalData: {'video_id': videoId, 'content_id': content.id},
         );
       }
-      
+
       return launched;
     } catch (error) {
       await AnalyticsService.instance.trackError(
@@ -232,7 +233,7 @@ class YouTubePlayerService {
       return false;
     }
   }
-  
+
   // Check if YouTube embed is supported
   bool isEmbedSupported() {
     if (kIsWeb) {
@@ -241,9 +242,12 @@ class YouTubePlayerService {
     }
     return true; // Mobile always supports external launch
   }
-  
+
   // Get video thumbnail URL
-  String getThumbnailUrl(String videoId, {YouTubeThumbnailQuality quality = YouTubeThumbnailQuality.high}) {
+  String getThumbnailUrl(
+    String videoId, {
+    YouTubeThumbnailQuality quality = YouTubeThumbnailQuality.high,
+  }) {
     switch (quality) {
       case YouTubeThumbnailQuality.default_:
         return 'https://img.youtube.com/vi/$videoId/default.jpg';
@@ -267,7 +271,7 @@ class YouTubePlayerResult {
   final String? externalUrl;
   final String? fallbackUrl;
   final String? errorMessage;
-  
+
   const YouTubePlayerResult({
     required this.success,
     this.playerId,
@@ -276,17 +280,11 @@ class YouTubePlayerResult {
     this.fallbackUrl,
     this.errorMessage,
   });
-  
+
   bool get isEmbedded => embedUrl != null;
   bool get isExternal => externalUrl != null;
   bool get hasFallback => fallbackUrl != null;
 }
 
 // YouTube thumbnail quality options
-enum YouTubeThumbnailQuality {
-  default_,
-  medium,
-  high,
-  standard,
-  maxres,
-}
+enum YouTubeThumbnailQuality { default_, medium, high, standard, maxres }

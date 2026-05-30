@@ -29,13 +29,11 @@ class UmpService {
 
   static Future<void> _loadAndShowConsentForm() async {
     try {
-      await ConsentForm.loadAndShowConsentFormIfRequired(
-        (FormError? error) {
-          if (error != null) {
-            debugPrint('UMP: consent form error: ${error.message}');
-          }
-        },
-      );
+      await ConsentForm.loadAndShowConsentFormIfRequired((FormError? error) {
+        if (error != null) {
+          debugPrint('UMP: consent form error: ${error.message}');
+        }
+      });
     } catch (e) {
       debugPrint('UMP: failed to show consent form: $e');
     }
@@ -45,7 +43,8 @@ class UmpService {
   static Future<bool> canShowPersonalizedAds() async {
     try {
       final status = await ConsentInformation.instance.getConsentStatus();
-      return status == ConsentStatus.obtained || status == ConsentStatus.notRequired;
+      return status == ConsentStatus.obtained ||
+          status == ConsentStatus.notRequired;
     } catch (_) {
       return false;
     }

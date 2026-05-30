@@ -5,7 +5,7 @@ class QualitySelectorWidget extends StatelessWidget {
   final List<String> availableQualities;
   final Function(String) onQualitySelected;
   final bool showBitrate;
-  
+
   const QualitySelectorWidget({
     super.key,
     required this.currentQuality,
@@ -13,7 +13,7 @@ class QualitySelectorWidget extends StatelessWidget {
     required this.onQualitySelected,
     this.showBitrate = false,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -45,11 +45,7 @@ class QualitySelectorWidget extends StatelessWidget {
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.high_quality,
-                  color: Colors.white,
-                  size: 16,
-                ),
+                Icon(Icons.high_quality, color: Colors.white, size: 16),
                 SizedBox(width: 8),
                 Text(
                   'Quality',
@@ -62,27 +58,29 @@ class QualitySelectorWidget extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Quality options
           ...availableQualities.map((quality) => _buildQualityOption(quality)),
-          
+
           // Auto quality option
           _buildQualityOption('Auto', isAuto: true),
         ],
       ),
     );
   }
-  
+
   Widget _buildQualityOption(String quality, {bool isAuto = false}) {
     final isSelected = currentQuality == quality;
     final qualityData = _getQualityData(quality);
-    
+
     return GestureDetector(
       onTap: () => onQualitySelected(quality),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.red.withValues(alpha: 0.2) : Colors.transparent,
+          color: isSelected
+              ? Colors.red.withValues(alpha: 0.2)
+              : Colors.transparent,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -100,9 +98,9 @@ class QualitySelectorWidget extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(width: 12),
-            
+
             // Quality text
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,7 +111,9 @@ class QualitySelectorWidget extends StatelessWidget {
                   style: TextStyle(
                     color: isSelected ? Colors.red : Colors.white,
                     fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 ),
                 if (showBitrate && qualityData['bitrate'] != null)
@@ -126,9 +126,9 @@ class QualitySelectorWidget extends StatelessWidget {
                   ),
               ],
             ),
-            
+
             const SizedBox(width: 16),
-            
+
             // Quality badge
             if (!isAuto)
               Container(
@@ -146,73 +146,37 @@ class QualitySelectorWidget extends StatelessWidget {
                   ),
                 ),
               ),
-            
+
             if (isAuto)
-              const Icon(
-                Icons.auto_awesome,
-                color: Colors.orange,
-                size: 16,
-              ),
+              const Icon(Icons.auto_awesome, color: Colors.orange, size: 16),
           ],
         ),
       ),
     );
   }
-  
+
   Map<String, dynamic> _getQualityData(String quality) {
     switch (quality.toLowerCase()) {
       case '2160p':
       case '4k':
-        return {
-          'label': '4K',
-          'bitrate': '~25 Mbps',
-          'color': Colors.purple,
-        };
+        return {'label': '4K', 'bitrate': '~25 Mbps', 'color': Colors.purple};
       case '1440p':
       case '2k':
-        return {
-          'label': '2K',
-          'bitrate': '~16 Mbps',
-          'color': Colors.blue,
-        };
+        return {'label': '2K', 'bitrate': '~16 Mbps', 'color': Colors.blue};
       case '1080p':
       case 'fhd':
-        return {
-          'label': 'FHD',
-          'bitrate': '~8 Mbps',
-          'color': Colors.green,
-        };
+        return {'label': 'FHD', 'bitrate': '~8 Mbps', 'color': Colors.green};
       case '720p':
       case 'hd':
-        return {
-          'label': 'HD',
-          'bitrate': '~5 Mbps',
-          'color': Colors.orange,
-        };
+        return {'label': 'HD', 'bitrate': '~5 Mbps', 'color': Colors.orange};
       case '480p':
-        return {
-          'label': 'SD',
-          'bitrate': '~2.5 Mbps',
-          'color': Colors.yellow,
-        };
+        return {'label': 'SD', 'bitrate': '~2.5 Mbps', 'color': Colors.yellow};
       case '360p':
-        return {
-          'label': 'LQ',
-          'bitrate': '~1 Mbps',
-          'color': Colors.red,
-        };
+        return {'label': 'LQ', 'bitrate': '~1 Mbps', 'color': Colors.red};
       case '240p':
-        return {
-          'label': 'VLQ',
-          'bitrate': '~0.5 Mbps',
-          'color': Colors.grey,
-        };
+        return {'label': 'VLQ', 'bitrate': '~0.5 Mbps', 'color': Colors.grey};
       default:
-        return {
-          'label': 'AUTO',
-          'bitrate': null,
-          'color': Colors.grey,
-        };
+        return {'label': 'AUTO', 'bitrate': null, 'color': Colors.grey};
     }
   }
 }
@@ -222,14 +186,14 @@ class CompactQualitySelector extends StatelessWidget {
   final String currentQuality;
   final List<String> availableQualities;
   final Function(String) onQualitySelected;
-  
+
   const CompactQualitySelector({
     super.key,
     required this.currentQuality,
     required this.availableQualities,
     required this.onQualitySelected,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -246,9 +210,9 @@ class CompactQualitySelector extends StatelessWidget {
           final quality = index < availableQualities.length
               ? availableQualities[index]
               : 'Auto';
-          
+
           final isSelected = currentQuality == quality;
-          
+
           return GestureDetector(
             onTap: () => onQualitySelected(quality),
             child: Container(
@@ -258,7 +222,9 @@ class CompactQualitySelector extends StatelessWidget {
                 color: isSelected ? Colors.red : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected ? Colors.red : Colors.white.withValues(alpha: 0.3),
+                  color: isSelected
+                      ? Colors.red
+                      : Colors.white.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -266,9 +232,13 @@ class CompactQualitySelector extends StatelessWidget {
                 child: Text(
                   quality,
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.8),
+                    color: isSelected
+                        ? Colors.white
+                        : Colors.white.withValues(alpha: 0.8),
                     fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 ),
               ),
@@ -285,18 +255,18 @@ class QualityIndicatorWidget extends StatelessWidget {
   final String quality;
   final bool isBuffering;
   final double? bufferProgress;
-  
+
   const QualityIndicatorWidget({
     super.key,
     required this.quality,
     this.isBuffering = false,
     this.bufferProgress,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final qualityData = _getQualityData(quality);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -315,9 +285,9 @@ class QualityIndicatorWidget extends StatelessWidget {
               shape: BoxShape.circle,
             ),
           ),
-          
+
           const SizedBox(width: 6),
-          
+
           // Quality text
           Text(
             quality,
@@ -327,7 +297,7 @@ class QualityIndicatorWidget extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          
+
           // Buffering indicator
           if (isBuffering) ...<Widget>[
             const SizedBox(width: 6),
@@ -345,7 +315,7 @@ class QualityIndicatorWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Map<String, dynamic> _getQualityData(String quality) {
     switch (quality.toLowerCase()) {
       case '2160p':

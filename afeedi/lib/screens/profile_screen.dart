@@ -13,11 +13,11 @@ import '../models/content_model.dart';
 import '../l10n/app_localizations.dart';
 
 // ─── Color palette ───────────────────────────────────────────────────────────
-const Color _bgPrimary       = Color(0xFF0D0B1E);
-const Color _surface         = Color(0xFF1A1A2E);
+const Color _bgPrimary = Color(0xFF0D0B1E);
+const Color _surface = Color(0xFF1A1A2E);
 const Color _surfaceElevated = Color(0xFF252545);
-const Color _accent          = Color(0xFF00D4FF);
-const Color _accentPink      = Color(0xFFFF006E);
+const Color _accent = Color(0xFF00D4FF);
+const Color _accentPink = Color(0xFFFF006E);
 // ─────────────────────────────────────────────────────────────────────────────
 
 class ProfileScreen extends StatefulWidget {
@@ -51,8 +51,8 @@ class _ProfileScreenState extends State<ProfileScreen>
   final List<Map<String, dynamic>> _achievements = [];
 
   List<Map<String, dynamic>> _viewingHistory = [];
-  final List<Content> _likedItems     = [];
-  final List<Content> _savedItems     = [];
+  final List<Content> _likedItems = [];
+  final List<Content> _savedItems = [];
 
   bool _bioExpanded = false;
   bool _isLoading = true;
@@ -69,7 +69,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   Future<void> _loadUserData() async {
-    final user  = LocalAuthService.instance.currentUser;
+    final user = LocalAuthService.instance.currentUser;
     final prefs = await SharedPreferences.getInstance();
 
     String name;
@@ -77,27 +77,28 @@ class _ProfileScreenState extends State<ProfileScreen>
     String joinDate;
 
     if (user != null) {
-      name = prefs.getString('onboarding_user_name') ??
+      name =
+          prefs.getString('onboarding_user_name') ??
           prefs.getString('user_name') ??
           user.email.split('@').first;
-      email    = user.email;
+      email = user.email;
       joinDate = '${_monthName(user.createdAt.month)} ${user.createdAt.year}';
     } else {
-      name     = prefs.getString('onboarding_user_name') ?? 'You';
-      email    = '';
+      name = prefs.getString('onboarding_user_name') ?? 'You';
+      email = '';
       joinDate = 'Today';
     }
 
     final videosWatched = prefs.getInt('stat_videos_watched') ?? 0;
-    final streakDays    = prefs.getInt('stat_streak_days')    ?? 1;
-    final watchMinutes  = prefs.getInt('stat_watch_minutes')  ?? 0;
-    final watchTimeStr  = watchMinutes >= 60
+    final streakDays = prefs.getInt('stat_streak_days') ?? 1;
+    final watchMinutes = prefs.getInt('stat_watch_minutes') ?? 0;
+    final watchTimeStr = watchMinutes >= 60
         ? '${watchMinutes ~/ 60}h ${watchMinutes % 60}m'
         : '${watchMinutes}m';
 
-    final savedCount     = prefs.getInt('stat_saved_count')     ?? 0;
+    final savedCount = prefs.getInt('stat_saved_count') ?? 0;
     final followingCount = prefs.getInt('stat_following_count') ?? 0;
-    final likedCount     = prefs.getInt('stat_liked_count')     ?? 0;
+    final likedCount = prefs.getInt('stat_liked_count') ?? 0;
 
     // Check onboarding genres for "Genre Fan" achievement
     final onboardingGenres = prefs.getStringList('selected_genres') ?? [];
@@ -122,7 +123,9 @@ class _ProfileScreenState extends State<ProfileScreen>
         'color': const Color(0xFF9C27B0),
         'unlocked': videosWatched >= 10,
         'progress': (videosWatched / 10.0).clamp(0.0, 1.0),
-        'progressLabel': videosWatched >= 10 ? 'Completed!' : '$videosWatched/10 videos',
+        'progressLabel': videosWatched >= 10
+            ? 'Completed!'
+            : '$videosWatched/10 videos',
       },
       {
         'id': 'explorer',
@@ -132,7 +135,9 @@ class _ProfileScreenState extends State<ProfileScreen>
         'color': const Color(0xFF4CAF50),
         'unlocked': followingCount >= 3,
         'progress': (followingCount / 3.0).clamp(0.0, 1.0),
-        'progressLabel': followingCount >= 3 ? 'Completed!' : '$followingCount/3 platforms',
+        'progressLabel': followingCount >= 3
+            ? 'Completed!'
+            : '$followingCount/3 platforms',
       },
       {
         'id': 'genre_fan',
@@ -142,7 +147,9 @@ class _ProfileScreenState extends State<ProfileScreen>
         'color': const Color(0xFFFF9800),
         'unlocked': onboardingGenres.length >= 3,
         'progress': (onboardingGenres.length / 3.0).clamp(0.0, 1.0),
-        'progressLabel': onboardingGenres.length >= 3 ? 'Completed!' : '${onboardingGenres.length}/3 genres',
+        'progressLabel': onboardingGenres.length >= 3
+            ? 'Completed!'
+            : '${onboardingGenres.length}/3 genres',
       },
       {
         'id': 'week_streak',
@@ -201,17 +208,21 @@ class _ProfileScreenState extends State<ProfileScreen>
 
     if (mounted) {
       setState(() {
-        _userProfile['name']           = name;
-        _userProfile['email']          = email;
-        _userProfile['joinDate']       = joinDate;
-        _userProfile['videosWatched']  = videosWatched;
-        _userProfile['streakDays']     = streakDays;
+        _userProfile['name'] = name;
+        _userProfile['email'] = email;
+        _userProfile['joinDate'] = joinDate;
+        _userProfile['videosWatched'] = videosWatched;
+        _userProfile['streakDays'] = streakDays;
         _userProfile['totalWatchTime'] = watchTimeStr;
-        _userProfile['level']          = (videosWatched ~/ 10) + 1;
-        _userProfile['savedCount']     = savedContent.isEmpty ? savedCount : savedContent.length;
+        _userProfile['level'] = (videosWatched ~/ 10) + 1;
+        _userProfile['savedCount'] = savedContent.isEmpty
+            ? savedCount
+            : savedContent.length;
         _userProfile['followingCount'] = followingCount;
-        _userProfile['likedCount']     = likedContent.isEmpty ? likedCount : likedContent.length;
-        _userProfile['isPremium']      = SubscriptionService.instance.isPremium;
+        _userProfile['likedCount'] = likedContent.isEmpty
+            ? likedCount
+            : likedContent.length;
+        _userProfile['isPremium'] = SubscriptionService.instance.isPremium;
         _topInterests = topInterests;
         _achievements
           ..clear()
@@ -240,16 +251,21 @@ class _ProfileScreenState extends State<ProfileScreen>
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString('genre_implicit_weights') ?? '';
     if (raw.isEmpty) return [];
-    final entries = raw.split(',').map((e) {
-      final parts = e.split(':');
-      if (parts.length != 2) return null;
-      return MapEntry(parts[0], int.tryParse(parts[1]) ?? 0);
-    }).whereType<MapEntry<String, int>>().toList();
+    final entries = raw
+        .split(',')
+        .map((e) {
+          final parts = e.split(':');
+          if (parts.length != 2) return null;
+          return MapEntry(parts[0], int.tryParse(parts[1]) ?? 0);
+        })
+        .whereType<MapEntry<String, int>>()
+        .toList();
     entries.sort((a, b) => b.value.compareTo(a.value));
     return entries.take(3).map((e) => e.key).toList();
   }
 
-  String _monthName(int month) => DateFormat.MMMM().format(DateTime(2000, month));
+  String _monthName(int month) =>
+      DateFormat.MMMM().format(DateTime(2000, month));
 
   @override
   void dispose() {
@@ -337,7 +353,8 @@ class _ProfileScreenState extends State<ProfileScreen>
               style: IconButton.styleFrom(
                 backgroundColor: Colors.black.withValues(alpha: 0.45),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
               tooltip: AppLocalizations.of(context)?.back ?? 'Back',
@@ -357,10 +374,13 @@ class _ProfileScreenState extends State<ProfileScreen>
               style: IconButton.styleFrom(
                 backgroundColor: Colors.black.withValues(alpha: 0.45),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               icon: const Icon(Icons.edit, color: Colors.white, size: 20),
-              tooltip: AppLocalizations.of(context)?.editProfileTooltip ?? 'Edit profile',
+              tooltip:
+                  AppLocalizations.of(context)?.editProfileTooltip ??
+                  'Edit profile',
             ),
           ),
         ),
@@ -405,7 +425,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   Widget _buildAvatar() {
-    final name    = _userProfile['name'] as String? ?? '';
+    final name = _userProfile['name'] as String? ?? '';
     final initial = name.isNotEmpty ? name[0].toUpperCase() : 'A';
 
     return Stack(
@@ -493,8 +513,8 @@ class _ProfileScreenState extends State<ProfileScreen>
   // ─── PROFILE INFO ─────────────────────────────────────────────────────────
 
   Widget _buildProfileInfo() {
-    final name     = _userProfile['name']     as String? ?? '';
-    final email    = _userProfile['email']    as String? ?? '';
+    final name = _userProfile['name'] as String? ?? '';
+    final email = _userProfile['email'] as String? ?? '';
     final joinDate = _userProfile['joinDate'] as String? ?? '';
 
     return Padding(
@@ -523,8 +543,10 @@ class _ProfileScreenState extends State<ProfileScreen>
               if (_userProfile['isPremium'] == true) ...[
                 const SizedBox(width: 8),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [_accent, _accentPink],
@@ -564,22 +586,23 @@ class _ProfileScreenState extends State<ProfileScreen>
           Row(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: _accent.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
-                  border:
-                      Border.all(color: _accent.withValues(alpha: 0.35)),
+                  border: Border.all(color: _accent.withValues(alpha: 0.35)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.calendar_today,
-                        color: _accent, size: 13),
+                    const Icon(Icons.calendar_today, color: _accent, size: 13),
                     const SizedBox(width: 5),
                     Text(
-                      AppLocalizations.of(context)?.memberSince(joinDate) ?? 'Member since $joinDate',
+                      AppLocalizations.of(context)?.memberSince(joinDate) ??
+                          'Member since $joinDate',
                       style: const TextStyle(
                         color: _accent,
                         fontSize: 12,
@@ -602,7 +625,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                 child: GestureDetector(
                   onTap: () => Navigator.pushNamed(context, '/referral'),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -611,12 +637,18 @@ class _ProfileScreenState extends State<ProfileScreen>
                         ],
                       ),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFF00D4FF).withValues(alpha: 0.4)),
+                      border: Border.all(
+                        color: const Color(0xFF00D4FF).withValues(alpha: 0.4),
+                      ),
                     ),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.card_giftcard, color: Color(0xFF00D4FF), size: 18),
+                        Icon(
+                          Icons.card_giftcard,
+                          color: Color(0xFF00D4FF),
+                          size: 18,
+                        ),
                         SizedBox(width: 8),
                         Text(
                           'Invite Friends → Get 7 Days Pro',
@@ -647,19 +679,25 @@ class _ProfileScreenState extends State<ProfileScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            _bioText.isNotEmpty ? _bioText : (AppLocalizations.of(context)?.defaultBio ?? 'Curious mind. Content explorer. Watching the world one feed at a time.'),
+            _bioText.isNotEmpty
+                ? _bioText
+                : (AppLocalizations.of(context)?.defaultBio ??
+                      'Curious mind. Content explorer. Watching the world one feed at a time.'),
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 14,
               height: 1.4,
             ),
             maxLines: _bioExpanded ? null : 2,
-            overflow:
-                _bioExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+            overflow: _bioExpanded
+                ? TextOverflow.visible
+                : TextOverflow.ellipsis,
           ),
           const SizedBox(height: 2),
           Text(
-            _bioExpanded ? (AppLocalizations.of(context)?.showLess ?? 'Show less') : (AppLocalizations.of(context)?.showMore ?? 'Show more'),
+            _bioExpanded
+                ? (AppLocalizations.of(context)?.showLess ?? 'Show less')
+                : (AppLocalizations.of(context)?.showMore ?? 'Show more'),
             style: const TextStyle(color: _accent, fontSize: 13),
           ),
         ],
@@ -670,22 +708,39 @@ class _ProfileScreenState extends State<ProfileScreen>
   // ─── STATS ROW ────────────────────────────────────────────────────────────
 
   Widget _buildStatsRow() {
-    final videosWatched  = _userProfile['videosWatched']  as int?    ?? 0;
+    final videosWatched = _userProfile['videosWatched'] as int? ?? 0;
     final totalWatchTime = _userProfile['totalWatchTime'] as String? ?? '0m';
-    final streakDays     = _userProfile['streakDays']     as int?    ?? 0;
-    final savedCount     = _userProfile['savedCount']     as int?    ?? 0;
+    final streakDays = _userProfile['streakDays'] as int? ?? 0;
+    final savedCount = _userProfile['savedCount'] as int? ?? 0;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Row(
         children: [
-          _buildStatCard('$videosWatched', AppLocalizations.of(context)?.videosWatchedLabel ?? 'Videos\nWatched', Icons.play_circle_outline),
+          _buildStatCard(
+            '$videosWatched',
+            AppLocalizations.of(context)?.videosWatchedLabel ??
+                'Videos\nWatched',
+            Icons.play_circle_outline,
+          ),
           const SizedBox(width: 10),
-          _buildStatCard(totalWatchTime, AppLocalizations.of(context)?.watchTimeLabel ?? 'Watch Time', Icons.access_time),
+          _buildStatCard(
+            totalWatchTime,
+            AppLocalizations.of(context)?.watchTimeLabel ?? 'Watch Time',
+            Icons.access_time,
+          ),
           const SizedBox(width: 10),
-          _buildStatCard('${streakDays}d', AppLocalizations.of(context)?.streak ?? 'Streak', Icons.local_fire_department_outlined),
+          _buildStatCard(
+            '${streakDays}d',
+            AppLocalizations.of(context)?.streak ?? 'Streak',
+            Icons.local_fire_department_outlined,
+          ),
           const SizedBox(width: 10),
-          _buildStatCard('$savedCount', AppLocalizations.of(context)?.saved ?? 'Saved', Icons.bookmark_outline),
+          _buildStatCard(
+            '$savedCount',
+            AppLocalizations.of(context)?.saved ?? 'Saved',
+            Icons.bookmark_outline,
+          ),
         ],
       ),
     );
@@ -756,7 +811,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                   ? genre[0].toUpperCase() + genre.substring(1)
                   : genre.toUpperCase();
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: _accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
@@ -788,8 +846,8 @@ class _ProfileScreenState extends State<ProfileScreen>
   // ─── TAB BAR ──────────────────────────────────────────────────────────────
 
   Widget _buildTabBar() {
-    final likedCount   = _userProfile['likedCount']   as int? ?? 0;
-    final savedCount   = _userProfile['savedCount']   as int? ?? 0;
+    final likedCount = _userProfile['likedCount'] as int? ?? 0;
+    final savedCount = _userProfile['savedCount'] as int? ?? 0;
     final watchedCount = _userProfile['videosWatched'] as int? ?? 0;
 
     return Container(
@@ -800,20 +858,28 @@ class _ProfileScreenState extends State<ProfileScreen>
         indicatorWeight: 2.5,
         labelColor: _accent,
         unselectedLabelColor: Colors.white60,
-        labelStyle: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
+        labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w400,
         ),
         isScrollable: false,
         tabs: [
-          _buildBadgeTab(AppLocalizations.of(context)?.liked ?? 'Liked', likedCount),
-          _buildBadgeTab(AppLocalizations.of(context)?.saved ?? 'Saved', savedCount),
-          _buildBadgeTab(AppLocalizations.of(context)?.history ?? 'History', watchedCount),
-          Tab(text: AppLocalizations.of(context)?.achievements ?? 'Achievements'),
+          _buildBadgeTab(
+            AppLocalizations.of(context)?.liked ?? 'Liked',
+            likedCount,
+          ),
+          _buildBadgeTab(
+            AppLocalizations.of(context)?.saved ?? 'Saved',
+            savedCount,
+          ),
+          _buildBadgeTab(
+            AppLocalizations.of(context)?.history ?? 'History',
+            watchedCount,
+          ),
+          Tab(
+            text: AppLocalizations.of(context)?.achievements ?? 'Achievements',
+          ),
         ],
       ),
     );
@@ -851,12 +917,17 @@ class _ProfileScreenState extends State<ProfileScreen>
   // ─── LIKED TAB ────────────────────────────────────────────────────────────
 
   Widget _buildLikedTab() {
-    if (_isLoading) return const Center(child: CircularProgressIndicator(color: _accent));
+    if (_isLoading)
+      return const Center(child: CircularProgressIndicator(color: _accent));
     if (_likedItems.isEmpty) {
       return _buildEmptyState(
         icon: Icons.favorite_outline,
-        title: AppLocalizations.of(context)?.noLikedContent ?? 'No liked videos yet',
-        subtitle: AppLocalizations.of(context)?.noLikedContentHint ?? 'Like videos to see them here',
+        title:
+            AppLocalizations.of(context)?.noLikedContent ??
+            'No liked videos yet',
+        subtitle:
+            AppLocalizations.of(context)?.noLikedContentHint ??
+            'Like videos to see them here',
       );
     }
     return GridView.builder(
@@ -875,25 +946,45 @@ class _ProfileScreenState extends State<ProfileScreen>
   // ─── SAVED TAB ────────────────────────────────────────────────────────────
 
   Widget _buildSavedTab() {
-    if (_isLoading) return const Center(child: CircularProgressIndicator(color: _accent));
+    if (_isLoading)
+      return const Center(child: CircularProgressIndicator(color: _accent));
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
           child: Row(
             children: [
-              Text(AppLocalizations.of(context)?.bookmarks ?? 'Bookmarks', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+              Text(
+                AppLocalizations.of(context)?.bookmarks ?? 'Bookmarks',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const Spacer(),
               TextButton(
-                onPressed: () => Navigator.pushNamed(context, AppRoutes.bookmarks),
-                child: Text(AppLocalizations.of(context)?.viewAll ?? 'View All', style: const TextStyle(color: _accent, fontSize: 13)),
+                onPressed: () =>
+                    Navigator.pushNamed(context, AppRoutes.bookmarks),
+                child: Text(
+                  AppLocalizations.of(context)?.viewAll ?? 'View All',
+                  style: const TextStyle(color: _accent, fontSize: 13),
+                ),
               ),
             ],
           ),
         ),
         Expanded(
           child: _savedItems.isEmpty
-              ? _buildEmptyState(icon: Icons.bookmark_outline, title: AppLocalizations.of(context)?.nothingSavedYet ?? 'No saved videos yet', subtitle: AppLocalizations.of(context)?.bookmarkContentHint ?? 'Save videos to watch later')
+              ? _buildEmptyState(
+                  icon: Icons.bookmark_outline,
+                  title:
+                      AppLocalizations.of(context)?.nothingSavedYet ??
+                      'No saved videos yet',
+                  subtitle:
+                      AppLocalizations.of(context)?.bookmarkContentHint ??
+                      'Save videos to watch later',
+                )
               : GridView.builder(
                   padding: const EdgeInsets.all(12),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -903,7 +994,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                     childAspectRatio: 16 / 9,
                   ),
                   itemCount: _savedItems.length,
-                  itemBuilder: (context, index) => _buildContentTile(_savedItems[index]),
+                  itemBuilder: (context, index) =>
+                      _buildContentTile(_savedItems[index]),
                 ),
         ),
       ],
@@ -914,7 +1006,8 @@ class _ProfileScreenState extends State<ProfileScreen>
     final thumb = content.thumbnailUrl ?? '';
     final title = content.title ?? '';
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
+      onTap: () =>
+          Navigator.pushNamed(context, AppRoutes.player, arguments: content),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: Stack(
@@ -926,7 +1019,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                     fit: BoxFit.cover,
                     errorWidget: (_, __, ___) => Container(
                       color: _surfaceElevated,
-                      child: const Icon(Icons.play_circle_outline, color: Colors.white54),
+                      child: const Icon(
+                        Icons.play_circle_outline,
+                        color: Colors.white54,
+                      ),
                     ),
                     placeholder: (_, __) => Container(color: _surfaceElevated),
                   )
@@ -984,7 +1080,8 @@ class _ProfileScreenState extends State<ProfileScreen>
               ),
               const Spacer(),
               TextButton(
-                onPressed: () => Navigator.pushNamed(context, AppRoutes.history),
+                onPressed: () =>
+                    Navigator.pushNamed(context, AppRoutes.history),
                 child: Text(
                   AppLocalizations.of(context)?.viewAll ?? 'View All',
                   style: const TextStyle(color: _accent, fontSize: 13),
@@ -997,8 +1094,12 @@ class _ProfileScreenState extends State<ProfileScreen>
           child: _viewingHistory.isEmpty
               ? _buildEmptyState(
                   icon: Icons.history,
-                  title: AppLocalizations.of(context)?.noHistoryYet ?? 'No watch history yet',
-                  subtitle: AppLocalizations.of(context)?.noHistoryHint ?? 'Videos you watch will appear here',
+                  title:
+                      AppLocalizations.of(context)?.noHistoryYet ??
+                      'No watch history yet',
+                  subtitle:
+                      AppLocalizations.of(context)?.noHistoryHint ??
+                      'Videos you watch will appear here',
                 )
               : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -1012,43 +1113,62 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   Widget _buildHistoryItem(Map<String, dynamic> item) {
-    final content         = item['content']         as Content?;
-    final completed       = item['completed']       as bool?   ?? false;
+    final content = item['content'] as Content?;
+    final completed = item['completed'] as bool? ?? false;
     final watchedDuration = item['watchedDuration'] as String? ?? '';
-    final totalDuration   = item['duration']        as String? ?? '';
-    final thumbUrl        = content?.thumbnailUrl   ?? (item['thumbnail'] as String? ?? '');
-    final title           = content?.title          ?? (item['title']     as String? ?? '');
-    final creator         = content?.creatorName    ?? (item['creator']   as String? ?? '');
-    final platform        = content?.platform.name  ?? (item['platform']  as String? ?? '');
-    final watchedAt       = item['watched_at']      as String? ?? (item['watchedAt'] as String? ?? '');
+    final totalDuration = item['duration'] as String? ?? '';
+    final thumbUrl =
+        content?.thumbnailUrl ?? (item['thumbnail'] as String? ?? '');
+    final title = content?.title ?? (item['title'] as String? ?? '');
+    final creator = content?.creatorName ?? (item['creator'] as String? ?? '');
+    final platform =
+        content?.platform.name ?? (item['platform'] as String? ?? '');
+    final watchedAt =
+        item['watched_at'] as String? ?? (item['watchedAt'] as String? ?? '');
 
     return GestureDetector(
       onTap: content != null
-          ? () => Navigator.pushNamed(context, AppRoutes.player, arguments: content)
+          ? () => Navigator.pushNamed(
+              context,
+              AppRoutes.player,
+              arguments: content,
+            )
           : null,
       child: Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: _surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
-      ),
-      child: Row(
-        children: [
-          // Thumbnail stack
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: thumbUrl.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: thumbUrl,
-                        width: 96,
-                        height: 64,
-                        fit: BoxFit.cover,
-                        placeholder: (ctx, url) => Container(color: Colors.grey[900]),
-                        errorWidget: (ctx, url, err) => Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: _surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+        ),
+        child: Row(
+          children: [
+            // Thumbnail stack
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: thumbUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: thumbUrl,
+                          width: 96,
+                          height: 64,
+                          fit: BoxFit.cover,
+                          placeholder: (ctx, url) =>
+                              Container(color: Colors.grey[900]),
+                          errorWidget: (ctx, url, err) => Container(
+                            width: 96,
+                            height: 64,
+                            color: _surfaceElevated,
+                            child: const Icon(
+                              Icons.play_circle_outline,
+                              color: Colors.white54,
+                              size: 24,
+                            ),
+                          ),
+                        )
+                      : Container(
                           width: 96,
                           height: 64,
                           color: _surfaceElevated,
@@ -1058,170 +1178,203 @@ class _ProfileScreenState extends State<ProfileScreen>
                             size: 24,
                           ),
                         ),
-                      )
-                    : Container(
-                        width: 96,
-                        height: 64,
-                        color: _surfaceElevated,
-                        child: const Icon(
-                          Icons.play_circle_outline,
-                          color: Colors.white54,
-                          size: 24,
-                        ),
-                      ),
-              ),
-              if (completed)
-                Positioned(
-                  top: 4,
-                  right: 4,
-                  child: Container(
-                    width: 18,
-                    height: 18,
-                    decoration: const BoxDecoration(
-                      color: _accent,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.check,
-                        color: Colors.white, size: 11),
-                  ),
                 ),
-              if (totalDuration.isNotEmpty)
-                Positioned(
-                  bottom: 4,
-                  right: 4,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 4, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.78),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      totalDuration,
-                      style: const TextStyle(
-                          color: Colors.white, fontSize: 9),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                if (completed)
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: Container(
+                      width: 18,
+                      height: 18,
+                      decoration: const BoxDecoration(
+                        color: _accent,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 11,
+                      ),
                     ),
                   ),
-                ),
-            ],
-          ),
-          const SizedBox(width: 12),
-          // Info column
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+                if (totalDuration.isNotEmpty)
+                  Positioned(
+                    bottom: 4,
+                    right: 4,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.78),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        totalDuration,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  creator,
-                  style: const TextStyle(
-                      color: Colors.white60, fontSize: 11),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    if (platform.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: _getPlatformColor(platform)
-                              .withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          platform,
-                          style: TextStyle(
-                            color: _getPlatformColor(platform),
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    if (platform.isNotEmpty && watchedAt.isNotEmpty)
-                      const SizedBox(width: 6),
-                    if (watchedAt.isNotEmpty)
-                      Flexible(
-                        child: Text(
-                          watchedAt,
-                          style: const TextStyle(
-                              color: Colors.white60, fontSize: 10),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                  ],
-                ),
-                if (!completed && watchedDuration.isNotEmpty) ...[
-                  const SizedBox(height: 4),
+              ],
+            ),
+            const SizedBox(width: 12),
+            // Info column
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    AppLocalizations.of(context)?.watchedOf(watchedDuration, totalDuration) ?? 'Watched $watchedDuration of $totalDuration',
-                    style: const TextStyle(color: _accent, fontSize: 10),
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    creator,
+                    style: const TextStyle(color: Colors.white60, fontSize: 11),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      if (platform.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _getPlatformColor(
+                              platform,
+                            ).withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            platform,
+                            style: TextStyle(
+                              color: _getPlatformColor(platform),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      if (platform.isNotEmpty && watchedAt.isNotEmpty)
+                        const SizedBox(width: 6),
+                      if (watchedAt.isNotEmpty)
+                        Flexible(
+                          child: Text(
+                            watchedAt,
+                            style: const TextStyle(
+                              color: Colors.white60,
+                              fontSize: 10,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                    ],
+                  ),
+                  if (!completed && watchedDuration.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      AppLocalizations.of(
+                            context,
+                          )?.watchedOf(watchedDuration, totalDuration) ??
+                          'Watched $watchedDuration of $totalDuration',
+                      style: const TextStyle(color: _accent, fontSize: 10),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ],
+              ),
+            ),
+            PopupMenuButton<String>(
+              icon: const Icon(
+                Icons.more_vert,
+                color: Colors.white54,
+                size: 18,
+              ),
+              color: const Color(0xFF1E1E2E),
+              constraints: const BoxConstraints.tightFor(width: 44, height: 44),
+              onSelected: (value) async {
+                if (value == 'play' && content != null) {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.player,
+                    arguments: content,
+                  );
+                } else if (value == 'remove' && content != null) {
+                  final prefs = await SharedPreferences.getInstance();
+                  final ids = prefs.getStringList('watched_ids') ?? [];
+                  ids.remove(content.id);
+                  await prefs.setStringList('watched_ids', ids);
+                  await prefs.remove('watch_progress_${content.id}');
+                  await prefs.remove('watched_at_${content.id}');
+                  if (mounted) {
+                    setState(
+                      () => _viewingHistory.removeWhere(
+                        (i) => (i['content'] as Content?)?.id == content.id,
+                      ),
+                    );
+                  }
+                }
+              },
+              itemBuilder: (ctx) => [
+                PopupMenuItem(
+                  value: 'play',
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.play_arrow,
+                        color: Colors.white70,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        AppLocalizations.of(ctx)?.play ?? 'Play',
+                        style: const TextStyle(color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'remove',
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.delete_outline,
+                        color: Colors.redAccent,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        AppLocalizations.of(ctx)?.removeFromHistory ??
+                            'Remove from history',
+                        style: const TextStyle(color: Colors.redAccent),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
-          ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: Colors.white54, size: 18),
-            color: const Color(0xFF1E1E2E),
-            constraints: const BoxConstraints.tightFor(width: 44, height: 44),
-            onSelected: (value) async {
-              if (value == 'play' && content != null) {
-                Navigator.pushNamed(context, AppRoutes.player, arguments: content);
-              } else if (value == 'remove' && content != null) {
-                final prefs = await SharedPreferences.getInstance();
-                final ids = prefs.getStringList('watched_ids') ?? [];
-                ids.remove(content.id);
-                await prefs.setStringList('watched_ids', ids);
-                await prefs.remove('watch_progress_${content.id}');
-                await prefs.remove('watched_at_${content.id}');
-                if (mounted) {
-                  setState(() => _viewingHistory.removeWhere(
-                    (i) => (i['content'] as Content?)?.id == content.id));
-                }
-              }
-            },
-            itemBuilder: (ctx) => [
-              PopupMenuItem(
-                value: 'play',
-                child: Row(children: [
-                  const Icon(Icons.play_arrow, color: Colors.white70, size: 18),
-                  const SizedBox(width: 8),
-                  Text(AppLocalizations.of(ctx)?.play ?? 'Play', style: const TextStyle(color: Colors.white70)),
-                ]),
-              ),
-              PopupMenuItem(
-                value: 'remove',
-                child: Row(children: [
-                  const Icon(Icons.delete_outline, color: Colors.redAccent, size: 18),
-                  const SizedBox(width: 8),
-                  Text(AppLocalizations.of(ctx)?.removeFromHistory ?? 'Remove from history', style: const TextStyle(color: Colors.redAccent)),
-                ]),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
     );
   }
 
@@ -1251,19 +1404,20 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   Widget _buildEngagementScore() {
     final videos = _userProfile['videosWatched'] as int? ?? 0;
-    final streak = _userProfile['streakDays']    as int? ?? 0;
-    final saved  = _userProfile['savedCount']    as int? ?? 0;
-    final score  =
-        ((videos * 2) + (streak * 5) + (saved * 3)).clamp(0, 999);
+    final streak = _userProfile['streakDays'] as int? ?? 0;
+    final saved = _userProfile['savedCount'] as int? ?? 0;
+    final score = ((videos * 2) + (streak * 5) + (saved * 3)).clamp(0, 999);
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [
-          _accent.withValues(alpha: 0.14),
-          _accentPink.withValues(alpha: 0.14),
-        ]),
+        gradient: LinearGradient(
+          colors: [
+            _accent.withValues(alpha: 0.14),
+            _accentPink.withValues(alpha: 0.14),
+          ],
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: _accent.withValues(alpha: 0.28)),
       ),
@@ -1274,7 +1428,8 @@ class _ProfileScreenState extends State<ProfileScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  AppLocalizations.of(context)?.engagementScore ?? 'Engagement Score',
+                  AppLocalizations.of(context)?.engagementScore ??
+                      'Engagement Score',
                   style: const TextStyle(color: Colors.white60, fontSize: 12),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1292,7 +1447,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  AppLocalizations.of(context)?.ofMaxKeepWatching((score / 10).clamp(0, 100).toInt()) ?? '${(score / 10).clamp(0, 100).toInt()}% of max — keep watching!',
+                  AppLocalizations.of(context)?.ofMaxKeepWatching(
+                        (score / 10).clamp(0, 100).toInt(),
+                      ) ??
+                      '${(score / 10).clamp(0, 100).toInt()}% of max — keep watching!',
                   style: const TextStyle(color: _accent, fontSize: 12),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1303,11 +1461,20 @@ class _ProfileScreenState extends State<ProfileScreen>
           const SizedBox(width: 12),
           Column(
             children: [
-              _miniStat('$videos', AppLocalizations.of(context)?.watchedLabel ?? 'Watched'),
+              _miniStat(
+                '$videos',
+                AppLocalizations.of(context)?.watchedLabel ?? 'Watched',
+              ),
               const SizedBox(height: 8),
-              _miniStat('${streak}d', AppLocalizations.of(context)?.streak ?? 'Streak'),
+              _miniStat(
+                '${streak}d',
+                AppLocalizations.of(context)?.streak ?? 'Streak',
+              ),
               const SizedBox(height: 8),
-              _miniStat('$saved', AppLocalizations.of(context)?.saved ?? 'Saved'),
+              _miniStat(
+                '$saved',
+                AppLocalizations.of(context)?.saved ?? 'Saved',
+              ),
             ],
           ),
         ],
@@ -1347,7 +1514,8 @@ class _ProfileScreenState extends State<ProfileScreen>
     String? progress,
   }) {
     return Semantics(
-      label: 'Achievement: $title, ${unlocked ? 'completed' : (progress ?? 'locked')}',
+      label:
+          'Achievement: $title, ${unlocked ? 'completed' : (progress ?? 'locked')}',
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         padding: const EdgeInsets.all(16),
@@ -1369,7 +1537,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                 color: unlocked ? color.withValues(alpha: 0.2) : Colors.white10,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: unlocked ? color : Colors.white30, size: 26),
+              child: Icon(
+                icon,
+                color: unlocked ? color : Colors.white30,
+                size: 26,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -1389,10 +1561,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   const SizedBox(height: 4),
                   Text(
                     description,
-                    style: const TextStyle(
-                      color: Colors.white38,
-                      fontSize: 12,
-                    ),
+                    style: const TextStyle(color: Colors.white38, fontSize: 12),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1481,8 +1650,14 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   void _showEditProfileDialog() {
     final nameController = TextEditingController(
-        text: _userProfile['name'] as String? ?? '');
-    final bioController = TextEditingController(text: _bioText.isNotEmpty ? _bioText : (AppLocalizations.of(context)?.defaultBio ?? 'Curious mind. Content explorer. Watching the world one feed at a time.'));
+      text: _userProfile['name'] as String? ?? '',
+    );
+    final bioController = TextEditingController(
+      text: _bioText.isNotEmpty
+          ? _bioText
+          : (AppLocalizations.of(context)?.defaultBio ??
+                'Curious mind. Content explorer. Watching the world one feed at a time.'),
+    );
     final formKey = GlobalKey<FormState>();
 
     showDialog(
@@ -1492,7 +1667,10 @@ class _ProfileScreenState extends State<ProfileScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           AppLocalizations.of(context)?.editProfile ?? 'Edit Profile',
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: Form(
           key: formKey,
@@ -1504,7 +1682,9 @@ class _ProfileScreenState extends State<ProfileScreen>
                 autofocus: true,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)?.displayName ?? 'Display Name',
+                  labelText:
+                      AppLocalizations.of(context)?.displayName ??
+                      'Display Name',
                   labelStyle: const TextStyle(color: Colors.white60),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -1524,8 +1704,12 @@ class _ProfileScreenState extends State<ProfileScreen>
                   ),
                 ),
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty) return AppLocalizations.of(context)?.nameCannotBeEmpty ?? 'Name cannot be empty';
-                  if (v.trim().length > 50) return AppLocalizations.of(context)?.nameTooLong ?? 'Name too long (max 50 chars)';
+                  if (v == null || v.trim().isEmpty)
+                    return AppLocalizations.of(context)?.nameCannotBeEmpty ??
+                        'Name cannot be empty';
+                  if (v.trim().length > 50)
+                    return AppLocalizations.of(context)?.nameTooLong ??
+                        'Name too long (max 50 chars)';
                   return null;
                 },
               ),
@@ -1555,14 +1739,18 @@ class _ProfileScreenState extends State<ProfileScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel', style: const TextStyle(color: Colors.white60)),
+            child: Text(
+              AppLocalizations.of(context)?.cancel ?? 'Cancel',
+              style: const TextStyle(color: Colors.white60),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: _accent,
               foregroundColor: Colors.black,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () async {
               if (!formKey.currentState!.validate()) return;
@@ -1576,7 +1764,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                 setState(() {
                   _userProfile['name'] = newName;
                   _bioText = bioController.text.trim().isEmpty
-                      ? (AppLocalizations.of(context)?.defaultBio ?? 'Curious mind. Content explorer. Watching the world one feed at a time.')
+                      ? (AppLocalizations.of(context)?.defaultBio ??
+                            'Curious mind. Content explorer. Watching the world one feed at a time.')
                       : bioController.text.trim();
                 });
               }
@@ -1587,5 +1776,4 @@ class _ProfileScreenState extends State<ProfileScreen>
       ),
     );
   }
-
 }

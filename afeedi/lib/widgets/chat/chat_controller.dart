@@ -72,11 +72,9 @@ class ChatController extends ChangeNotifier {
 
     Future.delayed(const Duration(milliseconds: 1500), () {
       _showTyping = false;
-      _messages.add(ChatMessage(
-        text: message,
-        isBot: true,
-        timestamp: DateTime.now(),
-      ));
+      _messages.add(
+        ChatMessage(text: message, isBot: true, timestamp: DateTime.now()),
+      );
       notifyListeners();
 
       // Show appropriate UI based on current step
@@ -87,7 +85,7 @@ class ChatController extends ChangeNotifier {
   void _showStepUI() {
     if (_currentStep < onboardingSteps.length) {
       final step = onboardingSteps[_currentStep];
-      
+
       Future.delayed(const Duration(milliseconds: 500), () {
         if (step.quickReplies.isNotEmpty) {
           _quickReplies = step.quickReplies;
@@ -108,34 +106,28 @@ class ChatController extends ChangeNotifier {
 
   void handleTextInput(String input) {
     if (input.trim().isEmpty) return;
-    
+
     _addUserMessage(input);
     _showTextInput = false;
     _processUserInput(input);
   }
 
   void _addUserMessage(String text) {
-    _messages.add(ChatMessage(
-      text: text,
-      isBot: false,
-      timestamp: DateTime.now(),
-    ));
+    _messages.add(
+      ChatMessage(text: text, isBot: false, timestamp: DateTime.now()),
+    );
     notifyListeners();
   }
 
   void _processUserInput(String input) {
     final step = onboardingSteps[_currentStep];
-    
+
     // Track step completion
-    onStepCompleted?.call(
-      _currentStep + 1,
-      'step_${_currentStep + 1}',
-      {
-        'user_input': input,
-        'step_type': 'onboarding_step',
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
+    onStepCompleted?.call(_currentStep + 1, 'step_${_currentStep + 1}', {
+      'user_input': input,
+      'step_type': 'onboarding_step',
+      'timestamp': DateTime.now().toIso8601String(),
+    });
 
     // Handle specific step logic based on current step
     if (_currentStep == 0) {
@@ -171,7 +163,9 @@ class ChatController extends ChangeNotifier {
       _filteredGenres = allGenres;
     } else {
       _filteredGenres = allGenres
-          .where((genre) => genre.name.toLowerCase().contains(query.toLowerCase()))
+          .where(
+            (genre) => genre.name.toLowerCase().contains(query.toLowerCase()),
+          )
           .toList();
     }
     notifyListeners();
@@ -196,14 +190,16 @@ class ChatController extends ChangeNotifier {
 
   void handlePlatformContinue() {
     _showPlatformSelection = false;
-    final connectedCount = platformConnections.values.where((connected) => connected).length;
+    final connectedCount = platformConnections.values
+        .where((connected) => connected)
+        .length;
     _addUserMessage('Connected $connectedCount platforms');
     _moveToNextStep();
   }
 
   void _moveToNextStep() {
     _currentStep++;
-    
+
     if (_currentStep < onboardingSteps.length) {
       Future.delayed(const Duration(milliseconds: 1000), () {
         _showBotMessage(onboardingSteps[_currentStep].botMessage);
@@ -221,11 +217,15 @@ class ChatController extends ChangeNotifier {
       'user_name': _userName,
       'selected_genres': _selectedGenres.toList(),
       'platform_connections': platformConnections,
-      'chat_history': _messages.map((m) => {
-        'text': m.text,
-        'is_user': !m.isBot,
-        'timestamp': m.timestamp.toIso8601String(),
-      }).toList(),
+      'chat_history': _messages
+          .map(
+            (m) => {
+              'text': m.text,
+              'is_user': !m.isBot,
+              'timestamp': m.timestamp.toIso8601String(),
+            },
+          )
+          .toList(),
       'total_steps': onboardingSteps.length,
       'completion_time': DateTime.now().toIso8601String(),
     };

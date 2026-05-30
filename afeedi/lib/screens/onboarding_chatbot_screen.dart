@@ -6,7 +6,8 @@ class OnboardingChatbotScreen extends StatefulWidget {
   const OnboardingChatbotScreen({super.key});
 
   @override
-  State<OnboardingChatbotScreen> createState() => _OnboardingChatbotScreenState();
+  State<OnboardingChatbotScreen> createState() =>
+      _OnboardingChatbotScreenState();
 }
 
 class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
@@ -38,7 +39,10 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
           context: context,
           builder: (ctx) => AlertDialog(
             backgroundColor: const Color(0xFF1A1A2E),
-            title: const Text('Leave setup?', style: TextStyle(color: Colors.white)),
+            title: const Text(
+              'Leave setup?',
+              style: TextStyle(color: Colors.white),
+            ),
             content: const Text(
               'Your progress will be saved as a draft. You can continue later.',
               style: TextStyle(color: Colors.white70),
@@ -50,7 +54,10 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
               ),
               TextButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Leave', style: TextStyle(color: Colors.redAccent)),
+                child: const Text(
+                  'Leave',
+                  style: TextStyle(color: Colors.redAccent),
+                ),
               ),
             ],
           ),
@@ -65,18 +72,10 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF1A1A2E),
-                Color(0xFF16213E),
-                Color(0xFF0F3460),
-              ],
+              colors: [Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460)],
             ),
           ),
-          child: SafeArea(
-            child: ChatInterface(
-              controller: _chatController,
-            ),
-          ),
+          child: SafeArea(child: ChatInterface(controller: _chatController)),
         ),
       ),
     );

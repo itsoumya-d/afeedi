@@ -18,25 +18,27 @@ import '../widgets/onboarding/personalization_settings_widget.dart';
 class EnhancedOnboardingFlow extends StatefulWidget {
   final Function() onComplete;
 
-  EnhancedOnboardingFlow({Key? key, required this.onComplete}) : super(key: key);
+  EnhancedOnboardingFlow({Key? key, required this.onComplete})
+    : super(key: key);
 
   @override
   State<EnhancedOnboardingFlow> createState() => _EnhancedOnboardingFlowState();
 }
 
-class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with SingleTickerProviderStateMixin {
+class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow>
+    with SingleTickerProviderStateMixin {
   final OnboardingService _onboardingService = OnboardingService.instance;
   final AnalyticsService _analyticsService = AnalyticsService.instance;
   late PageController _pageController;
   late ConfettiController _confettiController;
   late AnimationController _backgroundAnimationController;
   late Animation<Color?> _backgroundColorAnimation;
-  
+
   int _currentStep = 0;
   bool _isLastStep = false;
   UserPreferences _userPreferences = UserPreferences();
   bool _isLoading = false;
-  
+
   // Background gradient colors for different steps
   final List<List<Color>> _backgroundColors = [
     [Colors.blue.shade100, Colors.blue.shade50],
@@ -54,17 +56,19 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 0);
-    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 3),
+    );
     _backgroundAnimationController = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-    
+
     _backgroundColorAnimation = ColorTween(
       begin: _backgroundColors[0][0],
       end: _backgroundColors[0][0],
     ).animate(_backgroundAnimationController);
-    
+
     _loadUserPreferences();
     _trackOnboardingStarted();
   }
@@ -73,7 +77,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       // Load existing preferences if available
       final preferences = await _onboardingService.getCurrentPreferences();
@@ -92,9 +96,11 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
   }
 
   void _trackOnboardingStarted() {
-    _analyticsService.trackEvent(eventName: 'onboarding_started', eventType: 'onboarding', additionalData: {
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    _analyticsService.trackEvent(
+      eventName: 'onboarding_started',
+      eventType: 'onboarding',
+      additionalData: {'timestamp': DateTime.now().toIso8601String()},
+    );
   }
 
   void _updateBackgroundColor(int stepIndex) {
@@ -110,7 +116,8 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
     if (_currentStep < OnboardingService.onboardingFlow.length - 1) {
       setState(() {
         _currentStep++;
-        _isLastStep = _currentStep == OnboardingService.onboardingFlow.length - 1;
+        _isLastStep =
+            _currentStep == OnboardingService.onboardingFlow.length - 1;
       });
       _pageController.nextPage(
         duration: const Duration(milliseconds: 500),
@@ -139,43 +146,51 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
 
   void _trackStepCompleted(int stepIndex) {
     final stepKey = OnboardingService.onboardingFlow[stepIndex]['id'];
-    _analyticsService.trackEvent(eventName: 'onboarding_step_completed', eventType: 'onboarding', additionalData: {
-      'step_key': stepKey,
-      'step_index': stepIndex,
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    _analyticsService.trackEvent(
+      eventName: 'onboarding_step_completed',
+      eventType: 'onboarding',
+      additionalData: {
+        'step_key': stepKey,
+        'step_index': stepIndex,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
   }
 
   Future<void> _completeOnboarding() async {
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       // Save final preferences
       await _onboardingService.savePreferences(_userPreferences);
       await _onboardingService.markOnboardingComplete();
-      
+
       // Track completion
-      _analyticsService.trackEvent(eventName: 'onboarding_completed', eventType: 'onboarding', additionalData: {
-        'timestamp': DateTime.now().toIso8601String(),
-        'total_steps': OnboardingService.onboardingFlow.length,
-      });
-      
+      _analyticsService.trackEvent(
+        eventName: 'onboarding_completed',
+        eventType: 'onboarding',
+        additionalData: {
+          'timestamp': DateTime.now().toIso8601String(),
+          'total_steps': OnboardingService.onboardingFlow.length,
+        },
+      );
+
       // Celebrate completion
       _confettiController.play();
-      
+
       // Wait for confetti animation before proceeding
       await Future.delayed(const Duration(seconds: 2));
-      
+
       // Notify parent that onboarding is complete
       widget.onComplete();
     } catch (e) {
       debugPrint('Error completing onboarding: $e');
       // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving preferences: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error saving preferences: $e')));
     } finally {
       setState(() {
         _isLoading = false;
@@ -193,20 +208,28 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
           );
           break;
         case 'contentInterests':
-          _userPreferences = _userPreferences.copyWith(contentInterests: List<String>.from(value));
+          _userPreferences = _userPreferences.copyWith(
+            contentInterests: List<String>.from(value),
+          );
           break;
         case 'contentTypes':
-          _userPreferences = _userPreferences.copyWith(contentTypes: List<String>.from(value));
+          _userPreferences = _userPreferences.copyWith(
+            contentTypes: List<String>.from(value),
+          );
           break;
         case 'viewingHabits':
           _userPreferences = _userPreferences.copyWith(
-            preferredViewingTimes: List<String>.from(value['preferredViewingTimes']),
+            preferredViewingTimes: List<String>.from(
+              value['preferredViewingTimes'],
+            ),
             averageSessionDuration: value['averageSessionDuration'],
-            contentLengthPreferences: Map<String, int>.from(value['contentLengthPreferences']),
+            contentLengthPreferences: Map<String, int>.from(
+              value['contentLengthPreferences'],
+            ),
           );
           break;
         case 'entertainmentPreferences':
-           _userPreferences = _userPreferences.copyWith(
+          _userPreferences = _userPreferences.copyWith(
             entertainmentPreferences: {
               ...(_userPreferences.entertainmentPreferences),
               'genres': List<String>.from(value['genres']),
@@ -215,7 +238,9 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
           );
           break;
         case 'platformPreferences':
-          _userPreferences = _userPreferences.copyWith(platformPriorities: Map<String, double>.from(value));
+          _userPreferences = _userPreferences.copyWith(
+            platformPriorities: Map<String, double>.from(value),
+          );
           break;
         case 'personalizationSettings':
           _userPreferences = _userPreferences.copyWith(
@@ -257,7 +282,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     return Scaffold(
       body: AnimatedBuilder(
         animation: _backgroundAnimationController,
@@ -292,7 +317,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                   gravity: 0.2,
                 ),
               ),
-              
+
               // Main content
               Column(
                 children: [
@@ -304,13 +329,19 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                         IconButton(
                           icon: const Icon(Icons.arrow_back),
                           onPressed: _currentStep > 0 ? _previousStep : null,
-                          color: _currentStep > 0 ? Colors.black87 : Colors.grey.withValues(alpha: 0.5),
+                          color: _currentStep > 0
+                              ? Colors.black87
+                              : Colors.grey.withValues(alpha: 0.5),
                         ),
                         Expanded(
                           child: LinearProgressIndicator(
-                            value: (_currentStep + 1) / OnboardingService.onboardingFlow.length,
+                            value:
+                                (_currentStep + 1) /
+                                OnboardingService.onboardingFlow.length,
                             backgroundColor: Colors.grey.withValues(alpha: 0.3),
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primary,
+                            ),
                             minHeight: 8,
                             borderRadius: BorderRadius.circular(4),
                           ),
@@ -318,20 +349,25 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                         const SizedBox(width: 16),
                         Text(
                           '${_currentStep + 1}/${OnboardingService.onboardingFlow.length}',
-                          style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  
+
                   // Page content
                   Expanded(
                     child: PageView.builder(
                       controller: _pageController,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: OnboardingService.instance.getOnboardingSteps().length,
+                      itemCount: OnboardingService.instance
+                          .getOnboardingSteps()
+                          .length,
                       itemBuilder: (context, index) {
-                        final step = OnboardingService.instance.getOnboardingSteps()[index];
+                        final step = OnboardingService.instance
+                            .getOnboardingSteps()[index];
                         return SingleChildScrollView(
                           child: Padding(
                             padding: const EdgeInsets.all(24.0),
@@ -339,16 +375,24 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  step.stepTitle ?? 'Step ${index + 1}',
-                                  style: AppTextStyles.heading2,
-                                ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
+                                      step.stepTitle ?? 'Step ${index + 1}',
+                                      style: AppTextStyles.heading2,
+                                    )
+                                    .animate()
+                                    .fadeIn(duration: 400.ms)
+                                    .slideY(begin: 0.1, end: 0),
 
                                 const SizedBox(height: 8),
 
                                 Text(
-                                  step.stepDescription ?? step.botMessage,
-                                  style: AppTextStyles.bodyMedium.copyWith(color: Colors.black87),
-                                ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideY(begin: 0.1, end: 0),
+                                      step.stepDescription ?? step.botMessage,
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        color: Colors.black87,
+                                      ),
+                                    )
+                                    .animate()
+                                    .fadeIn(duration: 400.ms, delay: 100.ms)
+                                    .slideY(begin: 0.1, end: 0),
 
                                 const SizedBox(height: 32),
 
@@ -360,7 +404,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                       },
                     ),
                   ),
-                  
+
                   // Navigation buttons
                   Padding(
                     padding: const EdgeInsets.all(24.0),
@@ -380,7 +424,10 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                             ),
                             child: Text(
                               _isLastStep ? 'Complete' : 'Continue',
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
@@ -405,29 +452,33 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
       case 'content_interests':
         return InterestSelectionGrid(
           selectedInterests: _userPreferences.contentInterests,
-          onInterestsChanged: (interests) => _updateUserPreferences('contentInterests', interests),
+          onInterestsChanged: (interests) =>
+              _updateUserPreferences('contentInterests', interests),
         );
       case 'content_types':
         return ContentTypeSelection(
           selectedContentTypes: _userPreferences.contentTypes,
-          onContentTypesChanged: (types) => _updateUserPreferences('contentTypes', types),
+          onContentTypesChanged: (types) =>
+              _updateUserPreferences('contentTypes', types),
         );
       case 'entertainment_preferences':
         return _buildEntertainmentPreferencesStep();
       case 'viewing_habits':
         return ViewingHabitsWidget(
           viewingHabits: _userPreferences.viewingHabits,
-          onViewingHabitsChanged: (habits) => _updateUserPreferences('viewingHabits', habits),
+          onViewingHabitsChanged: (habits) =>
+              _updateUserPreferences('viewingHabits', habits),
         );
       case 'platform_preferences':
         return PlatformSelectionWidget(
           platformPriorities: _userPreferences.platformPriorities,
-          onPlatformPrioritiesChanged: (prefs) => _updateUserPreferences('platformPreferences', prefs),
+          onPlatformPrioritiesChanged: (prefs) =>
+              _updateUserPreferences('platformPreferences', prefs),
         );
       case 'personalization_settings':
         return PersonalizationSettingsWidget(
           personalizationSettings: _userPreferences.personalizationSettings,
-          onPersonalizationSettingsChanged: (settings) => 
+          onPersonalizationSettingsChanged: (settings) =>
               _updateUserPreferences('personalizationSettings', settings),
         );
       case 'calendar_integration':
@@ -523,7 +574,10 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -546,23 +600,23 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
     final ageController = TextEditingController(
       text: _userPreferences.personalInfo['age']?.toString() ?? '',
     );
-    
+
     // Update preferences when text changes
     void updatePersonalInfo() {
       final personalInfo = _userPreferences.personalInfo;
       personalInfo['name'] = nameController.text;
-      
+
       final age = int.tryParse(ageController.text);
       if (age != null) {
         personalInfo['age'] = age;
       }
-      
+
       _updateUserPreferences('personalInfo', personalInfo);
     }
-    
+
     nameController.addListener(updatePersonalInfo);
     ageController.addListener(updatePersonalInfo);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -579,25 +633,30 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
           ),
           textCapitalization: TextCapitalization.words,
         ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
-        
+
         const SizedBox(height: 16),
-        
+
         // Age field
         TextField(
-          controller: ageController,
-          decoration: InputDecoration(
-            labelText: 'Age',
-            hintText: 'Enter your age',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            prefixIcon: const Icon(Icons.cake_outlined),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.9),
-          ),
-          keyboardType: TextInputType.number,
-        ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideY(begin: 0.1, end: 0),
-        
+              controller: ageController,
+              decoration: InputDecoration(
+                labelText: 'Age',
+                hintText: 'Enter your age',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                prefixIcon: const Icon(Icons.cake_outlined),
+                filled: true,
+                fillColor: Colors.white.withValues(alpha: 0.9),
+              ),
+              keyboardType: TextInputType.number,
+            )
+            .animate()
+            .fadeIn(duration: 400.ms, delay: 100.ms)
+            .slideY(begin: 0.1, end: 0),
+
         const SizedBox(height: 24),
-        
+
         // Privacy note
         Container(
           padding: const EdgeInsets.all(16),
@@ -625,27 +684,49 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
 
   Widget _buildEntertainmentPreferencesStep() {
     final entertainmentPrefs = _userPreferences.entertainmentPreferences;
-    
+
     // Content mood preferences
     final List<Map<String, dynamic>> moodOptions = [
-      {'value': 'uplifting', 'label': 'Uplifting', 'icon': Icons.sentiment_very_satisfied_outlined},
+      {
+        'value': 'uplifting',
+        'label': 'Uplifting',
+        'icon': Icons.sentiment_very_satisfied_outlined,
+      },
       {'value': 'relaxing', 'label': 'Relaxing', 'icon': Icons.spa_outlined},
-      {'value': 'exciting', 'label': 'Exciting', 'icon': Icons.flash_on_outlined},
-      {'value': 'informative', 'label': 'Informative', 'icon': Icons.lightbulb_outline},
-      {'value': 'challenging', 'label': 'Challenging', 'icon': Icons.psychology_outlined},
-      {'value': 'funny', 'label': 'Funny', 'icon': Icons.emoji_emotions_outlined},
+      {
+        'value': 'exciting',
+        'label': 'Exciting',
+        'icon': Icons.flash_on_outlined,
+      },
+      {
+        'value': 'informative',
+        'label': 'Informative',
+        'icon': Icons.lightbulb_outline,
+      },
+      {
+        'value': 'challenging',
+        'label': 'Challenging',
+        'icon': Icons.psychology_outlined,
+      },
+      {
+        'value': 'funny',
+        'label': 'Funny',
+        'icon': Icons.emoji_emotions_outlined,
+      },
     ];
-    
+
     // Initialize selected moods
-    List<String> selectedMoods = List.from(entertainmentPrefs['contentMoods'] ?? []);
-    
+    List<String> selectedMoods = List.from(
+      entertainmentPrefs['contentMoods'] ?? [],
+    );
+
     void updateMoods(List<String> moods) {
       selectedMoods = moods;
       final updatedPrefs = Map<String, dynamic>.from(entertainmentPrefs);
       updatedPrefs['contentMoods'] = moods;
       _updateUserPreferences('entertainmentPreferences', updatedPrefs);
     }
-    
+
     void toggleMood(String mood) {
       final updatedMoods = List<String>.from(selectedMoods);
       if (updatedMoods.contains(mood)) {
@@ -655,7 +736,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
       }
       updateMoods(updatedMoods);
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -664,7 +745,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
           style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 16),
-        
+
         // Mood selection grid
         GridView.builder(
           shrinkWrap: true,
@@ -679,50 +760,63 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
           itemBuilder: (context, index) {
             final mood = moodOptions[index];
             final isSelected = selectedMoods.contains(mood['value']);
-            
+
             return InkWell(
-              onTap: () => toggleMood(mood['value']),
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.secondary.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.7),
+                  onTap: () => toggleMood(mood['value']),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSelected ? AppColors.secondary : Colors.grey.withValues(alpha: 0.3),
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      mood['icon'],
-                      color: isSelected ? AppColors.secondary : Colors.grey[600],
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      mood['label'],
-                      style: TextStyle(
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isSelected ? AppColors.secondary : Colors.black87,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.secondary.withValues(alpha: 0.1)
+                          : Colors.white.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.secondary
+                            : Colors.grey.withValues(alpha: 0.3),
+                        width: isSelected ? 2 : 1,
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ).animate().fadeIn(duration: 300.ms, delay: (50 * index).ms).slideY(begin: 0.05, end: 0);
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          mood['icon'],
+                          color: isSelected
+                              ? AppColors.secondary
+                              : Colors.grey[600],
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          mood['label'],
+                          style: TextStyle(
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? AppColors.secondary
+                                : Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+                .animate()
+                .fadeIn(duration: 300.ms, delay: (50 * index).ms)
+                .slideY(begin: 0.05, end: 0);
           },
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Content length preference
         Text(
           'Preferred content length',
           style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 16),
-        
+
         // Content length slider
         StatefulBuilder(
           builder: (context, setState) {
@@ -733,9 +827,9 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
               'long': 'Long',
               'any': 'Any Length',
             };
-            
+
             final currentLength = entertainmentPrefs['contentLength'] ?? 'any';
-            
+
             return Column(
               children: [
                 Row(
@@ -744,35 +838,49 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                     final isSelected = currentLength == entry.key;
                     return InkWell(
                       onTap: () {
-                        final updatedPrefs = Map<String, dynamic>.from(entertainmentPrefs);
+                        final updatedPrefs = Map<String, dynamic>.from(
+                          entertainmentPrefs,
+                        );
                         updatedPrefs['contentLength'] = entry.key;
-                        _updateUserPreferences('entertainmentPreferences', updatedPrefs);
+                        _updateUserPreferences(
+                          'entertainmentPreferences',
+                          updatedPrefs,
+                        );
                         setState(() {});
                       },
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.secondary.withValues(alpha: 0.1) : Colors.transparent,
+                          color: isSelected
+                              ? AppColors.secondary.withValues(alpha: 0.1)
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(20),
-                          border: isSelected 
+                          border: isSelected
                               ? Border.all(color: AppColors.secondary, width: 2)
                               : null,
                         ),
                         child: Text(
                           entry.value,
                           style: TextStyle(
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            color: isSelected ? AppColors.secondary : Colors.black87,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? AppColors.secondary
+                                : Colors.black87,
                           ),
                         ),
                       ),
                     );
                   }).toList(),
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Explanation of content length
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -785,7 +893,10 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                     children: [
                       Text(
                         'Content Length Guide:',
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[800]),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[800],
+                        ),
                       ),
                       const SizedBox(height: 8),
                       _buildLengthGuideItem('Short', '< 5 minutes'),
@@ -808,10 +919,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Text(
-            '$label: ',
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
+          Text('$label: ', style: const TextStyle(fontWeight: FontWeight.w500)),
           Text(description),
         ],
       ),
@@ -821,13 +929,13 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
   Widget _buildCalendarIntegrationStep() {
     final calendarIntegration = _userPreferences.calendarIntegration;
     final isEnabled = calendarIntegration['enabled'] ?? false;
-    
+
     void toggleCalendarIntegration(bool value) {
       final updatedSettings = Map<String, dynamic>.from(calendarIntegration);
       updatedSettings['enabled'] = value;
       _updateUserPreferences('calendarIntegration', updatedSettings);
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -888,52 +996,67 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                   ),
                 ],
               ),
-              
-              if (isEnabled) ...[  
+
+              if (isEnabled) ...[
                 const SizedBox(height: 16),
                 const Divider(),
                 const SizedBox(height: 16),
-                
+
                 // Calendar integration options
                 _buildCalendarOption(
                   title: 'Recommend content for free time',
                   subtitle: 'Find videos that fit your schedule gaps',
                   value: calendarIntegration['recommendForFreeTime'] ?? true,
                   onChanged: (value) {
-                    final updatedSettings = Map<String, dynamic>.from(calendarIntegration);
+                    final updatedSettings = Map<String, dynamic>.from(
+                      calendarIntegration,
+                    );
                     updatedSettings['recommendForFreeTime'] = value;
-                    _updateUserPreferences('calendarIntegration', updatedSettings);
+                    _updateUserPreferences(
+                      'calendarIntegration',
+                      updatedSettings,
+                    );
                   },
                 ),
-                
+
                 _buildCalendarOption(
                   title: 'Event-related content',
                   subtitle: 'Suggest videos related to upcoming events',
                   value: calendarIntegration['eventRelatedContent'] ?? true,
                   onChanged: (value) {
-                    final updatedSettings = Map<String, dynamic>.from(calendarIntegration);
+                    final updatedSettings = Map<String, dynamic>.from(
+                      calendarIntegration,
+                    );
                     updatedSettings['eventRelatedContent'] = value;
-                    _updateUserPreferences('calendarIntegration', updatedSettings);
+                    _updateUserPreferences(
+                      'calendarIntegration',
+                      updatedSettings,
+                    );
                   },
                 ),
-                
+
                 _buildCalendarOption(
                   title: 'Smart notifications',
                   subtitle: 'Get notified about relevant content before events',
                   value: calendarIntegration['smartNotifications'] ?? false,
                   onChanged: (value) {
-                    final updatedSettings = Map<String, dynamic>.from(calendarIntegration);
+                    final updatedSettings = Map<String, dynamic>.from(
+                      calendarIntegration,
+                    );
                     updatedSettings['smartNotifications'] = value;
-                    _updateUserPreferences('calendarIntegration', updatedSettings);
+                    _updateUserPreferences(
+                      'calendarIntegration',
+                      updatedSettings,
+                    );
                   },
                 ),
               ],
             ],
           ),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Privacy information
         Container(
           padding: const EdgeInsets.all(16),
@@ -967,7 +1090,10 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
               const SizedBox(height: 12),
               Text(
                 'You can disable this feature at any time in your profile settings.',
-                style: TextStyle(color: Colors.blue[800], fontStyle: FontStyle.italic),
+                style: TextStyle(
+                  color: Colors.blue[800],
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ],
           ),
@@ -992,7 +1118,10 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(

@@ -50,15 +50,37 @@ class PlatformConnection extends StatelessWidget {
 
   Widget _buildPlatformList() {
     final platforms = [
-      {'name': 'YouTube', 'icon': Icons.play_circle_fill, 'color': const Color(0xFFFF0000)},
-      {'name': 'Instagram', 'icon': Icons.camera_alt, 'color': const Color(0xFFE4405F)},
-      {'name': 'TikTok', 'icon': Icons.music_note, 'color': const Color(0xFF000000)},
-      {'name': 'Facebook', 'icon': Icons.facebook, 'color': const Color(0xFF1877F2)},
-      {'name': 'Twitter', 'icon': Icons.alternate_email, 'color': const Color(0xFF1DA1F2)},
+      {
+        'name': 'YouTube',
+        'icon': Icons.play_circle_fill,
+        'color': const Color(0xFFFF0000),
+      },
+      {
+        'name': 'Instagram',
+        'icon': Icons.camera_alt,
+        'color': const Color(0xFFE4405F),
+      },
+      {
+        'name': 'TikTok',
+        'icon': Icons.music_note,
+        'color': const Color(0xFF000000),
+      },
+      {
+        'name': 'Facebook',
+        'icon': Icons.facebook,
+        'color': const Color(0xFF1877F2),
+      },
+      {
+        'name': 'Twitter',
+        'icon': Icons.alternate_email,
+        'color': const Color(0xFF1DA1F2),
+      },
     ];
 
     return Column(
-      children: platforms.map((platform) => _buildPlatformTile(platform)).toList(),
+      children: platforms
+          .map((platform) => _buildPlatformTile(platform))
+          .toList(),
     );
   }
 
@@ -78,12 +100,12 @@ class PlatformConnection extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isConnected 
+              color: isConnected
                   ? color.withValues(alpha: 0.2)
                   : Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isConnected 
+                color: isConnected
                     ? color.withValues(alpha: 0.5)
                     : Colors.white.withValues(alpha: 0.2),
                 width: 1.5,
@@ -98,11 +120,7 @@ class PlatformConnection extends StatelessWidget {
                     color: color.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    icon,
-                    color: color,
-                    size: 20,
-                  ),
+                  child: Icon(icon, color: color, size: 20),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -118,9 +136,11 @@ class PlatformConnection extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        isConnected ? 'Connected' : 'Connect to sync your content',
+                        isConnected
+                            ? 'Connected'
+                            : 'Connect to sync your content',
                         style: TextStyle(
-                          color: isConnected 
+                          color: isConnected
                               ? color
                               : Colors.white.withValues(alpha: 0.7),
                           fontSize: 14,
@@ -137,16 +157,14 @@ class PlatformConnection extends StatelessWidget {
                     color: isConnected ? color : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isConnected ? color : Colors.white.withValues(alpha: 0.5),
+                      color: isConnected
+                          ? color
+                          : Colors.white.withValues(alpha: 0.5),
                       width: 2,
                     ),
                   ),
                   child: isConnected
-                      ? const Icon(
-                          Icons.check,
-                          color: Colors.white,
-                          size: 16,
-                        )
+                      ? const Icon(Icons.check, color: Colors.white, size: 16)
                       : null,
                 ),
               ],
@@ -158,8 +176,10 @@ class PlatformConnection extends StatelessWidget {
   }
 
   Widget _buildActionButtons() {
-    final hasConnections = platformConnections.values.any((connected) => connected);
-    
+    final hasConnections = platformConnections.values.any(
+      (connected) => connected,
+    );
+
     return Column(
       children: [
         if (hasConnections)
@@ -178,10 +198,7 @@ class PlatformConnection extends StatelessWidget {
               ),
               child: const Text(
                 'Continue with connected platforms ✨',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -203,10 +220,7 @@ class PlatformConnection extends StatelessWidget {
             ),
             child: const Text(
               'Skip for now',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
           ),
         ),

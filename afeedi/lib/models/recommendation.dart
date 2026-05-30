@@ -84,7 +84,8 @@ class Recommendation {
       durationSeconds: json['durationSeconds'] as int,
       relevanceScore: (json['relevanceScore'] as num?)?.toDouble() ?? 0.0,
       recommendationReason: json['recommendationReason'] as String? ?? '',
-      contextualRelevance: (json['contextualRelevance'] as num?)?.toDouble() ?? 0.0,
+      contextualRelevance:
+          (json['contextualRelevance'] as num?)?.toDouble() ?? 0.0,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,

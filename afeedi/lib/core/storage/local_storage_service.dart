@@ -17,8 +17,9 @@ class LocalStorageService {
   static const String _contentCacheBox = 'content_cache';
 
   static LocalStorageService? _instance;
-  static LocalStorageService get instance => _instance ??= LocalStorageService._();
-  
+  static LocalStorageService get instance =>
+      _instance ??= LocalStorageService._();
+
   LocalStorageService._();
 
   late Box<Map> _userBoxInstance;
@@ -36,16 +37,22 @@ class LocalStorageService {
   Future<void> initialize() async {
     await Hive.initFlutter();
     _prefs = await SharedPreferences.getInstance();
-    
+
     // Open all boxes
     _userBoxInstance = await Hive.openBox<Map>(_userBox);
     _contentBoxInstance = await Hive.openBox<Map>(_contentBox);
-    _scheduledContentBoxInstance = await Hive.openBox<Map>(_scheduledContentBox);
+    _scheduledContentBoxInstance = await Hive.openBox<Map>(
+      _scheduledContentBox,
+    );
     _userPreferencesBoxInstance = await Hive.openBox<Map>(_userPreferencesBox);
-    _platformConnectionsBoxInstance = await Hive.openBox<Map>(_platformConnectionsBox);
+    _platformConnectionsBoxInstance = await Hive.openBox<Map>(
+      _platformConnectionsBox,
+    );
     _recommendationsBoxInstance = await Hive.openBox<Map>(_recommendationsBox);
     _analyticsBoxInstance = await Hive.openBox<Map>(_analyticsBox);
-    _contentInteractionsBoxInstance = await Hive.openBox<Map>(_contentInteractionsBox);
+    _contentInteractionsBoxInstance = await Hive.openBox<Map>(
+      _contentInteractionsBox,
+    );
     _contentCacheBoxInstance = await Hive.openBox<Map>(_contentCacheBox);
   }
 
@@ -76,7 +83,10 @@ class LocalStorageService {
 
   /// User Preferences
   Future<void> saveUserPreferences(UserPreferences preferences) async {
-    await _userPreferencesBoxInstance.put(preferences.userId, preferences.toJson());
+    await _userPreferencesBoxInstance.put(
+      preferences.userId,
+      preferences.toJson(),
+    );
   }
 
   Future<UserPreferences?> getUserPreferences(String userId) async {
@@ -120,11 +130,18 @@ class LocalStorageService {
   }
 
   /// Scheduled Content
-  Future<void> saveScheduledContent(Map<String, dynamic> scheduledContent) async {
-    await _scheduledContentBoxInstance.put(scheduledContent['id'], scheduledContent);
+  Future<void> saveScheduledContent(
+    Map<String, dynamic> scheduledContent,
+  ) async {
+    await _scheduledContentBoxInstance.put(
+      scheduledContent['id'],
+      scheduledContent,
+    );
   }
 
-  Future<Map<String, dynamic>?> getScheduledContent(String scheduledContentId) async {
+  Future<Map<String, dynamic>?> getScheduledContent(
+    String scheduledContentId,
+  ) async {
     final scheduledData = _scheduledContentBoxInstance.get(scheduledContentId);
     if (scheduledData != null) {
       return Map<String, dynamic>.from(scheduledData);
@@ -132,7 +149,9 @@ class LocalStorageService {
     return null;
   }
 
-  Future<List<Map<String, dynamic>>> getScheduledContentForUser(String userId) async {
+  Future<List<Map<String, dynamic>>> getScheduledContentForUser(
+    String userId,
+  ) async {
     final scheduledList = <Map<String, dynamic>>[];
     for (final scheduledData in _scheduledContentBoxInstance.values) {
       final scheduled = Map<String, dynamic>.from(scheduledData);
@@ -149,13 +168,18 @@ class LocalStorageService {
 
   /// Platform Connections
   Future<void> savePlatformConnection(PlatformConnection connection) async {
-    await _platformConnectionsBoxInstance.put('${connection.userId}_${connection.platform}', connection.toJson());
+    await _platformConnectionsBoxInstance.put(
+      '${connection.userId}_${connection.platform}',
+      connection.toJson(),
+    );
   }
 
   Future<List<PlatformConnection>> getPlatformConnections(String userId) async {
     final connections = <PlatformConnection>[];
     for (final connectionData in _platformConnectionsBoxInstance.values) {
-      final connection = PlatformConnection.fromJson(Map<String, dynamic>.from(connectionData));
+      final connection = PlatformConnection.fromJson(
+        Map<String, dynamic>.from(connectionData),
+      );
       if (connection.userId == userId) {
         connections.add(connection);
       }
@@ -169,7 +193,9 @@ class LocalStorageService {
 
   /// Recommendations
   Future<void> saveRecommendation(Map<String, dynamic> recommendation) async {
-    final id = recommendation['id'] ?? DateTime.now().millisecondsSinceEpoch.toString();
+    final id =
+        recommendation['id'] ??
+        DateTime.now().millisecondsSinceEpoch.toString();
     await _recommendationsBoxInstance.put(id, recommendation);
   }
 
@@ -186,11 +212,14 @@ class LocalStorageService {
 
   /// Content Interactions
   Future<void> saveContentInteraction(Map<String, dynamic> interaction) async {
-    final id = interaction['id'] ?? DateTime.now().millisecondsSinceEpoch.toString();
+    final id =
+        interaction['id'] ?? DateTime.now().millisecondsSinceEpoch.toString();
     await _contentInteractionsBoxInstance.put(id, interaction);
   }
 
-  Future<List<Map<String, dynamic>>> getContentInteractions(String userId) async {
+  Future<List<Map<String, dynamic>>> getContentInteractions(
+    String userId,
+  ) async {
     final interactions = <Map<String, dynamic>>[];
     for (final interactionData in _contentInteractionsBoxInstance.values) {
       final interaction = Map<String, dynamic>.from(interactionData);
@@ -219,7 +248,10 @@ class LocalStorageService {
   }
 
   /// Content Cache
-  Future<void> saveCachedContent(String key, Map<String, dynamic> content) async {
+  Future<void> saveCachedContent(
+    String key,
+    Map<String, dynamic> content,
+  ) async {
     await _contentCacheBoxInstance.put(key, content);
   }
 
@@ -297,31 +329,45 @@ class LocalStorageService {
     }
     if (data['scheduled_content'] != null) {
       await _scheduledContentBoxInstance.clear();
-      await _scheduledContentBoxInstance.putAll(Map<String, Map>.from(data['scheduled_content']));
+      await _scheduledContentBoxInstance.putAll(
+        Map<String, Map>.from(data['scheduled_content']),
+      );
     }
     if (data['user_preferences'] != null) {
       await _userPreferencesBoxInstance.clear();
-      await _userPreferencesBoxInstance.putAll(Map<String, Map>.from(data['user_preferences']));
+      await _userPreferencesBoxInstance.putAll(
+        Map<String, Map>.from(data['user_preferences']),
+      );
     }
     if (data['platform_connections'] != null) {
       await _platformConnectionsBoxInstance.clear();
-      await _platformConnectionsBoxInstance.putAll(Map<String, Map>.from(data['platform_connections']));
+      await _platformConnectionsBoxInstance.putAll(
+        Map<String, Map>.from(data['platform_connections']),
+      );
     }
     if (data['recommendations'] != null) {
       await _recommendationsBoxInstance.clear();
-      await _recommendationsBoxInstance.putAll(Map<String, Map>.from(data['recommendations']));
+      await _recommendationsBoxInstance.putAll(
+        Map<String, Map>.from(data['recommendations']),
+      );
     }
     if (data['analytics'] != null) {
       await _analyticsBoxInstance.clear();
-      await _analyticsBoxInstance.putAll(Map<String, Map>.from(data['analytics']));
+      await _analyticsBoxInstance.putAll(
+        Map<String, Map>.from(data['analytics']),
+      );
     }
     if (data['content_interactions'] != null) {
       await _contentInteractionsBoxInstance.clear();
-      await _contentInteractionsBoxInstance.putAll(Map<String, Map>.from(data['content_interactions']));
+      await _contentInteractionsBoxInstance.putAll(
+        Map<String, Map>.from(data['content_interactions']),
+      );
     }
     if (data['content_cache'] != null) {
       await _contentCacheBoxInstance.clear();
-      await _contentCacheBoxInstance.putAll(Map<String, Map>.from(data['content_cache']));
+      await _contentCacheBoxInstance.putAll(
+        Map<String, Map>.from(data['content_cache']),
+      );
     }
   }
 }

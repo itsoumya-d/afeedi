@@ -6,7 +6,8 @@ import '../models/content_model.dart';
 /// youtube_explode_dart was removed — scraping YouTube violates YouTube ToS §4.F
 /// and Google Play Developer Policy. Use YouTube Data API v3 for live content.
 class YouTubeLiveContentService {
-  static final YouTubeLiveContentService _instance = YouTubeLiveContentService._internal();
+  static final YouTubeLiveContentService _instance =
+      YouTubeLiveContentService._internal();
   factory YouTubeLiveContentService() => _instance;
   YouTubeLiveContentService._internal();
 
@@ -31,7 +32,9 @@ class YouTubeLiveContentService {
   /// Search stub — returns empty list. Use ContentService.searchVideos() instead.
   Future<List<Content>> searchLive(String query, {int limit = 15}) async {
     if (kDebugMode) {
-      debugPrint('YouTubeLiveContentService.searchLive: delegating to ContentService');
+      debugPrint(
+        'YouTubeLiveContentService.searchLive: delegating to ContentService',
+      );
     }
     return [];
   }

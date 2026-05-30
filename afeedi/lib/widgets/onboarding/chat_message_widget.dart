@@ -24,8 +24,9 @@ class ChatMessageWidget extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         child: Row(
-          mainAxisAlignment:
-              message.isBot ? MainAxisAlignment.start : MainAxisAlignment.end,
+          mainAxisAlignment: message.isBot
+              ? MainAxisAlignment.start
+              : MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             if (message.isBot) ..._buildBotMessage(),
@@ -166,11 +167,7 @@ class ChatMessageWidget extends StatelessWidget {
           color: Colors.white.withValues(alpha: 0.18),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Icon(
-          Icons.person,
-          color: Colors.white,
-          size: 18,
-        ),
+        child: const Icon(Icons.person, color: Colors.white, size: 18),
       ),
     ];
   }

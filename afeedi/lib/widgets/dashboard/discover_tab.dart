@@ -18,7 +18,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
   String _selectedCategory = 'All';
   String _selectedTimeWindow = '7d';
   String _selectedTimeFilter = 'Today';
-  String _sortMode = 'hot'; // 'hot' = sorted by viewCount desc, 'rising' = sorted by publishedAt desc
+  String _sortMode =
+      'hot'; // 'hot' = sorted by viewCount desc, 'rising' = sorted by publishedAt desc
   List<Content> _content = [];
   List<Content> _trending = [];
   bool _isLoading = true;
@@ -26,10 +27,10 @@ class _DiscoverTabState extends State<DiscoverTab> {
 
   static const Map<String, String> _timeWindowLabels = {
     'today': 'Today',
-    '7d':    'Last 7 Days',
-    '30d':   'Last Month',
-    '60d':   'Last 60 Days',
-    '1y':    'Last Year',
+    '7d': 'Last 7 Days',
+    '30d': 'Last Month',
+    '60d': 'Last 60 Days',
+    '1y': 'Last Year',
   };
 
   static const List<String> _timeFilters = [
@@ -89,16 +90,21 @@ class _DiscoverTabState extends State<DiscoverTab> {
     ContentService.instance
         .getTrendingVideos(limit: 20, timeWindow: _selectedTimeWindow)
         .then((data) {
-      if (mounted) {
-        setState(() {
-          _trending = data;
-          _content = _applySort(_applyTimeFilter(data));
-          _isLoading = false;
+          if (mounted) {
+            setState(() {
+              _trending = data;
+              _content = _applySort(_applyTimeFilter(data));
+              _isLoading = false;
+            });
+          }
+        })
+        .catchError((e) {
+          if (mounted)
+            setState(() {
+              _isLoading = false;
+              _hasError = true;
+            });
         });
-      }
-    }).catchError((e) {
-      if (mounted) setState(() { _isLoading = false; _hasError = true; });
-    });
   }
 
   void _onTimeWindowSelected(String window) {
@@ -110,14 +116,14 @@ class _DiscoverTabState extends State<DiscoverTab> {
     ContentService.instance
         .getTrendingVideos(limit: 20, timeWindow: window)
         .then((data) {
-      if (mounted) {
-        setState(() {
-          _trending = data;
-          _content = _applySort(_applyTimeFilter(data));
-          _isLoading = false;
+          if (mounted) {
+            setState(() {
+              _trending = data;
+              _content = _applySort(_applyTimeFilter(data));
+              _isLoading = false;
+            });
+          }
         });
-      }
-    });
   }
 
   void _onCategorySelected(String category) {
@@ -130,21 +136,27 @@ class _DiscoverTabState extends State<DiscoverTab> {
     ContentService.instance
         .getVideos(category: category.toLowerCase(), limit: 20)
         .then((data) {
-      if (mounted) {
-        setState(() {
-          final base = data.isEmpty
-              ? _trending
-                  .where((c) =>
-                      c.categories.any(
-                          (cat) => cat.toLowerCase() == category.toLowerCase()) ||
-                      c.tags
-                          .any((t) => t.toLowerCase() == category.toLowerCase()))
-                  .toList()
-              : data;
-          _content = _applySort(_applyTimeFilter(base));
+          if (mounted) {
+            setState(() {
+              final base = data.isEmpty
+                  ? _trending
+                        .where(
+                          (c) =>
+                              c.categories.any(
+                                (cat) =>
+                                    cat.toLowerCase() == category.toLowerCase(),
+                              ) ||
+                              c.tags.any(
+                                (t) =>
+                                    t.toLowerCase() == category.toLowerCase(),
+                              ),
+                        )
+                        .toList()
+                  : data;
+              _content = _applySort(_applyTimeFilter(base));
+            });
+          }
         });
-      }
-    });
   }
 
   List<Content> _applyTimeFilter(List<Content> items) {
@@ -237,9 +249,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
           _buildSearchBar(),
           _buildTimeFilterChips(),
           _buildCategoryChips(),
-          Expanded(
-            child: _buildContent(),
-          ),
+          Expanded(child: _buildContent()),
         ],
       ),
     );
@@ -270,7 +280,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 6),
+                              horizontal: 14,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? const Color(0xFF00D4FF)
@@ -286,8 +298,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                             child: Text(
                               filter,
                               style: TextStyle(
-                                color:
-                                    isSelected ? Colors.black : Colors.white,
+                                color: isSelected ? Colors.black : Colors.white,
                                 fontWeight: isSelected
                                     ? FontWeight.w700
                                     : FontWeight.w400,
@@ -316,7 +327,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: _sortMode == 'hot'
-                                ? const Color(0xFFFF4500).withValues(alpha: 0.25)
+                                ? const Color(
+                                    0xFFFF4500,
+                                  ).withValues(alpha: 0.25)
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
@@ -346,7 +359,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: _sortMode == 'rising'
-                                ? const Color(0xFF32D74B).withValues(alpha: 0.25)
+                                ? const Color(
+                                    0xFF32D74B,
+                                  ).withValues(alpha: 0.25)
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
@@ -376,10 +391,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
               child: Text(
                 'Showing $_filteredCount trending items • $_selectedTimeFilter • ${_sortMode == 'hot' ? 'Hot' : 'Rising'}',
-                style: const TextStyle(
-                  color: Colors.white54,
-                  fontSize: 11,
-                ),
+                style: const TextStyle(color: Colors.white54, fontSize: 11),
               ),
             ),
         ],
@@ -399,23 +411,19 @@ class _DiscoverTabState extends State<DiscoverTab> {
               color: const Color(0xFF1A1A2E),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: Colors.white.withValues(alpha:0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),
             child: Row(
               children: [
                 const SizedBox(width: 14),
-                const Icon(
-                  Icons.search,
-                  color: Colors.white54,
-                  size: 22,
-                ),
+                const Icon(Icons.search, color: Colors.white54, size: 22),
                 const SizedBox(width: 10),
                 Text(
                   'Search videos, creators, topics...',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha:0.4),
+                    color: Colors.white.withValues(alpha: 0.4),
                     fontSize: 15,
                   ),
                 ),
@@ -443,16 +451,17 @@ class _DiscoverTabState extends State<DiscoverTab> {
               onTap: () => _onCategorySelected(category),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color:
-                      isSelected ? AppTheme.primaryCyan : Colors.transparent,
+                  color: isSelected ? AppTheme.primaryCyan : Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isSelected
                         ? AppTheme.primaryCyan
-                        : Colors.white.withValues(alpha:0.15),
+                        : Colors.white.withValues(alpha: 0.15),
                     width: 1,
                   ),
                 ),
@@ -460,9 +469,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   category,
                   style: TextStyle(
                     color: isSelected ? Colors.black : Colors.white,
-                    fontWeight: isSelected
-                        ? FontWeight.w700
-                        : FontWeight.w400,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                     fontSize: 13,
                   ),
                 ),
@@ -514,11 +521,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.trending_up,
-                size: 72,
-                color: Colors.white24,
-              ),
+              const Icon(Icons.trending_up, size: 72, color: Colors.white24),
               const SizedBox(height: 20),
               const Text(
                 'No trending content right now',
@@ -538,21 +541,39 @@ class _DiscoverTabState extends State<DiscoverTab> {
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: () {
-                  setState(() { _isLoading = true; _hasError = false; });
-                  ContentService.instance
-                      .getTrendingVideos(limit: 20, timeWindow: _selectedTimeWindow)
-                      .then((data) {
-                    if (mounted) setState(() { _trending = data; _content = _applyTimeFilter(data); _isLoading = false; });
-                  }).catchError((e) {
-                    if (mounted) setState(() { _isLoading = false; _hasError = true; });
+                  setState(() {
+                    _isLoading = true;
+                    _hasError = false;
                   });
+                  ContentService.instance
+                      .getTrendingVideos(
+                        limit: 20,
+                        timeWindow: _selectedTimeWindow,
+                      )
+                      .then((data) {
+                        if (mounted)
+                          setState(() {
+                            _trending = data;
+                            _content = _applyTimeFilter(data);
+                            _isLoading = false;
+                          });
+                      })
+                      .catchError((e) {
+                        if (mounted)
+                          setState(() {
+                            _isLoading = false;
+                            _hasError = true;
+                          });
+                      });
                 },
                 icon: const Icon(Icons.refresh),
                 label: const Text('Refresh'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF00D4FF),
                   foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
             ],
@@ -593,7 +614,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
             ],
           ),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFF00D4FF).withValues(alpha: 0.3)),
+          border: Border.all(
+            color: const Color(0xFF00D4FF).withValues(alpha: 0.3),
+          ),
         ),
         child: Row(
           children: [
@@ -603,7 +626,11 @@ class _DiscoverTabState extends State<DiscoverTab> {
                 color: const Color(0xFF00D4FF).withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.auto_awesome, color: Color(0xFF00D4FF), size: 20),
+              child: const Icon(
+                Icons.auto_awesome,
+                color: Color(0xFF00D4FF),
+                size: 20,
+              ),
             ),
             const SizedBox(width: 14),
             const Expanded(
@@ -626,7 +653,11 @@ class _DiscoverTabState extends State<DiscoverTab> {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, color: Colors.white24, size: 14),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.white24,
+              size: 14,
+            ),
           ],
         ),
       ),
@@ -661,13 +692,18 @@ class _DiscoverTabState extends State<DiscoverTab> {
       byPlatform[p] = items.isNotEmpty ? items.first : null;
     }
 
-    final available = platformOrder.where((p) => byPlatform[p] != null).toList();
+    final available = platformOrder
+        .where((p) => byPlatform[p] != null)
+        .toList();
     if (available.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Text(
           'Load trending content to see cross-platform highlights',
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 13),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.45),
+            fontSize: 13,
+          ),
         ),
       );
     }
@@ -684,13 +720,20 @@ class _DiscoverTabState extends State<DiscoverTab> {
           final color = platformColors[platform]!;
           final label = platformLabels[platform]!;
           return GestureDetector(
-            onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
+            onTap: () => Navigator.pushNamed(
+              context,
+              AppRoutes.player,
+              arguments: content,
+            ),
             child: Container(
               width: 148,
               margin: const EdgeInsets.only(right: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: color.withValues(alpha: 0.6), width: 1.5),
+                border: Border.all(
+                  color: color.withValues(alpha: 0.6),
+                  width: 1.5,
+                ),
                 color: const Color(0xFF1A1A2E),
               ),
               child: Stack(
@@ -703,7 +746,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       child: CachedNetworkImage(
                         imageUrl: content.thumbnailUrl!,
                         fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => _buildThumbnailPlaceholder(content),
+                        errorWidget: (_, __, ___) =>
+                            _buildThumbnailPlaceholder(content),
                       ),
                     )
                   else
@@ -719,7 +763,10 @@ class _DiscoverTabState extends State<DiscoverTab> {
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [Colors.transparent, Colors.black.withValues(alpha: 0.85)],
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.85),
+                          ],
                           stops: const [0.4, 1.0],
                         ),
                       ),
@@ -730,14 +777,21 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     top: 8,
                     left: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: color,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         label,
-                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -748,7 +802,11 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     bottom: 8,
                     child: Text(
                       content.title ?? label,
-                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -776,12 +834,19 @@ class _DiscoverTabState extends State<DiscoverTab> {
               onTap: () => _onTimeWindowSelected(entry.key),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFFFF4500) : Colors.transparent,
+                  color: isSelected
+                      ? const Color(0xFFFF4500)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isSelected ? const Color(0xFFFF4500) : Colors.white24,
+                    color: isSelected
+                        ? const Color(0xFFFF4500)
+                        : Colors.white24,
                   ),
                 ),
                 child: Text(
@@ -789,7 +854,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   style: TextStyle(
                     color: isSelected ? Colors.white : Colors.white60,
                     fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 ),
               ),
@@ -840,137 +907,141 @@ class _DiscoverTabState extends State<DiscoverTab> {
   Widget _buildTrendingCard(Content content, {int rank = 0}) {
     final badgeColor = _rankBadgeColor(rank);
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
+      onTap: () =>
+          Navigator.pushNamed(context, AppRoutes.player, arguments: content),
       child: Padding(
-      padding: const EdgeInsets.only(right: 10),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: SizedBox(
-          width: 140,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Thumbnail background
-              Container(
-                color: const Color(0xFF1A1A2E),
-                child: content.thumbnailUrl != null
-                    ? CachedNetworkImage(
-                        imageUrl: content.thumbnailUrl!,
-                        fit: BoxFit.cover,
-                        errorWidget: (context, url, error) =>
-                            _buildThumbnailPlaceholder(content),
-                      )
-                    : _buildThumbnailPlaceholder(content),
-              ),
-              // Gradient overlay at bottom
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                      colors: [
-                        Colors.black.withValues(alpha:0.85),
-                        Colors.transparent,
+        padding: const EdgeInsets.only(right: 10),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: SizedBox(
+            width: 140,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Thumbnail background
+                Container(
+                  color: const Color(0xFF1A1A2E),
+                  child: content.thumbnailUrl != null
+                      ? CachedNetworkImage(
+                          imageUrl: content.thumbnailUrl!,
+                          fit: BoxFit.cover,
+                          errorWidget: (context, url, error) =>
+                              _buildThumbnailPlaceholder(content),
+                        )
+                      : _buildThumbnailPlaceholder(content),
+                ),
+                // Gradient overlay at bottom
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: 0.85),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          content.title ?? 'Untitled',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.redAccent.withValues(alpha: 0.85),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            '🔥 trending',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        content.title ?? 'Untitled',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.redAccent.withValues(alpha:0.85),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Text(
-                          '🔥 trending',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
-              ),
-              // Platform color dot top-right
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: _getPlatformColor(content.platform),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color:
-                            _getPlatformColor(content.platform).withValues(alpha:0.6),
-                        blurRadius: 4,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // Rank badge for top 3
-              if (badgeColor != null)
+                // Platform color dot top-right
                 Positioned(
                   top: 8,
-                  left: 8,
+                  right: 8,
                   child: Container(
-                    width: 24,
-                    height: 24,
+                    width: 8,
+                    height: 8,
                     decoration: BoxDecoration(
-                      color: badgeColor,
+                      color: _getPlatformColor(content.platform),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: badgeColor.withValues(alpha: 0.5),
-                          blurRadius: 6,
+                          color: _getPlatformColor(
+                            content.platform,
+                          ).withValues(alpha: 0.6),
+                          blurRadius: 4,
                           spreadRadius: 1,
                         ),
                       ],
                     ),
-                    child: Center(
-                      child: Text(
-                        '$rank',
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w900,
+                  ),
+                ),
+                // Rank badge for top 3
+                if (badgeColor != null)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: badgeColor,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: badgeColor.withValues(alpha: 0.5),
+                            blurRadius: 6,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          '$rank',
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
     );
   }
 
@@ -981,7 +1052,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
       child: Center(
         child: Icon(
           _categoryIcons[guessedCategory] ?? Icons.play_circle,
-          color: _getPlatformColor(content.platform).withValues(alpha:0.5),
+          color: _getPlatformColor(content.platform).withValues(alpha: 0.5),
           size: 40,
         ),
       ),
@@ -997,7 +1068,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
     if (tags.contains('art') || tags.contains('painting')) return 'Art';
     if (tags.contains('funny') || tags.contains('comedy')) return 'Comedy';
     if (tags.contains('fashion') || tags.contains('style')) return 'Fashion';
-    if (tags.contains('education') || tags.contains('school')) return 'Education';
+    if (tags.contains('education') || tags.contains('school'))
+      return 'Education';
     if (tags.contains('sports') || tags.contains('football')) return 'Sports';
     return 'Tech';
   }
@@ -1045,8 +1117,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  color.withValues(alpha:0.8),
-                  color.withValues(alpha:0.4),
+                  color.withValues(alpha: 0.8),
+                  color.withValues(alpha: 0.4),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -1083,7 +1155,11 @@ class _DiscoverTabState extends State<DiscoverTab> {
           const SizedBox(height: 16),
           const Text(
             'Could not load content',
-            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 8),
           const Text(
@@ -1093,21 +1169,39 @@ class _DiscoverTabState extends State<DiscoverTab> {
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
-              setState(() { _isLoading = true; _hasError = false; });
+              setState(() {
+                _isLoading = true;
+                _hasError = false;
+              });
               ContentService.instance
                   .getTrendingVideos(limit: 20, timeWindow: _selectedTimeWindow)
                   .then((data) {
-                if (mounted) setState(() { _trending = data; _content = _applyTimeFilter(data); _isLoading = false; });
-              }).catchError((e) {
-                if (mounted) setState(() { _isLoading = false; _hasError = true; });
-              });
+                    if (mounted)
+                      setState(() {
+                        _trending = data;
+                        _content = _applyTimeFilter(data);
+                        _isLoading = false;
+                      });
+                  })
+                  .catchError((e) {
+                    if (mounted)
+                      setState(() {
+                        _isLoading = false;
+                        _hasError = true;
+                      });
+                  });
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF00D4FF),
               foregroundColor: Colors.black,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
-            child: const Text('Try Again', style: TextStyle(fontWeight: FontWeight.w600)),
+            child: const Text(
+              'Try Again',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),
@@ -1124,7 +1218,11 @@ class _DiscoverTabState extends State<DiscoverTab> {
             const SizedBox(height: 12),
             Text(
               'No $_selectedCategory content found',
-              style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 8),
             GestureDetector(
@@ -1155,7 +1253,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
 
   Widget _buildContentCard(Content content) {
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
+      onTap: () =>
+          Navigator.pushNamed(context, AppRoutes.player, arguments: content),
       child: _buildContentCardInner(content),
     );
   }
@@ -1188,8 +1287,10 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   top: 6,
                   right: 6,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: _getPlatformColor(content.platform),
                       borderRadius: BorderRadius.circular(4),
@@ -1228,10 +1329,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   content.creatorName ?? 'Unknown',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white54,
-                    fontSize: 11,
-                  ),
+                  style: const TextStyle(color: Colors.white54, fontSize: 11),
                 ),
                 if (content.viewCount > 0) ...[
                   const SizedBox(height: 2),
@@ -1239,10 +1337,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     content.formattedViewCount,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white38,
-                      fontSize: 10,
-                    ),
+                    style: const TextStyle(color: Colors.white38, fontSize: 10),
                   ),
                 ],
               ],

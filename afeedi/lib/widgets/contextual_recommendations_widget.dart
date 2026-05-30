@@ -275,47 +275,47 @@ class _ContextualRecommendationsWidgetState
         : 'Based on Your Calendar';
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: UIScaling.spacing(context, 2),
-            vertical: UIScaling.spacing(context, 1),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                contextTitle,
-                style: AppTextStyles.heading2,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: UIScaling.spacing(context, 2),
+                vertical: UIScaling.spacing(context, 1),
               ),
-              SizedBox(height: UIScaling.spacing(context, 0.5)),
-              Text(
-                _getSubtitle(),
-                style: AppTextStyles.body2.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(contextTitle, style: AppTextStyles.heading2),
+                  SizedBox(height: UIScaling.spacing(context, 0.5)),
+                  Text(
+                    _getSubtitle(),
+                    style: AppTextStyles.body2.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        SizedBox(height: UIScaling.spacing(context, 1)),
-        SizedBox(
-          height: UIScaling.cardHeight(context, isLarge: true),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: _recommendations.length,
-            padding: EdgeInsets.symmetric(
-              horizontal: UIScaling.spacing(context, 2),
             ),
-            itemBuilder: (context, index) {
-              final item = _recommendations[index];
-              return _buildRecommendationCard(item, index);
-            },
-          ),
-        ),
-      ],
-    ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideY(
+            SizedBox(height: UIScaling.spacing(context, 1)),
+            SizedBox(
+              height: UIScaling.cardHeight(context, isLarge: true),
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _recommendations.length,
+                padding: EdgeInsets.symmetric(
+                  horizontal: UIScaling.spacing(context, 2),
+                ),
+                itemBuilder: (context, index) {
+                  final item = _recommendations[index];
+                  return _buildRecommendationCard(item, index);
+                },
+              ),
+            ),
+          ],
+        )
+        .animate()
+        .fadeIn(duration: 400.ms, delay: 100.ms)
+        .slideY(
           begin: 0.1,
           end: 0,
           duration: 400.ms,
@@ -361,146 +361,157 @@ class _ContextualRecommendationsWidgetState
       onTap: () {
         widget.onItemTap(item);
       },
-      child: Container(
-        width: UIScaling.cardWidth(context),
-        margin: EdgeInsets.only(
-          right: UIScaling.spacing(context, 1.5),
-          bottom: UIScaling.spacing(context, 1),
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.cardBackground,
-          borderRadius: BorderRadius.circular(UIScaling.radius(context)),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.shadow.withValues(alpha: 0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image
-            Expanded(
-              flex: 3,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  CachedNetworkImage(
-                    imageUrl: item.thumbnailUrl ?? '',
-                    fit: BoxFit.cover,
-                    placeholder: (ctx, url) => Container(color: Colors.grey[900]),
-                    errorWidget: (ctx, url, err) => Container(
-                      color: AppColors.getPlatformColor(item.platform),
-                      child: Center(
-                        child: Icon(
-                          Icons.image,
-                          color: AppColors.white,
-                          size: 32,
-                        ),
-                      ),
-                    ),
+      child:
+          Container(
+                width: UIScaling.cardWidth(context),
+                margin: EdgeInsets.only(
+                  right: UIScaling.spacing(context, 1.5),
+                  bottom: UIScaling.spacing(context, 1),
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.cardBackground,
+                  borderRadius: BorderRadius.circular(
+                    UIScaling.radius(context),
                   ),
-                  // Platform badge
-                  Positioned(
-                    top: UIScaling.spacing(context, 1),
-                    left: UIScaling.spacing(context, 1),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: UIScaling.spacing(context, 0.75),
-                        vertical: UIScaling.spacing(context, 0.25),
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.getPlatformColor(item.platform),
-                        borderRadius: BorderRadius.circular(
-                          UIScaling.radius(context, 0.5),
-                        ),
-                      ),
-                      child: Text(
-                        item.platform,
-                        style: AppTextStyles.tag.copyWith(
-                          color: AppColors.white,
-                        ),
-                      ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.shadow.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
-                  ),
-                  // Duration badge
-                  Positioned(
-                    bottom: UIScaling.spacing(context, 1),
-                    right: UIScaling.spacing(context, 1),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: UIScaling.spacing(context, 0.75),
-                        vertical: UIScaling.spacing(context, 0.25),
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.black.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(
-                          UIScaling.radius(context, 0.5),
-                        ),
-                      ),
-                      child: Text(
-                        _formatDuration(Duration(seconds: item.durationSeconds)),
-                        style: AppTextStyles.tag.copyWith(
-                          color: AppColors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Content details
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: EdgeInsets.all(UIScaling.spacing(context, 1)),
+                  ],
+                ),
+                clipBehavior: Clip.antiAlias,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.title,
-                      style: AppTextStyles.heading4,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: UIScaling.spacing(context, 0.5)),
-                    Text(
-                      item.description ?? '',
-                      style: AppTextStyles.body2.copyWith(
-                        color: AppColors.textSecondary,
+                    // Image
+                    Expanded(
+                      flex: 3,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          CachedNetworkImage(
+                            imageUrl: item.thumbnailUrl ?? '',
+                            fit: BoxFit.cover,
+                            placeholder: (ctx, url) =>
+                                Container(color: Colors.grey[900]),
+                            errorWidget: (ctx, url, err) => Container(
+                              color: AppColors.getPlatformColor(item.platform),
+                              child: Center(
+                                child: Icon(
+                                  Icons.image,
+                                  color: AppColors.white,
+                                  size: 32,
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Platform badge
+                          Positioned(
+                            top: UIScaling.spacing(context, 1),
+                            left: UIScaling.spacing(context, 1),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: UIScaling.spacing(context, 0.75),
+                                vertical: UIScaling.spacing(context, 0.25),
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.getPlatformColor(
+                                  item.platform,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  UIScaling.radius(context, 0.5),
+                                ),
+                              ),
+                              child: Text(
+                                item.platform,
+                                style: AppTextStyles.tag.copyWith(
+                                  color: AppColors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Duration badge
+                          Positioned(
+                            bottom: UIScaling.spacing(context, 1),
+                            right: UIScaling.spacing(context, 1),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: UIScaling.spacing(context, 0.75),
+                                vertical: UIScaling.spacing(context, 0.25),
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.black.withValues(alpha: 0.7),
+                                borderRadius: BorderRadius.circular(
+                                  UIScaling.radius(context, 0.5),
+                                ),
+                              ),
+                              child: Text(
+                                _formatDuration(
+                                  Duration(seconds: item.durationSeconds),
+                                ),
+                                style: AppTextStyles.tag.copyWith(
+                                  color: AppColors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    if (widget.showRecommendationReason &&
-                        item.recommendationReason.isNotEmpty)
-                      Padding(
-                        padding: EdgeInsets.only(
-                          top: UIScaling.spacing(context, 0.5),
-                        ),
-                        child: Text(
-                          item.recommendationReason,
-                          style: AppTextStyles.recommendationReason,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                    // Content details
+                    Expanded(
+                      flex: 2,
+                      child: Padding(
+                        padding: EdgeInsets.all(UIScaling.spacing(context, 1)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.title,
+                              style: AppTextStyles.heading4,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(height: UIScaling.spacing(context, 0.5)),
+                            Text(
+                              item.description ?? '',
+                              style: AppTextStyles.body2.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (widget.showRecommendationReason &&
+                                item.recommendationReason.isNotEmpty)
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  top: UIScaling.spacing(context, 0.5),
+                                ),
+                                child: Text(
+                                  item.recommendationReason,
+                                  style: AppTextStyles.recommendationReason,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
                         ),
                       ),
+                    ),
                   ],
                 ),
+              )
+              .animate()
+              .fadeIn(duration: 300.ms, delay: (100 + index * 50).ms)
+              .slideY(
+                begin: 0.1,
+                end: 0,
+                duration: 300.ms,
+                curve: Curves.easeOutQuad,
+                delay: (100 + index * 50).ms,
               ),
-            ),
-          ],
-        ),
-      ).animate().fadeIn(duration: 300.ms, delay: (100 + index * 50).ms).slideY(
-            begin: 0.1,
-            end: 0,
-            duration: 300.ms,
-            curve: Curves.easeOutQuad,
-            delay: (100 + index * 50).ms,
-          ),
     );
   }
 
@@ -525,7 +536,9 @@ class _ContextualRecommendationsWidgetState
             height: 24,
             decoration: BoxDecoration(
               color: AppColors.shimmerBase,
-              borderRadius: BorderRadius.circular(UIScaling.radius(context, 0.5)),
+              borderRadius: BorderRadius.circular(
+                UIScaling.radius(context, 0.5),
+              ),
             ),
           ),
           SizedBox(height: UIScaling.spacing(context, 0.5)),
@@ -535,7 +548,9 @@ class _ContextualRecommendationsWidgetState
             height: 16,
             decoration: BoxDecoration(
               color: AppColors.shimmerBase,
-              borderRadius: BorderRadius.circular(UIScaling.radius(context, 0.5)),
+              borderRadius: BorderRadius.circular(
+                UIScaling.radius(context, 0.5),
+              ),
             ),
           ),
           SizedBox(height: UIScaling.spacing(context, 2)),
@@ -546,13 +561,19 @@ class _ContextualRecommendationsWidgetState
               itemCount: 5,
               itemBuilder: (context, index) {
                 return Container(
-                  width: UIScaling.cardWidth(context),
-                  margin: EdgeInsets.only(right: UIScaling.spacing(context, 1.5)),
-                  decoration: BoxDecoration(
-                    color: AppColors.shimmerBase,
-                    borderRadius: BorderRadius.circular(UIScaling.radius(context)),
-                  ),
-                ).animate(onPlay: (controller) => controller.repeat()).shimmer(
+                      width: UIScaling.cardWidth(context),
+                      margin: EdgeInsets.only(
+                        right: UIScaling.spacing(context, 1.5),
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.shimmerBase,
+                        borderRadius: BorderRadius.circular(
+                          UIScaling.radius(context),
+                        ),
+                      ),
+                    )
+                    .animate(onPlay: (controller) => controller.repeat())
+                    .shimmer(
                       duration: 1500.ms,
                       color: AppColors.shimmerHighlight,
                     );
@@ -572,11 +593,7 @@ class _ContextualRecommendationsWidgetState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              color: AppColors.error,
-              size: 48,
-            ),
+            Icon(Icons.error_outline, color: AppColors.error, size: 48),
             SizedBox(height: UIScaling.spacing(context, 1)),
             Text(
               'Failed to load contextual recommendations',
@@ -602,11 +619,7 @@ class _ContextualRecommendationsWidgetState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.info_outline,
-              color: AppColors.primary,
-              size: 48,
-            ),
+            Icon(Icons.info_outline, color: AppColors.primary, size: 48),
             SizedBox(height: UIScaling.spacing(context, 1)),
             Text(
               'No contextual recommendations available',

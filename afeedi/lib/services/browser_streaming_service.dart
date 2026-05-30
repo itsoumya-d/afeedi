@@ -6,10 +6,11 @@ import 'analytics_service.dart';
 
 class BrowserStreamingService {
   static BrowserStreamingService? _instance;
-  static BrowserStreamingService get instance => _instance ??= BrowserStreamingService._();
-  
+  static BrowserStreamingService get instance =>
+      _instance ??= BrowserStreamingService._();
+
   BrowserStreamingService._();
-  
+
   // Supported streaming protocols
   static const List<String> supportedProtocols = [
     'HLS', // HTTP Live Streaming
@@ -18,7 +19,7 @@ class BrowserStreamingService {
     'WebM', // WebM format
     'OGG', // Ogg format
   ];
-  
+
   // Platform-specific streaming configurations
   static const Map<PlatformType, Map<String, dynamic>> platformConfigs = {
     PlatformType.youtube: {
@@ -54,7 +55,7 @@ class BrowserStreamingService {
       'controls': true,
     },
   };
-  
+
   // Initialize streaming service
   Future<void> initialize() async {
     try {
@@ -63,7 +64,7 @@ class BrowserStreamingService {
       } else {
         await _initializeMobileStreaming();
       }
-      
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'streaming_service_initialized',
         screen: 'streaming',
@@ -81,7 +82,7 @@ class BrowserStreamingService {
       rethrow;
     }
   }
-  
+
   // Create streaming player for content
   Future<StreamingPlayer> createPlayer({
     required Content content,
@@ -89,15 +90,15 @@ class BrowserStreamingService {
   }) async {
     try {
       final config = platformConfigs[content.platform] ?? {};
-      
+
       final player = StreamingPlayer(
         content: content,
         config: config,
         options: playerOptions ?? {},
       );
-      
+
       await player.initialize();
-      
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'streaming_player_created',
         screen: 'streaming',
@@ -107,7 +108,7 @@ class BrowserStreamingService {
           'content_type': content.contentType.name,
         },
       );
-      
+
       return player;
     } catch (error) {
       await AnalyticsService.instance.trackError(
@@ -118,7 +119,7 @@ class BrowserStreamingService {
       rethrow;
     }
   }
-  
+
   // Get optimal streaming quality based on connection
   Future<String> getOptimalQuality() async {
     try {
@@ -136,7 +137,7 @@ class BrowserStreamingService {
             return '720p';
         }
       }
-      
+
       // Default quality for mobile or when connection info unavailable
       return '720p';
     } catch (error) {
@@ -144,39 +145,43 @@ class BrowserStreamingService {
       return '720p';
     }
   }
-  
+
   // Check browser compatibility
   bool isBrowserSupported() {
     if (!kIsWeb) return true; // Mobile apps are always supported
-    
+
     try {
       final userAgent = html.window.navigator.userAgent.toLowerCase();
-      
+
       // Check for modern browser features
-      final hasVideoSupport = html.VideoElement().canPlayType('video/mp4') != '';
+      final hasVideoSupport =
+          html.VideoElement().canPlayType('video/mp4') != '';
 
       // Check browser versions
-      final isChrome = userAgent.contains('chrome') && !userAgent.contains('edge');
+      final isChrome =
+          userAgent.contains('chrome') && !userAgent.contains('edge');
       final isFirefox = userAgent.contains('firefox');
-      final isSafari = userAgent.contains('safari') && !userAgent.contains('chrome');
+      final isSafari =
+          userAgent.contains('safari') && !userAgent.contains('chrome');
       final isEdge = userAgent.contains('edge');
-      
-      return hasVideoSupport && (isChrome || isFirefox || isSafari || isEdge); // ignore: dead_code
+
+      return hasVideoSupport &&
+          (isChrome || isFirefox || isSafari || isEdge); // ignore: dead_code
     } catch (error) {
       debugPrint('Error checking browser support: $error');
       return false;
     }
   }
-  
+
   // Get supported video formats for current browser
   List<String> getSupportedFormats() {
     if (!kIsWeb) {
       return ['MP4', 'WebM', 'HLS', 'DASH'];
     }
-    
+
     final supportedFormats = <String>[];
     final video = html.VideoElement();
-    
+
     if (video.canPlayType('video/mp4') != '') {
       supportedFormats.add('MP4');
     }
@@ -192,24 +197,24 @@ class BrowserStreamingService {
     if (_checkDASHSupport()) {
       supportedFormats.add('DASH');
     }
-    
+
     return supportedFormats;
   }
-  
+
   // Create embed URL for platform content
   String createEmbedUrl(Content content, {Map<String, String>? parameters}) {
     final baseParams = {
       'autoplay': '0',
       'controls': '1',
-      
+
       'rel': '0',
       'showinfo': '0',
     };
-    
+
     if (parameters != null) {
       baseParams.addAll(parameters);
     }
-    
+
     switch (content.platform) {
       case PlatformType.youtube:
         return _createYouTubeEmbedUrl(content.platformContentId, baseParams);
@@ -221,7 +226,7 @@ class BrowserStreamingService {
         return _createFacebookEmbedUrl(content.platformContentId, baseParams);
     }
   }
-  
+
   // Handle streaming errors
   Future<void> handleStreamingError({
     required String errorType,
@@ -239,7 +244,7 @@ class BrowserStreamingService {
         'error_type': errorType,
       },
     );
-    
+
     // Implement error recovery strategies
     switch (errorType) {
       case 'network_error':
@@ -255,9 +260,9 @@ class BrowserStreamingService {
         debugPrint('Unhandled streaming error: $errorType - $errorMessage');
     }
   }
-  
+
   // Private helper methods
-  
+
   Future<void> _initializeWebStreaming() async {
     // Initialize web-specific streaming components
     if (kIsWeb) {
@@ -265,35 +270,35 @@ class BrowserStreamingService {
       if (!_checkMediaSourceSupport()) {
         throw Exception('MediaSource API not supported');
       }
-      
+
       // Initialize HLS.js if needed
       await _loadHLSLibrary();
-      
+
       // Initialize DASH.js if needed
       await _loadDASHLibrary();
     }
   }
-  
+
   Future<void> _initializeMobileStreaming() async {
     // Initialize mobile-specific streaming components
     // WebView configuration for embedded players
   }
-  
+
   bool _checkHLSSupport() {
     if (!kIsWeb) return true;
-    
+
     try {
       final video = html.VideoElement();
       return video.canPlayType('application/vnd.apple.mpegurl') != '' ||
-             video.canPlayType('audio/mpegurl') != '';
+          video.canPlayType('audio/mpegurl') != '';
     } catch (error) {
       return false;
     }
   }
-  
+
   bool _checkDASHSupport() {
     if (!kIsWeb) return true;
-    
+
     try {
       final video = html.VideoElement();
       return video.canPlayType('application/dash+xml') != '';
@@ -301,17 +306,17 @@ class BrowserStreamingService {
       return false;
     }
   }
-  
+
   bool _checkMediaSourceSupport() {
     if (!kIsWeb) return true;
-    
+
     try {
       return html.window.navigator.userAgent.contains('MediaSource');
     } catch (error) {
       return false;
     }
   }
-  
+
   Future<void> _loadHLSLibrary() async {
     // Load HLS.js library for browsers that don't natively support HLS
     if (kIsWeb && !_checkHLSSupport()) {
@@ -319,7 +324,7 @@ class BrowserStreamingService {
       debugPrint('Loading HLS.js library...');
     }
   }
-  
+
   Future<void> _loadDASHLibrary() async {
     // Load DASH.js library for DASH streaming support
     if (kIsWeb) {
@@ -327,36 +332,36 @@ class BrowserStreamingService {
       debugPrint('Loading DASH.js library...');
     }
   }
-  
+
   String _createYouTubeEmbedUrl(String videoId, Map<String, String> params) {
     final queryString = params.entries
         .map((e) => '${e.key}=${e.value}')
         .join('&');
     return 'https://www.youtube.com/embed/$videoId?$queryString';
   }
-  
+
   String _createInstagramEmbedUrl(String postId, Map<String, String> params) {
     return 'https://www.instagram.com/p/$postId/embed/';
   }
-  
+
   String _createTikTokEmbedUrl(String videoId, Map<String, String> params) {
     return 'https://www.tiktok.com/embed/v2/$videoId';
   }
-  
+
   String _createFacebookEmbedUrl(String postId, Map<String, String> params) {
     return 'https://www.facebook.com/plugins/video.php?href=https://www.facebook.com/video.php?v=$postId';
   }
-  
+
   Future<void> _handleNetworkError() async {
     // Implement network error recovery
     debugPrint('Handling network error - attempting reconnection...');
   }
-  
+
   Future<void> _handleFormatError() async {
     // Implement format error recovery
     debugPrint('Handling format error - trying alternative format...');
   }
-  
+
   Future<void> _handlePermissionError() async {
     // Implement permission error recovery
     debugPrint('Handling permission error - checking authentication...');
@@ -368,20 +373,20 @@ class StreamingPlayer {
   final Content content;
   final Map<String, dynamic> config;
   final Map<String, dynamic> options;
-  
+
   html.VideoElement? _videoElement;
   bool _isInitialized = false;
   bool _isPlaying = false;
   double _currentTime = 0.0;
   double _duration = 0.0;
   String _currentQuality = '720p';
-  
+
   StreamingPlayer({
     required this.content,
     required this.config,
     required this.options,
   });
-  
+
   // Initialize the player
   Future<void> initialize() async {
     try {
@@ -390,9 +395,9 @@ class StreamingPlayer {
       } else {
         await _initializeMobilePlayer();
       }
-      
+
       _isInitialized = true;
-      
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'player_initialized',
         screen: 'streaming',
@@ -410,20 +415,20 @@ class StreamingPlayer {
       rethrow;
     }
   }
-  
+
   // Play content
   Future<void> play() async {
     if (!_isInitialized) {
       throw Exception('Player not initialized');
     }
-    
+
     try {
       if (kIsWeb && _videoElement != null) {
         await _videoElement!.play();
       }
-      
+
       _isPlaying = true;
-      
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'content_played',
         screen: 'streaming',
@@ -443,18 +448,18 @@ class StreamingPlayer {
       rethrow;
     }
   }
-  
+
   // Pause content
   Future<void> pause() async {
     if (!_isInitialized) return;
-    
+
     try {
       if (kIsWeb && _videoElement != null) {
         _videoElement!.pause();
       }
-      
+
       _isPlaying = false;
-      
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'content_paused',
         screen: 'streaming',
@@ -467,51 +472,45 @@ class StreamingPlayer {
       debugPrint('Error pausing content: $error');
     }
   }
-  
+
   // Seek to specific time
   Future<void> seekTo(double seconds) async {
     if (!_isInitialized) return;
-    
+
     try {
       if (kIsWeb && _videoElement != null) {
         _videoElement!.currentTime = seconds;
       }
-      
+
       _currentTime = seconds;
-      
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'content_seeked',
         screen: 'streaming',
-        additionalData: {
-          'content_id': content.id,
-          'seek_time': seconds,
-        },
+        additionalData: {'content_id': content.id, 'seek_time': seconds},
       );
     } catch (error) {
       debugPrint('Error seeking content: $error');
     }
   }
-  
+
   // Change quality
   Future<void> setQuality(String quality) async {
     if (!_isInitialized) return;
-    
+
     try {
       _currentQuality = quality;
-      
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'quality_changed',
         screen: 'streaming',
-        additionalData: {
-          'content_id': content.id,
-          'new_quality': quality,
-        },
+        additionalData: {'content_id': content.id, 'new_quality': quality},
       );
     } catch (error) {
       debugPrint('Error changing quality: $error');
     }
   }
-  
+
   // Dispose player resources
   Future<void> dispose() async {
     try {
@@ -520,10 +519,10 @@ class StreamingPlayer {
         _videoElement!.src = '';
         _videoElement = null;
       }
-      
+
       _isInitialized = false;
       _isPlaying = false;
-      
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'player_disposed',
         screen: 'streaming',
@@ -536,16 +535,16 @@ class StreamingPlayer {
       debugPrint('Error disposing player: $error');
     }
   }
-  
+
   // Getters
   bool get isInitialized => _isInitialized;
   bool get isPlaying => _isPlaying;
   double get currentTime => _currentTime;
   double get duration => _duration;
   String get currentQuality => _currentQuality;
-  
+
   // Private methods
-  
+
   Future<void> _initializeWebPlayer() async {
     if (content.embedUrl != null) {
       // Use iframe embed for web
@@ -557,18 +556,18 @@ class StreamingPlayer {
         ..src = content.videoUrl!
         ..controls = config['controls'] ?? true
         ..autoplay = config['autoplay'] ?? false;
-      
+
       // Set up event listeners
       _videoElement!.onLoadedMetadata.listen((_) {
         _duration = (_videoElement!.duration ?? 0.0).toDouble();
       });
-      
+
       _videoElement!.onTimeUpdate.listen((_) {
         _currentTime = (_videoElement!.currentTime ?? 0.0).toDouble();
       });
     }
   }
-  
+
   Future<void> _initializeMobilePlayer() async {
     // Initialize WebView for mobile platforms
     if (content.embedUrl != null) {

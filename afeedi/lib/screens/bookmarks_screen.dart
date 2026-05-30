@@ -53,8 +53,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
 
     try {
       final allContent = await ContentService.instance.getVideos(limit: 200);
-      final matched =
-          allContent.where((c) => savedIds.contains(c.id)).toList();
+      final matched = allContent.where((c) => savedIds.contains(c.id)).toList();
       if (mounted) {
         setState(() {
           _saved = matched;
@@ -86,8 +85,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
           _displayed = List.from(_saved);
         case _SortMode.alphabetical:
           _displayed = List.from(_saved)
-            ..sort((a, b) =>
-                (a.title ?? '').compareTo(b.title ?? ''));
+            ..sort((a, b) => (a.title ?? '').compareTo(b.title ?? ''));
         case _SortMode.byPlatform:
           _displayed = List.from(_saved)
             ..sort((a, b) => a.platform.name.compareTo(b.platform.name));
@@ -161,12 +159,21 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
             color: const Color(0xFF1A1A2E),
             onSelected: _applySort,
             itemBuilder: (context) => [
-              _buildMenuItem(_SortMode.recentlySaved, 'Recently Saved',
-                  Icons.access_time),
               _buildMenuItem(
-                  _SortMode.alphabetical, 'A–Z', Icons.sort_by_alpha),
+                _SortMode.recentlySaved,
+                'Recently Saved',
+                Icons.access_time,
+              ),
               _buildMenuItem(
-                  _SortMode.byPlatform, 'By Platform', Icons.devices),
+                _SortMode.alphabetical,
+                'A–Z',
+                Icons.sort_by_alpha,
+              ),
+              _buildMenuItem(
+                _SortMode.byPlatform,
+                'By Platform',
+                Icons.devices,
+              ),
             ],
           ),
           const SizedBox(width: 4),
@@ -177,29 +184,33 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
         child: _isLoading
             ? const LoadingShimmer(itemCount: 3)
             : _displayed.isEmpty
-                ? _buildEmptyState()
-                : _buildList(),
+            ? _buildEmptyState()
+            : _buildList(),
       ),
     );
   }
 
   PopupMenuItem<_SortMode> _buildMenuItem(
-      _SortMode mode, String label, IconData icon) {
+    _SortMode mode,
+    String label,
+    IconData icon,
+  ) {
     final isSelected = _sortMode == mode;
     return PopupMenuItem(
       value: mode,
       child: Row(
         children: [
-          Icon(icon,
-              color: isSelected ? const Color(0xFF00D4FF) : Colors.white70,
-              size: 18),
+          Icon(
+            icon,
+            color: isSelected ? const Color(0xFF00D4FF) : Colors.white70,
+            size: 18,
+          ),
           const SizedBox(width: 10),
           Text(
             label,
             style: TextStyle(
               color: isSelected ? const Color(0xFF00D4FF) : Colors.white,
-              fontWeight:
-                  isSelected ? FontWeight.w600 : FontWeight.w400,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
             ),
           ),
         ],
@@ -266,7 +277,8 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
 
   Widget _buildSavedTile(Content content) {
     return Semantics(
-      label: '${content.title ?? 'Untitled'}. ${content.creatorName ?? ''}. Bookmarked.',
+      label:
+          '${content.title ?? 'Untitled'}. ${content.creatorName ?? ''}. Bookmarked.',
       button: true,
       child: Dismissible(
         key: Key('bookmark_${content.id}'),
@@ -276,77 +288,94 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
           color: Colors.red.withOpacity(0.2),
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 20),
-          child: const Icon(Icons.bookmark_remove, color: Colors.redAccent, size: 26),
+          child: const Icon(
+            Icons.bookmark_remove,
+            color: Colors.redAccent,
+            size: 26,
+          ),
         ),
         child: SizedBox(
-        height: 80,
-        child: ListTile(
-          onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          leading: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: SizedBox(
-              width: 112,
-              height: 72,
-              child: content.thumbnailUrl != null
-                  ? CachedNetworkImage(
-                      imageUrl: content.thumbnailUrl!,
-                      fit: BoxFit.cover,
-                      errorWidget: (context, url, error) =>
-                          _buildThumbPlaceholder(content),
-                    )
-                  : _buildThumbPlaceholder(content),
+          height: 80,
+          child: ListTile(
+            onTap: () => Navigator.pushNamed(
+              context,
+              AppRoutes.player,
+              arguments: content,
             ),
-          ),
-          title: Text(
-            content.title ?? 'Untitled',
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 4,
             ),
-          ),
-          subtitle: Row(
-            children: [
-              Text(
-                content.creatorName ?? 'Unknown',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.white54, fontSize: 11),
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: SizedBox(
+                width: 112,
+                height: 72,
+                child: content.thumbnailUrl != null
+                    ? CachedNetworkImage(
+                        imageUrl: content.thumbnailUrl!,
+                        fit: BoxFit.cover,
+                        errorWidget: (context, url, error) =>
+                            _buildThumbPlaceholder(content),
+                      )
+                    : _buildThumbPlaceholder(content),
               ),
-              const SizedBox(width: 6),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                decoration: BoxDecoration(
-                  color: _getPlatformColor(content.platform).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(
-                    color: _getPlatformColor(content.platform).withOpacity(0.5),
-                    width: 0.5,
+            ),
+            title: Text(
+              content.title ?? 'Untitled',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            subtitle: Row(
+              children: [
+                Text(
+                  content.creatorName ?? 'Unknown',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Colors.white54, fontSize: 11),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _getPlatformColor(content.platform).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: _getPlatformColor(
+                        content.platform,
+                      ).withOpacity(0.5),
+                      width: 0.5,
+                    ),
+                  ),
+                  child: Text(
+                    _getPlatformLabel(content.platform),
+                    style: TextStyle(
+                      color: _getPlatformColor(content.platform),
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-                child: Text(
-                  _getPlatformLabel(content.platform),
-                  style: TextStyle(
-                    color: _getPlatformColor(content.platform),
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+              ],
+            ),
+            trailing: IconButton(
+              icon: const Icon(
+                Icons.bookmark_remove,
+                color: Colors.white38,
+                size: 22,
               ),
-            ],
+              tooltip: 'Remove bookmark',
+              onPressed: () => _unsave(content),
+            ),
           ),
-          trailing: IconButton(
-            icon: const Icon(Icons.bookmark_remove,
-                color: Colors.white38, size: 22),
-            tooltip: 'Remove bookmark',
-            onPressed: () => _unsave(content),
-          ),
-        ),
         ),
       ),
     );

@@ -25,16 +25,14 @@ class MessageBubble extends StatelessWidget {
           bottom: 12,
         ),
         child: Row(
-          mainAxisAlignment: message.isBot 
-              ? MainAxisAlignment.start 
+          mainAxisAlignment: message.isBot
+              ? MainAxisAlignment.start
               : MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (message.isBot) _buildAvatar(),
             if (message.isBot) const SizedBox(width: 12),
-            Flexible(
-              child: _buildMessageContent(context),
-            ),
+            Flexible(child: _buildMessageContent(context)),
             if (!message.isBot) const SizedBox(width: 12),
             if (!message.isBot) _buildAvatar(),
           ],
@@ -45,15 +43,9 @@ class MessageBubble extends StatelessWidget {
     if (animation != null) {
       return SlideTransition(
         position: animation!.drive(
-          Tween<Offset>(
-            begin: const Offset(0, 0.3),
-            end: Offset.zero,
-          ),
+          Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero),
         ),
-        child: FadeTransition(
-          opacity: animation!,
-          child: widget,
-        ),
+        child: FadeTransition(opacity: animation!, child: widget),
       );
     }
 
@@ -112,9 +104,7 @@ class MessageBubble extends StatelessWidget {
           Text(
             message.text,
             style: TextStyle(
-              color: message.isBot
-                  ? AppColors.textPrimary
-                  : AppColors.primary,
+              color: message.isBot ? AppColors.textPrimary : AppColors.primary,
               fontSize: 16,
               fontWeight: message.isBot ? FontWeight.w400 : FontWeight.w500,
               height: 1.4,
@@ -155,10 +145,7 @@ class MessageBubble extends StatelessWidget {
 class TypingIndicator extends StatefulWidget {
   final Animation<double>? animation;
 
-  const TypingIndicator({
-    super.key,
-    this.animation,
-  });
+  const TypingIndicator({super.key, this.animation});
 
   @override
   State<TypingIndicator> createState() => _TypingIndicatorState();
@@ -245,9 +232,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
                   animation: _dotAnimations[index],
                   builder: (context, child) {
                     return Container(
-                      margin: EdgeInsets.only(
-                        right: index < 2 ? 4 : 0,
-                      ),
+                      margin: EdgeInsets.only(right: index < 2 ? 4 : 0),
                       child: Opacity(
                         opacity: _dotAnimations[index].value,
                         child: Container(
@@ -272,15 +257,9 @@ class _TypingIndicatorState extends State<TypingIndicator>
     if (widget.animation != null) {
       return SlideTransition(
         position: widget.animation!.drive(
-          Tween<Offset>(
-            begin: const Offset(0, 0.3),
-            end: Offset.zero,
-          ),
+          Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero),
         ),
-        child: FadeTransition(
-          opacity: widget.animation!,
-          child: indicator,
-        ),
+        child: FadeTransition(opacity: widget.animation!, child: indicator),
       );
     }
 

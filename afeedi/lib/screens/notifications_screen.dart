@@ -11,7 +11,8 @@ class NotificationsScreen extends StatefulWidget {
   State<NotificationsScreen> createState() => _NotificationsScreenState();
 }
 
-class _NotificationsScreenState extends State<NotificationsScreen> with SingleTickerProviderStateMixin {
+class _NotificationsScreenState extends State<NotificationsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   final List<Map<String, dynamic>> _notifications = [
@@ -69,7 +70,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
       'id': '6',
       'type': 'system',
       'title': 'Welcome to Afeedi!',
-      'body': 'Start exploring personalized content from your favorite platforms.',
+      'body':
+          'Start exploring personalized content from your favorite platforms.',
       'time': '3 days ago',
       'read': true,
       'icon': Icons.celebration,
@@ -81,7 +83,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    AnalyticsService.instance.trackUserInteraction(action: 'screen_view', screen: 'notifications');
+    AnalyticsService.instance.trackUserInteraction(
+      action: 'screen_view',
+      screen: 'notifications',
+    );
     _loadReadState();
     _injectDynamicNotifications();
   }
@@ -126,14 +131,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
     final dynamicItems = <Map<String, dynamic>>[];
 
     // Real: saved content count (check SharedPreferences for keys starting with 'saved_')
-    final allKeys = prefs.getKeys().where((k) => k.startsWith('saved_')).toList();
+    final allKeys = prefs
+        .getKeys()
+        .where((k) => k.startsWith('saved_'))
+        .toList();
     final savedCount = allKeys.where((k) => prefs.getBool(k) == true).length;
     if (savedCount > 0) {
       dynamicItems.add({
         'id': 'dyn_saved',
         'type': 'recommendation',
         'title': 'Your library',
-        'body': 'You have $savedCount saved video${savedCount == 1 ? '' : 's'} waiting for you.',
+        'body':
+            'You have $savedCount saved video${savedCount == 1 ? '' : 's'} waiting for you.',
         'time': 'Just now',
         'read': false,
         'icon': Icons.bookmark,
@@ -164,7 +173,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
         'id': 'dyn_watched',
         'type': 'achievement',
         'title': 'Keep watching!',
-        'body': 'You\'ve watched $watched video${watched == 1 ? '' : 's'} so far. Keep it up!',
+        'body':
+            'You\'ve watched $watched video${watched == 1 ? '' : 's'} so far. Keep it up!',
         'time': 'Today',
         'read': false,
         'icon': Icons.emoji_events,
@@ -174,12 +184,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
 
     // Weekly Digest — show on Sundays OR if digest not viewed this week
     final now = DateTime.now();
-    final weekNumber = now.millisecondsSinceEpoch ~/ Duration.millisecondsPerDay ~/ 7;
+    final weekNumber =
+        now.millisecondsSinceEpoch ~/ Duration.millisecondsPerDay ~/ 7;
     final lastDigestWeek = prefs.getInt('last_digest_viewed_week') ?? -1;
     final isSunday = now.weekday == DateTime.sunday;
     if (isSunday || lastDigestWeek < weekNumber) {
       final genres = prefs.getStringList('onboarding_selected_genres') ?? [];
-      final genreHint = genres.isNotEmpty ? genres.take(2).join(' & ') : 'your interests';
+      final genreHint = genres.isNotEmpty
+          ? genres.take(2).join(' & ')
+          : 'your interests';
       dynamicItems.insert(0, {
         'id': 'dyn_digest_$weekNumber',
         'type': 'weekly_digest',
@@ -213,9 +226,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
 
   List<Map<String, dynamic>> get _filteredNotifications {
     switch (_tabController.index) {
-      case 1: return _notifications.where((n) => !n['read']).toList();
-      case 2: return _notifications.where((n) => n['type'] == 'recommendation' || n['type'] == 'trending').toList();
-      default: return _notifications;
+      case 1:
+        return _notifications.where((n) => !n['read']).toList();
+      case 2:
+        return _notifications
+            .where(
+              (n) => n['type'] == 'recommendation' || n['type'] == 'trending',
+            )
+            .toList();
+      default:
+        return _notifications;
     }
   }
 
@@ -234,7 +254,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
             Flexible(
               child: Text(
                 AppLocalizations.of(context)!.notifications,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
@@ -247,7 +270,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
                   color: const Color(0xFF00D4FF),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Text('$_unreadCount', style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.bold)),
+                child: Text(
+                  '$_unreadCount',
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ],
           ],
@@ -256,7 +286,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
           if (_unreadCount > 0)
             TextButton(
               onPressed: _markAllRead,
-              child: Text(AppLocalizations.of(context)!.markAllRead, style: const TextStyle(color: Color(0xFF00D4FF), fontSize: 12)),
+              child: Text(
+                AppLocalizations.of(context)!.markAllRead,
+                style: const TextStyle(color: Color(0xFF00D4FF), fontSize: 12),
+              ),
             ),
         ],
         bottom: TabBar(
@@ -281,7 +314,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
           return ListView.separated(
             padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: items.length,
-            separatorBuilder: (_, __) => const Divider(color: Colors.white10, height: 1, indent: 72),
+            separatorBuilder: (_, __) =>
+                const Divider(color: Colors.white10, height: 1, indent: 72),
             itemBuilder: (ctx, i) => _buildNotificationTile(items[i]),
           );
         },
@@ -297,17 +331,28 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
         // Deep-link to player when content_id is present, otherwise open discover
         final contentId = notification['content_id'] as String?;
         if (contentId != null) {
-          Navigator.of(context).pushNamed(AppRoutes.player, arguments: contentId);
+          Navigator.of(
+            context,
+          ).pushNamed(AppRoutes.player, arguments: contentId);
         } else {
-          Navigator.of(context).pushNamed(AppRoutes.dashboard, arguments: {'initialTab': 1});
+          Navigator.of(
+            context,
+          ).pushNamed(AppRoutes.dashboard, arguments: {'initialTab': 1});
         }
       case 'recommendation':
-        Navigator.of(context).pushNamed(AppRoutes.dashboard, arguments: {'initialTab': 0});
+        Navigator.of(
+          context,
+        ).pushNamed(AppRoutes.dashboard, arguments: {'initialTab': 0});
       case 'trending':
-        Navigator.of(context).pushNamed(AppRoutes.dashboard, arguments: {'initialTab': 1});
+        Navigator.of(
+          context,
+        ).pushNamed(AppRoutes.dashboard, arguments: {'initialTab': 1});
       case 'weekly_digest':
         SharedPreferences.getInstance().then((prefs) {
-          final weekNumber = DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerDay ~/ 7;
+          final weekNumber =
+              DateTime.now().millisecondsSinceEpoch ~/
+              Duration.millisecondsPerDay ~/
+              7;
           prefs.setInt('last_digest_viewed_week', weekNumber);
         });
         Navigator.of(context).pushNamed(AppRoutes.weeklyDigest);
@@ -328,72 +373,88 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
       button: true,
       child: InkWell(
         onTap: () => _handleNotificationTap(notification),
-      child: Container(
-        color: isUnread ? const Color(0xFF00D4FF).withValues(alpha: 0.04) : Colors.transparent,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: (notification['color'] as Color).withValues(alpha: 0.15),
-                shape: BoxShape.circle,
+        child: Container(
+          color: isUnread
+              ? const Color(0xFF00D4FF).withValues(alpha: 0.04)
+              : Colors.transparent,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: (notification['color'] as Color).withValues(
+                    alpha: 0.15,
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  notification['icon'] as IconData,
+                  color: notification['color'] as Color,
+                  size: 22,
+                ),
               ),
-              child: Icon(notification['icon'] as IconData, color: notification['color'] as Color, size: 22),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          notification['title'] as String,
-                          style: TextStyle(
-                            color: isUnread ? Colors.white : Colors.white70,
-                            fontSize: 14,
-                            fontWeight: isUnread ? FontWeight.w600 : FontWeight.normal,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            notification['title'] as String,
+                            style: TextStyle(
+                              color: isUnread ? Colors.white : Colors.white70,
+                              fontSize: 14,
+                              fontWeight: isUnread
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
+                        if (isUnread)
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF00D4FF),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      notification['body'] as String,
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 13,
                       ),
-                      if (isUnread)
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF00D4FF),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    notification['body'] as String,
-                    style: const TextStyle(color: Colors.white54, fontSize: 13),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    notification['time'] as String,
-                    style: const TextStyle(color: Colors.white60, fontSize: 11),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      notification['time'] as String,
+                      style: const TextStyle(
+                        color: Colors.white60,
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 
@@ -403,11 +464,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.notifications_none, size: 72, color: Colors.white.withValues(alpha: 0.2)),
+          Icon(
+            Icons.notifications_none,
+            size: 72,
+            color: Colors.white.withValues(alpha: 0.2),
+          ),
           const SizedBox(height: 20),
           Text(
             l10n?.noNotifications ?? 'No notifications',
-            style: const TextStyle(color: Colors.white70, fontSize: 18, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

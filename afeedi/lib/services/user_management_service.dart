@@ -20,8 +20,9 @@ class UserManagementService {
   // -------------------------------------------------------------------------
 
   // Get user profile
-  Future<LocalStorageResponse<UserProfile>> getUserProfile(
-      [String? userId]) async {
+  Future<LocalStorageResponse<UserProfile>> getUserProfile([
+    String? userId,
+  ]) async {
     try {
       final targetUserId = userId ?? AuthService.instance.currentUser?.id;
       if (targetUserId == null) {
@@ -35,8 +36,9 @@ class UserManagementService {
         return LocalStorageResponse.error('User profile not found');
       }
 
-      final profile =
-          UserProfile.fromJson(Map<String, dynamic>.from(jsonDecode(raw) as Map));
+      final profile = UserProfile.fromJson(
+        Map<String, dynamic>.from(jsonDecode(raw) as Map),
+      );
       return LocalStorageResponse.success(profile);
     } catch (error) {
       await AnalyticsService.instance.trackError(
@@ -114,8 +116,9 @@ class UserManagementService {
   // -------------------------------------------------------------------------
 
   // Get user preferences
-  Future<LocalStorageResponse<UserPreferences>> getUserPreferences(
-      [String? userId]) async {
+  Future<LocalStorageResponse<UserPreferences>> getUserPreferences([
+    String? userId,
+  ]) async {
     try {
       final targetUserId = userId ?? AuthService.instance.currentUser?.id;
       if (targetUserId == null) {
@@ -155,7 +158,8 @@ class UserManagementService {
       }
 
       final existing =
-          await _storage.getUserPreferences(user.id) ?? _defaultPreferences(user.id);
+          await _storage.getUserPreferences(user.id) ??
+          _defaultPreferences(user.id);
 
       final updated = existing.copyWith(
         contentCategories: contentCategories ?? existing.contentCategories,
@@ -165,7 +169,8 @@ class UserManagementService {
         privacySettings: privacySettings ?? existing.privacySettings,
         aiRecommendationsEnabled:
             aiRecommendationsEnabled ?? existing.aiRecommendationsEnabled,
-        matureContentEnabled: matureContentEnabled ?? existing.matureContentEnabled,
+        matureContentEnabled:
+            matureContentEnabled ?? existing.matureContentEnabled,
         updatedAt: DateTime.now(),
       );
 
@@ -255,8 +260,9 @@ class UserManagementService {
       if (targetUserId == null) return {};
 
       // Content interactions
-      final rawInteractions =
-          await _storage.getContentInteractions(targetUserId);
+      final rawInteractions = await _storage.getContentInteractions(
+        targetUserId,
+      );
       final interactionCounts = <String, int>{};
       for (final interaction in rawInteractions) {
         final type = interaction['interaction_type'] as String? ?? 'unknown';
@@ -271,8 +277,7 @@ class UserManagementService {
           .toList();
 
       // Scheduled content (upcoming only)
-      final scheduled =
-          await _storage.getScheduledContentForUser(targetUserId);
+      final scheduled = await _storage.getScheduledContentForUser(targetUserId);
       final now = DateTime.now();
       final upcomingScheduled = scheduled.where((s) {
         final scheduledFor = s['scheduled_for'] as String?;
@@ -287,8 +292,9 @@ class UserManagementService {
       // Recommendations
       final rawRecs = await _storage.getRecommendations(targetUserId);
       final totalRecommendations = rawRecs.length;
-      final clickedRecommendations =
-          rawRecs.where((r) => r['is_clicked'] == true).length;
+      final clickedRecommendations = rawRecs
+          .where((r) => r['is_clicked'] == true)
+          .length;
 
       return {
         'total_interactions': rawInteractions.length,
@@ -340,31 +346,37 @@ class UserManagementService {
       // Platform connections (without sensitive tokens)
       final connections = await AuthService.instance.getPlatformConnections();
       exportData['platform_connections'] = connections
-          .map((c) => {
-                'platform': c.platform.name,
-                'platform_username': c.platformUsername,
-                'connected_at': c.createdAt.toIso8601String(),
-                'is_active': c.isActive,
-              })
+          .map(
+            (c) => {
+              'platform': c.platform.name,
+              'platform_username': c.platformUsername,
+              'connected_at': c.createdAt.toIso8601String(),
+              'is_active': c.isActive,
+            },
+          )
           .toList();
 
       // Content interactions
       exportData['content_interactions'] =
           (await _storage.getContentInteractions(user.id))
-              .map((i) => {
-                    'interaction_type': i['interaction_type'],
-                    'created_at': i['created_at'],
-                  })
+              .map(
+                (i) => {
+                  'interaction_type': i['interaction_type'],
+                  'created_at': i['created_at'],
+                },
+              )
               .toList();
 
       // Scheduled content
       exportData['scheduled_content'] =
           (await _storage.getScheduledContentForUser(user.id))
-              .map((s) => {
-                    'scheduled_for': s['scheduled_for'],
-                    'notes': s['notes'],
-                    'created_at': s['created_at'],
-                  })
+              .map(
+                (s) => {
+                  'scheduled_for': s['scheduled_for'],
+                  'notes': s['notes'],
+                  'created_at': s['created_at'],
+                },
+              )
               .toList();
 
       // Analytics events (last 30 days)
@@ -380,11 +392,13 @@ class UserManagementService {
                   return false;
                 }
               })
-              .map((e) => {
-                    'event_type': e['event_type'],
-                    'event_name': e['event_name'],
-                    'created_at': e['created_at'],
-                  })
+              .map(
+                (e) => {
+                  'event_type': e['event_type'],
+                  'event_name': e['event_name'],
+                  'created_at': e['created_at'],
+                },
+              )
               .toList();
 
       await AnalyticsService.instance.trackUserInteraction(
@@ -495,10 +509,7 @@ class UserManagementService {
         return LocalStorageResponse.error('User not found');
       }
 
-      final updated = target.copyWith(
-        role: newRole,
-        updatedAt: DateTime.now(),
-      );
+      final updated = target.copyWith(role: newRole, updatedAt: DateTime.now());
 
       await _storage.saveUser(updated);
 
@@ -571,7 +582,10 @@ class UserManagementService {
 
   Future<void> _saveProfile(UserProfile profile) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_profileKey(profile.userId), jsonEncode(profile.toJson()));
+    await prefs.setString(
+      _profileKey(profile.userId),
+      jsonEncode(profile.toJson()),
+    );
   }
 
   UserProfile _defaultProfile(String userId) {

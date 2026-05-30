@@ -70,13 +70,16 @@ class LocalAuthService {
       // on rooted or compromised devices.
       final prefs = await SharedPreferences.getInstance();
       final salt = _generateSalt();
-      await prefs.setString('user_credentials_${user.id}', jsonEncode({
-        'email': email,
-        'kdf': 'pbkdf2-sha256',
-        'iterations': _pbkdf2Iterations,
-        'salt': salt,
-        'hash': _pbkdf2Hash(password, salt),
-      }));
+      await prefs.setString(
+        'user_credentials_${user.id}',
+        jsonEncode({
+          'email': email,
+          'kdf': 'pbkdf2-sha256',
+          'iterations': _pbkdf2Iterations,
+          'salt': salt,
+          'hash': _pbkdf2Hash(password, salt),
+        }),
+      );
 
       // Set as current user
       await _setCurrentUser(user);
@@ -103,8 +106,11 @@ class LocalAuthService {
       final prefs = await SharedPreferences.getInstance();
       final lockoutUntilMs = prefs.getInt(_lockoutUntilKey) ?? 0;
       if (lockoutUntilMs > DateTime.now().millisecondsSinceEpoch) {
-        final remaining = (lockoutUntilMs - DateTime.now().millisecondsSinceEpoch) ~/ 60000;
-        throw Exception('Account temporarily locked. Try again in ${remaining + 1} minute(s).');
+        final remaining =
+            (lockoutUntilMs - DateTime.now().millisecondsSinceEpoch) ~/ 60000;
+        throw Exception(
+          'Account temporarily locked. Try again in ${remaining + 1} minute(s).',
+        );
       }
 
       // Find user by email
@@ -122,7 +128,10 @@ class LocalAuthService {
         bool passwordValid = false;
         if (credentials['kdf'] == 'pbkdf2-sha256') {
           // New PBKDF2 format
-          final candidateHash = _pbkdf2Hash(password, credentials['salt'] as String);
+          final candidateHash = _pbkdf2Hash(
+            password,
+            credentials['salt'] as String,
+          );
           passwordValid = candidateHash == (credentials['hash'] as String);
         } else {
           // Legacy SHA-256: verify and upgrade on success
@@ -130,13 +139,16 @@ class LocalAuthService {
           if (passwordValid) {
             // Upgrade stored credential to PBKDF2 silently
             final salt = _generateSalt();
-            await prefs.setString('user_credentials_${user.id}', jsonEncode({
-              'email': email,
-              'kdf': 'pbkdf2-sha256',
-              'iterations': _pbkdf2Iterations,
-              'salt': salt,
-              'hash': _pbkdf2Hash(password, salt),
-            }));
+            await prefs.setString(
+              'user_credentials_${user.id}',
+              jsonEncode({
+                'email': email,
+                'kdf': 'pbkdf2-sha256',
+                'iterations': _pbkdf2Iterations,
+                'salt': salt,
+                'hash': _pbkdf2Hash(password, salt),
+              }),
+            );
           }
         }
         if (passwordValid) {
@@ -162,12 +174,18 @@ class LocalAuthService {
       await prefs.setInt(_failedAttemptsKey, attempts);
       if (attempts >= _maxFailedAttempts) {
         // Lock for 5 minutes (exponential: could be attempts*minutes but keep simple)
-        final lockUntil = DateTime.now().add(const Duration(minutes: 5)).millisecondsSinceEpoch;
+        final lockUntil = DateTime.now()
+            .add(const Duration(minutes: 5))
+            .millisecondsSinceEpoch;
         await prefs.setInt(_lockoutUntilKey, lockUntil);
         await prefs.setInt(_failedAttemptsKey, 0);
-        throw Exception('Too many failed attempts. Account locked for 5 minutes.');
+        throw Exception(
+          'Too many failed attempts. Account locked for 5 minutes.',
+        );
       }
-      throw Exception('Invalid password. ${_maxFailedAttempts - attempts} attempt(s) remaining.');
+      throw Exception(
+        'Invalid password. ${_maxFailedAttempts - attempts} attempt(s) remaining.',
+      );
     } catch (error) {
       debugPrint('Error during sign in: $error');
       return null;
@@ -213,9 +231,7 @@ class LocalAuthService {
     try {
       if (_currentUser == null) return null;
 
-      final updatedUser = _currentUser!.copyWith(
-        updatedAt: DateTime.now(),
-      );
+      final updatedUser = _currentUser!.copyWith(updatedAt: DateTime.now());
 
       // Save updated user
       await _storage.saveUser(updatedUser);
@@ -239,16 +255,22 @@ class LocalAuthService {
       final credJson = prefs.getString('user_credentials_${_currentUser!.id}');
       if (credJson == null) return false;
       final cred = jsonDecode(credJson) as Map<String, dynamic>;
-      final candidateHash = _pbkdf2Hash(currentPassword, cred['salt'] as String);
+      final candidateHash = _pbkdf2Hash(
+        currentPassword,
+        cred['salt'] as String,
+      );
       if (candidateHash != cred['hash']) return false;
       final newSalt = _generateSalt();
-      await prefs.setString('user_credentials_${_currentUser!.id}', jsonEncode({
-        'email': cred['email'],
-        'kdf': 'pbkdf2-sha256',
-        'iterations': _pbkdf2Iterations,
-        'salt': newSalt,
-        'hash': _pbkdf2Hash(newPassword, newSalt),
-      }));
+      await prefs.setString(
+        'user_credentials_${_currentUser!.id}',
+        jsonEncode({
+          'email': cred['email'],
+          'kdf': 'pbkdf2-sha256',
+          'iterations': _pbkdf2Iterations,
+          'salt': newSalt,
+          'hash': _pbkdf2Hash(newPassword, newSalt),
+        }),
+      );
       return true;
     } catch (e) {
       debugPrint('Error changing password: $e');

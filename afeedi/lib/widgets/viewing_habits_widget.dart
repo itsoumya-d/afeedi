@@ -9,7 +9,7 @@ import '../models/viewing_habit.dart';
 class ViewingHabitsWidget extends StatefulWidget {
   final List<ViewingHabit>? initialHabits;
   final Function(List<ViewingHabit> habits)? onHabitsUpdated;
-  
+
   const ViewingHabitsWidget({
     super.key,
     this.initialHabits,
@@ -20,24 +20,25 @@ class ViewingHabitsWidget extends StatefulWidget {
   State<ViewingHabitsWidget> createState() => _ViewingHabitsWidgetState();
 }
 
-class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> with TickerProviderStateMixin {
+class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget>
+    with TickerProviderStateMixin {
   late List<ViewingHabit> _habits;
   bool _isLoading = true;
   String? _errorMessage;
-  
+
   @override
   void initState() {
     super.initState();
     _loadViewingHabits();
   }
-  
+
   Future<void> _loadViewingHabits() async {
     try {
       setState(() {
         _isLoading = true;
         _errorMessage = null;
       });
-      
+
       // If initial habits are provided, use them
       if (widget.initialHabits != null) {
         _habits = List.from(widget.initialHabits!);
@@ -46,10 +47,10 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> with TickerPr
         });
         return;
       }
-      
+
       // Otherwise, load from service or use defaults
       await Future.delayed(Duration(seconds: 1)); // Simulate network delay
-      
+
       // Sample data - in a real app, this would come from a service
       _habits = [
         ViewingHabit(
@@ -73,16 +74,14 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> with TickerPr
           preferredPlatforms: ['Netflix', 'Hulu'],
         ),
       ];
-      
+
       // Track analytics event
       AnalyticsService.instance.trackEvent(
         eventName: 'viewing_habits_loaded',
         eventType: AnalyticsEvents.screenView,
-        additionalData: {
-          'habit_count': _habits.length,
-        },
+        additionalData: {'habit_count': _habits.length},
       );
-      
+
       setState(() {
         _isLoading = false;
       });
@@ -93,7 +92,7 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> with TickerPr
       });
     }
   }
-  
+
   // This method is intentionally commented out as it's not currently used
   // but may be needed in future implementations
   /*
@@ -119,95 +118,100 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> with TickerPr
     }
   }
   */
-  
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return _buildLoadingIndicator();
     }
-    
+
     if (_errorMessage != null) {
       return _buildErrorWidget();
     }
-    
+
     if (_habits.isEmpty) {
       return _buildEmptyStateWidget();
     }
-    
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Text(
-            'Your Viewing Habits',
-            style: AppTextStyles.heading3,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-          child: Text(
-            'Based on your watching patterns, we\'ve identified these habits:',
-            style: AppTextStyles.bodyMedium,
-          ),
-        ),
-        SizedBox(height: 16),
-        ..._habits.map((habit) => _buildHabitCard(habit)),
-      ],
-    )
-    .animate()
-    .fadeIn(duration: 500.ms, delay: 100.ms)
-    .slideY(begin: 0.2, end: 0, duration: 500.ms, curve: Curves.easeOutQuad);
-  }
-  
-  Widget _buildHabitCard(ViewingHabit habit) {
-    return Card(
-      margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      elevation: 2.0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
+              child: Text('Your Viewing Habits', style: AppTextStyles.heading3),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 4.0,
+              ),
+              child: Text(
+                'Based on your watching patterns, we\'ve identified these habits:',
+                style: AppTextStyles.bodyMedium,
+              ),
+            ),
+            SizedBox(height: 16),
+            ..._habits.map((habit) => _buildHabitCard(habit)),
+          ],
+        )
+        .animate()
+        .fadeIn(duration: 500.ms, delay: 100.ms)
+        .slideY(
+          begin: 0.2,
+          end: 0,
+          duration: 500.ms,
+          curve: Curves.easeOutQuad,
+        );
+  }
+
+  Widget _buildHabitCard(ViewingHabit habit) {
+    return Card(
+          margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          elevation: 2.0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  habit.title,
-                  style: AppTextStyles.heading4,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(habit.title, style: AppTextStyles.heading4),
+                    IconButton(
+                      icon: Icon(Icons.edit, color: AppColors.primary),
+                      onPressed: () => _showEditHabitDialog(habit, context),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: Icon(Icons.edit, color: AppColors.primary),
-                  onPressed: () => _showEditHabitDialog(habit, context),
-                ),
+                SizedBox(height: 8.0),
+                Text(habit.description, style: AppTextStyles.bodyMedium),
+                SizedBox(height: 16.0),
+                _buildHabitDetails(habit),
               ],
             ),
-            SizedBox(height: 8.0),
-            Text(
-              habit.description,
-              style: AppTextStyles.bodyMedium,
-            ),
-            SizedBox(height: 16.0),
-            _buildHabitDetails(habit),
-          ],
-        ),
-      ),
-    )
-    .animate()
-    .fadeIn(duration: 300.ms)
-    .scale(begin: const Offset(0.95, 0.95), end: const Offset(1.0, 1.0), duration: 300.ms, curve: Curves.easeOut);
+          ),
+        )
+        .animate()
+        .fadeIn(duration: 300.ms)
+        .scale(
+          begin: const Offset(0.95, 0.95),
+          end: const Offset(1.0, 1.0),
+          duration: 300.ms,
+          curve: Curves.easeOut,
+        );
   }
-  
+
   Widget _buildHabitDetails(ViewingHabit habit) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildDetailRow(
-          Icons.access_time,
-          'Time of Day:',
-          habit.timeOfDay,
-        ),
+        _buildDetailRow(Icons.access_time, 'Time of Day:', habit.timeOfDay),
         SizedBox(height: 8.0),
         _buildDetailRow(
           Icons.calendar_today,
@@ -229,7 +233,9 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> with TickerPr
         Wrap(
           spacing: 8.0,
           runSpacing: 8.0,
-          children: habit.preferredGenres.map((genre) => _buildGenreChip(genre)).toList(),
+          children: habit.preferredGenres
+              .map((genre) => _buildGenreChip(genre))
+              .toList(),
         ),
         SizedBox(height: 12.0),
         Text(
@@ -240,12 +246,14 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> with TickerPr
         Wrap(
           spacing: 8.0,
           runSpacing: 8.0,
-          children: habit.preferredPlatforms.map((platform) => _buildPlatformChip(platform)).toList(),
+          children: habit.preferredPlatforms
+              .map((platform) => _buildPlatformChip(platform))
+              .toList(),
         ),
       ],
     );
   }
-  
+
   Widget _buildDetailRow(IconData icon, String label, String value) {
     return Row(
       children: [
@@ -256,57 +264,44 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> with TickerPr
           style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold),
         ),
         SizedBox(width: 4.0),
-        Expanded(
-          child: Text(
-            value,
-            style: AppTextStyles.bodySmall,
-          ),
-        ),
+        Expanded(child: Text(value, style: AppTextStyles.bodySmall)),
       ],
     );
   }
-  
+
   Widget _buildGenreChip(String genre) {
     return Chip(
-      label: Text(
-        genre,
-        style: AppTextStyles.genreLabel,
-      ),
+      label: Text(genre, style: AppTextStyles.genreLabel),
       backgroundColor: AppColors.getGenreColor(genre),
       padding: EdgeInsets.symmetric(horizontal: 4.0),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
   }
-  
+
   Widget _buildPlatformChip(String platform) {
     return Chip(
-      label: Text(
-        platform,
-        style: AppTextStyles.platformLabel,
-      ),
+      label: Text(platform, style: AppTextStyles.platformLabel),
       backgroundColor: AppColors.getPlatformColor(platform),
       padding: EdgeInsets.symmetric(horizontal: 4.0),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
   }
-  
+
   void _showEditHabitDialog(ViewingHabit habit, BuildContext context) {
     // In a real app, this would open a dialog to edit the habit
     // For simplicity, we'll just show a snackbar
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Edit habit dialog not implemented')),
     );
-    
+
     // Track analytics event
     AnalyticsService.instance.trackEvent(
       eventName: 'edit_habit_dialog_opened',
       eventType: AnalyticsEvents.buttonTap,
-      additionalData: {
-        'habit_id': habit.id,
-      },
+      additionalData: {'habit_id': habit.id},
     );
   }
-  
+
   Widget _buildLoadingIndicator() {
     return Center(
       child: Column(
@@ -322,7 +317,7 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> with TickerPr
       ),
     );
   }
-    
+
   Widget _buildErrorWidget() {
     return Center(
       child: Column(
@@ -355,18 +350,19 @@ class _ViewingHabitsWidgetState extends State<ViewingHabitsWidget> with TickerPr
       ),
     );
   }
-  
+
   Widget _buildEmptyStateWidget() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.visibility_off, color: AppColors.textSecondary, size: 48.0),
-          SizedBox(height: 16.0),
-          Text(
-            'No Viewing Habits Yet',
-            style: AppTextStyles.heading4,
+          Icon(
+            Icons.visibility_off,
+            color: AppColors.textSecondary,
+            size: 48.0,
           ),
+          SizedBox(height: 16.0),
+          Text('No Viewing Habits Yet', style: AppTextStyles.heading4),
           SizedBox(height: 8.0),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32.0),

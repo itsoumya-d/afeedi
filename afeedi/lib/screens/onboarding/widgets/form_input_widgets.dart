@@ -14,7 +14,7 @@ class OnboardingTextInput extends StatefulWidget {
   final int maxLines;
   final int? maxLength;
   final List<TextInputFormatter>? inputFormatters;
-  
+
   const OnboardingTextInput({
     super.key,
     required this.label,
@@ -29,7 +29,7 @@ class OnboardingTextInput extends StatefulWidget {
     this.maxLength,
     this.inputFormatters,
   });
-  
+
   @override
   State<OnboardingTextInput> createState() => _OnboardingTextInputState();
 }
@@ -40,7 +40,7 @@ class _OnboardingTextInputState extends State<OnboardingTextInput>
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   bool _isFocused = false;
-  
+
   @override
   void initState() {
     super.initState();
@@ -53,14 +53,14 @@ class _OnboardingTextInputState extends State<OnboardingTextInput>
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
   }
-  
+
   @override
   void dispose() {
     _controller.dispose();
     _animationController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -80,27 +80,25 @@ class _OnboardingTextInputState extends State<OnboardingTextInput>
       },
     );
   }
-  
+
   Widget _buildLabel() {
     return RichText(
       text: TextSpan(
         text: widget.label,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
         children: [
           if (widget.isRequired)
             TextSpan(
               text: ' *',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-              ),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
         ],
       ),
     );
   }
-  
+
   Widget _buildTextField() {
     return TextFormField(
       controller: _controller,
@@ -134,8 +132,12 @@ class _OnboardingTextInputState extends State<OnboardingTextInput>
             : null,
         filled: true,
         fillColor: _isFocused
-            ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1)
-            : Theme.of(context).colorScheme.surfaceVariant.withValues(alpha: 0.3),
+            ? Theme.of(
+                context,
+              ).colorScheme.primaryContainer.withValues(alpha: 0.1)
+            : Theme.of(
+                context,
+              ).colorScheme.surfaceVariant.withValues(alpha: 0.3),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -172,7 +174,7 @@ class OnboardingMultiSelect extends StatefulWidget {
   final bool isRequired;
   final int? maxSelections;
   final String? description;
-  
+
   const OnboardingMultiSelect({
     super.key,
     required this.label,
@@ -183,7 +185,7 @@ class OnboardingMultiSelect extends StatefulWidget {
     this.maxSelections,
     this.description,
   });
-  
+
   @override
   State<OnboardingMultiSelect> createState() => _OnboardingMultiSelectState();
 }
@@ -192,13 +194,13 @@ class _OnboardingMultiSelectState extends State<OnboardingMultiSelect>
     with TickerProviderStateMixin {
   late List<AnimationController> _chipControllers;
   late List<Animation<double>> _chipAnimations;
-  
+
   @override
   void initState() {
     super.initState();
     _initializeAnimations();
   }
-  
+
   void _initializeAnimations() {
     _chipControllers = List.generate(
       widget.options.length,
@@ -207,13 +209,14 @@ class _OnboardingMultiSelectState extends State<OnboardingMultiSelect>
         vsync: this,
       ),
     );
-    
+
     _chipAnimations = _chipControllers.map((controller) {
-      return Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: controller, curve: Curves.elasticOut),
-      );
+      return Tween<double>(
+        begin: 0.0,
+        end: 1.0,
+      ).animate(CurvedAnimation(parent: controller, curve: Curves.elasticOut));
     }).toList();
-    
+
     // Stagger the animations
     for (int i = 0; i < _chipControllers.length; i++) {
       Future.delayed(Duration(milliseconds: i * 100), () {
@@ -223,7 +226,7 @@ class _OnboardingMultiSelectState extends State<OnboardingMultiSelect>
       });
     }
   }
-  
+
   @override
   void dispose() {
     for (final controller in _chipControllers) {
@@ -231,7 +234,7 @@ class _OnboardingMultiSelectState extends State<OnboardingMultiSelect>
     }
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -244,32 +247,29 @@ class _OnboardingMultiSelectState extends State<OnboardingMultiSelect>
         ],
         const SizedBox(height: 16),
         _buildChips(),
-        if (widget.maxSelections != null)
-          _buildSelectionCounter(),
+        if (widget.maxSelections != null) _buildSelectionCounter(),
       ],
     );
   }
-  
+
   Widget _buildHeader() {
     return RichText(
       text: TextSpan(
         text: widget.label,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         children: [
           if (widget.isRequired)
             TextSpan(
               text: ' *',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-              ),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
         ],
       ),
     );
   }
-  
+
   Widget _buildDescription() {
     return Text(
       widget.description!,
@@ -278,7 +278,7 @@ class _OnboardingMultiSelectState extends State<OnboardingMultiSelect>
       ),
     );
   }
-  
+
   Widget _buildChips() {
     return Wrap(
       spacing: 8,
@@ -287,7 +287,7 @@ class _OnboardingMultiSelectState extends State<OnboardingMultiSelect>
         final index = entry.key;
         final option = entry.value;
         final isSelected = widget.selectedOptions.contains(option);
-        
+
         return AnimatedBuilder(
           animation: _chipAnimations[index],
           builder: (context, child) {
@@ -300,12 +300,13 @@ class _OnboardingMultiSelectState extends State<OnboardingMultiSelect>
       }).toList(),
     );
   }
-  
+
   Widget _buildChip(String option, bool isSelected) {
-    final canSelect = widget.maxSelections == null ||
+    final canSelect =
+        widget.maxSelections == null ||
         widget.selectedOptions.length < widget.maxSelections! ||
         isSelected;
-    
+
     return FilterChip(
       label: Text(option),
       selected: isSelected,
@@ -340,7 +341,7 @@ class _OnboardingMultiSelectState extends State<OnboardingMultiSelect>
       ),
     );
   }
-  
+
   Widget _buildSelectionCounter() {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
@@ -365,7 +366,7 @@ class OnboardingSingleSelect extends StatefulWidget {
   final bool isRequired;
   final String? hint;
   final IconData? prefixIcon;
-  
+
   const OnboardingSingleSelect({
     super.key,
     required this.label,
@@ -376,7 +377,7 @@ class OnboardingSingleSelect extends StatefulWidget {
     this.hint,
     this.prefixIcon,
   });
-  
+
   @override
   State<OnboardingSingleSelect> createState() => _OnboardingSingleSelectState();
 }
@@ -385,7 +386,7 @@ class _OnboardingSingleSelectState extends State<OnboardingSingleSelect>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -397,45 +398,39 @@ class _OnboardingSingleSelectState extends State<OnboardingSingleSelect>
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
   }
-  
+
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildLabel(),
-        const SizedBox(height: 8),
-        _buildDropdown(),
-      ],
+      children: [_buildLabel(), const SizedBox(height: 8), _buildDropdown()],
     );
   }
-  
+
   Widget _buildLabel() {
     return RichText(
       text: TextSpan(
         text: widget.label,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
         children: [
           if (widget.isRequired)
             TextSpan(
               text: ' *',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-              ),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
         ],
       ),
     );
   }
-  
+
   Widget _buildDropdown() {
     return AnimatedBuilder(
       animation: _scaleAnimation,
@@ -461,7 +456,9 @@ class _OnboardingSingleSelectState extends State<OnboardingSingleSelect>
                     )
                   : null,
               filled: true,
-              fillColor: Theme.of(context).colorScheme.surfaceVariant.withValues(alpha: 0.3),
+              fillColor: Theme.of(
+                context,
+              ).colorScheme.surfaceVariant.withValues(alpha: 0.3),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -492,7 +489,7 @@ class OnboardingTimePicker extends StatefulWidget {
   final Function(TimeOfDay?) onTimeChanged;
   final bool isRequired;
   final IconData? prefixIcon;
-  
+
   const OnboardingTimePicker({
     super.key,
     required this.label,
@@ -501,7 +498,7 @@ class OnboardingTimePicker extends StatefulWidget {
     this.isRequired = false,
     this.prefixIcon,
   });
-  
+
   @override
   State<OnboardingTimePicker> createState() => _OnboardingTimePickerState();
 }
@@ -511,34 +508,28 @@ class _OnboardingTimePickerState extends State<OnboardingTimePicker> {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildLabel(),
-        const SizedBox(height: 8),
-        _buildTimePicker(),
-      ],
+      children: [_buildLabel(), const SizedBox(height: 8), _buildTimePicker()],
     );
   }
-  
+
   Widget _buildLabel() {
     return RichText(
       text: TextSpan(
         text: widget.label,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
         children: [
           if (widget.isRequired)
             TextSpan(
               text: ' *',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-              ),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
         ],
       ),
     );
   }
-  
+
   Widget _buildTimePicker() {
     return InkWell(
       onTap: _showTimePicker,
@@ -546,7 +537,9 @@ class _OnboardingTimePickerState extends State<OnboardingTimePicker> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant.withValues(alpha: 0.3),
+          color: Theme.of(
+            context,
+          ).colorScheme.surfaceVariant.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -579,13 +572,13 @@ class _OnboardingTimePickerState extends State<OnboardingTimePicker> {
       ),
     );
   }
-  
+
   Future<void> _showTimePicker() async {
     final time = await showTimePicker(
       context: context,
       initialTime: widget.selectedTime ?? TimeOfDay.now(),
     );
-    
+
     if (time != null) {
       widget.onTimeChanged(time);
     }

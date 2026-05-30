@@ -40,7 +40,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (orderedIds.isEmpty) {
       final rawIds = prefs.getString('watched_ids');
       if (rawIds != null) {
-        try { orderedIds = List<String>.from(jsonDecode(rawIds) as List); } catch (_) {}
+        try {
+          orderedIds = List<String>.from(jsonDecode(rawIds) as List);
+        } catch (_) {}
       }
     }
 
@@ -56,7 +58,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
         final id = key.replaceFirst('watch_ts_', '');
         final tsStr = prefs.getString(key);
         if (tsStr != null) {
-          try { watchTimestamps[id] = DateTime.parse(tsStr); } catch (_) {}
+          try {
+            watchTimestamps[id] = DateTime.parse(tsStr);
+          } catch (_) {}
         }
       }
     }
@@ -77,12 +81,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
 
     try {
-      final allContent =
-          await ContentService.instance.getVideos(limit: 200);
+      final allContent = await ContentService.instance.getVideos(limit: 200);
       final contentMap = {for (final c in allContent) c.id: c};
 
-      final extras =
-          progressMap.keys.where((id) => !orderedIds.contains(id)).toList();
+      final extras = progressMap.keys
+          .where((id) => !orderedIds.contains(id))
+          .toList();
       final fullOrder = [...orderedIds, ...extras];
 
       final matched = fullOrder
@@ -92,14 +96,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
           .toList();
 
       final continueWatching = matched
-          .where((c) => (progressMap[c.id] ?? 0.0) < 0.8 &&
-              (progressMap[c.id] ?? 0.0) > 0.05)
+          .where(
+            (c) =>
+                (progressMap[c.id] ?? 0.0) < 0.8 &&
+                (progressMap[c.id] ?? 0.0) > 0.05,
+          )
           .toList();
 
       final history = matched
-          .where((c) =>
-              (progressMap[c.id] ?? 0.0) >= 0.8 ||
-              progressMap[c.id] == null)
+          .where(
+            (c) =>
+                (progressMap[c.id] ?? 0.0) >= 0.8 || progressMap[c.id] == null,
+          )
           .toList();
 
       if (mounted) {
@@ -122,7 +130,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (orderedIds.isEmpty) {
       final raw = prefs.getString('watched_ids');
       if (raw != null) {
-        try { orderedIds = List<String>.from(jsonDecode(raw) as List); } catch (_) {}
+        try {
+          orderedIds = List<String>.from(jsonDecode(raw) as List);
+        } catch (_) {}
       }
     }
     orderedIds.remove(content.id);
@@ -154,13 +164,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel',
-                style: TextStyle(color: Colors.white54)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white54),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Clear All',
-                style: TextStyle(color: Color(0xFFFF006E))),
+            child: const Text(
+              'Clear All',
+              style: TextStyle(color: Color(0xFFFF006E)),
+            ),
           ),
         ],
       ),
@@ -202,8 +216,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final progress = _progressMap[content.id] ?? 0.0;
     final totalSeconds = content.durationSeconds ?? 0;
     if (totalSeconds == 0) return '';
-    final remaining =
-        ((1.0 - progress) * totalSeconds).round();
+    final remaining = ((1.0 - progress) * totalSeconds).round();
     final d = Duration(seconds: remaining);
     final mins = d.inMinutes;
     final secs = d.inSeconds.remainder(60);
@@ -243,7 +256,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
           if (!_isLoading &&
               (_history.isNotEmpty || _continueWatching.isNotEmpty))
             IconButton(
-              icon: const Icon(Icons.delete_sweep_outlined, color: Colors.white70),
+              icon: const Icon(
+                Icons.delete_sweep_outlined,
+                color: Colors.white70,
+              ),
               tooltip: 'Clear all history',
               onPressed: _clearAllHistory,
             ),
@@ -255,8 +271,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
         child: _isLoading
             ? _buildShimmer()
             : (_history.isEmpty && _continueWatching.isEmpty)
-                ? _buildEmptyState()
-                : _buildBody(),
+            ? _buildEmptyState()
+            : _buildBody(),
       ),
     );
   }
@@ -296,9 +312,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(height: 12, color: Colors.white.withOpacity(0.1)),
+                      Container(
+                        height: 12,
+                        color: Colors.white.withOpacity(0.1),
+                      ),
                       const SizedBox(height: 8),
-                      Container(height: 10, width: 120, color: Colors.white.withOpacity(0.07)),
+                      Container(
+                        height: 10,
+                        width: 120,
+                        color: Colors.white.withOpacity(0.07),
+                      ),
                     ],
                   ),
                 ),
@@ -316,11 +339,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.history,
-            size: 80,
-            color: Colors.white.withOpacity(0.25),
-          ),
+          Icon(Icons.history, size: 80, color: Colors.white.withOpacity(0.25)),
           const SizedBox(height: 20),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 32),
@@ -372,7 +391,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final groupedHistory = <String, List<Content>>{};
     for (final item in _history) {
       // Use actual watch timestamp if available; fall back to publishedAt
-      final label = _dateGroupLabel(_watchTimestamps[item.id] ?? item.publishedAt);
+      final label = _dateGroupLabel(
+        _watchTimestamps[item.id] ?? item.publishedAt,
+      );
       if (!groupedHistory.containsKey(label)) {
         groupedHistory[label] = [];
         groupOrder.add(label);
@@ -482,7 +503,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         value: progress.clamp(0.0, 1.0),
                         backgroundColor: Colors.black45,
                         valueColor: const AlwaysStoppedAnimation<Color>(
-                            Color(0xFF00D4FF)),
+                          Color(0xFF00D4FF),
+                        ),
                         minHeight: 3,
                       ),
                     ),
@@ -504,10 +526,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             const SizedBox(height: 2),
             Text(
               _timeRemaining(content),
-              style: const TextStyle(
-                color: Colors.white54,
-                fontSize: 11,
-              ),
+              style: const TextStyle(color: Colors.white54, fontSize: 11),
             ),
           ],
         ),
@@ -516,103 +535,106 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildHistoryTile(Content content) {
-    final isContinueWatching =
-        _continueWatching.any((c) => c.id == content.id);
+    final isContinueWatching = _continueWatching.any((c) => c.id == content.id);
     final progressPct = ((_progressMap[content.id] ?? 0.0) * 100).round();
 
     return Semantics(
       label: '${content.title ?? 'Untitled'}. $progressPct% watched.',
       button: true,
       child: GestureDetector(
-        onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
+        onTap: () =>
+            Navigator.pushNamed(context, AppRoutes.player, arguments: content),
         child: Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
-        borderRadius: BorderRadius.circular(10),
-        border: isContinueWatching
-            ? const Border(
-                left: BorderSide(
-                  color: Color(0xFF00D4FF),
-                  width: 3,
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A2E),
+            borderRadius: BorderRadius.circular(10),
+            border: isContinueWatching
+                ? const Border(
+                    left: BorderSide(color: Color(0xFF00D4FF), width: 3),
+                  )
+                : null,
+          ),
+          child: SizedBox(
+            height: 80,
+            child: Row(
+              children: [
+                // Thumbnail
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    bottomLeft: Radius.circular(10),
+                  ),
+                  child: SizedBox(
+                    width: 112,
+                    height: 80,
+                    child: content.thumbnailUrl != null
+                        ? CachedNetworkImage(
+                            imageUrl: content.thumbnailUrl!,
+                            fit: BoxFit.cover,
+                            errorWidget: (context, url, error) =>
+                                _buildThumbPlaceholder(content),
+                          )
+                        : _buildThumbPlaceholder(content),
+                  ),
                 ),
-              )
-            : null,
-      ),
-      child: SizedBox(
-        height: 80,
-        child: Row(
-          children: [
-            // Thumbnail
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(10),
-                bottomLeft: Radius.circular(10),
-              ),
-              child: SizedBox(
-                width: 112,
-                height: 80,
-                child: content.thumbnailUrl != null
-                    ? CachedNetworkImage(
-                        imageUrl: content.thumbnailUrl!,
-                        fit: BoxFit.cover,
-                        errorWidget: (context, url, error) =>
-                            _buildThumbPlaceholder(content),
-                      )
-                    : _buildThumbPlaceholder(content),
-              ),
-            ),
-            // Info
-            Expanded(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      content.title ?? 'Untitled',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
+                // Info
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      content.creatorName ?? 'Unknown',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white54,
-                        fontSize: 11,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          content.title ?? 'Untitled',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          content.creatorName ?? 'Unknown',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white54,
+                            fontSize: 11,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          _relativeTime(content.publishedAt),
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.35),
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      _relativeTime(content.publishedAt),
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.35),
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+                // Remove button
+                IconButton(
+                  icon: const Icon(
+                    Icons.close,
+                    color: Colors.white38,
+                    size: 18,
+                  ),
+                  tooltip: 'Remove from history',
+                  onPressed: () => _removeFromHistory(content),
+                ),
+              ],
             ),
-            // Remove button
-            IconButton(
-              icon: const Icon(Icons.close, color: Colors.white38, size: 18),
-              tooltip: 'Remove from history',
-              onPressed: () => _removeFromHistory(content),
-            ),
-          ],
+          ),
         ),
-        ),
-      ),
       ),
     );
   }

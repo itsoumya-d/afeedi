@@ -13,18 +13,18 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
-  
+
   Map<String, double> _platformPriorities = {
     'youtube': 80.0,
     'instagram': 60.0,
     'tiktok': 40.0,
     'facebook': 30.0,
   };
-  
+
   bool _showAttribution = true;
   bool _showCreatorInfo = true;
   String _attributionStyle = 'overlay';
-  
+
   final List<Map<String, dynamic>> _platforms = [
     {
       'id': 'youtube',
@@ -74,7 +74,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
     _fadeController.dispose();
     super.dispose();
   }
-  
+
   void _continue() {
     // Save platform preferences
     NavigationService.pushNamed('/calendar-customization');
@@ -109,7 +109,9 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
                         const SizedBox(height: 32),
                         _buildPreviewSection(),
                         const SizedBox(height: 40),
-                        SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+                        SizedBox(
+                          height: MediaQuery.of(context).padding.bottom + 16,
+                        ),
                       ],
                     ),
                   ),
@@ -122,7 +124,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -136,7 +138,10 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -198,7 +203,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
       ),
     );
   }
-  
+
   Widget _buildPlatformPrioritiesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,10 +231,10 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
       ],
     );
   }
-  
+
   Widget _buildPlatformSlider(Map<String, dynamic> platform) {
     final priority = _platformPriorities[platform['id']] ?? 50.0;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(20),
@@ -282,7 +287,10 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: platform['color'].withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -324,7 +332,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
       ),
     );
   }
-  
+
   Widget _buildAttributionSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -383,7 +391,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
       ],
     );
   }
-  
+
   Widget _buildAttributionToggle(
     String title,
     String subtitle,
@@ -437,22 +445,22 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
       ),
     );
   }
-  
+
   Widget _buildAttributionStyleOption(String value, String label) {
     final isSelected = _attributionStyle == value;
-    
+
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => _attributionStyle = value),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected 
+            color: isSelected
                 ? AppTheme.primaryCyan.withValues(alpha: 0.2)
                 : Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isSelected 
+              color: isSelected
                   ? AppTheme.primaryCyan
                   : Colors.white.withValues(alpha: 0.3),
               width: isSelected ? 2 : 1,
@@ -471,7 +479,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
       ),
     );
   }
-  
+
   Widget _buildPreviewSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -533,7 +541,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
       ],
     );
   }
-  
+
   Widget _buildAttributionPreview() {
     Widget attributionWidget = Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -551,7 +559,10 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
             style: TextStyle(color: Colors.white, fontSize: 12),
           ),
           if (_showCreatorInfo) ...[
-            const Text(' • ', style: TextStyle(color: Colors.white, fontSize: 12)),
+            const Text(
+              ' • ',
+              style: TextStyle(color: Colors.white, fontSize: 12),
+            ),
             const Text(
               '@creator',
               style: TextStyle(color: Colors.white, fontSize: 12),
@@ -560,14 +571,10 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
         ],
       ),
     );
-    
+
     switch (_attributionStyle) {
       case 'overlay':
-        return Positioned(
-          top: 12,
-          left: 12,
-          child: attributionWidget,
-        );
+        return Positioned(top: 12, left: 12, child: attributionWidget);
       case 'bottom':
         return Positioned(
           bottom: 12,
@@ -576,20 +583,12 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
           child: attributionWidget,
         );
       case 'corner':
-        return Positioned(
-          top: 12,
-          right: 12,
-          child: attributionWidget,
-        );
+        return Positioned(top: 12, right: 12, child: attributionWidget);
       default:
-        return Positioned(
-          top: 12,
-          left: 12,
-          child: attributionWidget,
-        );
+        return Positioned(top: 12, left: 12, child: attributionWidget);
     }
   }
-  
+
   Widget _buildBottomSection() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -610,10 +609,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
               ),
               child: const Text(
                 'Continue',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
             ),
           ),

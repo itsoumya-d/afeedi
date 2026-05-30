@@ -61,15 +61,34 @@ class SkeletonFeedCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Container(width: 32, height: 32, decoration: const BoxDecoration(color: Color(0xFF252545), shape: BoxShape.circle)),
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF252545),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
                       const SizedBox(width: 8),
-                      Container(height: 14, width: 100, color: const Color(0xFF252545)),
+                      Container(
+                        height: 14,
+                        width: 100,
+                        color: const Color(0xFF252545),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Container(height: 14, width: double.infinity, color: const Color(0xFF252545)),
+                  Container(
+                    height: 14,
+                    width: double.infinity,
+                    color: const Color(0xFF252545),
+                  ),
                   const SizedBox(height: 4),
-                  Container(height: 14, width: 200, color: const Color(0xFF252545)),
+                  Container(
+                    height: 14,
+                    width: 200,
+                    color: const Color(0xFF252545),
+                  ),
                 ],
               ),
             ),
@@ -105,9 +124,19 @@ class SkeletonGridCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            Container(height: 12, width: double.infinity, color: const Color(0xFF252545), margin: const EdgeInsets.symmetric(horizontal: 4)),
+            Container(
+              height: 12,
+              width: double.infinity,
+              color: const Color(0xFF252545),
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+            ),
             const SizedBox(height: 4),
-            Container(height: 12, width: 80, color: const Color(0xFF252545), margin: const EdgeInsets.symmetric(horizontal: 4)),
+            Container(
+              height: 12,
+              width: 80,
+              color: const Color(0xFF252545),
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+            ),
             const SizedBox(height: 4),
           ],
         ),

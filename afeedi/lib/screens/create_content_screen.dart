@@ -34,17 +34,26 @@ class CreateContentScreen extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Connect $platformName',
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         content: Text(
           'Connect $platformName from Settings → Connected Platforms '
           'to personalise your feed with $platformName content.',
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.8), height: 1.5),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.8),
+            height: 1.5,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Got it', style: TextStyle(color: Color(0xFF00BCD4))),
+            child: const Text(
+              'Got it',
+              style: TextStyle(color: Color(0xFF00BCD4)),
+            ),
           ),
         ],
       ),
@@ -150,9 +159,7 @@ class _PlatformCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: platform.color.withValues(alpha: 0.25),
-        ),
+        border: Border.all(color: platform.color.withValues(alpha: 0.25)),
       ),
       child: Row(
         children: [

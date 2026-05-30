@@ -13,7 +13,13 @@ class PlaceholderScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A1A2E),
         foregroundColor: Colors.white,
-        title: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         elevation: 0,
       ),
       body: Center(

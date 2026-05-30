@@ -101,8 +101,9 @@ class SubscriptionService extends ChangeNotifier {
       return;
     }
     try {
-      final response =
-          await InAppPurchase.instance.queryProductDetails(SubscriptionIds.all);
+      final response = await InAppPurchase.instance.queryProductDetails(
+        SubscriptionIds.all,
+      );
       if (response.error != null) {
         debugPrint('Product load error: ${response.error}');
       }
@@ -157,9 +158,9 @@ class SubscriptionService extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
 
     final isYearly = purchase.productID == SubscriptionIds.yearly;
-    final expiry = DateTime.now().add(isYearly
-        ? const Duration(days: 365)
-        : const Duration(days: 31));
+    final expiry = DateTime.now().add(
+      isYearly ? const Duration(days: 365) : const Duration(days: 31),
+    );
 
     await prefs.setBool(_prefKey, true);
     await prefs.setString(_expiryKey, expiry.toIso8601String());
@@ -168,12 +169,16 @@ class SubscriptionService extends ChangeNotifier {
     _purchaseState = PurchaseState.success;
     notifyListeners();
 
-    final price = isYearly ? SubscriptionIds.yearlyPrice : SubscriptionIds.monthlyPrice;
-    AnalyticsService.instance.trackSubscriptionPurchase(
-      planId: purchase.productID,
-      amount: price,
-      currency: 'USD',
-    ).catchError((_) {});
+    final price = isYearly
+        ? SubscriptionIds.yearlyPrice
+        : SubscriptionIds.monthlyPrice;
+    AnalyticsService.instance
+        .trackSubscriptionPurchase(
+          planId: purchase.productID,
+          amount: price,
+          currency: 'USD',
+        )
+        .catchError((_) {});
   }
 
   /// Purchase monthly subscription
@@ -270,7 +275,8 @@ class SubscriptionService extends ChangeNotifier {
   Future<bool> shouldGateBookmarks() async {
     if (isPremium) return false;
     final prefs = await SharedPreferences.getInstance();
-    final savedCount = prefs.getKeys()
+    final savedCount = prefs
+        .getKeys()
         .where((k) => k.startsWith('saved_') && prefs.getBool(k) == true)
         .length;
     return savedCount >= 10;

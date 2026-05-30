@@ -46,14 +46,19 @@ class _ShortsTabState extends State<ShortsTab> {
       });
 
       final allContent = await ContentService.instance.getFeedContent();
-      final shorts = allContent.where((content) =>
-          content.contentType == ContentType.short ||
-          content.contentType == ContentType.reel ||
-          (content.durationSeconds != null &&
-              content.durationSeconds! <= 180)).toList();
+      final shorts = allContent
+          .where(
+            (content) =>
+                content.contentType == ContentType.short ||
+                content.contentType == ContentType.reel ||
+                (content.durationSeconds != null &&
+                    content.durationSeconds! <= 180),
+          )
+          .toList();
 
-      final followed =
-          UserInteractionService.instance.getFollowedCreatorIds().toSet();
+      final followed = UserInteractionService.instance
+          .getFollowedCreatorIds()
+          .toSet();
 
       // Pre-populate liked/saved state from the persistence service
       final likedIds = <String>{};
@@ -372,8 +377,10 @@ class _ShortsTabState extends State<ShortsTab> {
     final platformColor = _getPlatformColor(content.platform);
     final isLiked = _likedContent.contains(content.id);
     final isSaved = _savedContent.contains(content.id);
-    final likeCount = UserInteractionService.instance
-        .getLikeCount(content.id, baseCount: content.likeCount);
+    final likeCount = UserInteractionService.instance.getLikeCount(
+      content.id,
+      baseCount: content.likeCount,
+    );
 
     return _ShortItemWrapper(
       key: ValueKey(content.id),
@@ -412,7 +419,8 @@ class _ShortsTabState extends State<ShortsTab> {
       youtubeOverlayBuilder: (overlay) => _InlineYouTubeShort(
         videoId: content.platformContentId,
         overlay: overlay,
-        onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
+        onTap: () =>
+            Navigator.pushNamed(context, AppRoutes.player, arguments: content),
         onDoubleTap: () {
           _showHeartAnimation(context);
           _handleLike(content);
@@ -534,8 +542,7 @@ class _ShortsTabState extends State<ShortsTab> {
   }) {
     final creatorId = content.creatorId ?? content.creatorName ?? content.id;
     final isFollowed = _followedCreators.contains(creatorId);
-    final commentCount =
-        (content.metadata['comments'] as num?)?.toInt() ?? 0;
+    final commentCount = (content.metadata['comments'] as num?)?.toInt() ?? 0;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -586,7 +593,10 @@ class _ShortsTabState extends State<ShortsTab> {
 
   /// Creator avatar circle (40 dp) with a "+" or check follow badge overlaid.
   Widget _buildCreatorAvatarButton(
-      Content content, String creatorId, bool isFollowed) {
+    Content content,
+    String creatorId,
+    bool isFollowed,
+  ) {
     final avatarUrl = content.creatorAvatarUrl;
     final initial = (content.creatorName ?? '?')[0].toUpperCase();
 
@@ -594,31 +604,43 @@ class _ShortsTabState extends State<ShortsTab> {
       label: isFollowed ? 'Unfollow creator' : 'Follow creator',
       button: true,
       child: GestureDetector(
-      onTap: () => _handleFollow(creatorId),
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 52,
-        height: 56,
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.topCenter,
-          children: [
-            // Avatar circle — 40 dp diameter as required
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
-                color: AppTheme.darkSecondary,
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: avatarUrl != null && avatarUrl.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: avatarUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (ctx, url) => Container(color: Colors.grey[900]),
-                      errorWidget: (ctx, url, err) => Center(
+        onTap: () => _handleFollow(creatorId),
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox(
+          width: 52,
+          height: 56,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.topCenter,
+            children: [
+              // Avatar circle — 40 dp diameter as required
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                  color: AppTheme.darkSecondary,
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: avatarUrl != null && avatarUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: avatarUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (ctx, url) =>
+                            Container(color: Colors.grey[900]),
+                        errorWidget: (ctx, url, err) => Center(
+                          child: Text(
+                            initial,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Center(
                         child: Text(
                           initial,
                           style: const TextStyle(
@@ -628,42 +650,31 @@ class _ShortsTabState extends State<ShortsTab> {
                           ),
                         ),
                       ),
-                    )
-                  : Center(
-                      child: Text(
-                        initial,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
+              ),
+              // Follow badge at the bottom of the avatar
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    width: 18,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: isFollowed ? Colors.green.shade600 : Colors.red,
+                      shape: BoxShape.circle,
                     ),
-            ),
-            // Follow badge at the bottom of the avatar
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  width: 18,
-                  height: 18,
-                  decoration: BoxDecoration(
-                    color: isFollowed ? Colors.green.shade600 : Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    isFollowed ? Icons.check : Icons.add,
-                    color: Colors.white,
-                    size: 11,
+                    child: Icon(
+                      isFollowed ? Icons.check : Icons.add,
+                      color: Colors.white,
+                      size: 11,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -680,42 +691,40 @@ class _ShortsTabState extends State<ShortsTab> {
       label: semanticLabel ?? label,
       button: true,
       child: GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 52,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 44,
-              height: 44,
-              child: Center(
-                child: Icon(icon, color: iconColor, size: 26),
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox(
+          width: 52,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 44,
+                height: 44,
+                child: Center(child: Icon(icon, color: iconColor, size: 26)),
               ),
-            ),
-            if (label.isNotEmpty)
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black54,
-                      blurRadius: 4,
-                      offset: Offset(0, 1),
-                    ),
-                  ],
+              if (label.isNotEmpty)
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black54,
+                        blurRadius: 4,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -899,7 +908,9 @@ class _ShortsTabState extends State<ShortsTab> {
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Tap a short from your personalized feed to interact'),
+                      content: Text(
+                        'Tap a short from your personalized feed to interact',
+                      ),
                       duration: Duration(seconds: 2),
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -913,7 +924,9 @@ class _ShortsTabState extends State<ShortsTab> {
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Tap a short from your personalized feed to interact'),
+                      content: Text(
+                        'Tap a short from your personalized feed to interact',
+                      ),
                       duration: Duration(seconds: 2),
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -927,7 +940,9 @@ class _ShortsTabState extends State<ShortsTab> {
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Tap a short from your personalized feed to interact'),
+                      content: Text(
+                        'Tap a short from your personalized feed to interact',
+                      ),
                       duration: Duration(seconds: 2),
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -941,7 +956,9 @@ class _ShortsTabState extends State<ShortsTab> {
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Tap a short from your personalized feed to interact'),
+                      content: Text(
+                        'Tap a short from your personalized feed to interact',
+                      ),
                       duration: Duration(seconds: 2),
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -992,7 +1009,9 @@ class _ShortsTabState extends State<ShortsTab> {
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.white, width: 1.2),
                       borderRadius: BorderRadius.circular(4),
@@ -1024,7 +1043,9 @@ class _ShortsTabState extends State<ShortsTab> {
                     child: Text(
                       'Original audio · @${shortData['creator'] ?? 'Unknown'}',
                       style: const TextStyle(
-                          color: Colors.white70, fontSize: 11),
+                        color: Colors.white70,
+                        fontSize: 11,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1057,7 +1078,8 @@ class _ShortsTabState extends State<ShortsTab> {
   // ─── Interaction handlers ──────────────────────────────────────────────────
 
   Future<void> _checkShortsUpsell() async {
-    final shouldShow = await SubscriptionService.instance.shouldShowShortsUpsell(_scrollCount);
+    final shouldShow = await SubscriptionService.instance
+        .shouldShowShortsUpsell(_scrollCount);
     if (!shouldShow || !mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -1117,8 +1139,10 @@ class _ShortsTabState extends State<ShortsTab> {
         _likedContent.add(content.id);
       }
     });
-    UserInteractionService.instance
-        .toggleLike(content.id, baseCount: content.likeCount);
+    UserInteractionService.instance.toggleLike(
+      content.id,
+      baseCount: content.likeCount,
+    );
     AnalyticsService.instance.trackUserInteraction(
       action: wasLiked ? 'short_unliked' : 'short_liked',
       screen: 'shorts',
@@ -1136,7 +1160,9 @@ class _ShortsTabState extends State<ShortsTab> {
   }
 
   void _maybeShowShareNudge(Content content) {
-    final likedCount = UserInteractionService.instance.getLikedContentIds().length;
+    final likedCount = UserInteractionService.instance
+        .getLikedContentIds()
+        .length;
     // Show the nudge on the 3rd and every 10th like (not too often)
     if (likedCount != 3 && likedCount % 10 != 0) return;
     final url = content.videoUrl ?? content.embedUrl;
@@ -1152,7 +1178,8 @@ class _ShortsTabState extends State<ShortsTab> {
           textColor: const Color(0xFF00D4FF),
           onPressed: () async {
             final title = content.title ?? 'Check this out on Afeedi';
-            final msg = '$title\n$url\n\nFound on Afeedi — AI-curated feed from YouTube, TikTok, Instagram & more.';
+            final msg =
+                '$title\n$url\n\nFound on Afeedi — AI-curated feed from YouTube, TikTok, Instagram & more.';
             await Clipboard.setData(ClipboardData(text: msg));
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -1183,7 +1210,10 @@ class _ShortsTabState extends State<ShortsTab> {
       }
       await prefs.setString(
         'genre_implicit_weights',
-        weights.entries.where((e) => e.key.isNotEmpty).map((e) => '${e.key}:${e.value}').join(','),
+        weights.entries
+            .where((e) => e.key.isNotEmpty)
+            .map((e) => '${e.key}:${e.value}')
+            .join(','),
       );
     } catch (_) {}
   }
@@ -1238,20 +1268,57 @@ class _ShortsTabState extends State<ShortsTab> {
   }
 
   static const List<Map<String, String>> _sampleComments = [
-    {'name': 'Alex_M', 'text': 'This is exactly what I needed today 🙌', 'time': '1m ago'},
-    {'name': 'riya.codes', 'text': 'The editing on this is insane 🔥', 'time': '4m ago'},
-    {'name': 'TechWithJordan', 'text': 'Can you drop the source for this?', 'time': '12m ago'},
-    {'name': 'sunsetsandsam', 'text': 'Watched it 3 times already lol', 'time': '23m ago'},
-    {'name': 'CaseyReacts', 'text': 'Never thought about it this way. Mind blown.', 'time': '45m ago'},
-    {'name': 'dev.priya', 'text': 'More content like this please 👏', 'time': '1h ago'},
-    {'name': 'KyleLennox7', 'text': 'Tag someone who needs to see this', 'time': '2h ago'},
-    {'name': 'mia.watches', 'text': 'The quality has improved so much 💯', 'time': '3h ago'},
+    {
+      'name': 'Alex_M',
+      'text': 'This is exactly what I needed today 🙌',
+      'time': '1m ago',
+    },
+    {
+      'name': 'riya.codes',
+      'text': 'The editing on this is insane 🔥',
+      'time': '4m ago',
+    },
+    {
+      'name': 'TechWithJordan',
+      'text': 'Can you drop the source for this?',
+      'time': '12m ago',
+    },
+    {
+      'name': 'sunsetsandsam',
+      'text': 'Watched it 3 times already lol',
+      'time': '23m ago',
+    },
+    {
+      'name': 'CaseyReacts',
+      'text': 'Never thought about it this way. Mind blown.',
+      'time': '45m ago',
+    },
+    {
+      'name': 'dev.priya',
+      'text': 'More content like this please 👏',
+      'time': '1h ago',
+    },
+    {
+      'name': 'KyleLennox7',
+      'text': 'Tag someone who needs to see this',
+      'time': '2h ago',
+    },
+    {
+      'name': 'mia.watches',
+      'text': 'The quality has improved so much 💯',
+      'time': '3h ago',
+    },
   ];
 
   static const List<Color> _commentAvatarColors = [
-    Color(0xFF00D4FF), Color(0xFFFF6B9D), Color(0xFF7C4DFF),
-    Color(0xFF00BFA5), Color(0xFFFF8F00), Color(0xFF4CAF50),
-    Color(0xFFE91E63), Color(0xFF2196F3),
+    Color(0xFF00D4FF),
+    Color(0xFFFF6B9D),
+    Color(0xFF7C4DFF),
+    Color(0xFF00BFA5),
+    Color(0xFFFF8F00),
+    Color(0xFF4CAF50),
+    Color(0xFFE91E63),
+    Color(0xFF2196F3),
   ];
 
   Widget _buildCommentsList(ScrollController controller) {
@@ -1272,7 +1339,11 @@ class _ShortsTabState extends State<ShortsTab> {
                 backgroundColor: color.withValues(alpha: 0.25),
                 child: Text(
                   comment['name']![0].toUpperCase(),
-                  style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -1280,11 +1351,30 @@ class _ShortsTabState extends State<ShortsTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(comment['name']!, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+                    Text(
+                      comment['name']!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text(comment['text']!, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                    Text(
+                      comment['text']!,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(comment['time']!, style: const TextStyle(color: Colors.white38, fontSize: 11)),
+                    Text(
+                      comment['time']!,
+                      style: const TextStyle(
+                        color: Colors.white38,
+                        fontSize: 11,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1344,9 +1434,7 @@ class _ShortsTabState extends State<ShortsTab> {
                   ),
                 ),
                 const Divider(color: Colors.white12),
-                Expanded(
-                  child: _buildCommentsList(controller),
-                ),
+                Expanded(child: _buildCommentsList(controller)),
                 SafeArea(
                   child: Padding(
                     padding: EdgeInsets.only(
@@ -1372,7 +1460,10 @@ class _ShortsTabState extends State<ShortsTab> {
                                 hintText: 'Add a comment...',
                                 hintStyle: TextStyle(color: Colors.white38),
                                 border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
                               ),
                             ),
                           ),
@@ -1399,7 +1490,11 @@ class _ShortsTabState extends State<ShortsTab> {
                               color: Color(0xFF00D4FF),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.send, color: Colors.white, size: 20),
+                            child: const Icon(
+                              Icons.send,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                           ),
                         ),
                       ],
@@ -1542,11 +1637,7 @@ class _ShortItemWrapperState extends State<_ShortItemWrapper> {
         ),
 
         // Platform badge top-right
-        Positioned(
-          top: 56,
-          right: 16,
-          child: widget.platformBadge,
-        ),
+        Positioned(top: 56, right: 16, child: widget.platformBadge),
 
         // Interaction buttons — animated fade-in after 1 second
         Positioned(
@@ -1561,12 +1652,7 @@ class _ShortItemWrapperState extends State<_ShortItemWrapper> {
         ),
 
         // Content info bottom-left
-        Positioned(
-          left: 14,
-          right: 80,
-          bottom: 110,
-          child: widget.contentInfo,
-        ),
+        Positioned(left: 14, right: 80, bottom: 110, child: widget.contentInfo),
 
         // Progress indicator at the very bottom
         Positioned(
@@ -1578,7 +1664,9 @@ class _ShortItemWrapperState extends State<_ShortItemWrapper> {
             builder: (_, value, __) => LinearProgressIndicator(
               value: value,
               backgroundColor: Colors.white24,
-              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF00D4FF)),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                Color(0xFF00D4FF),
+              ),
               minHeight: 3,
             ),
           ),
@@ -1597,10 +1685,7 @@ class _ShortItemWrapperState extends State<_ShortItemWrapper> {
       behavior: HitTestBehavior.opaque,
       child: Stack(
         fit: StackFit.expand,
-        children: [
-          widget.thumbnailWidget,
-          overlay,
-        ],
+        children: [widget.thumbnailWidget, overlay],
       ),
     );
   }
@@ -1645,7 +1730,9 @@ class _InlineYouTubeShortState extends State<_InlineYouTubeShort> {
   }
 
   void _toggleMute() {
-    setState(() { _isMuted = !_isMuted; });
+    setState(() {
+      _isMuted = !_isMuted;
+    });
     if (_isMuted) {
       _controller.mute();
     } else {
@@ -1746,7 +1833,10 @@ class _ShimmerFeed extends StatelessWidget {
                 Container(width: 120, height: 14, color: Colors.white),
                 const SizedBox(height: 8),
                 Container(
-                    width: double.infinity, height: 12, color: Colors.white),
+                  width: double.infinity,
+                  height: 12,
+                  color: Colors.white,
+                ),
                 const SizedBox(height: 6),
                 Container(width: 160, height: 10, color: Colors.white),
               ],

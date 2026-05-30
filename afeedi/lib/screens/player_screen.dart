@@ -19,7 +19,8 @@ class PlayerScreen extends StatefulWidget {
   State<PlayerScreen> createState() => _PlayerScreenState();
 }
 
-class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver {
+class _PlayerScreenState extends State<PlayerScreen>
+    with WidgetsBindingObserver {
   bool _isLiked = false;
   bool _isSaved = false;
   bool _isFullscreen = false;
@@ -40,7 +41,10 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
     _incrementVideoCount();
     _loadRelatedContent();
     _loadSettings();
-    _progressTimer = Timer.periodic(const Duration(seconds: 30), (_) => _saveWatchTime());
+    _progressTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _saveWatchTime(),
+    );
     setState(() {
       _isLiked = UserInteractionService.instance.isLiked(widget.content.id);
       _isSaved = UserInteractionService.instance.isSaved(widget.content.id);
@@ -132,7 +136,10 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
     watchedList.insert(0, widget.content.id);
     await prefs.setStringList('watched_ids', watchedList.take(100).toList());
     // Save watch timestamp so history can group by when the user actually watched
-    await prefs.setString('watch_ts_${widget.content.id}', DateTime.now().toIso8601String());
+    await prefs.setString(
+      'watch_ts_${widget.content.id}',
+      DateTime.now().toIso8601String(),
+    );
 
     // Update implicit genre weights when user watches >20% of content
     if (progress > 0.2 && widget.content.tags.isNotEmpty) {
@@ -165,9 +172,9 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
     final url = widget.content.videoUrl ?? widget.content.embedUrl;
     if (url != null && url.isNotEmpty) {
       Clipboard.setData(ClipboardData(text: url));
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Link copied to clipboard')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Link copied to clipboard')));
     }
   }
 
@@ -336,21 +343,29 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
                             // View count + creator
                             Row(
                               children: [
-                                Icon(Icons.visibility_outlined,
-                                    color: Colors.white60, size: 14),
+                                Icon(
+                                  Icons.visibility_outlined,
+                                  color: Colors.white60,
+                                  size: 14,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   '${_formatCount(widget.content.viewCount)} views',
                                   style: const TextStyle(
-                                      color: Colors.white60, fontSize: 12),
+                                    color: Colors.white60,
+                                    fontSize: 12,
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
                                 Flexible(
                                   child: Text(
                                     widget.content.creatorName ?? '',
                                     style: TextStyle(
-                                        color: Colors.white.withValues(alpha: 0.7),
-                                        fontSize: 13),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.7,
+                                      ),
+                                      fontSize: 13,
+                                    ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -372,9 +387,9 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
                                     HapticFeedback.lightImpact();
                                     await ContentService.instance
                                         .trackContentInteraction(
-                                      contentId: widget.content.id,
-                                      interactionType: InteractionType.like,
-                                    );
+                                          contentId: widget.content.id,
+                                          interactionType: InteractionType.like,
+                                        );
                                     setState(() => _isLiked = !_isLiked);
                                   },
                                 ),
@@ -391,9 +406,9 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
                                     HapticFeedback.lightImpact();
                                     await ContentService.instance
                                         .trackContentInteraction(
-                                      contentId: widget.content.id,
-                                      interactionType: InteractionType.save,
-                                    );
+                                          contentId: widget.content.id,
+                                          interactionType: InteractionType.save,
+                                        );
                                     setState(() => _isSaved = !_isSaved);
                                   },
                                 ),
@@ -417,17 +432,23 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
                                 widget.content.description!.isNotEmpty) ...[
                               const SizedBox(height: 10),
                               GestureDetector(
-                                onTap: () => setState(() =>
-                                    _isDescriptionExpanded =
-                                        !_isDescriptionExpanded),
+                                onTap: () => setState(
+                                  () => _isDescriptionExpanded =
+                                      !_isDescriptionExpanded,
+                                ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       widget.content.description!,
                                       style: const TextStyle(
-                                          color: Colors.white54, fontSize: 13, height: 1.5),
-                                      maxLines: _isDescriptionExpanded ? null : 2,
+                                        color: Colors.white54,
+                                        fontSize: 13,
+                                        height: 1.5,
+                                      ),
+                                      maxLines: _isDescriptionExpanded
+                                          ? null
+                                          : 2,
                                       overflow: _isDescriptionExpanded
                                           ? null
                                           : TextOverflow.ellipsis,
@@ -437,9 +458,10 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
                                           ? 'Show less'
                                           : 'Show more',
                                       style: const TextStyle(
-                                          color: Color(0xFF00D4FF),
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500),
+                                        color: Color(0xFF00D4FF),
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -454,7 +476,8 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                           child: Text(
-                            AppLocalizations.of(context)?.recommended ?? 'Up Next',
+                            AppLocalizations.of(context)?.recommended ??
+                                'Up Next',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -608,19 +631,25 @@ class _RelatedCard extends StatelessWidget {
                           fit: BoxFit.cover,
                           placeholder: (_, __) => Container(
                             color: const Color(0xFF1A1A2E),
-                            child: const Icon(Icons.play_circle_outline,
-                                color: Colors.white24),
+                            child: const Icon(
+                              Icons.play_circle_outline,
+                              color: Colors.white24,
+                            ),
                           ),
                           errorWidget: (_, __, ___) => Container(
                             color: const Color(0xFF1A1A2E),
-                            child: const Icon(Icons.play_circle_outline,
-                                color: Colors.white24),
+                            child: const Icon(
+                              Icons.play_circle_outline,
+                              color: Colors.white24,
+                            ),
                           ),
                         )
                       : Container(
                           color: const Color(0xFF1A1A2E),
-                          child: const Icon(Icons.play_circle_outline,
-                              color: Colors.white24),
+                          child: const Icon(
+                            Icons.play_circle_outline,
+                            color: Colors.white24,
+                          ),
                         ),
                 ),
               ),
@@ -644,14 +673,20 @@ class _RelatedCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       content.creatorName ?? '',
-                      style: const TextStyle(color: Colors.white54, fontSize: 11),
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 11,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
                       content.formattedViewCount,
-                      style: const TextStyle(color: Colors.white60, fontSize: 11),
+                      style: const TextStyle(
+                        color: Colors.white60,
+                        fontSize: 11,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

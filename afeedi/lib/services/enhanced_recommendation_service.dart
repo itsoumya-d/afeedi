@@ -18,7 +18,7 @@ class Recommendation {
   final String algorithmVersion;
   final DateTime createdAt;
   final DateTime expiresAt;
-  
+
   Recommendation({
     required this.id,
     required this.userId,
@@ -30,7 +30,7 @@ class Recommendation {
     required this.createdAt,
     required this.expiresAt,
   });
-  
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -52,7 +52,7 @@ class UserBehaviorInsight {
   final int interactionCount;
   final Map<String, dynamic> additionalMetrics;
   final DateTime lastUpdated;
-  
+
   UserBehaviorInsight({
     required this.userId,
     required this.engagementScore,
@@ -64,29 +64,203 @@ class UserBehaviorInsight {
 
 class EnhancedRecommendationService {
   static EnhancedRecommendationService? _instance;
-  static EnhancedRecommendationService get instance => _instance ??= EnhancedRecommendationService._();
+  static EnhancedRecommendationService get instance =>
+      _instance ??= EnhancedRecommendationService._();
 
   EnhancedRecommendationService._();
 
   static const Map<String, List<String>> _genreTagMap = {
-    'gaming':        ['gaming', 'game', 'games', 'esports', 'fps', 'rpg', 'minecraft', 'fortnite', 'valorant', 'streamer'],
-    'music':         ['music', 'song', 'songs', 'artist', 'album', 'concert', 'pop', 'hip-hop', 'rap', 'edm', 'classical', 'guitar', 'piano', 'singing'],
-    'technology':    ['technology', 'tech', 'programming', 'coding', 'software', 'hardware', 'ai', 'machine-learning', 'flutter', 'javascript', 'python', 'react', 'startup'],
-    'comedy':        ['comedy', 'funny', 'humor', 'memes', 'satire', 'standup', 'sketch', 'parody', 'hilarious'],
-    'fitness':       ['fitness', 'workout', 'exercise', 'gym', 'yoga', 'running', 'health', 'nutrition', 'weight', 'muscle'],
-    'food':          ['food', 'cooking', 'recipe', 'cuisine', 'chef', 'baking', 'restaurant', 'foodie', 'meal'],
-    'travel':        ['travel', 'adventure', 'tourism', 'vacation', 'destination', 'backpacking', 'explore', 'vlog'],
-    'education':     ['education', 'learning', 'tutorial', 'how-to', 'science', 'history', 'math', 'language', 'study', 'course'],
-    'sports':        ['sports', 'football', 'basketball', 'soccer', 'tennis', 'cricket', 'athletics', 'nfl', 'nba', 'match'],
-    'fashion':       ['fashion', 'style', 'outfit', 'clothing', 'designer', 'trends', 'beauty', 'makeup', 'skincare'],
-    'art':           ['art', 'design', 'drawing', 'painting', 'illustration', 'photography', 'creative', 'animation'],
-    'news':          ['news', 'politics', 'world', 'breaking', 'journalism', 'reporter'],
-    'business':      ['business', 'entrepreneur', 'startup', 'marketing', 'finance', 'investing', 'economy', 'stocks'],
-    'science':       ['science', 'physics', 'chemistry', 'biology', 'space', 'nasa', 'research', 'discovery'],
-    'entertainment': ['entertainment', 'celebrity', 'movie', 'films', 'series', 'hollywood', 'bollywood'],
-    'lifestyle':     ['lifestyle', 'vlog', 'daily', 'routine', 'motivation', 'wellness', 'mindfulness', 'productivity'],
-    'cars':          ['cars', 'automotive', 'vehicle', 'driving', 'racing', 'tesla', 'bmw'],
-    'pets':          ['pets', 'dogs', 'cats', 'animals', 'cute', 'adorable', 'animal', 'wildlife'],
+    'gaming': [
+      'gaming',
+      'game',
+      'games',
+      'esports',
+      'fps',
+      'rpg',
+      'minecraft',
+      'fortnite',
+      'valorant',
+      'streamer',
+    ],
+    'music': [
+      'music',
+      'song',
+      'songs',
+      'artist',
+      'album',
+      'concert',
+      'pop',
+      'hip-hop',
+      'rap',
+      'edm',
+      'classical',
+      'guitar',
+      'piano',
+      'singing',
+    ],
+    'technology': [
+      'technology',
+      'tech',
+      'programming',
+      'coding',
+      'software',
+      'hardware',
+      'ai',
+      'machine-learning',
+      'flutter',
+      'javascript',
+      'python',
+      'react',
+      'startup',
+    ],
+    'comedy': [
+      'comedy',
+      'funny',
+      'humor',
+      'memes',
+      'satire',
+      'standup',
+      'sketch',
+      'parody',
+      'hilarious',
+    ],
+    'fitness': [
+      'fitness',
+      'workout',
+      'exercise',
+      'gym',
+      'yoga',
+      'running',
+      'health',
+      'nutrition',
+      'weight',
+      'muscle',
+    ],
+    'food': [
+      'food',
+      'cooking',
+      'recipe',
+      'cuisine',
+      'chef',
+      'baking',
+      'restaurant',
+      'foodie',
+      'meal',
+    ],
+    'travel': [
+      'travel',
+      'adventure',
+      'tourism',
+      'vacation',
+      'destination',
+      'backpacking',
+      'explore',
+      'vlog',
+    ],
+    'education': [
+      'education',
+      'learning',
+      'tutorial',
+      'how-to',
+      'science',
+      'history',
+      'math',
+      'language',
+      'study',
+      'course',
+    ],
+    'sports': [
+      'sports',
+      'football',
+      'basketball',
+      'soccer',
+      'tennis',
+      'cricket',
+      'athletics',
+      'nfl',
+      'nba',
+      'match',
+    ],
+    'fashion': [
+      'fashion',
+      'style',
+      'outfit',
+      'clothing',
+      'designer',
+      'trends',
+      'beauty',
+      'makeup',
+      'skincare',
+    ],
+    'art': [
+      'art',
+      'design',
+      'drawing',
+      'painting',
+      'illustration',
+      'photography',
+      'creative',
+      'animation',
+    ],
+    'news': ['news', 'politics', 'world', 'breaking', 'journalism', 'reporter'],
+    'business': [
+      'business',
+      'entrepreneur',
+      'startup',
+      'marketing',
+      'finance',
+      'investing',
+      'economy',
+      'stocks',
+    ],
+    'science': [
+      'science',
+      'physics',
+      'chemistry',
+      'biology',
+      'space',
+      'nasa',
+      'research',
+      'discovery',
+    ],
+    'entertainment': [
+      'entertainment',
+      'celebrity',
+      'movie',
+      'films',
+      'series',
+      'hollywood',
+      'bollywood',
+    ],
+    'lifestyle': [
+      'lifestyle',
+      'vlog',
+      'daily',
+      'routine',
+      'motivation',
+      'wellness',
+      'mindfulness',
+      'productivity',
+    ],
+    'cars': [
+      'cars',
+      'automotive',
+      'vehicle',
+      'driving',
+      'racing',
+      'tesla',
+      'bmw',
+    ],
+    'pets': [
+      'pets',
+      'dogs',
+      'cats',
+      'animals',
+      'cute',
+      'adorable',
+      'animal',
+      'wildlife',
+    ],
   };
 
   Future<List<Recommendation>> getTimeBasedRecommendations({
@@ -99,24 +273,34 @@ class EnhancedRecommendationService {
 
       // Get user preferences
       final userPreferences = await OnboardingService().getCurrentPreferences();
-      
+
       // Get content based on current time context
       final currentHour = DateTime.now().hour;
       final timeContext = _getTimeContext(currentHour);
-      
+
       // Get available content
       final contentService = ContentAggregationService.instance;
       final availableContent = await contentService.aggregateContent(
-        platforms: userPreferences?.platformPriorities.keys.map((p) => PlatformType.values.firstWhere((pt) => pt.name == p, orElse: () => PlatformType.youtube)).toList() ?? [PlatformType.youtube],
+        platforms:
+            userPreferences?.platformPriorities.keys
+                .map(
+                  (p) => PlatformType.values.firstWhere(
+                    (pt) => pt.name == p,
+                    orElse: () => PlatformType.youtube,
+                  ),
+                )
+                .toList() ??
+            [PlatformType.youtube],
         categories: userPreferences?.contentInterests ?? [],
         limit: limit * 3, // Get more to filter from
       );
-      
+
       // Score content based on time context
       final scoredContent = <MapEntry<Content, double>>[];
       final sp = await SharedPreferences.getInstance();
       final platformWatches = _loadPlatformWatches(sp);
-      final selectedGenres = sp.getStringList('onboarding_selected_genres') ?? [];
+      final selectedGenres =
+          sp.getStringList('onboarding_selected_genres') ?? [];
 
       for (final content in availableContent) {
         double score = _calculateTimeScore(content, timeContext, currentHour);
@@ -137,7 +321,7 @@ class EnhancedRecommendationService {
 
         scoredContent.add(MapEntry(content, score));
       }
-      
+
       // Sort by score, apply diversity cap, then take top results
       scoredContent.sort((a, b) => b.value.compareTo(a.value));
       final sortedContent = scoredContent.map((e) => e.key).toList();
@@ -167,18 +351,21 @@ class EnhancedRecommendationService {
 
         recommendations.add(recommendation);
       }
-      
+
       return recommendations;
     } catch (error) {
       debugPrint('Error getting time-based recommendations: $error');
       return [];
     }
   }
-  
+
   /// Applies a per-category diversity cap so no single genre dominates
   /// the recommendation list. [maxPerCategory] items are allowed per
   /// category/genre key; the overall result is capped at 20 items.
-  List<Content> _applyDiversity(List<Content> sorted, {int maxPerCategory = 4}) {
+  List<Content> _applyDiversity(
+    List<Content> sorted, {
+    int maxPerCategory = 4,
+  }) {
     final result = <Content>[];
     final categoryCounts = <String, int>{};
     for (final content in sorted) {
@@ -201,54 +388,70 @@ class EnhancedRecommendationService {
     if (hour >= 17 && hour < 22) return 'evening';
     return 'night';
   }
-  
+
   double _calculateTimeScore(Content content, String timeContext, int hour) {
     // Base score
     double score = 0.5;
-    
+
     // Adjust based on content type and time
     switch (timeContext) {
       case 'morning':
-        if (content.categories.any((cat) => cat.toLowerCase().contains('news')) ||
-            content.categories.any((cat) => cat.toLowerCase().contains('education'))) {
+        if (content.categories.any(
+              (cat) => cat.toLowerCase().contains('news'),
+            ) ||
+            content.categories.any(
+              (cat) => cat.toLowerCase().contains('education'),
+            )) {
           score += 0.3;
         }
         break;
       case 'afternoon':
-        if (content.categories.any((cat) => cat.toLowerCase().contains('productivity')) ||
+        if (content.categories.any(
+              (cat) => cat.toLowerCase().contains('productivity'),
+            ) ||
             content.tags.any((tag) => tag.toLowerCase().contains('tutorial'))) {
           score += 0.2;
         }
         break;
       case 'evening':
-        if (content.categories.any((cat) => cat.toLowerCase().contains('entertainment')) ||
+        if (content.categories.any(
+              (cat) => cat.toLowerCase().contains('entertainment'),
+            ) ||
             content.tags.any((tag) => tag.toLowerCase().contains('music'))) {
           score += 0.3;
         }
         break;
       case 'night':
-        if (content.categories.any((cat) => cat.toLowerCase().contains('relaxation')) ||
+        if (content.categories.any(
+              (cat) => cat.toLowerCase().contains('relaxation'),
+            ) ||
             content.tags.any((tag) => tag.toLowerCase().contains('podcast'))) {
           score += 0.2;
         }
         break;
     }
-    
+
     return score;
   }
-  
-  double _calculateBasicPreferenceScore(Content content, preferences.UserPreferences userPreferences) {
+
+  double _calculateBasicPreferenceScore(
+    Content content,
+    preferences.UserPreferences userPreferences,
+  ) {
     double score = 0.0;
 
     // Check content interests
     for (final interest in userPreferences.contentInterests) {
-      if (content.tags.any((tag) => tag.toLowerCase().contains(interest.toLowerCase()))) {
+      if (content.tags.any(
+        (tag) => tag.toLowerCase().contains(interest.toLowerCase()),
+      )) {
         score += 0.3;
       }
     }
 
     // Check platform preferences
-    final platformScore = userPreferences.platformPriorities[content.platform.name] ?? 0.0;
+    final platformScore =
+        userPreferences.platformPriorities[content.platform.name] ?? 0.0;
     score += platformScore * 0.2;
 
     return score;
@@ -304,15 +507,20 @@ class EnhancedRecommendationService {
         continue;
       }
       // Expanded synonym match via genre map — also checks title/description
-      final synonyms = _genreTagMap[genreKey] ??
+      final synonyms =
+          _genreTagMap[genreKey] ??
           _genreTagMap.entries
-              .where((e) => e.key.contains(genreKey) || genreKey.contains(e.key))
+              .where(
+                (e) => e.key.contains(genreKey) || genreKey.contains(e.key),
+              )
               .expand((e) => e.value)
               .toList();
-      final synonymMatch = synonyms.any((syn) =>
-          content.tags.any((t) => t.toLowerCase().contains(syn)) ||
-          (content.title?.toLowerCase().contains(syn) ?? false) ||
-          (content.description?.toLowerCase().contains(syn) ?? false));
+      final synonymMatch = synonyms.any(
+        (syn) =>
+            content.tags.any((t) => t.toLowerCase().contains(syn)) ||
+            (content.title?.toLowerCase().contains(syn) ?? false) ||
+            (content.description?.toLowerCase().contains(syn) ?? false),
+      );
       if (synonymMatch) score += 1.2;
     }
 
@@ -333,7 +541,8 @@ class EnhancedRecommendationService {
       }
     } else {
       // Fall back to stored platform priority
-      final platformScore = prefs.platformPriorities[content.platform.name] ?? 0.0;
+      final platformScore =
+          prefs.platformPriorities[content.platform.name] ?? 0.0;
       score += platformScore * 0.2;
     }
 
@@ -366,12 +575,19 @@ class EnhancedRecommendationService {
   ///   50% watched → 1.71×
   ///   80% watched → 1.89×
   ///  100% watched → 2.0× (full boost, matches prior max)
-  double _applyWatchTimeWeight(double score, String contentId, SharedPreferences sp) {
-    final progress = (sp.getDouble('watch_progress_$contentId') ?? 0.0).clamp(0.0, 1.0);
+  double _applyWatchTimeWeight(
+    double score,
+    String contentId,
+    SharedPreferences sp,
+  ) {
+    final progress = (sp.getDouble('watch_progress_$contentId') ?? 0.0).clamp(
+      0.0,
+      1.0,
+    );
     final multiplier = 1.0 + progress.toDouble();
     return score * multiplier;
   }
-  
+
   static const String _implicitWeightsKey = 'genre_implicit_weights';
 
   // Track content interaction and update implicit genre weights in SharedPreferences.
@@ -380,8 +596,13 @@ class EnhancedRecommendationService {
   Future<void> trackContentInteraction(Map<String, dynamic> interaction) async {
     try {
       final tags = List<String>.from(interaction['tags'] as List? ?? []);
-      final categories = List<String>.from(interaction['categories'] as List? ?? []);
-      final allSignals = [...tags, ...categories].map((s) => s.toLowerCase()).toList();
+      final categories = List<String>.from(
+        interaction['categories'] as List? ?? [],
+      );
+      final allSignals = [
+        ...tags,
+        ...categories,
+      ].map((s) => s.toLowerCase()).toList();
       if (allSignals.isEmpty) return;
 
       final prefs = await SharedPreferences.getInstance();
@@ -392,7 +613,8 @@ class EnhancedRecommendationService {
           final decoded = raw.split(',').where((e) => e.contains(':'));
           for (final entry in decoded) {
             final parts = entry.split(':');
-            if (parts.length == 2) weights[parts[0]] = int.tryParse(parts[1]) ?? 0;
+            if (parts.length == 2)
+              weights[parts[0]] = int.tryParse(parts[1]) ?? 0;
           }
         } catch (_) {}
       }
@@ -400,7 +622,10 @@ class EnhancedRecommendationService {
       // Map raw tags/categories to canonical genre names via the genre tag map
       for (final signal in allSignals) {
         for (final entry in _genreTagMap.entries) {
-          if (entry.key == signal || entry.value.any((v) => signal.contains(v) || v.contains(signal))) {
+          if (entry.key == signal ||
+              entry.value.any(
+                (v) => signal.contains(v) || v.contains(signal),
+              )) {
             weights[entry.key] = (weights[entry.key] ?? 0) + 1;
             break;
           }
@@ -434,7 +659,7 @@ class EnhancedRecommendationService {
       return {};
     }
   }
-  
+
   // Get personalized recommendations
   Future<List<Recommendation>> getPersonalizedRecommendations({
     required String userId,
@@ -443,7 +668,7 @@ class EnhancedRecommendationService {
     // For now, return time-based recommendations
     return getTimeBasedRecommendations(userId: userId, limit: limit);
   }
-  
+
   // Get onboarding-based recommendations
   Future<List<Recommendation>> getOnboardingBasedRecommendations({
     required String userId,
@@ -452,7 +677,7 @@ class EnhancedRecommendationService {
     // For now, return time-based recommendations
     return getTimeBasedRecommendations(userId: userId, limit: limit);
   }
-  
+
   // Generate viewing habits recommendations
   Future<List<Recommendation>> generateViewingHabitsRecommendations({
     required String userId,
@@ -461,7 +686,7 @@ class EnhancedRecommendationService {
     // For now, return time-based recommendations
     return getTimeBasedRecommendations(userId: userId, limit: limit);
   }
-  
+
   // Generate platform-specific recommendations
   Future<List<Recommendation>> generatePlatformSpecificRecommendations({
     required String userId,
@@ -471,54 +696,62 @@ class EnhancedRecommendationService {
     try {
       final user = AuthService.instance.currentUser;
       if (user == null) return [];
-      
+
       final contentService = ContentAggregationService.instance;
       final availableContent = await contentService.aggregateContent(
         platforms: [_getPlatformTypeFromString(platform)],
         limit: limit * 2, // Get more to filter
       );
-      
+
       if (availableContent.isEmpty) return [];
-      
+
       // Score content based on platform-specific factors
       final scoredContent = <MapEntry<Content, double>>[];
-      
+
       for (final content in availableContent) {
         double score = 0.5; // Base score
-        
+
         // Platform-specific scoring logic
         if (platform.toLowerCase() == 'youtube') {
           // Prefer longer content for YouTube
-          if (content.durationSeconds != null && content.durationSeconds! > 600) score += 0.2;
-          if (content.categories.any((cat) => cat.toLowerCase().contains('education'))) {
+          if (content.durationSeconds != null && content.durationSeconds! > 600)
+            score += 0.2;
+          if (content.categories.any(
+            (cat) => cat.toLowerCase().contains('education'),
+          )) {
             score += 0.3;
           }
         } else if (platform.toLowerCase() == 'tiktok') {
           // Prefer shorter content for TikTok
-          if (content.durationSeconds != null && content.durationSeconds! < 180) score += 0.3;
-          if (content.categories.any((cat) => cat.toLowerCase().contains('entertainment'))) {
+          if (content.durationSeconds != null && content.durationSeconds! < 180)
+            score += 0.3;
+          if (content.categories.any(
+            (cat) => cat.toLowerCase().contains('entertainment'),
+          )) {
             score += 0.2;
           }
         } else if (platform.toLowerCase() == 'instagram') {
           // Prefer visual content for Instagram
-          if (content.categories.any((cat) => cat.toLowerCase().contains('lifestyle'))) {
+          if (content.categories.any(
+            (cat) => cat.toLowerCase().contains('lifestyle'),
+          )) {
             score += 0.2;
           }
         }
-        
+
         scoredContent.add(MapEntry(content, score));
       }
-      
+
       // Sort by score and take top results
       scoredContent.sort((a, b) => b.value.compareTo(a.value));
       final topContent = scoredContent.take(limit).toList();
-      
+
       // Convert to recommendations
       final recommendations = <Recommendation>[];
       for (int i = 0; i < topContent.length; i++) {
         final content = topContent[i].key;
         final score = topContent[i].value;
-        
+
         final recommendation = Recommendation(
           id: 'platform_${platform}_${DateTime.now().millisecondsSinceEpoch}_$i',
           userId: user.id,
@@ -530,17 +763,17 @@ class EnhancedRecommendationService {
           createdAt: DateTime.now(),
           expiresAt: DateTime.now().add(const Duration(hours: 4)),
         );
-        
+
         recommendations.add(recommendation);
       }
-      
+
       return recommendations;
     } catch (error) {
       debugPrint('Error getting platform-specific recommendations: $error');
       return [];
     }
   }
-  
+
   // Helper method to convert string to PlatformType
   PlatformType _getPlatformTypeFromString(String platform) {
     switch (platform.toLowerCase()) {
@@ -556,7 +789,7 @@ class EnhancedRecommendationService {
         return PlatformType.youtube;
     }
   }
-  
+
   // Get user behavior insights (simplified)
   Future<UserBehaviorInsight?> _getUserBehaviorInsights(String userId) async {
     try {
@@ -576,7 +809,7 @@ class EnhancedRecommendationService {
       return null;
     }
   }
-  
+
   // Helper method to save a single recommendation to the database
   Future<void> _saveRecommendation(Recommendation recommendation) async {
     try {
@@ -605,15 +838,20 @@ class EnhancedRecommendationService {
       final results = <Content>[];
       for (final genre in genres) {
         try {
-          final genreContent = await ContentService.instance.getVideosByCategory(genre, limit: 2);
+          final genreContent = await ContentService.instance
+              .getVideosByCategory(genre, limit: 2);
           results.addAll(genreContent);
         } catch (e) {
-          debugPrint('EnhancedRecommendationService: cold-start genre "$genre" error: $e');
+          debugPrint(
+            'EnhancedRecommendationService: cold-start genre "$genre" error: $e',
+          );
         }
       }
       return results;
     } catch (error) {
-      debugPrint('EnhancedRecommendationService getColdStartRecommendations error: $error');
+      debugPrint(
+        'EnhancedRecommendationService getColdStartRecommendations error: $error',
+      );
       return [];
     }
   }

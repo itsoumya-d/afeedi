@@ -49,7 +49,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         return [];
       }
       posts = posts.where((p) {
-        final creatorId = p.creatorId ?? p.creatorName?.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+        final creatorId =
+            p.creatorId ??
+            p.creatorName?.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
         return _followedCreatorIds.contains(creatorId) ||
             _followedCreatorIds.contains(p.creatorName);
       }).toList();
@@ -70,7 +72,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         default:
           cutoff = DateTime(2000);
       }
-      posts = posts.where((p) => p.publishedAt == null || p.publishedAt!.isAfter(cutoff)).toList();
+      posts = posts
+          .where((p) => p.publishedAt == null || p.publishedAt!.isAfter(cutoff))
+          .toList();
     }
     return posts;
   }
@@ -82,7 +86,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     if (_dateFilter != 'all') count++;
     return count;
   }
-  
+
   @override
   bool get wantKeepAlive => true;
 
@@ -97,7 +101,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   }
 
   Future<void> _checkProactivePaywall() async {
-    final shouldShow = await SubscriptionService.instance.shouldShowProactivePaywall();
+    final shouldShow = await SubscriptionService.instance
+        .shouldShowProactivePaywall();
     if (shouldShow && mounted) {
       // Wait until content has loaded before showing paywall to avoid racing with _isLoading
       await Future.delayed(const Duration(milliseconds: 3000));
@@ -126,9 +131,11 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         final lastWatched = items.first.content;
         final recs = await ContentService.instance.getVideos(limit: 50);
         final becauseRecs = recs
-            .where((c) =>
-                c.id != lastWatched.id &&
-                c.tags.any((t) => lastWatched.tags.contains(t)))
+            .where(
+              (c) =>
+                  c.id != lastWatched.id &&
+                  c.tags.any((t) => lastWatched.tags.contains(t)),
+            )
             .take(3)
             .toList();
         if (mounted && becauseRecs.isNotEmpty) {
@@ -154,7 +161,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     _scrollController.dispose();
     super.dispose();
   }
-  
+
   void _onScroll() {
     final pos = _scrollController.position;
     // Preload thumbnails for the items roughly 2 screen-heights ahead
@@ -167,7 +174,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       _loadMorePosts();
     }
   }
-  
+
   Future<void> _loadInitialPosts() async {
     setState(() {
       _isLoading = true;
@@ -179,24 +186,32 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       final authService = AuthService.instance;
       final onboardingService = OnboardingService();
       final user = authService.currentUser;
-      
+
       List<Content> feedContent;
-      
-      final isOnboardingCompleted = await onboardingService.isOnboardingCompleted();
+
+      final isOnboardingCompleted = await onboardingService
+          .isOnboardingCompleted();
       if (user != null) {
         if (isOnboardingCompleted) {
-          feedContent = await ContentService.instance.getPersonalizedContent(limit: 15);
+          feedContent = await ContentService.instance.getPersonalizedContent(
+            limit: 15,
+          );
         } else {
-          feedContent = await ContentService.instance.getOnboardingBasedRecommendations(limit: 15);
+          feedContent = await ContentService.instance
+              .getOnboardingBasedRecommendations(limit: 15);
         }
       } else if (isOnboardingCompleted) {
         // User completed chatbot onboarding without creating account — show genre-personalized feed
-        feedContent = await ContentService.instance.getOnboardingBasedRecommendations(limit: 15);
+        feedContent = await ContentService.instance
+            .getOnboardingBasedRecommendations(limit: 15);
       } else {
-        feedContent = await ContentService.instance.getTrendingVideos(limit: 15);
+        feedContent = await ContentService.instance.getTrendingVideos(
+          limit: 15,
+        );
       }
-      
-      final followedIds = UserInteractionService.instance.getFollowedCreatorIds();
+
+      final followedIds = UserInteractionService.instance
+          .getFollowedCreatorIds();
 
       // Cold-start diversity: shuffle for new users with no watch history and no follows
       if (_continueWatching.isEmpty && followedIds.isEmpty) {
@@ -207,17 +222,22 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       final tagCounts = feedContent
           .expand((p) => p.tags)
           .fold<Map<String, int>>({}, (m, t) {
-        m[t] = (m[t] ?? 0) + 1;
-        return m;
-      });
-      final derivedTopics = (tagCounts.entries.toList()
-            ..sort((a, b) => b.value.compareTo(a.value)))
-          .take(6)
-          .map((e) => '#${e.key}')
-          .toList();
-      final newCount = feedContent.where((p) =>
-          p.publishedAt != null &&
-          DateTime.now().difference(p.publishedAt!).inHours < 24).length;
+            m[t] = (m[t] ?? 0) + 1;
+            return m;
+          });
+      final derivedTopics =
+          (tagCounts.entries.toList()
+                ..sort((a, b) => b.value.compareTo(a.value)))
+              .take(6)
+              .map((e) => '#${e.key}')
+              .toList();
+      final newCount = feedContent
+          .where(
+            (p) =>
+                p.publishedAt != null &&
+                DateTime.now().difference(p.publishedAt!).inHours < 24,
+          )
+          .length;
       setState(() {
         _allPosts = feedContent;
         _posts = List.from(_allPosts);
@@ -231,14 +251,15 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _preloadThumbnails(0, count: 5);
       });
-      
+
       // Track successful content load with personalization info
       await AnalyticsService.instance.trackUserInteraction(
         action: 'home_content_loaded',
         screen: 'home',
         additionalData: {
           'total_content': feedContent.length,
-          'is_personalized': user != null && await onboardingService.isOnboardingCompleted(),
+          'is_personalized':
+              user != null && await onboardingService.isOnboardingCompleted(),
           'user_authenticated': user != null,
         },
       );
@@ -249,7 +270,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         _isLoading = false;
         _loadError = true;
       });
-      
+
       // Track error
       await AnalyticsService.instance.trackError(
         errorType: 'home_content_load_error',
@@ -258,51 +279,67 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       );
     }
   }
-  
+
   Future<void> _loadMorePosts() async {
     if (_isLoading || !_hasMore) return;
-    
+
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       // Use the same personalization logic as initial load
       final authService = AuthService.instance;
       final onboardingService = OnboardingService();
       final user = authService.currentUser;
-      
+
       List<Content> newPosts;
-      
-      final isOnboardingCompleted = await onboardingService.isOnboardingCompleted();
+
+      final isOnboardingCompleted = await onboardingService
+          .isOnboardingCompleted();
       if (user != null) {
         if (isOnboardingCompleted) {
-          newPosts = await ContentService.instance.getPersonalizedContent(limit: 8);
+          newPosts = await ContentService.instance.getPersonalizedContent(
+            limit: 8,
+          );
         } else {
-          newPosts = await ContentService.instance.getOnboardingBasedRecommendations(limit: 8);
+          newPosts = await ContentService.instance
+              .getOnboardingBasedRecommendations(limit: 8);
         }
       } else if (isOnboardingCompleted) {
-        newPosts = await ContentService.instance.getOnboardingBasedRecommendations(limit: 8);
+        newPosts = await ContentService.instance
+            .getOnboardingBasedRecommendations(limit: 8);
       } else {
         newPosts = await ContentService.instance.getFeedContent(limit: 8);
       }
-      
+
       final existingIds = _allPosts.map((p) => p.id).toSet();
-      final deduped = newPosts.where((p) => !existingIds.contains(p.id)).toList();
+      final deduped = newPosts
+          .where((p) => !existingIds.contains(p.id))
+          .toList();
       if (deduped.isEmpty) {
-        setState(() { _hasMore = false; _isLoading = false; });
+        setState(() {
+          _hasMore = false;
+          _isLoading = false;
+        });
         return;
       }
       _allPosts.addAll(deduped);
-      final newCount = _allPosts.where((p) =>
-          p.publishedAt != null &&
-          DateTime.now().difference(p.publishedAt!).inHours < 24).length;
+      final newCount = _allPosts
+          .where(
+            (p) =>
+                p.publishedAt != null &&
+                DateTime.now().difference(p.publishedAt!).inHours < 24,
+          )
+          .length;
       setState(() {
         // Apply current filter to new posts
         if (_selectedPlatform == null) {
           _posts.addAll(deduped);
         } else {
-          _posts.addAll(deduped.where((post) => post.platform == _selectedPlatform));
+          _posts.addAll(
+            deduped.where((post) => post.platform == _selectedPlatform),
+          );
         }
         _isLoading = false;
         _hasMore = _allPosts.length < 200;
@@ -314,7 +351,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       });
     }
   }
-  
+
   Future<void> _refreshPosts() async {
     setState(() {
       _posts.clear();
@@ -337,7 +374,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       }
     }
   }
-  
+
   void _handlePlatformFilter(PlatformType? platform) {
     setState(() {
       _selectedPlatform = platform;
@@ -373,27 +410,23 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       ),
     );
   }
-  
-
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return Container(
       child: Column(
         children: [
           _buildHeader(),
           if (_isOffline)
             _OfflineBanner(onDismiss: () => setState(() => _isOffline = false)),
-          Expanded(
-            child: _buildFeed(),
-          ),
+          Expanded(child: _buildFeed()),
         ],
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -417,9 +450,17 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         Expanded(
           child: Row(
             children: [
-              _buildFeedTab(AppLocalizations.of(context)!.forYou, !_showFollowing, isForYou: true),
+              _buildFeedTab(
+                AppLocalizations.of(context)!.forYou,
+                !_showFollowing,
+                isForYou: true,
+              ),
               const SizedBox(width: 24),
-              _buildFeedTab(AppLocalizations.of(context)!.following, _showFollowing, isForYou: false),
+              _buildFeedTab(
+                AppLocalizations.of(context)!.following,
+                _showFollowing,
+                isForYou: false,
+              ),
             ],
           ),
         ),
@@ -429,51 +470,57 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
               : 'Open filters',
           button: true,
           child: GestureDetector(
-          onTap: _showFilterSheet,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: _activeFilterCount > 0
-                      ? AppTheme.primaryCyan.withValues(alpha: 0.2)
-                      : Colors.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
+            onTap: _showFilterSheet,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _activeFilterCount > 0
+                        ? AppTheme.primaryCyan.withValues(alpha: 0.2)
+                        : Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: _activeFilterCount > 0
+                          ? AppTheme.primaryCyan
+                          : Colors.white.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.tune,
                     color: _activeFilterCount > 0
                         ? AppTheme.primaryCyan
-                        : Colors.white.withValues(alpha: 0.2),
+                        : Colors.white70,
+                    size: 20,
                   ),
                 ),
-                child: Icon(
-                  Icons.tune,
-                  color: _activeFilterCount > 0 ? AppTheme.primaryCyan : Colors.white70,
-                  size: 20,
-                ),
-              ),
-              if (_activeFilterCount > 0)
-                Positioned(
-                  top: -4,
-                  right: -4,
-                  child: Container(
-                    width: 16,
-                    height: 16,
-                    decoration: const BoxDecoration(
-                      color: AppTheme.primaryCyan,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        '$_activeFilterCount',
-                        style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                if (_activeFilterCount > 0)
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: Container(
+                      width: 16,
+                      height: 16,
+                      decoration: const BoxDecoration(
+                        color: AppTheme.primaryCyan,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '$_activeFilterCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
         ),
         const SizedBox(width: 8),
         _buildQuickStats(),
@@ -487,38 +534,40 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       selected: isActive,
       button: true,
       child: GestureDetector(
-      onTap: () {
-        setState(() {
-          _showFollowing = !isForYou;
-        });
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.45),
-              fontSize: 18,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.w400,
-            ),
-          ),
-          const SizedBox(height: 4),
-          if (isActive)
-            Container(
-              height: 3,
-              width: 32,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppTheme.primaryCyan, AppTheme.primaryPink],
-                ),
-                borderRadius: BorderRadius.circular(2),
+        onTap: () {
+          setState(() {
+            _showFollowing = !isForYou;
+          });
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: isActive
+                    ? Colors.white
+                    : Colors.white.withValues(alpha: 0.45),
+                fontSize: 18,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.w400,
               ),
-            )
-          else
-            const SizedBox(height: 3),
-        ],
-      ),
+            ),
+            const SizedBox(height: 4),
+            if (isActive)
+              Container(
+                height: 3,
+                width: 32,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppTheme.primaryCyan, AppTheme.primaryPink],
+                  ),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              )
+            else
+              const SizedBox(height: 3),
+          ],
+        ),
       ),
     );
   }
@@ -560,8 +609,11 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       children: [
         Row(
           children: [
-            const Icon(Icons.local_fire_department_rounded,
-                color: AppTheme.primaryPink, size: 14),
+            const Icon(
+              Icons.local_fire_department_rounded,
+              color: AppTheme.primaryPink,
+              size: 14,
+            ),
             const SizedBox(width: 4),
             Text(
               AppLocalizations.of(context)?.trending ?? 'Trending',
@@ -593,8 +645,10 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                   ),
                   child: Container(
                     margin: const EdgeInsets.only(right: 8),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -606,7 +660,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                       ),
                       borderRadius: BorderRadius.circular(15),
                       border: Border.all(
-                          color: AppTheme.primaryPink.withValues(alpha: 0.35)),
+                        color: AppTheme.primaryPink.withValues(alpha: 0.35),
+                      ),
                     ),
                     child: Text(
                       topics[index],
@@ -629,10 +684,26 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   Widget _buildQuickFilters() {
     const filters = [
       (name: 'All', platform: null, icon: Icons.auto_awesome_rounded),
-      (name: 'YouTube', platform: PlatformType.youtube, icon: Icons.play_circle_rounded),
-      (name: 'Instagram', platform: PlatformType.instagram, icon: Icons.camera_alt_rounded),
-      (name: 'TikTok', platform: PlatformType.tiktok, icon: Icons.music_video_rounded),
-      (name: 'Facebook', platform: PlatformType.facebook, icon: Icons.facebook_rounded),
+      (
+        name: 'YouTube',
+        platform: PlatformType.youtube,
+        icon: Icons.play_circle_rounded,
+      ),
+      (
+        name: 'Instagram',
+        platform: PlatformType.instagram,
+        icon: Icons.camera_alt_rounded,
+      ),
+      (
+        name: 'TikTok',
+        platform: PlatformType.tiktok,
+        icon: Icons.music_video_rounded,
+      ),
+      (
+        name: 'Facebook',
+        platform: PlatformType.facebook,
+        icon: Icons.facebook_rounded,
+      ),
     ];
 
     return SizedBox(
@@ -655,8 +726,10 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeInOut,
                 margin: const EdgeInsets.only(right: 8),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? const Color(0xFF00D4FF)
@@ -671,10 +744,12 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: const Color(0xFF00D4FF).withValues(alpha: 0.3),
+                            color: const Color(
+                              0xFF00D4FF,
+                            ).withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
-                          )
+                          ),
                         ]
                       : null,
                 ),
@@ -684,8 +759,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                     Icon(
                       filter.icon,
                       size: 13,
-                      color:
-                          isSelected ? Colors.black87 : Colors.white.withValues(alpha: 0.75),
+                      color: isSelected
+                          ? Colors.black87
+                          : Colors.white.withValues(alpha: 0.75),
                     ),
                     const SizedBox(width: 5),
                     Text(
@@ -695,8 +771,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                             ? Colors.black87
                             : Colors.white.withValues(alpha: 0.75),
                         fontSize: 12,
-                        fontWeight:
-                            isSelected ? FontWeight.w700 : FontWeight.w400,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w400,
                         letterSpacing: isSelected ? 0.1 : 0,
                       ),
                     ),
@@ -709,7 +786,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       ),
     );
   }
-  
+
   Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 8, 0, 12),
@@ -805,9 +882,12 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                     backgroundColor: AppTheme.primaryCyan,
                     foregroundColor: Colors.black,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(22)),
+                      borderRadius: BorderRadius.circular(22),
+                    ),
                     textStyle: const TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 14),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
               ),
@@ -870,9 +950,12 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                     backgroundColor: AppTheme.primaryCyan,
                     foregroundColor: Colors.black,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(22)),
+                      borderRadius: BorderRadius.circular(22),
+                    ),
                     textStyle: const TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 14),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
               ),
@@ -944,7 +1027,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         ? _buildContinueWatchingSection()
         : null;
 
-    final becauseYouWatchedSection = _becauseYouWatched.isNotEmpty && _continueWatching.isNotEmpty
+    final becauseYouWatchedSection =
+        _becauseYouWatched.isNotEmpty && _continueWatching.isNotEmpty
         ? _buildBecauseYouWatchedSection()
         : null;
 
@@ -977,7 +1061,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       }
     }
 
-    final extraItems = (continueSection != null ? 1 : 0) +
+    final extraItems =
+        (continueSection != null ? 1 : 0) +
         (becauseYouWatchedSection != null ? 1 : 0) +
         (_isLoading ? 1 : 0) +
         (_showFollowSuggestion ? 1 : 0);
@@ -997,8 +1082,11 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           if (continueSection != null && index == 0) return continueSection;
           int offset0 = continueSection != null ? index - 1 : index;
           // Second item: because you watched
-          if (becauseYouWatchedSection != null && offset0 == 0) return becauseYouWatchedSection;
-          final offsetIndex = becauseYouWatchedSection != null ? offset0 - 1 : offset0;
+          if (becauseYouWatchedSection != null && offset0 == 0)
+            return becauseYouWatchedSection;
+          final offsetIndex = becauseYouWatchedSection != null
+              ? offset0 - 1
+              : offset0;
 
           // Insert follow suggestion banner after the 2nd post (YouTube/TikTok pattern)
           if (_showFollowSuggestion && offsetIndex == 2) {
@@ -1014,7 +1102,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
               padding: EdgeInsets.all(20),
               child: Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryCyan),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppTheme.primaryCyan,
+                  ),
                 ),
               ),
             );
@@ -1089,8 +1179,11 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                   label: 'Continue watching ${item.content.title ?? ""}',
                   button: true,
                   child: GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, AppRoutes.player,
-                        arguments: item.content),
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      AppRoutes.player,
+                      arguments: item.content,
+                    ),
                     child: Container(
                       width: 180,
                       margin: const EdgeInsets.only(right: 12),
@@ -1134,20 +1227,25 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(8, 0, 8, 4),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    8,
+                                    0,
+                                    8,
+                                    4,
+                                  ),
                                   child: Text(
                                     item.content.title ?? '',
                                     style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        shadows: [
-                                          Shadow(
-                                            color: Colors.black54,
-                                            blurRadius: 4,
-                                          ),
-                                        ]),
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black54,
+                                          blurRadius: 4,
+                                        ),
+                                      ],
+                                    ),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -1157,7 +1255,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                                   backgroundColor: Colors.white24,
                                   valueColor:
                                       const AlwaysStoppedAnimation<Color>(
-                                          AppTheme.primaryCyan),
+                                        AppTheme.primaryCyan,
+                                      ),
                                   minHeight: 3,
                                 ),
                               ],
@@ -1172,8 +1271,11 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                                 color: Colors.black.withValues(alpha: 0.6),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.play_arrow_rounded,
-                                  color: Colors.white, size: 14),
+                              child: const Icon(
+                                Icons.play_arrow_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              ),
                             ),
                           ),
                         ],
@@ -1218,7 +1320,11 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
               itemBuilder: (context, i) {
                 final item = _becauseYouWatched[i];
                 return GestureDetector(
-                  onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: item),
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    AppRoutes.player,
+                    arguments: item,
+                  ),
                   child: Container(
                     width: 180,
                     margin: const EdgeInsets.only(right: 12),
@@ -1263,7 +1369,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                               color: Colors.white,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+                              shadows: [
+                                Shadow(color: Colors.black54, blurRadius: 4),
+                              ],
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -1292,25 +1400,41 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           end: Alignment.centerRight,
         ),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFF00D4FF).withValues(alpha: 0.25)),
+        border: Border.all(
+          color: const Color(0xFF00D4FF).withValues(alpha: 0.25),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.people_outline, color: Color(0xFF00D4FF), size: 20),
+              const Icon(
+                Icons.people_outline,
+                color: Color(0xFF00D4FF),
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
-                AppLocalizations.of(context)?.discoverCreators ?? 'Discover creators to follow',
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+                AppLocalizations.of(context)?.discoverCreators ??
+                    'Discover creators to follow',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
-            AppLocalizations.of(context)?.followCreatorsHint ?? 'Follow creators to surface their content first in your feed. Tap Follow on any video.',
-            style: const TextStyle(color: Colors.white54, fontSize: 12, height: 1.5),
+            AppLocalizations.of(context)?.followCreatorsHint ??
+                'Follow creators to surface their content first in your feed. Tap Follow on any video.',
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 12,
+              height: 1.5,
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -1321,18 +1445,32 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                   Navigator.pushNamed(context, AppRoutes.search);
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 7,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF00D4FF),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(AppLocalizations.of(context)?.findCreators ?? 'Find creators', style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    AppLocalizations.of(context)?.findCreators ??
+                        'Find creators',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
               GestureDetector(
                 onTap: () => setState(() => _showFollowSuggestion = false),
-                child: Text(AppLocalizations.of(context)?.dismiss ?? 'Dismiss', style: const TextStyle(color: Colors.white60, fontSize: 12)),
+                child: Text(
+                  AppLocalizations.of(context)?.dismiss ?? 'Dismiss',
+                  style: const TextStyle(color: Colors.white60, fontSize: 12),
+                ),
               ),
             ],
           ),
@@ -1382,29 +1520,34 @@ class _FeedItem {
   final String? sectionTitle;
 
   const _FeedItem.content(Content c)
-      : content = c,
-        isAd = false,
-        isSectionHeader = false,
-        sectionTitle = null;
+    : content = c,
+      isAd = false,
+      isSectionHeader = false,
+      sectionTitle = null;
 
   const _FeedItem.ad()
-      : content = null,
-        isAd = true,
-        isSectionHeader = false,
-        sectionTitle = null;
+    : content = null,
+      isAd = true,
+      isSectionHeader = false,
+      sectionTitle = null;
 
   const _FeedItem.sectionHeader(String title)
-      : content = null,
-        isAd = false,
-        isSectionHeader = true,
-        sectionTitle = title;
+    : content = null,
+      isAd = false,
+      isSectionHeader = true,
+      sectionTitle = title;
 }
 
 class _FilterBottomSheet extends StatefulWidget {
   final PlatformType? selectedPlatform;
   final String dateFilter;
   final ContentType? contentTypeFilter;
-  final void Function(PlatformType? platform, String dateFilter, ContentType? contentType) onApply;
+  final void Function(
+    PlatformType? platform,
+    String dateFilter,
+    ContentType? contentType,
+  )
+  onApply;
 
   const _FilterBottomSheet({
     required this.selectedPlatform,
@@ -1458,7 +1601,14 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(AppLocalizations.of(context)?.filters ?? 'Filters', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(
+                    AppLocalizations.of(context)?.filters ?? 'Filters',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   TextButton(
                     onPressed: () {
                       setState(() {
@@ -1467,48 +1617,124 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                         _contentType = null;
                       });
                     },
-                    child: Text(AppLocalizations.of(context)?.resetAll ?? 'Reset All', style: const TextStyle(color: Color(0xFF00D4FF))),
+                    child: Text(
+                      AppLocalizations.of(context)?.resetAll ?? 'Reset All',
+                      style: const TextStyle(color: Color(0xFF00D4FF)),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              const Text('Platform', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+              const Text(
+                'Platform',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: 10),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _buildFilterChip('All', _platform == null, () => setState(() => _platform = null)),
-                  _buildPlatformChip('YouTube', PlatformType.youtube, const Color(0xFFFF0000)),
-                  _buildPlatformChip('Instagram', PlatformType.instagram, const Color(0xFFE1306C)),
-                  _buildPlatformChip('TikTok', PlatformType.tiktok, const Color(0xFF69C9D0)),
-                  _buildPlatformChip('Facebook', PlatformType.facebook, const Color(0xFF1877F2)),
+                  _buildFilterChip(
+                    'All',
+                    _platform == null,
+                    () => setState(() => _platform = null),
+                  ),
+                  _buildPlatformChip(
+                    'YouTube',
+                    PlatformType.youtube,
+                    const Color(0xFFFF0000),
+                  ),
+                  _buildPlatformChip(
+                    'Instagram',
+                    PlatformType.instagram,
+                    const Color(0xFFE1306C),
+                  ),
+                  _buildPlatformChip(
+                    'TikTok',
+                    PlatformType.tiktok,
+                    const Color(0xFF69C9D0),
+                  ),
+                  _buildPlatformChip(
+                    'Facebook',
+                    PlatformType.facebook,
+                    const Color(0xFF1877F2),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
-              const Text('Time Range', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+              const Text(
+                'Time Range',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: 10),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _buildFilterChip('All Time', _dateFilter == 'all', () => setState(() => _dateFilter = 'all')),
-                  _buildFilterChip('Today', _dateFilter == 'today', () => setState(() => _dateFilter = 'today')),
-                  _buildFilterChip('This Week', _dateFilter == 'week', () => setState(() => _dateFilter = 'week')),
-                  _buildFilterChip('This Month', _dateFilter == 'month', () => setState(() => _dateFilter = 'month')),
+                  _buildFilterChip(
+                    'All Time',
+                    _dateFilter == 'all',
+                    () => setState(() => _dateFilter = 'all'),
+                  ),
+                  _buildFilterChip(
+                    'Today',
+                    _dateFilter == 'today',
+                    () => setState(() => _dateFilter = 'today'),
+                  ),
+                  _buildFilterChip(
+                    'This Week',
+                    _dateFilter == 'week',
+                    () => setState(() => _dateFilter = 'week'),
+                  ),
+                  _buildFilterChip(
+                    'This Month',
+                    _dateFilter == 'month',
+                    () => setState(() => _dateFilter = 'month'),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
-              const Text('Content Type', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+              const Text(
+                'Content Type',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: 10),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _buildFilterChip('All', _contentType == null, () => setState(() => _contentType = null)),
-                  _buildFilterChip('Videos', _contentType == ContentType.video, () => setState(() => _contentType = ContentType.video)),
-                  _buildFilterChip('Shorts', _contentType == ContentType.short, () => setState(() => _contentType = ContentType.short)),
-                  _buildFilterChip('Reels', _contentType == ContentType.reel, () => setState(() => _contentType = ContentType.reel)),
+                  _buildFilterChip(
+                    'All',
+                    _contentType == null,
+                    () => setState(() => _contentType = null),
+                  ),
+                  _buildFilterChip(
+                    'Videos',
+                    _contentType == ContentType.video,
+                    () => setState(() => _contentType = ContentType.video),
+                  ),
+                  _buildFilterChip(
+                    'Shorts',
+                    _contentType == ContentType.short,
+                    () => setState(() => _contentType = ContentType.short),
+                  ),
+                  _buildFilterChip(
+                    'Reels',
+                    _contentType == ContentType.reel,
+                    () => setState(() => _contentType = ContentType.reel),
+                  ),
                 ],
               ),
               const SizedBox(height: 24),
@@ -1523,9 +1749,14 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF00D4FF),
                     foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  child: const Text('Apply Filters', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  child: const Text(
+                    'Apply Filters',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                 ),
               ),
             ],
@@ -1545,9 +1776,15 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF00D4FF).withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.08),
+            color: isSelected
+                ? const Color(0xFF00D4FF).withValues(alpha: 0.2)
+                : Colors.white.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: isSelected ? const Color(0xFF00D4FF) : Colors.white.withValues(alpha: 0.2)),
+            border: Border.all(
+              color: isSelected
+                  ? const Color(0xFF00D4FF)
+                  : Colors.white.withValues(alpha: 0.2),
+            ),
           ),
           child: Text(
             label,
@@ -1573,9 +1810,13 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? color.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.08),
+            color: isSelected
+                ? color.withValues(alpha: 0.2)
+                : Colors.white.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: isSelected ? color : Colors.white.withValues(alpha: 0.2)),
+            border: Border.all(
+              color: isSelected ? color : Colors.white.withValues(alpha: 0.2),
+            ),
           ),
           child: Text(
             label,

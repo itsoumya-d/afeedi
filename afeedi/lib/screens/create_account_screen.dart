@@ -43,21 +43,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
 
     _fadeController.forward();
     Future.delayed(const Duration(milliseconds: 300), () {
@@ -91,7 +84,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
         Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
       } else {
         setState(() {
-          _serverError = 'Account creation failed. Email may already be in use.';
+          _serverError =
+              'Account creation failed. Email may already be in use.';
         });
       }
     } catch (e) {
@@ -119,10 +113,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF0D0B1E),
-              Color(0xFF2D1B69),
-            ],
+            colors: [Color(0xFF0D0B1E), Color(0xFF2D1B69)],
           ),
         ),
         child: Stack(
@@ -273,8 +264,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                       if (value.trim().length > 50) {
                                         return 'Name must be 50 characters or fewer';
                                       }
-                                      if (!RegExp(r"^[a-zA-Z0-9 \-']+$")
-                                          .hasMatch(value.trim())) {
+                                      if (!RegExp(
+                                        r"^[a-zA-Z0-9 \-']+$",
+                                      ).hasMatch(value.trim())) {
                                         return "Name may only contain letters, numbers, spaces, hyphens and apostrophes";
                                       }
                                       return null;
@@ -292,8 +284,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                         return 'Please enter your email';
                                       }
                                       if (!RegExp(
-                                              r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$')
-                                          .hasMatch(value)) {
+                                        r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$',
+                                      ).hasMatch(value)) {
                                         return 'Please enter a valid email';
                                       }
                                       return null;
@@ -303,7 +295,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                   // Password Field
                                   _buildTextField(
                                     controller: _passwordController,
-                                    label: AppLocalizations.of(context)!.password,
+                                    label: AppLocalizations.of(
+                                      context,
+                                    )!.password,
                                     hint: 'Create a strong password',
                                     obscureText: _obscurePassword,
                                     suffixIcon: IconButton(
@@ -326,7 +320,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                       if (value.length < 8) {
                                         return 'Password must be at least 8 characters';
                                       }
-                                      if (!RegExp(r'[a-zA-Z]').hasMatch(value)) {
+                                      if (!RegExp(
+                                        r'[a-zA-Z]',
+                                      ).hasMatch(value)) {
                                         return 'Password must contain at least one letter';
                                       }
                                       if (!RegExp(r'[0-9]').hasMatch(value)) {
@@ -382,7 +378,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                         activeColor: const Color(0xFF00D4FF),
                                         checkColor: const Color(0xFF0D0B1E),
                                         side: const BorderSide(
-                                            color: Colors.white54),
+                                          color: Colors.white54,
+                                        ),
                                       ),
                                       Expanded(
                                         child: RichText(
@@ -395,7 +392,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                             ),
                                             children: [
                                               TextSpan(
-                                                  text: "I agree to Afeedi's "),
+                                                text: "I agree to Afeedi's ",
+                                              ),
                                               TextSpan(
                                                 text: 'Terms',
                                                 style: TextStyle(
@@ -442,15 +440,17 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                           ? _handleCreateAccount
                                           : null,
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            const Color(0xFF00D4FF),
-                                        disabledBackgroundColor:
-                                            Colors.white24,
-                                        foregroundColor:
-                                            const Color(0xFF0D0B1E),
+                                        backgroundColor: const Color(
+                                          0xFF00D4FF,
+                                        ),
+                                        disabledBackgroundColor: Colors.white24,
+                                        foregroundColor: const Color(
+                                          0xFF0D0B1E,
+                                        ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
                                         elevation: 0,
                                       ),
@@ -464,7 +464,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                               ),
                                             )
                                           : Text(
-                                              AppLocalizations.of(context)!.createAccount,
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.createAccount,
                                               style: const TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
@@ -480,10 +482,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                     child: TextButton(
                                       onPressed: () {
                                         Navigator.pushReplacementNamed(
-                                            context, AppRoutes.login);
+                                          context,
+                                          AppRoutes.login,
+                                        );
                                       },
                                       child: Text(
-                                        AppLocalizations.of(context)!.alreadyHaveAccount,
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.alreadyHaveAccount,
                                         style: const TextStyle(
                                           color: Colors.white70,
                                           fontSize: 16,
@@ -557,25 +563,21 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: Color(0xFF00D4FF), width: 2),
+              borderSide: const BorderSide(color: Color(0xFF00D4FF), width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: Color(0xFFFF3C7E), width: 2),
+              borderSide: const BorderSide(color: Color(0xFFFF3C7E), width: 2),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: Color(0xFFFF3C7E), width: 2),
+              borderSide: const BorderSide(color: Color(0xFFFF3C7E), width: 2),
             ),
-            errorStyle: const TextStyle(
-              color: Color(0xFFFF3C7E),
-              fontSize: 12,
+            errorStyle: const TextStyle(color: Color(0xFFFF3C7E), fontSize: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
             ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
         ),
       ],

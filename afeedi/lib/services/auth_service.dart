@@ -16,7 +16,7 @@ class AuthResult {
   final bool success;
   final String? error;
   final User? user;
-  
+
   AuthResult({required this.success, this.error, this.user});
 }
 
@@ -31,13 +31,13 @@ class AuthService {
   static const int _lockoutMinutes = 15;
 
   User? _currentUser;
-  
+
   // Get current user
   User? get currentUser => _currentUser;
-  
+
   // Check if user is authenticated
   bool get isAuthenticated => _currentUser != null;
-  
+
   // Initialize and restore user session from local storage
   Future<void> initializeAuth() async {
     try {
@@ -59,7 +59,7 @@ class AuthService {
       debugPrint('Error initializing auth: $e');
     }
   }
-  
+
   // Initialize auth service
   Future<void> initialize() async {
     try {
@@ -68,24 +68,26 @@ class AuthService {
       final email = prefs.getString('user_email');
 
       if (userId != null && email != null) {
-         _currentUser = User(
-           id: userId,
-           email: email,
-           role: UserRole.registered,
-           isActive: true,
-           createdAt: DateTime.now(),
-           updatedAt: DateTime.now(),
-         );
-       }
+        _currentUser = User(
+          id: userId,
+          email: email,
+          role: UserRole.registered,
+          isActive: true,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+      }
     } catch (e) {
       debugPrint('Error initializing auth: $e');
     }
   }
-  
+
   // Rate limiting helpers — keyed per email address
   Future<bool> _isAccountLocked(String email) async {
     final prefs = await SharedPreferences.getInstance();
-    final lockoutTime = prefs.getInt('login_lockout_time_${email.toLowerCase()}');
+    final lockoutTime = prefs.getInt(
+      'login_lockout_time_${email.toLowerCase()}',
+    );
     if (lockoutTime == null) return false;
     final lockoutEnd = DateTime.fromMillisecondsSinceEpoch(lockoutTime);
     if (DateTime.now().isBefore(lockoutEnd)) return true;
@@ -101,8 +103,7 @@ class AuthService {
     final attempts = (prefs.getInt(key) ?? 0) + 1;
     await prefs.setInt(key, attempts);
     if (attempts >= _maxLoginAttempts) {
-      final lockoutEnd = DateTime.now()
-          .add(Duration(minutes: _lockoutMinutes));
+      final lockoutEnd = DateTime.now().add(Duration(minutes: _lockoutMinutes));
       await prefs.setInt(
         'login_lockout_time_${email.toLowerCase()}',
         lockoutEnd.millisecondsSinceEpoch,
@@ -125,40 +126,37 @@ class AuthService {
     try {
       // Simulate sign up - in real app, this would call backend
       final userId = DateTime.now().millisecondsSinceEpoch.toString();
-      
+
       final user = User(
-         id: userId,
-         email: email,
-         role: UserRole.registered,
-         isActive: true,
-         createdAt: DateTime.now(),
-         updatedAt: DateTime.now(),
-       );
-      
+        id: userId,
+        email: email,
+        role: UserRole.registered,
+        isActive: true,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
       // Save to local storage
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_id', userId);
       await prefs.setString('user_email', email);
       await prefs.setString('user_name', name ?? 'User');
-      
+
       _currentUser = user;
-      
+
       // Track analytics
-       AnalyticsService.instance.trackUserInteraction(
-         action: 'signup_success',
-         screen: 'auth',
-         additionalData: {
-           'method': 'email',
-           'user_id': userId,
-         },
-       );
-      
+      AnalyticsService.instance.trackUserInteraction(
+        action: 'signup_success',
+        screen: 'auth',
+        additionalData: {'method': 'email', 'user_id': userId},
+      );
+
       return AuthResult(success: true, user: user);
     } catch (e) {
       return AuthResult(success: false, error: e.toString());
     }
   }
-  
+
   // Sign in with email and password
   Future<AuthResult> signIn({
     required String email,
@@ -200,15 +198,19 @@ class AuthService {
       // Record the failed attempt for per-email rate limiting
       await _recordFailedAttempt(email);
       return AuthResult(
-          success: false, error: 'Authentication failed. Please try again.');
+        success: false,
+        error: 'Authentication failed. Please try again.',
+      );
     } catch (e) {
       // Do not expose internal error details to the caller
       debugPrint('SignIn error: $e');
       return AuthResult(
-          success: false, error: 'Authentication failed. Please try again.');
+        success: false,
+        error: 'Authentication failed. Please try again.',
+      );
     }
   }
-  
+
   // Sign out
   Future<AuthResult> signOut() async {
     try {
@@ -216,23 +218,26 @@ class AuthService {
       await prefs.remove('user_id');
       await prefs.remove('user_email');
       await prefs.remove('user_name');
-      
+
       _currentUser = null;
-      
+
       // Track analytics
-       AnalyticsService.instance.trackUserInteraction(
-         action: 'signout',
-         screen: 'app',
-       );
-      
+      AnalyticsService.instance.trackUserInteraction(
+        action: 'signout',
+        screen: 'app',
+      );
+
       return AuthResult(success: true);
     } catch (e) {
       return AuthResult(success: false, error: e.toString());
     }
   }
-  
+
   // OAuth sign in with actual OAuth data
-  Future<AuthResult> signInWithOAuth(String provider, [Map<String, dynamic>? oauthData]) async {
+  Future<AuthResult> signInWithOAuth(
+    String provider, [
+    Map<String, dynamic>? oauthData,
+  ]) async {
     try {
       // Use OAuth data if provided, otherwise get from OAuthService
       Map<String, dynamic>? authData = oauthData;
@@ -246,83 +251,82 @@ class AuthService {
             authData = await OAuthService.connectApple();
             break;
           default:
-            return AuthResult(success: false, error: 'Unsupported OAuth provider: $provider');
+            return AuthResult(
+              success: false,
+              error: 'Unsupported OAuth provider: $provider',
+            );
         }
       }
-      
+
       if (authData == null) {
         return AuthResult(success: false, error: 'OAuth authentication failed');
       }
-      
+
       // Extract user information from OAuth data
       final userId = DateTime.now().millisecondsSinceEpoch.toString();
       final email = authData['email'] ?? 'user@$provider.com';
-      final displayName = authData['displayName'] ?? authData['givenName'] ?? 'User';
-      
+      final displayName =
+          authData['displayName'] ?? authData['givenName'] ?? 'User';
+
       final user = User(
-         id: userId,
-         email: email,
-         role: UserRole.registered,
-         isActive: true,
-         createdAt: DateTime.now(),
-         updatedAt: DateTime.now(),
-       );
-      
+        id: userId,
+        email: email,
+        role: UserRole.registered,
+        isActive: true,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
       // Save to local storage
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_id', userId);
       await prefs.setString('user_email', email);
       await prefs.setString('user_name', displayName);
-      
+
       // OAuth tokens are intentionally NOT stored here.
       // Each OAuth package (google_sign_in, sign_in_with_apple) manages its own
       // token lifecycle and secure storage. Storing tokens in SharedPreferences
       // would expose them in plaintext on non-rooted devices' app data.
-      
+
       _currentUser = user;
-      
+
       // Track analytics
-       AnalyticsService.instance.trackUserInteraction(
-         action: 'oauth_signin_success',
-         screen: 'auth',
-         additionalData: {
-           'provider': provider,
-           'user_id': userId,
-         },
-       );
-      
+      AnalyticsService.instance.trackUserInteraction(
+        action: 'oauth_signin_success',
+        screen: 'auth',
+        additionalData: {'provider': provider, 'user_id': userId},
+      );
+
       return AuthResult(success: true, user: user);
     } catch (e) {
       return AuthResult(success: false, error: e.toString());
     }
   }
-  
+
   // Update user profile
-  Future<AuthResult> updateProfile({
-    String? email,
-  }) async {
+  Future<AuthResult> updateProfile({String? email}) async {
     try {
       if (_currentUser == null) {
         return AuthResult(success: false, error: 'User not authenticated');
       }
-      
+
       final updatedUser = _currentUser!.copyWith(
         email: email ?? _currentUser!.email,
         updatedAt: DateTime.now(),
       );
-      
+
       // Save to local storage
       final prefs = await SharedPreferences.getInstance();
       if (email != null) await prefs.setString('user_email', email);
-      
+
       _currentUser = updatedUser;
-      
+
       return AuthResult(success: true, user: updatedUser);
     } catch (e) {
       return AuthResult(success: false, error: e.toString());
     }
   }
-  
+
   // Change password (simplified)
   Future<AuthResult> changePassword({
     required String currentPassword,
@@ -335,7 +339,7 @@ class AuthService {
       return AuthResult(success: false, error: e.toString());
     }
   }
-  
+
   // Reset password (simplified)
   Future<AuthResult> resetPassword(String email) async {
     try {
@@ -345,26 +349,27 @@ class AuthService {
       return AuthResult(success: false, error: e.toString());
     }
   }
-  
+
   // Delete account (simplified)
   Future<AuthResult> deleteAccount() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
       _currentUser = null;
-      
+
       return AuthResult(success: true);
     } catch (e) {
       return AuthResult(success: false, error: e.toString());
     }
   }
-  
+
   // Get platform connections for the current user
   Future<List<PlatformConnection>> getPlatformConnections() async {
     try {
       if (_currentUser == null) return [];
       final prefs = await SharedPreferences.getInstance();
-      final connectionsJson = prefs.getStringList('platform_connections_${_currentUser!.id}') ?? [];
+      final connectionsJson =
+          prefs.getStringList('platform_connections_${_currentUser!.id}') ?? [];
       return connectionsJson
           .map((jsonStr) {
             try {

@@ -38,7 +38,8 @@ class _ReferralScreenState extends State<ReferralScreen> {
     final user = LocalAuthService.instance.currentUser;
     final rawId = user?.id ?? prefs.getString('user_id') ?? 'AFEEDI';
     // Derive a short, memorable code from the user ID
-    final code = 'AF-${rawId.substring(rawId.length > 6 ? rawId.length - 6 : 0).toUpperCase()}';
+    final code =
+        'AF-${rawId.substring(rawId.length > 6 ? rawId.length - 6 : 0).toUpperCase()}';
     setState(() {
       _referralCode = code;
       _invitesSent = prefs.getInt('referral_invites_sent') ?? 0;
@@ -62,7 +63,9 @@ class _ReferralScreenState extends State<ReferralScreen> {
 
   Future<void> _shareInvite() async {
     final now = DateTime.now();
-    if (_lastShareTime != null && now.difference(_lastShareTime!) < const Duration(seconds: 5)) return;
+    if (_lastShareTime != null &&
+        now.difference(_lastShareTime!) < const Duration(seconds: 5))
+      return;
     _lastShareTime = now;
 
     final message =
@@ -85,7 +88,9 @@ class _ReferralScreenState extends State<ReferralScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Invite message copied! Paste it anywhere to share.'),
+        content: const Text(
+          'Invite message copied! Paste it anywhere to share.',
+        ),
         behavior: SnackBarBehavior.floating,
         backgroundColor: _cyan.withValues(alpha: 0.9),
         action: SnackBarAction(
@@ -117,25 +122,25 @@ class _ReferralScreenState extends State<ReferralScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: _cyan))
           : SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildHeroSection(),
-            const SizedBox(height: 28),
-            _buildReferralCode(),
-            const SizedBox(height: 20),
-            _buildShareButton(),
-            const SizedBox(height: 28),
-            _buildStatsRow(),
-            const SizedBox(height: 28),
-            _buildRewardSteps(),
-            const SizedBox(height: 28),
-            _buildHowItWorks(),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHeroSection(),
+                  const SizedBox(height: 28),
+                  _buildReferralCode(),
+                  const SizedBox(height: 20),
+                  _buildShareButton(),
+                  const SizedBox(height: 28),
+                  _buildStatsRow(),
+                  const SizedBox(height: 28),
+                  _buildRewardSteps(),
+                  const SizedBox(height: 28),
+                  _buildHowItWorks(),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
     );
   }
 
@@ -171,7 +176,11 @@ class _ReferralScreenState extends State<ReferralScreen> {
           const SizedBox(height: 10),
           Text(
             'When a friend joins Afeedi using your code and watches 5 videos, you both get 7 days of Pro free.',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 14, height: 1.5),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.75),
+              fontSize: 14,
+              height: 1.5,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -191,7 +200,10 @@ class _ReferralScreenState extends State<ReferralScreen> {
         children: [
           Text(
             'Your referral code',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.6),
+              fontSize: 13,
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -258,9 +270,21 @@ class _ReferralScreenState extends State<ReferralScreen> {
   Widget _buildStatsRow() {
     return Row(
       children: [
-        Expanded(child: _buildStatCard('$_invitesSent', 'Invites Sent', Icons.send_outlined)),
+        Expanded(
+          child: _buildStatCard(
+            '$_invitesSent',
+            'Invites Sent',
+            Icons.send_outlined,
+          ),
+        ),
         const SizedBox(width: 16),
-        Expanded(child: _buildStatCard('$_friendsJoined', 'Friends Joined', Icons.group_outlined)),
+        Expanded(
+          child: _buildStatCard(
+            '$_friendsJoined',
+            'Friends Joined',
+            Icons.group_outlined,
+          ),
+        ),
         const SizedBox(width: 16),
         Expanded(
           child: _buildStatCard(
@@ -347,7 +371,11 @@ class _ReferralScreenState extends State<ReferralScreen> {
         children: [
           const Text(
             'How the reward works',
-            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
           ...steps.asMap().entries.map((entry) {

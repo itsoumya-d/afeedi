@@ -29,7 +29,8 @@ class VideoContentExtractionService {
     try {
       if (content.platform != PlatformType.youtube) {
         throw UnsupportedError(
-            'Only YouTube content is supported. Other platforms use url_launcher.');
+          'Only YouTube content is supported. Other platforms use url_launcher.',
+        );
       }
 
       final videoId = content.platformContentId;
@@ -43,7 +44,8 @@ class VideoContentExtractionService {
         duration: content.durationSeconds != null
             ? Duration(seconds: content.durationSeconds!)
             : null,
-        thumbnailUrl: content.thumbnailUrl ??
+        thumbnailUrl:
+            content.thumbnailUrl ??
             'https://img.youtube.com/vi/$videoId/mqdefault.jpg',
         author: content.creatorName ?? '',
         viewCount: content.viewCount ?? 0,
@@ -58,10 +60,7 @@ class VideoContentExtractionService {
       await AnalyticsService.instance.trackUserInteraction(
         action: 'video_content_extracted',
         screen: 'video_extraction',
-        additionalData: {
-          'video_id': videoId,
-          'content_id': content.id,
-        },
+        additionalData: {'video_id': videoId, 'content_id': content.id},
       );
 
       return extracted;

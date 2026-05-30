@@ -41,7 +41,8 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
     _genres = prefs.getStringList('onboarding_selected_genres') ?? [];
     final isPro = prefs.getBool('is_premium') ?? false;
 
-    final content = await ContentService.instance.getOnboardingBasedRecommendations(limit: 5);
+    final content = await ContentService.instance
+        .getOnboardingBasedRecommendations(limit: 5);
     if (!mounted) return;
     setState(() {
       _isPro = isPro;
@@ -55,13 +56,27 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
     final now = DateTime.now();
     final startOfWeek = now.subtract(Duration(days: now.weekday % 7));
     final endOfWeek = startOfWeek.add(const Duration(days: 6));
-    final months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return '${months[startOfWeek.month - 1]} ${startOfWeek.day} – ${months[endOfWeek.month - 1]} ${endOfWeek.day}';
   }
 
   Future<void> _shareDigest() async {
     final titles = _picks.take(3).map((c) => '• ${c.title}').join('\n');
-    final msg = 'My Afeedi Weekly Digest — $_weekLabel\n\nTop picks this week:\n$titles\n\nGet your personalized feed: https://afeedi.com/download';
+    final msg =
+        'My Afeedi Weekly Digest — $_weekLabel\n\nTop picks this week:\n$titles\n\nGet your personalized feed: https://afeedi.com/download';
     await Clipboard.setData(ClipboardData(text: msg));
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -80,7 +95,9 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final greeting = _userName.isNotEmpty ? 'Hi ${_userName.split(' ').first},' : 'Your';
+    final greeting = _userName.isNotEmpty
+        ? 'Hi ${_userName.split(' ').first},'
+        : 'Your';
 
     return Scaffold(
       backgroundColor: _bg,
@@ -150,7 +167,10 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: _cyan.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(20),
@@ -175,7 +195,10 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
               const Spacer(),
               Text(
                 _weekLabel,
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12),
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  fontSize: 12,
+                ),
               ),
             ],
           ),
@@ -192,7 +215,11 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
           const SizedBox(height: 6),
           Text(
             'Curated from across YouTube, TikTok, Instagram & more — just for you.',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13, height: 1.5),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.6),
+              fontSize: 13,
+              height: 1.5,
+            ),
           ),
         ],
       ),
@@ -216,7 +243,11 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
           ),
           child: Text(
             g,
-            style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         );
       }).toList(),
@@ -278,114 +309,127 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
     final thumbnail = content.thumbnailUrl;
 
     return Semantics(
-      label: 'Rank $rank: ${content.title ?? 'Video'}, $platformName. Double-tap to play.',
+      label:
+          'Rank $rank: ${content.title ?? 'Video'}, $platformName. Double-tap to play.',
       button: true,
       child: GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, AppRoutes.player, arguments: content);
-        AnalyticsService.instance.trackUserInteraction(
-          action: 'weekly_digest_pick_tapped',
-          screen: 'weekly_digest',
-          additionalData: {'rank': rank, 'content_id': content.id},
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: _card,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
-        ),
-        child: Row(
-          children: [
-            // Rank number
-            Container(
-              width: 36,
-              alignment: Alignment.center,
-              child: Text(
-                '$rank',
-                style: TextStyle(
-                  color: rank == 1 ? const Color(0xFFFFD700) : Colors.white.withValues(alpha: 0.3),
-                  fontSize: rank == 1 ? 18 : 14,
-                  fontWeight: FontWeight.bold,
+        onTap: () {
+          Navigator.pushNamed(context, AppRoutes.player, arguments: content);
+          AnalyticsService.instance.trackUserInteraction(
+            action: 'weekly_digest_pick_tapped',
+            screen: 'weekly_digest',
+            additionalData: {'rank': rank, 'content_id': content.id},
+          );
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: _card,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+          ),
+          child: Row(
+            children: [
+              // Rank number
+              Container(
+                width: 36,
+                alignment: Alignment.center,
+                child: Text(
+                  '$rank',
+                  style: TextStyle(
+                    color: rank == 1
+                        ? const Color(0xFFFFD700)
+                        : Colors.white.withValues(alpha: 0.3),
+                    fontSize: rank == 1 ? 18 : 14,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-            // Thumbnail
-            ClipRRect(
-              borderRadius: const BorderRadius.horizontal(left: Radius.circular(4)),
-              child: thumbnail != null
-                  ? Image.network(
-                      thumbnail,
-                      width: 80,
-                      height: 60,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _thumbnailFallback(platformColor),
-                    )
-                  : _thumbnailFallback(platformColor),
-            ),
-            const SizedBox(width: 12),
-            // Info
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      content.title ?? 'Untitled',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        height: 1.3,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 5),
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: platformColor.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            platformName,
-                            style: TextStyle(
-                              color: platformColor,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
+              // Thumbnail
+              ClipRRect(
+                borderRadius: const BorderRadius.horizontal(
+                  left: Radius.circular(4),
+                ),
+                child: thumbnail != null
+                    ? Image.network(
+                        thumbnail,
+                        width: 80,
+                        height: 60,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) =>
+                            _thumbnailFallback(platformColor),
+                      )
+                    : _thumbnailFallback(platformColor),
+              ),
+              const SizedBox(width: 12),
+              // Info
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        content.title ?? 'Untitled',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          height: 1.3,
                         ),
-                        if (content.tags.isNotEmpty) ...[
-                          const SizedBox(width: 6),
-                          Text(
-                            content.tags.first,
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.4),
-                              fontSize: 10,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: platformColor.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              platformName,
+                              style: TextStyle(
+                                color: platformColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
+                          if (content.tags.isNotEmpty) ...[
+                            const SizedBox(width: 6),
+                            Text(
+                              content.tags.first,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.4),
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(right: 12),
-              child: ExcludeSemantics(
-                child: Icon(Icons.play_circle_outline, color: Colors.white38, size: 22),
+              const Padding(
+                padding: EdgeInsets.only(right: 12),
+                child: ExcludeSemantics(
+                  child: Icon(
+                    Icons.play_circle_outline,
+                    color: Colors.white38,
+                    size: 22,
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 
@@ -411,7 +455,9 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
             ],
           ),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFF7C3AED).withValues(alpha: 0.4)),
+          border: Border.all(
+            color: const Color(0xFF7C3AED).withValues(alpha: 0.4),
+          ),
         ),
         child: Row(
           children: [
@@ -432,8 +478,9 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
                   Text(
                     'Upgrade to Pro for all 5 personalized picks.',
                     style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.55),
-                        fontSize: 12),
+                      color: Colors.white.withValues(alpha: 0.55),
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),
@@ -447,9 +494,10 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
               child: const Text(
                 'Unlock',
                 style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold),
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -463,53 +511,57 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
       label: 'Share your digest and get 7 days Pro free. Double-tap to share.',
       button: true,
       child: GestureDetector(
-      onTap: _shareDigest,
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              _purple.withValues(alpha: 0.18),
-              _cyan.withValues(alpha: 0.18),
+        onTap: _shareDigest,
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                _purple.withValues(alpha: 0.18),
+                _cyan.withValues(alpha: 0.18),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: _purple.withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.card_giftcard, color: _purple, size: 28),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Share your digest → Get 7 Days Pro',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'When a friend joins using your link, you both get Pro free.',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.55),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const ExcludeSemantics(
+                child: Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white30,
+                  size: 14,
+                ),
+              ),
             ],
           ),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _purple.withValues(alpha: 0.3)),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.card_giftcard, color: _purple, size: 28),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Share your digest → Get 7 Days Pro',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'When a friend joins using your link, you both get Pro free.',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.55),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const ExcludeSemantics(
-              child: Icon(Icons.arrow_forward_ios, color: Colors.white30, size: 14),
-            ),
-          ],
         ),
       ),
-    ),
     );
   }
 }

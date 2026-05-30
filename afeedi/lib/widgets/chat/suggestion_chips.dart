@@ -24,7 +24,8 @@ class SuggestionChips extends StatelessWidget {
     }
 
     final widget = Container(
-      padding: padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -43,11 +44,7 @@ class SuggestionChips extends StatelessWidget {
             children: suggestions.asMap().entries.map((entry) {
               final index = entry.key;
               final suggestion = entry.value;
-              return _buildSuggestionChip(
-                suggestion,
-                index,
-                context,
-              );
+              return _buildSuggestionChip(suggestion, index, context);
             }).toList(),
           ),
         ],
@@ -57,15 +54,9 @@ class SuggestionChips extends StatelessWidget {
     if (animation != null) {
       return SlideTransition(
         position: animation!.drive(
-          Tween<Offset>(
-            begin: const Offset(0, 0.3),
-            end: Offset.zero,
-          ),
+          Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero),
         ),
-        child: FadeTransition(
-          opacity: animation!,
-          child: widget,
-        ),
+        child: FadeTransition(opacity: animation!, child: widget),
       );
     }
 
@@ -100,10 +91,7 @@ class _SuggestionChip extends StatefulWidget {
   final String text;
   final VoidCallback onTap;
 
-  const _SuggestionChip({
-    required this.text,
-    required this.onTap,
-  });
+  const _SuggestionChip({required this.text, required this.onTap});
 
   @override
   State<_SuggestionChip> createState() => _SuggestionChipState();
@@ -125,10 +113,7 @@ class _SuggestionChipState extends State<_SuggestionChip>
     _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -172,10 +157,7 @@ class _SuggestionChipState extends State<_SuggestionChip>
             scale: _scaleAnimation.value,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 10,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 gradient: _isPressed
                     ? LinearGradient(
@@ -298,15 +280,9 @@ class QuickReplyChips extends StatelessWidget {
     if (animation != null) {
       return SlideTransition(
         position: animation!.drive(
-          Tween<Offset>(
-            begin: const Offset(0, 0.3),
-            end: Offset.zero,
-          ),
+          Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero),
         ),
-        child: FadeTransition(
-          opacity: animation!,
-          child: widget,
-        ),
+        child: FadeTransition(opacity: animation!, child: widget),
       );
     }
 
@@ -346,18 +322,12 @@ class _QuickReplyChipState extends State<_QuickReplyChip>
     _slideAnimation = Tween<double>(
       begin: 50,
       end: 0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutBack,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
     _fadeAnimation = Tween<double>(
       begin: 0,
       end: 1,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     Future.delayed(widget.delay, () {
       if (mounted) {

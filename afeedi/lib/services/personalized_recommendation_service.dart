@@ -66,10 +66,14 @@ class PersonalizedRecommendationService {
       }
 
       // Get user preferences from onboarding
-      final onboardingPreferences = await OnboardingService.instance.getUserPreferences();
+      final onboardingPreferences = await OnboardingService.instance
+          .getUserPreferences();
       if (onboardingPreferences == null) {
         // Fall back to basic recommendations if no onboarding data
-        return await _generateBasicRecommendations(limit: limit, platforms: platforms);
+        return await _generateBasicRecommendations(
+          limit: limit,
+          platforms: platforms,
+        );
       }
 
       // Get behavioral insights from AI service
@@ -82,7 +86,10 @@ class PersonalizedRecommendationService {
       final availableContent = await ContentAggregationService.instance
           .aggregateContent(
             limit: limit * 5, // Get more content to choose from
-            platforms: _getPrioritizedPlatforms(onboardingPreferences, platforms),
+            platforms: _getPrioritizedPlatforms(
+              onboardingPreferences,
+              platforms,
+            ),
           );
 
       if (availableContent.isEmpty) {
@@ -218,8 +225,9 @@ class PersonalizedRecommendationService {
 
   // Apply diversity to recommendations to avoid showing too many similar items
   List<Recommendation> applyDiversityToRecommendations(
-      List<Recommendation> recommendations,
-      {double diversityFactor = 0.3}) {
+    List<Recommendation> recommendations, {
+    double diversityFactor = 0.3,
+  }) {
     // In a real implementation, this would use a sophisticated algorithm
     // to ensure diversity across genres, content types, etc.
     // For this demo, we'll just shuffle the list
@@ -233,7 +241,9 @@ class PersonalizedRecommendationService {
   }
 
   // Apply diversity to content items to avoid showing too similar content
-  List<ContentItem> applyDiversityToContentItems(List<ContentItem> contentItems) {
+  List<ContentItem> applyDiversityToContentItems(
+    List<ContentItem> contentItems,
+  ) {
     // In a real implementation, this would use a sophisticated algorithm
     // to ensure diversity across genres, content types, etc.
     // For this demo, we'll just shuffle the list
@@ -259,10 +269,7 @@ class PersonalizedRecommendationService {
 
       // Get content that aligns with the calendar event
       final availableContent = await ContentAggregationService.instance
-          .aggregateContent(
-            limit: limit * 3,
-            platforms: platforms,
-          );
+          .aggregateContent(limit: limit * 3, platforms: platforms);
 
       if (availableContent.isEmpty) {
         return [];
@@ -312,7 +319,10 @@ class PersonalizedRecommendationService {
       // Get user preferences
       final preferences = await OnboardingService.instance.getUserPreferences();
       if (preferences == null) {
-        return await _generateBasicRecommendations(limit: limit, platforms: platforms);
+        return await _generateBasicRecommendations(
+          limit: limit,
+          platforms: platforms,
+        );
       }
 
       // Determine current time context
@@ -321,10 +331,7 @@ class PersonalizedRecommendationService {
       // Get content aligned with time preferences
       // (preferredContentTypes computed inside _scoreContentForTimeContext)
       final availableContent = await ContentAggregationService.instance
-          .aggregateContent(
-            limit: limit * 3,
-            platforms: platforms,
-          );
+          .aggregateContent(limit: limit * 3, platforms: platforms);
 
       if (availableContent.isEmpty) {
         return [];
@@ -373,14 +380,13 @@ class PersonalizedRecommendationService {
     }
 
     var availableContent = await ContentAggregationService.instance
-        .aggregateContent(
-          limit: limit,
-          platforms: platforms,
-        );
+        .aggregateContent(limit: limit, platforms: platforms);
 
     // Fall back to seed content when no OAuth connections are configured
     if (availableContent.isEmpty) {
-      availableContent = await ContentService.instance.getFeedContent(limit: limit);
+      availableContent = await ContentService.instance.getFeedContent(
+        limit: limit,
+      );
     }
 
     if (availableContent.isEmpty) {
@@ -391,18 +397,22 @@ class PersonalizedRecommendationService {
     final now = DateTime.now();
 
     for (final content in availableContent.take(limit)) {
-      recommendations.add(Recommendation(
-        id: 'basic_rec_${now.millisecondsSinceEpoch}_${recommendations.length}',
-        title: content.title ?? 'Untitled',
-        description: content.description ?? '',
-        imageUrl: content.thumbnailUrl ?? '',
-        platform: content.platform.name,
-        category: content.categories.isNotEmpty ? content.categories.first : 'general',
-        durationSeconds: content.durationSeconds ?? 0,
-        relevanceScore: 0.5,
-        recommendationReason: 'Trending content you might enjoy',
-        createdAt: now,
-      ));
+      recommendations.add(
+        Recommendation(
+          id: 'basic_rec_${now.millisecondsSinceEpoch}_${recommendations.length}',
+          title: content.title ?? 'Untitled',
+          description: content.description ?? '',
+          imageUrl: content.thumbnailUrl ?? '',
+          platform: content.platform.name,
+          category: content.categories.isNotEmpty
+              ? content.categories.first
+              : 'general',
+          durationSeconds: content.durationSeconds ?? 0,
+          relevanceScore: 0.5,
+          recommendationReason: 'Trending content you might enjoy',
+          createdAt: now,
+        ),
+      );
     }
 
     return recommendations;
@@ -444,7 +454,8 @@ class PersonalizedRecommendationService {
 
             if (eventRelevance > calendarBoost) {
               calendarBoost = eventRelevance;
-              calendarContext = 'Relevant to your upcoming ${event.title} event';
+              calendarContext =
+                  'Relevant to your upcoming ${event.title} event';
             }
           }
         }
@@ -463,12 +474,16 @@ class PersonalizedRecommendationService {
 
       if (finalScore > 0.3) {
         // Threshold for inclusion
-        scoredContent.add(ScoredContent(
-          content: contentItem,
-          score: finalScore,
-          calendarContext: calendarBoost > 0.3 ? calendarContext : null,
-          timeContext: timeBoost > 0.3 ? 'Perfect for ${timeContext.toLowerCase()}' : null,
-        ));
+        scoredContent.add(
+          ScoredContent(
+            content: contentItem,
+            score: finalScore,
+            calendarContext: calendarBoost > 0.3 ? calendarContext : null,
+            timeContext: timeBoost > 0.3
+                ? 'Perfect for ${timeContext.toLowerCase()}'
+                : null,
+          ),
+        );
       }
     }
 
@@ -491,20 +506,22 @@ class PersonalizedRecommendationService {
         timeContext: item.timeContext,
       );
 
-      recommendations.add(Recommendation(
-        id: 'comprehensive_rec_${now.millisecondsSinceEpoch}_${recommendations.length}',
-        title: item.content.title ?? 'Untitled',
-        description: item.content.description ?? '',
-        imageUrl: item.content.thumbnailUrl ?? '',
-        platform: item.content.platform.name,
-        category: item.content.categories.isNotEmpty
-            ? item.content.categories.first
-            : 'general',
-        durationSeconds: item.content.durationSeconds ?? 0,
-        relevanceScore: item.score,
-        recommendationReason: reason,
-        createdAt: now,
-      ));
+      recommendations.add(
+        Recommendation(
+          id: 'comprehensive_rec_${now.millisecondsSinceEpoch}_${recommendations.length}',
+          title: item.content.title ?? 'Untitled',
+          description: item.content.description ?? '',
+          imageUrl: item.content.thumbnailUrl ?? '',
+          platform: item.content.platform.name,
+          category: item.content.categories.isNotEmpty
+              ? item.content.categories.first
+              : 'general',
+          durationSeconds: item.content.durationSeconds ?? 0,
+          relevanceScore: item.score,
+          recommendationReason: reason,
+          createdAt: now,
+        ),
+      );
     }
 
     return recommendations;
@@ -562,7 +579,8 @@ class PersonalizedRecommendationService {
       }
 
       if (preferences.contentLengthPreferences.containsKey(lengthCategory)) {
-        score += 0.1 * (preferences.contentLengthPreferences[lengthCategory]! / 100);
+        score +=
+            0.1 * (preferences.contentLengthPreferences[lengthCategory]! / 100);
       }
     }
 
@@ -587,8 +605,9 @@ class PersonalizedRecommendationService {
 
     if (eventKeywords.isEmpty) return 0.0;
 
-    final matchingKeywords =
-        contentKeywords.where((keyword) => eventKeywords.contains(keyword)).length;
+    final matchingKeywords = contentKeywords
+        .where((keyword) => eventKeywords.contains(keyword))
+        .length;
 
     if (matchingKeywords > 0) {
       relevance += 0.6 * (matchingKeywords / eventKeywords.length);
@@ -613,8 +632,11 @@ class PersonalizedRecommendationService {
     final contentTypeName = content.contentType.name;
 
     // Check if user has time-based preferences
-    if (preferences.timeBasedPreferences.containsKey(timeContext.toLowerCase())) {
-      final preferredType = preferences.timeBasedPreferences[timeContext.toLowerCase()];
+    if (preferences.timeBasedPreferences.containsKey(
+      timeContext.toLowerCase(),
+    )) {
+      final preferredType =
+          preferences.timeBasedPreferences[timeContext.toLowerCase()];
 
       if (contentTypeName == preferredType) {
         boost += 0.7;
@@ -680,12 +702,14 @@ class PersonalizedRecommendationService {
       final adjustedScore = item.score * (1 + diversityBoost);
 
       // Add to result with adjusted score
-      result.add(ScoredContent(
-        content: item.content,
-        score: adjustedScore,
-        calendarContext: item.calendarContext,
-        timeContext: item.timeContext,
-      ));
+      result.add(
+        ScoredContent(
+          content: item.content,
+          score: adjustedScore,
+          calendarContext: item.calendarContext,
+          timeContext: item.timeContext,
+        ),
+      );
 
       // Update diversity tracking sets
       platforms.add(item.content.platform);
@@ -761,8 +785,9 @@ class PersonalizedRecommendationService {
   // No-op: Supabase has been removed; recommendations are not persisted remotely.
   void _saveRecommendations(List<Recommendation> recommendations) {
     debugPrint(
-        'PersonalizedRecommendationService: _saveRecommendations called with '
-        '${recommendations.length} items (no-op: Supabase removed)');
+      'PersonalizedRecommendationService: _saveRecommendations called with '
+      '${recommendations.length} items (no-op: Supabase removed)',
+    );
   }
 
   List<PlatformType>? _getPrioritizedPlatforms(
@@ -850,17 +875,21 @@ class PersonalizedRecommendationService {
     final keywords = <String>[];
 
     // Add event title words
-    keywords.addAll(event.title
-        .split(' ')
-        .where((word) => word.length > 3)
-        .map((word) => word.toLowerCase()));
+    keywords.addAll(
+      event.title
+          .split(' ')
+          .where((word) => word.length > 3)
+          .map((word) => word.toLowerCase()),
+    );
 
     // Add event description words if available
     if (event.description != null && event.description!.isNotEmpty) {
-      keywords.addAll(event.description!
-          .split(' ')
-          .where((word) => word.length > 3)
-          .map((word) => word.toLowerCase()));
+      keywords.addAll(
+        event.description!
+            .split(' ')
+            .where((word) => word.length > 3)
+            .map((word) => word.toLowerCase()),
+      );
     }
 
     // Add event type
@@ -868,10 +897,12 @@ class PersonalizedRecommendationService {
 
     // Add event location if available
     if (event.location != null && event.location!.isNotEmpty) {
-      keywords.addAll(event.location!
-          .split(' ')
-          .where((word) => word.length > 3)
-          .map((word) => word.toLowerCase()));
+      keywords.addAll(
+        event.location!
+            .split(' ')
+            .where((word) => word.length > 3)
+            .map((word) => word.toLowerCase()),
+      );
     }
 
     return keywords;
@@ -882,18 +913,22 @@ class PersonalizedRecommendationService {
 
     // Add title words
     if (content.title != null) {
-      keywords.addAll(content.title!
-          .split(' ')
-          .where((word) => word.length > 3)
-          .map((word) => word.toLowerCase()));
+      keywords.addAll(
+        content.title!
+            .split(' ')
+            .where((word) => word.length > 3)
+            .map((word) => word.toLowerCase()),
+      );
     }
 
     // Add description words if available
     if (content.description != null && content.description!.isNotEmpty) {
-      keywords.addAll(content.description!
-          .split(' ')
-          .where((word) => word.length > 3)
-          .map((word) => word.toLowerCase()));
+      keywords.addAll(
+        content.description!
+            .split(' ')
+            .where((word) => word.length > 3)
+            .map((word) => word.toLowerCase()),
+      );
     }
 
     // Add tags if available
@@ -931,7 +966,10 @@ class PersonalizedRecommendationService {
     return false;
   }
 
-  double _calculateBehavioralBoost(Content content, UserBehaviorInsight insights) {
+  double _calculateBehavioralBoost(
+    Content content,
+    UserBehaviorInsight insights,
+  ) {
     // Check if the content type matches user's preferred content types
     final contentTypeName = content.contentType.name;
     if (insights.preferredContentTypes.contains(contentTypeName)) {
@@ -952,17 +990,17 @@ class PersonalizedRecommendationService {
     final now = DateTime.now();
 
     for (final item in content) {
-      final relevance = _calculateEventRelevance(
-        content: item,
-        event: event,
-      );
+      final relevance = _calculateEventRelevance(content: item, event: event);
 
       if (relevance > 0.3) {
-        scoredContent.add(ScoredContent(
-          content: item,
-          score: relevance,
-          calendarContext: 'Relevant to your ${event.title} ${event.eventType}',
-        ));
+        scoredContent.add(
+          ScoredContent(
+            content: item,
+            score: relevance,
+            calendarContext:
+                'Relevant to your ${event.title} ${event.eventType}',
+          ),
+        );
       }
     }
 
@@ -971,21 +1009,23 @@ class PersonalizedRecommendationService {
     // Create recommendation objects
     final recommendations = <Recommendation>[];
     for (final item in scoredContent.take(limit)) {
-      recommendations.add(Recommendation(
-        id: 'calendar_rec_${now.millisecondsSinceEpoch}_${recommendations.length}',
-        title: item.content.title ?? 'Untitled',
-        description: item.content.description ?? '',
-        imageUrl: item.content.thumbnailUrl ?? '',
-        platform: item.content.platform.name,
-        category: item.content.categories.isNotEmpty
-            ? item.content.categories.first
-            : 'general',
-        durationSeconds: item.content.durationSeconds ?? 0,
-        relevanceScore: item.score,
-        recommendationReason:
-            item.calendarContext ?? 'Relevant to your calendar event',
-        createdAt: now,
-      ));
+      recommendations.add(
+        Recommendation(
+          id: 'calendar_rec_${now.millisecondsSinceEpoch}_${recommendations.length}',
+          title: item.content.title ?? 'Untitled',
+          description: item.content.description ?? '',
+          imageUrl: item.content.thumbnailUrl ?? '',
+          platform: item.content.platform.name,
+          category: item.content.categories.isNotEmpty
+              ? item.content.categories.first
+              : 'general',
+          durationSeconds: item.content.durationSeconds ?? 0,
+          relevanceScore: item.score,
+          recommendationReason:
+              item.calendarContext ?? 'Relevant to your calendar event',
+          createdAt: now,
+        ),
+      );
     }
 
     return recommendations;
@@ -1028,11 +1068,13 @@ class PersonalizedRecommendationService {
         }
       }
 
-      scoredContent.add(ScoredContent(
-        content: item,
-        score: score,
-        timeContext: 'Perfect for ${timeContext.toLowerCase()} viewing',
-      ));
+      scoredContent.add(
+        ScoredContent(
+          content: item,
+          score: score,
+          timeContext: 'Perfect for ${timeContext.toLowerCase()} viewing',
+        ),
+      );
     }
 
     scoredContent.sort((a, b) => b.score.compareTo(a.score));
@@ -1040,21 +1082,24 @@ class PersonalizedRecommendationService {
     // Create recommendation objects
     final recommendations = <Recommendation>[];
     for (final item in scoredContent.take(limit)) {
-      recommendations.add(Recommendation(
-        id: 'time_rec_${now.millisecondsSinceEpoch}_${recommendations.length}',
-        title: item.content.title ?? 'Untitled',
-        description: item.content.description ?? '',
-        imageUrl: item.content.thumbnailUrl ?? '',
-        platform: item.content.platform.name,
-        category: item.content.categories.isNotEmpty
-            ? item.content.categories.first
-            : 'general',
-        durationSeconds: item.content.durationSeconds ?? 0,
-        relevanceScore: item.score,
-        recommendationReason: item.timeContext ??
-            'Recommended for ${timeContext.toLowerCase()}',
-        createdAt: now,
-      ));
+      recommendations.add(
+        Recommendation(
+          id: 'time_rec_${now.millisecondsSinceEpoch}_${recommendations.length}',
+          title: item.content.title ?? 'Untitled',
+          description: item.content.description ?? '',
+          imageUrl: item.content.thumbnailUrl ?? '',
+          platform: item.content.platform.name,
+          category: item.content.categories.isNotEmpty
+              ? item.content.categories.first
+              : 'general',
+          durationSeconds: item.content.durationSeconds ?? 0,
+          relevanceScore: item.score,
+          recommendationReason:
+              item.timeContext ??
+              'Recommended for ${timeContext.toLowerCase()}',
+          createdAt: now,
+        ),
+      );
     }
 
     return recommendations;

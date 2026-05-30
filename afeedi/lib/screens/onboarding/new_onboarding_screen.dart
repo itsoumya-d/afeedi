@@ -19,104 +19,95 @@ class _NewOnboardingScreenState extends State<NewOnboardingScreen>
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  
+
   Map<String, dynamic>? _currentStep;
   Map<String, dynamic> _stepData = {};
   bool _isLoading = false;
   String? _errorMessage;
-  
+
   @override
   void initState() {
     super.initState();
     _initializeAnimations();
     _initializeOnboarding();
   }
-  
+
   void _initializeAnimations() {
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _slideController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
-    
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
   }
-  
+
   Future<void> _initializeOnboarding() async {
     setState(() => _isLoading = true);
-    
+
     try {
       await OnboardingService.instance.initialize();
-      
+
       // Check if onboarding is already completed
       final isCompleted = await OnboardingService().isOnboardingCompleted();
       if (isCompleted && mounted) {
         NavigationService.pushReplacementNamed('/dashboard');
         return;
       }
-      
+
       // Get the next step
       _currentStep = OnboardingService().getNextStep();
-      
+
       if (_currentStep == null && mounted) {
         // All steps completed, navigate to home
         NavigationService.navigateToHome();
         return;
       }
-      
+
       _fadeController.forward();
       _slideController.forward();
-      
     } catch (e) {
       setState(() => _errorMessage = 'Failed to initialize onboarding: $e');
     } finally {
       setState(() => _isLoading = false);
     }
   }
-  
+
   Future<void> _nextStep() async {
     if (_currentStep == null) return;
-    
+
     setState(() => _isLoading = true);
-    
+
     try {
       // Validate step data
       if (_currentStep!['required'] == true && _stepData.isEmpty) {
-        setState(() => _errorMessage = 'Please complete this step before continuing');
+        setState(
+          () => _errorMessage = 'Please complete this step before continuing',
+        );
         return;
       }
-      
+
       // Complete current step
-      await OnboardingService().completeStep(
-        _currentStep!['id'],
-        _stepData,
-      );
-      
+      await OnboardingService().completeStep(_currentStep!['id'], _stepData);
+
       // Animate out
       await _slideController.reverse();
-      
+
       // Get next step
       _currentStep = OnboardingService().getNextStep();
       _stepData.clear();
-      
+
       if (_currentStep == null) {
         // Onboarding completed
         if (mounted) {
@@ -124,31 +115,30 @@ class _NewOnboardingScreenState extends State<NewOnboardingScreen>
         }
         return;
       }
-      
+
       // Animate in new step
       await _slideController.forward();
-      
+
       // Haptic feedback
       HapticFeedback.lightImpact();
-      
     } catch (e) {
       setState(() => _errorMessage = 'Failed to proceed: $e');
     } finally {
       setState(() => _isLoading = false);
     }
   }
-  
+
   Future<void> _previousStep() async {
     // For now, we'll just go back in the step flow
     // In a more complex implementation, we could track step history
     HapticFeedback.lightImpact();
   }
-  
+
   Future<void> _skipStep() async {
     if (_currentStep == null || _currentStep!['required'] == true) return;
-    
+
     setState(() => _isLoading = true);
-    
+
     try {
       await OnboardingService().skipStep(_currentStep!['id']);
       await _nextStep();
@@ -158,21 +148,21 @@ class _NewOnboardingScreenState extends State<NewOnboardingScreen>
       setState(() => _isLoading = false);
     }
   }
-  
+
   void _updateStepData(Map<String, dynamic> data) {
     setState(() {
       _stepData = {..._stepData, ...data};
       _errorMessage = null;
     });
   }
-  
+
   @override
   void dispose() {
     _fadeController.dispose();
     _slideController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -181,12 +171,12 @@ class _NewOnboardingScreenState extends State<NewOnboardingScreen>
         child: _isLoading
             ? _buildLoadingState()
             : _errorMessage != null
-                ? _buildErrorState()
-                : _buildOnboardingContent(),
+            ? _buildErrorState()
+            : _buildOnboardingContent(),
       ),
     );
   }
-  
+
   Widget _buildLoadingState() {
     return const Center(
       child: Column(
@@ -194,15 +184,12 @@ class _NewOnboardingScreenState extends State<NewOnboardingScreen>
         children: [
           CircularProgressIndicator(),
           SizedBox(height: 16),
-          Text(
-            'Setting up your experience...',
-            style: TextStyle(fontSize: 16),
-          ),
+          Text('Setting up your experience...', style: TextStyle(fontSize: 16)),
         ],
       ),
     );
   }
-  
+
   Widget _buildErrorState() {
     return Center(
       child: Padding(
@@ -239,7 +226,8 @@ class _NewOnboardingScreenState extends State<NewOnboardingScreen>
                 ),
                 const SizedBox(width: 16),
                 FilledButton(
-                  onPressed: () => NavigationService.pushReplacementNamed('/dashboard'),
+                  onPressed: () =>
+                      NavigationService.pushReplacementNamed('/dashboard'),
                   child: const Text('Skip Onboarding'),
                 ),
               ],
@@ -249,14 +237,12 @@ class _NewOnboardingScreenState extends State<NewOnboardingScreen>
       ),
     );
   }
-  
+
   Widget _buildOnboardingContent() {
     if (_currentStep == null) {
-      return const Center(
-        child: Text('No onboarding steps available'),
-      );
+      return const Center(child: Text('No onboarding steps available'));
     }
-    
+
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Column(
@@ -267,7 +253,7 @@ class _NewOnboardingScreenState extends State<NewOnboardingScreen>
             currentStep: _currentStep!['title'] ?? '',
             totalSteps: OnboardingService.onboardingFlow.length,
           ),
-          
+
           // Main content
           Expanded(
             child: SlideTransition(
@@ -279,7 +265,7 @@ class _NewOnboardingScreenState extends State<NewOnboardingScreen>
               ),
             ),
           ),
-          
+
           // Navigation buttons
           StepNavigationWidget(
             canGoBack: OnboardingService.instance.completedSteps.isNotEmpty,

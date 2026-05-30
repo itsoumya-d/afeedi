@@ -5,10 +5,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class OAuthService {
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: [
-      'email',
-      'https://www.googleapis.com/auth/youtube.readonly',
-    ],
+    scopes: ['email', 'https://www.googleapis.com/auth/youtube.readonly'],
   );
 
   // Google Sign-In (for authentication)
@@ -39,10 +36,7 @@ class OAuthService {
     try {
       final result = await connectGoogle();
       if (result != null) {
-        return {
-          ...result,
-          'platform': 'youtube',
-        };
+        return {...result, 'platform': 'youtube'};
       }
     } catch (error) {
       debugPrint('YouTube OAuth Error: $error');
@@ -56,7 +50,7 @@ class OAuthService {
       final LoginResult result = await FacebookAuth.instance.login(
         permissions: ['instagram_basic', 'instagram_content_publish'],
       );
-      
+
       if (result.status == LoginStatus.success) {
         final userData = await FacebookAuth.instance.getUserData(
           fields: "name,email,picture",
@@ -80,7 +74,9 @@ class OAuthService {
   // Until a real client_key is configured, this returns null to prevent
   // a fake "Connected" badge from appearing to users.
   static Future<Map<String, dynamic>?> connectTikTok() async {
-    debugPrint('TikTok OAuth: not configured — register at developers.tiktok.com');
+    debugPrint(
+      'TikTok OAuth: not configured — register at developers.tiktok.com',
+    );
     return null;
   }
 
@@ -90,7 +86,7 @@ class OAuthService {
       final LoginResult result = await FacebookAuth.instance.login(
         permissions: ['email', 'public_profile', 'pages_read_engagement'],
       );
-      
+
       if (result.status == LoginStatus.success) {
         final userData = await FacebookAuth.instance.getUserData(
           fields: "name,email,picture",
@@ -117,7 +113,7 @@ class OAuthService {
           AppleIDAuthorizationScopes.fullName,
         ],
       );
-      
+
       return {
         'platform': 'apple',
         'userIdentifier': credential.userIdentifier,

@@ -6,12 +6,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz_data;
 
 // Notification categories
-enum NotificationCategory {
-  newContent,
-  recommendation,
-  achievement,
-  system,
-}
+enum NotificationCategory { newContent, recommendation, achievement, system }
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -19,12 +14,14 @@ class NotificationService {
   NotificationService._internal();
   static NotificationService get instance => _instance;
 
-  final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _plugin =
+      FlutterLocalNotificationsPlugin();
   bool _initialized = false;
   bool _tzInitialized = false;
 
   static const _channelName = 'Afeedi Notifications';
-  static const _channelDesc = 'Content updates, streak reminders, and personalized recommendations';
+  static const _channelDesc =
+      'Content updates, streak reminders, and personalized recommendations';
 
   // Per-category channel IDs
   static const _channelNewContent = 'afeedi_new_content';
@@ -49,13 +46,18 @@ class NotificationService {
     if (_initialized) return;
     try {
       _initTimezone();
-      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const androidSettings = AndroidInitializationSettings(
+        '@mipmap/ic_launcher',
+      );
       const iosSettings = DarwinInitializationSettings(
         requestAlertPermission: false,
         requestBadgePermission: false,
         requestSoundPermission: false,
       );
-      const initSettings = InitializationSettings(android: androidSettings, iOS: iosSettings);
+      const initSettings = InitializationSettings(
+        android: androidSettings,
+        iOS: iosSettings,
+      );
       await _plugin.initialize(initSettings);
       _initialized = true;
       debugPrint('NotificationService: initialized');
@@ -80,12 +82,22 @@ class NotificationService {
 
   Future<bool> requestPermission() async {
     try {
-      final iosPlugin = _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+      final iosPlugin = _plugin
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >();
       if (iosPlugin != null) {
-        final granted = await iosPlugin.requestPermissions(alert: true, badge: true, sound: true);
+        final granted = await iosPlugin.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
         return granted ?? false;
       }
-      final androidPlugin = _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      final androidPlugin = _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
       if (androidPlugin != null) {
         final granted = await androidPlugin.requestNotificationsPermission();
         return granted ?? false;
@@ -115,7 +127,10 @@ class NotificationService {
     }
   }
 
-  Future<void> showNewContentNotification({required int count, required String category}) async {
+  Future<void> showNewContentNotification({
+    required int count,
+    required String category,
+  }) async {
     if (!_initialized) return;
     try {
       final details = _buildDetails(category: NotificationCategory.newContent);
@@ -166,7 +181,14 @@ class NotificationService {
       _initTimezone();
       final location = tz.local;
       final now = tz.TZDateTime.now(location);
-      var scheduledDate = tz.TZDateTime(location, now.year, now.month, now.day, hour, minute);
+      var scheduledDate = tz.TZDateTime(
+        location,
+        now.year,
+        now.month,
+        now.day,
+        hour,
+        minute,
+      );
       if (scheduledDate.isBefore(now)) {
         scheduledDate = scheduledDate.add(const Duration(days: 1));
       }
@@ -182,7 +204,9 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
       );
-      debugPrint('NotificationService: scheduled daily notification id=$id at $hour:$minute');
+      debugPrint(
+        'NotificationService: scheduled daily notification id=$id at $hour:$minute',
+      );
     } catch (e) {
       debugPrint('NotificationService scheduleDailyNotification error: $e');
     }
@@ -202,7 +226,14 @@ class NotificationService {
       _initTimezone();
       final location = tz.local;
       final now = tz.TZDateTime.now(location);
-      var scheduledDate = tz.TZDateTime(location, now.year, now.month, now.day, hour, minute);
+      var scheduledDate = tz.TZDateTime(
+        location,
+        now.year,
+        now.month,
+        now.day,
+        hour,
+        minute,
+      );
       if (scheduledDate.isBefore(now)) {
         scheduledDate = scheduledDate.add(const Duration(days: 7));
       }
@@ -264,7 +295,9 @@ class NotificationService {
         );
       }
     } catch (e) {
-      debugPrint('NotificationService schedulePersonalizedNotifications error: $e');
+      debugPrint(
+        'NotificationService schedulePersonalizedNotifications error: $e',
+      );
     }
   }
 
@@ -292,7 +325,9 @@ class NotificationService {
       final genreHint = genres.isNotEmpty
           ? genres.take(2).join(' & ')
           : 'your interests';
-      final details = _buildDetails(category: NotificationCategory.recommendation);
+      final details = _buildDetails(
+        category: NotificationCategory.recommendation,
+      );
       await _plugin.zonedSchedule(
         _weeklyNewContentId,
         'Your Weekly Digest is ready ✨',
@@ -304,16 +339,22 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
       );
-      debugPrint('NotificationService: weekly digest scheduled for Sunday 10AM');
+      debugPrint(
+        'NotificationService: weekly digest scheduled for Sunday 10AM',
+      );
     } catch (e) {
       debugPrint('NotificationService _scheduleWeeklyDigest error: $e');
     }
   }
 
-  Future<void> _scheduleIfContinueWatchingPending(SharedPreferences prefs) async {
+  Future<void> _scheduleIfContinueWatchingPending(
+    SharedPreferences prefs,
+  ) async {
     try {
       final keys = prefs.getKeys();
-      final progressKeys = keys.where((k) => k.startsWith('watch_progress_')).toList();
+      final progressKeys = keys
+          .where((k) => k.startsWith('watch_progress_'))
+          .toList();
       for (final key in progressKeys) {
         final progress = prefs.getDouble(key) ?? 0.0;
         if (progress > 0.0 && progress < 0.8) {
@@ -329,7 +370,9 @@ class NotificationService {
         }
       }
     } catch (e) {
-      debugPrint('NotificationService _scheduleIfContinueWatchingPending error: $e');
+      debugPrint(
+        'NotificationService _scheduleIfContinueWatchingPending error: $e',
+      );
     }
   }
 
@@ -357,7 +400,10 @@ class NotificationService {
     }
   }
 
-  Future<void> notifyContentLoaded({required int newItemCount, required String category}) async {
+  Future<void> notifyContentLoaded({
+    required int newItemCount,
+    required String category,
+  }) async {
     if (newItemCount < 5) return;
     final prefs = await SharedPreferences.getInstance();
     final lastNotifDate = prefs.getString('notif_last_content_date');

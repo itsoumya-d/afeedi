@@ -22,7 +22,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   int _currentIndex = 0;
   late PageController _pageController;
   bool _hasUnreadNotifications = false;
-  
+
   final List<Map<String, dynamic>> _tabs = [
     {
       'title': 'Home',
@@ -64,7 +64,8 @@ class _DashboardScreenState extends State<DashboardScreen>
 
     // Handle initial tab from navigation arguments
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       if (args != null && args['initialTab'] != null) {
         final initialTab = args['initialTab'] as int;
         _onTabTapped(initialTab);
@@ -89,7 +90,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     _pageController.dispose();
     super.dispose();
   }
-  
+
   void _onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
@@ -100,7 +101,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       curve: Curves.easeInOut,
     );
   }
-  
+
   void _onPageChanged(int index) {
     setState(() {
       _currentIndex = index;
@@ -126,7 +127,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                 child: PageView(
                   controller: _pageController,
                   onPageChanged: _onPageChanged,
-                  children: _tabs.map((tab) => tab['widget'] as Widget).toList(),
+                  children: _tabs
+                      .map((tab) => tab['widget'] as Widget)
+                      .toList(),
                 ),
               ),
             ],
@@ -140,7 +143,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       ),
     );
   }
-  
+
   Widget _buildAppBar() {
     final l10n = AppLocalizations.of(context);
     return Container(
@@ -164,7 +167,11 @@ class _DashboardScreenState extends State<DashboardScreen>
                 Positioned(
                   bottom: 4,
                   right: 4,
-                  child: Icon(Icons.play_arrow, color: Colors.white.withValues(alpha: 0.4), size: 16),
+                  child: Icon(
+                    Icons.play_arrow,
+                    color: Colors.white.withValues(alpha: 0.4),
+                    size: 16,
+                  ),
                 ),
                 const Center(
                   child: Text(
@@ -209,48 +216,46 @@ class _DashboardScreenState extends State<DashboardScreen>
             label: 'Search',
             button: true,
             child: IconButton(
-            onPressed: () {
-              Navigator.pushNamed(context, AppRoutes.search);
-            },
-            tooltip: 'Search',
-            icon: const Icon(
-              Icons.search,
-              color: Colors.white,
-              size: 22,
-            ),
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.search);
+              },
+              tooltip: 'Search',
+              icon: const Icon(Icons.search, color: Colors.white, size: 22),
             ),
           ),
           Semantics(
-            label: _hasUnreadNotifications ? 'Notifications, unread' : 'Notifications',
+            label: _hasUnreadNotifications
+                ? 'Notifications, unread'
+                : 'Notifications',
             button: true,
             child: IconButton(
-            onPressed: () {
-              _clearUnreadState();
-              Navigator.pushNamed(context, AppRoutes.notifications);
-            },
-            tooltip: 'Notifications',
-            icon: Stack(
-              children: [
-                const Icon(
-                  Icons.notifications_outlined,
-                  color: Colors.white,
-                  size: 22,
-                ),
-                if (_hasUnreadNotifications)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppTheme.primaryPink,
-                        shape: BoxShape.circle,
+              onPressed: () {
+                _clearUnreadState();
+                Navigator.pushNamed(context, AppRoutes.notifications);
+              },
+              tooltip: 'Notifications',
+              icon: Stack(
+                children: [
+                  const Icon(
+                    Icons.notifications_outlined,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+                  if (_hasUnreadNotifications)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.primaryPink,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
-                  ),
-              ],
-            ),
+                ],
+              ),
             ),
           ),
         ],

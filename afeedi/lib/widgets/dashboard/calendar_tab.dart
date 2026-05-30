@@ -15,13 +15,15 @@ class CalendarTab extends StatefulWidget {
   State<CalendarTab> createState() => _CalendarTabState();
 }
 
-class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
+class _CalendarTabState extends State<CalendarTab>
+    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   @override
   bool get wantKeepAlive => true;
-  
+
   DateTime _selectedDate = DateTime.now();
   String _viewMode = 'month'; // 'month', 'week', 'day'
-  String _selectedFilter = 'all'; // 'all', 'entertainment', 'education', 'study'
+  String _selectedFilter =
+      'all'; // 'all', 'entertainment', 'education', 'study'
   bool _isFilterExpanded = false;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
@@ -31,24 +33,25 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   bool _gcalConnecting = false;
   bool _gcalConnectionError = false;
   List<CalendarEvent> _gcalEvents = [];
-  
+
   // Enhanced calendar functionality (fields removed - unused)
-  
+
   // Percentage-based filtering
   double _educationPercentage = 50.0;
   double _entertainmentPercentage = 50.0;
   bool _isPercentageFilterActive = false;
-  String _selectedPercentagePreset = 'custom'; // 'custom', '50-50', '80-20', '20-80'
-  
+  String _selectedPercentagePreset =
+      'custom'; // 'custom', '50-50', '80-20', '20-80'
+
   // Advanced search categories (fields removed - unused)
-  
+
   late AnimationController _calendarAnimationController;
   late Animation<double> _calendarAnimation;
   late AnimationController _filterAnimationController;
   late Animation<double> _filterAnimation;
-  
+
   final List<Map<String, dynamic>> _scheduledContent = [];
-  
+
   @override
   void initState() {
     super.initState();
@@ -63,7 +66,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       parent: _calendarAnimationController,
       curve: Curves.easeInOut,
     );
-    
+
     _filterAnimationController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
@@ -72,10 +75,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       parent: _filterAnimationController,
       curve: Curves.easeInOut,
     );
-    
+
     _calendarAnimationController.forward();
   }
-  
+
   @override
   void dispose() {
     _calendarAnimationController.dispose();
@@ -83,12 +86,14 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     _searchController.dispose();
     super.dispose();
   }
-  
+
   /// Populates _scheduledContent with real content from ContentService,
   /// distributed across 7 days starting today (3 items per day).
   Future<void> _loadScheduledContentFromService() async {
     try {
-      final allContent = await ContentService.instance.getFeedContent(limit: 21);
+      final allContent = await ContentService.instance.getFeedContent(
+        limit: 21,
+      );
       final now = DateTime.now();
       // Time slots to distribute content across the day
       const timeSlots = ['08:00', '14:30', '20:00'];
@@ -101,15 +106,29 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           final durationMinutes = c.durationSeconds != null
               ? (c.durationSeconds! / 60).round()
               : 30;
-          final platform = c.platform.name[0].toUpperCase() +
-              c.platform.name.substring(1);
+          final platform =
+              c.platform.name[0].toUpperCase() + c.platform.name.substring(1);
           // Determine category from tags/categories
           String category = 'entertainment';
-          final allTags = [...c.tags.map((t) => t.toLowerCase()),
-                           ...c.categories.map((cat) => cat.toLowerCase())];
-          if (allTags.any((t) => t.contains('education') || t.contains('tutorial') || t.contains('study') || t.contains('learn'))) {
+          final allTags = [
+            ...c.tags.map((t) => t.toLowerCase()),
+            ...c.categories.map((cat) => cat.toLowerCase()),
+          ];
+          if (allTags.any(
+            (t) =>
+                t.contains('education') ||
+                t.contains('tutorial') ||
+                t.contains('study') ||
+                t.contains('learn'),
+          )) {
             category = 'education';
-          } else if (allTags.any((t) => t.contains('fitness') || t.contains('workout') || t.contains('health') || t.contains('meditation'))) {
+          } else if (allTags.any(
+            (t) =>
+                t.contains('fitness') ||
+                t.contains('workout') ||
+                t.contains('health') ||
+                t.contains('meditation'),
+          )) {
             category = 'health';
           }
           newItems.add({
@@ -123,8 +142,16 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             'type': 'scheduled',
             'category': category,
             'keywords': c.tags.take(3).toList(),
-            'educationValue': category == 'education' ? 80 : category == 'health' ? 50 : 20,
-            'entertainmentValue': category == 'education' ? 20 : category == 'health' ? 50 : 80,
+            'educationValue': category == 'education'
+                ? 80
+                : category == 'health'
+                ? 50
+                : 20,
+            'entertainmentValue': category == 'education'
+                ? 20
+                : category == 'health'
+                ? 50
+                : 80,
             'date': day,
           });
         }
@@ -186,11 +213,11 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       },
     );
   }
-  
+
   void _onFilterChanged() {
     _loadContentForSelectedDate();
   }
-  
+
   final List<Map<String, dynamic>> _aiRecommendations = [
     {
       'id': 'ai1',
@@ -217,7 +244,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -231,7 +258,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   Widget _buildGoogleCalendarSection() {
     final isConnected = GoogleCalendarService.instance.isConnected;
     return Container(
@@ -251,8 +278,8 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       child: isConnected
           ? _buildConnectedCalendar()
           : _gcalConnectionError
-              ? _buildConnectionErrorState()
-              : _buildConnectButton(),
+          ? _buildConnectionErrorState()
+          : _buildConnectButton(),
     );
   }
 
@@ -262,32 +289,70 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       children: [
         Row(
           children: [
-            const Icon(Icons.calendar_today, color: Color(0xFF4285F4), size: 20),
+            const Icon(
+              Icons.calendar_today,
+              color: Color(0xFF4285F4),
+              size: 20,
+            ),
             const SizedBox(width: 10),
             Text(
               AppLocalizations.of(context)?.googleCalendar ?? 'Google Calendar',
-              style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
         const SizedBox(height: 12),
-        _buildConnectStep(Icons.lock_outline, AppLocalizations.of(context)?.readOnlyAccess ?? 'Read-only access', AppLocalizations.of(context)?.readOnlyAccessHint ?? 'We only read events, never modify them'),
-        _buildConnectStep(Icons.event, AppLocalizations.of(context)?.seeEventsInApp ?? 'See events in-app', AppLocalizations.of(context)?.seeEventsInAppHint ?? 'Your calendar appears alongside your content schedule'),
-        _buildConnectStep(Icons.privacy_tip_outlined, AppLocalizations.of(context)?.privateAndLocal ?? 'Private & local', AppLocalizations.of(context)?.privateAndLocalHint ?? 'Data stays on-device; we never share it'),
+        _buildConnectStep(
+          Icons.lock_outline,
+          AppLocalizations.of(context)?.readOnlyAccess ?? 'Read-only access',
+          AppLocalizations.of(context)?.readOnlyAccessHint ??
+              'We only read events, never modify them',
+        ),
+        _buildConnectStep(
+          Icons.event,
+          AppLocalizations.of(context)?.seeEventsInApp ?? 'See events in-app',
+          AppLocalizations.of(context)?.seeEventsInAppHint ??
+              'Your calendar appears alongside your content schedule',
+        ),
+        _buildConnectStep(
+          Icons.privacy_tip_outlined,
+          AppLocalizations.of(context)?.privateAndLocal ?? 'Private & local',
+          AppLocalizations.of(context)?.privateAndLocalHint ??
+              'Data stays on-device; we never share it',
+        ),
         const SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
             onPressed: _gcalConnecting ? null : _connectGoogleCalendar,
             icon: _gcalConnecting
-                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
                 : const Icon(Icons.login, size: 18),
-            label: Text(_gcalConnecting ? (AppLocalizations.of(context)?.connecting ?? 'Connecting...') : (AppLocalizations.of(context)?.connectWithGoogle ?? 'Connect with Google')),
+            label: Text(
+              _gcalConnecting
+                  ? (AppLocalizations.of(context)?.connecting ??
+                        'Connecting...')
+                  : (AppLocalizations.of(context)?.connectWithGoogle ??
+                        'Connect with Google'),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF4285F4),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           ),
         ),
@@ -306,7 +371,11 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             const Expanded(
               child: Text(
                 'Could not connect to Google Calendar',
-                style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -314,7 +383,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         const SizedBox(height: 8),
         Text(
           'Check your permissions and internet connection, then try again.',
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.6),
+            fontSize: 12,
+          ),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -330,13 +402,18 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               backgroundColor: const Color(0xFF4285F4),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           ),
         ),
         TextButton(
           onPressed: () => setState(() => _gcalConnectionError = false),
-          child: const Text('Dismiss', style: TextStyle(color: Colors.white54, fontSize: 12)),
+          child: const Text(
+            'Dismiss',
+            style: TextStyle(color: Colors.white54, fontSize: 12),
+          ),
         ),
       ],
     );
@@ -353,8 +430,18 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             child: RichText(
               text: TextSpan(
                 children: [
-                  TextSpan(text: '$title  ', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
-                  TextSpan(text: subtitle, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                  TextSpan(
+                    text: '$title  ',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  TextSpan(
+                    text: subtitle,
+                    style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  ),
                 ],
               ),
             ),
@@ -370,25 +457,40 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       children: [
         Row(
           children: [
-            const Icon(Icons.calendar_today, color: Color(0xFF4285F4), size: 18),
+            const Icon(
+              Icons.calendar_today,
+              color: Color(0xFF4285F4),
+              size: 18,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 'Google Calendar • ${GoogleCalendarService.instance.userEmail ?? ""}',
-                style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             TextButton(
               onPressed: _disconnectGoogleCalendar,
-              child: Text(AppLocalizations.of(context)?.disconnect ?? 'Disconnect', style: const TextStyle(color: Colors.white70, fontSize: 12)),
+              child: Text(
+                AppLocalizations.of(context)?.disconnect ?? 'Disconnect',
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
+              ),
             ),
           ],
         ),
         if (_gcalEvents.isEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 8),
-            child: Text(AppLocalizations.of(context)?.noUpcomingEvents ?? 'No upcoming events', style: const TextStyle(color: Colors.white38, fontSize: 13)),
+            child: Text(
+              AppLocalizations.of(context)?.noUpcomingEvents ??
+                  'No upcoming events',
+              style: const TextStyle(color: Colors.white38, fontSize: 13),
+            ),
           )
         else ...[
           const SizedBox(height: 10),
@@ -410,7 +512,14 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           Container(
             width: 50,
             padding: const EdgeInsets.only(top: 2),
-            child: Text(time, style: const TextStyle(color: Color(0xFF00D4FF), fontSize: 12, fontWeight: FontWeight.w500)),
+            child: Text(
+              time,
+              style: const TextStyle(
+                color: Color(0xFF00D4FF),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
           Expanded(
             child: Column(
@@ -418,12 +527,21 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               children: [
                 Text(
                   event.title,
-                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (event.location != null)
-                  Text(event.location!, style: const TextStyle(color: Colors.white38, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(
+                    event.location!,
+                    style: const TextStyle(color: Colors.white38, fontSize: 11),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
               ],
             ),
           ),
@@ -451,14 +569,11 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               children: [
                 Row(
                   children: [
-                    Icon(
-                      Icons.category,
-                      color: AppTheme.primaryCyan,
-                      size: 18,
-                    ),
+                    Icon(Icons.category, color: AppTheme.primaryCyan, size: 18),
                     const SizedBox(width: 8),
                     Text(
-                      AppLocalizations.of(context)?.contentCategories ?? 'Content Categories',
+                      AppLocalizations.of(context)?.contentCategories ??
+                          'Content Categories',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -473,11 +588,17 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                   children: [
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => setState(() => _isPercentageFilterActive = false),
+                        onTap: () =>
+                            setState(() => _isPercentageFilterActive = false),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
                           decoration: BoxDecoration(
-                            color: !_isPercentageFilterActive ? Colors.white.withValues(alpha: 0.2) : Colors.transparent,
+                            color: !_isPercentageFilterActive
+                                ? Colors.white.withValues(alpha: 0.2)
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: Colors.white.withValues(alpha: 0.3),
@@ -485,11 +606,14 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                             ),
                           ),
                           child: Text(
-                            AppLocalizations.of(context)?.categoryFilter ?? 'Category Filter',
+                            AppLocalizations.of(context)?.categoryFilter ??
+                                'Category Filter',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white,
-                              fontWeight: !_isPercentageFilterActive ? FontWeight.w600 : FontWeight.w400,
+                              fontWeight: !_isPercentageFilterActive
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
                               fontSize: 12,
                             ),
                           ),
@@ -499,11 +623,17 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                     const SizedBox(width: 8),
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => setState(() => _isPercentageFilterActive = true),
+                        onTap: () =>
+                            setState(() => _isPercentageFilterActive = true),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 12,
+                          ),
                           decoration: BoxDecoration(
-                            color: _isPercentageFilterActive ? Colors.white.withValues(alpha: 0.2) : Colors.transparent,
+                            color: _isPercentageFilterActive
+                                ? Colors.white.withValues(alpha: 0.2)
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: Colors.white.withValues(alpha: 0.3),
@@ -511,11 +641,14 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                             ),
                           ),
                           child: Text(
-                            AppLocalizations.of(context)?.percentageFilter ?? 'Percentage Filter',
+                            AppLocalizations.of(context)?.percentageFilter ??
+                                'Percentage Filter',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white,
-                              fontWeight: _isPercentageFilterActive ? FontWeight.w600 : FontWeight.w400,
+                              fontWeight: _isPercentageFilterActive
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
                               fontSize: 12,
                             ),
                           ),
@@ -538,7 +671,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       },
     );
   }
-  
+
   Widget _buildCategoryFilter() {
     return SizedBox(
       height: 40,
@@ -547,11 +680,16 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         itemCount: _filterOrder.length,
         itemBuilder: (context, index) {
           final filter = _filterOrder[index];
-          final displayName = filter == 'all' ? 'All' : 
-              filter[0].toUpperCase() + filter.substring(1);
-          final icon = filter == 'all' ? Icons.apps :
-              filter == 'entertainment' ? Icons.movie :
-              filter == 'education' ? Icons.school : Icons.book;
+          final displayName = filter == 'all'
+              ? 'All'
+              : filter[0].toUpperCase() + filter.substring(1);
+          final icon = filter == 'all'
+              ? Icons.apps
+              : filter == 'entertainment'
+              ? Icons.movie
+              : filter == 'education'
+              ? Icons.school
+              : Icons.book;
           return Container(
             margin: const EdgeInsets.only(right: 8),
             child: Draggable<String>(
@@ -588,7 +726,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   Widget _buildPercentageFilter() {
     return Column(
       children: [
@@ -610,11 +748,17 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  AppLocalizations.of(context)?.educationPct(_educationPercentage.round()) ?? 'Education: ${_educationPercentage.round()}%',
+                  AppLocalizations.of(
+                        context,
+                      )?.educationPct(_educationPercentage.round()) ??
+                      'Education: ${_educationPercentage.round()}%',
                   style: const TextStyle(color: Colors.white, fontSize: 12),
                 ),
                 Text(
-                  AppLocalizations.of(context)?.entertainmentPct(_entertainmentPercentage.round()) ?? 'Entertainment: ${_entertainmentPercentage.round()}%',
+                  AppLocalizations.of(
+                        context,
+                      )?.entertainmentPct(_entertainmentPercentage.round()) ??
+                      'Entertainment: ${_entertainmentPercentage.round()}%',
                   style: const TextStyle(color: Colors.white, fontSize: 12),
                 ),
               ],
@@ -640,7 +784,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ],
     );
   }
-  
+
   Widget _buildPresetButton(String preset, String label) {
     final isSelected = _selectedPercentagePreset == preset;
     return Expanded(
@@ -649,10 +793,14 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white.withValues(alpha: 0.2) : Colors.transparent,
+            color: isSelected
+                ? Colors.white.withValues(alpha: 0.2)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
             border: Border.all(
-              color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.3),
+              color: isSelected
+                  ? Colors.white
+                  : Colors.white.withValues(alpha: 0.3),
               width: 1,
             ),
           ),
@@ -669,7 +817,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   Widget _buildFilterChip(String label, String value, IconData icon) {
     final isSelected = _selectedFilter == value;
     return GestureDetector(
@@ -683,12 +831,12 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected 
+          color: isSelected
               ? AppTheme.primaryCyan.withValues(alpha: 0.3)
               : Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected 
+            color: isSelected
                 ? AppTheme.primaryCyan
                 : Colors.white.withValues(alpha: 0.3),
           ),
@@ -699,7 +847,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             Icon(
               icon,
               size: 16,
-              color: isSelected 
+              color: isSelected
                   ? AppTheme.primaryCyan
                   : Colors.white.withValues(alpha: 0.7),
             ),
@@ -707,7 +855,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             Text(
               label,
               style: TextStyle(
-                color: isSelected 
+                color: isSelected
                     ? AppTheme.primaryCyan
                     : Colors.white.withValues(alpha: 0.7),
                 fontSize: 12,
@@ -719,7 +867,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   Widget _buildSearchField() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -741,7 +889,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               controller: _searchController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                hintText: AppLocalizations.of(context)?.searchContent ?? 'Search content...',
+                hintText:
+                    AppLocalizations.of(context)?.searchContent ??
+                    'Search content...',
                 hintStyle: TextStyle(
                   color: Colors.white.withValues(alpha: 0.5),
                   fontSize: 14,
@@ -760,7 +910,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -781,7 +931,8 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  AppLocalizations.of(context)?.personalizedContentSchedule ?? 'Your personalized content schedule',
+                  AppLocalizations.of(context)?.personalizedContentSchedule ??
+                      'Your personalized content schedule',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
@@ -801,7 +952,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   Widget _buildFilterButton() {
     return GestureDetector(
       onTap: () {
@@ -818,14 +969,14 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: _isFilterExpanded 
+          color: _isFilterExpanded
               ? AppTheme.primaryCyan.withValues(alpha: 0.2)
               : Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: _isFilterExpanded 
+            color: _isFilterExpanded
                 ? AppTheme.primaryCyan.withValues(alpha: 0.5)
-                : Colors.white.withValues(alpha: 0.2)
+                : Colors.white.withValues(alpha: 0.2),
           ),
         ),
         child: Row(
@@ -837,22 +988,22 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               size: 20,
             ),
             if (_isFilterExpanded) ...[
-               const SizedBox(width: 8),
-               Text(
-                 AppLocalizations.of(context)?.filter ?? 'Filter',
-                 style: TextStyle(
-                   color: AppTheme.primaryCyan,
-                   fontSize: 14,
-                   fontWeight: FontWeight.w600,
-                 ),
-               ),
-             ]
+              const SizedBox(width: 8),
+              Text(
+                AppLocalizations.of(context)?.filter ?? 'Filter',
+                style: TextStyle(
+                  color: AppTheme.primaryCyan,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildQuickCalendarStats() {
     final todayCount = _getContentForDate(DateTime.now()).length;
     return Container(
@@ -893,17 +1044,26 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ),
       child: Row(
         children: [
-          _buildViewModeButton(AppLocalizations.of(context)?.monthView ?? 'Month', 'month'),
-          _buildViewModeButton(AppLocalizations.of(context)?.weekView ?? 'Week', 'week'),
-          _buildViewModeButton(AppLocalizations.of(context)?.dayView ?? 'Day', 'day'),
+          _buildViewModeButton(
+            AppLocalizations.of(context)?.monthView ?? 'Month',
+            'month',
+          ),
+          _buildViewModeButton(
+            AppLocalizations.of(context)?.weekView ?? 'Week',
+            'week',
+          ),
+          _buildViewModeButton(
+            AppLocalizations.of(context)?.dayView ?? 'Day',
+            'day',
+          ),
         ],
       ),
     );
   }
-  
+
   Widget _buildViewModeButton(String label, String mode) {
     final isSelected = _viewMode == mode;
-    
+
     return Expanded(
       child: GestureDetector(
         onTap: () {
@@ -914,7 +1074,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected 
+            color: isSelected
                 ? AppTheme.primaryCyan.withValues(alpha: 0.3)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
@@ -923,7 +1083,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: isSelected 
+              color: isSelected
                   ? AppTheme.primaryCyan
                   : Colors.white.withValues(alpha: 0.7),
               fontSize: 12,
@@ -934,7 +1094,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   Widget _buildCalendarView() {
     return AnimatedBuilder(
       animation: _calendarAnimation,
@@ -955,23 +1115,24 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                 height: _viewMode == 'month' ? 350 : 400,
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (Widget child, Animation<double> animation) {
-                    return SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(1.0, 0.0),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: FadeTransition(
-                        opacity: animation,
-                        child: child,
-                      ),
-                    );
-                  },
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                        return SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(1.0, 0.0),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          ),
+                        );
+                      },
                   child: _viewMode == 'month'
                       ? _buildMonthView()
                       : _viewMode == 'week'
-                          ? _buildWeekView()
-                          : _buildDayView(),
+                      ? _buildWeekView()
+                      : _buildDayView(),
                 ),
               ),
               // Selected date content panel — shown below month grid
@@ -1018,7 +1179,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               if (items.isNotEmpty)
                 Text(
                   '${items.length} item${items.length == 1 ? '' : 's'}',
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    fontSize: 11,
+                  ),
                 ),
             ],
           ),
@@ -1029,14 +1193,22 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.calendar_today, color: Colors.white.withValues(alpha: 0.25), size: 20),
+                  Icon(
+                    Icons.calendar_today,
+                    color: Colors.white.withValues(alpha: 0.25),
+                    size: 20,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      AppLocalizations.of(context)?.noContentScheduled ?? 'No content scheduled for this day',
+                      AppLocalizations.of(context)?.noContentScheduled ??
+                          'No content scheduled for this day',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 13),
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.4),
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],
@@ -1072,7 +1244,11 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                 width: 40,
                 height: 40,
                 color: Colors.white.withValues(alpha: 0.1),
-                child: Icon(Icons.play_circle_outline, color: Colors.white38, size: 18),
+                child: Icon(
+                  Icons.play_circle_outline,
+                  color: Colors.white38,
+                  size: 18,
+                ),
               ),
             ),
           ),
@@ -1085,14 +1261,21 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                   item['title']?.toString() ?? '',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '${item['time'] ?? ''} · ${item['creator'] ?? ''} · ${item['duration'] ?? 0} min',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    fontSize: 11,
+                  ),
                 ),
               ],
             ),
@@ -1111,7 +1294,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             _calendarAnimationController.reset();
             setState(() {
               if (_viewMode == 'month') {
-                _selectedDate = DateTime(_selectedDate.year, _selectedDate.month - 1);
+                _selectedDate = DateTime(
+                  _selectedDate.year,
+                  _selectedDate.month - 1,
+                );
               } else if (_viewMode == 'week') {
                 _selectedDate = _selectedDate.subtract(const Duration(days: 7));
               } else {
@@ -1154,7 +1340,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             _calendarAnimationController.reset();
             setState(() {
               if (_viewMode == 'month') {
-                _selectedDate = DateTime(_selectedDate.year, _selectedDate.month + 1);
+                _selectedDate = DateTime(
+                  _selectedDate.year,
+                  _selectedDate.month + 1,
+                );
               } else if (_viewMode == 'week') {
                 _selectedDate = _selectedDate.add(const Duration(days: 7));
               } else {
@@ -1179,22 +1368,32 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ],
     );
   }
-  
+
   String _getHeaderText() {
     if (_viewMode == 'month') {
       return DateFormat.yMMMM().format(_selectedDate);
     } else if (_viewMode == 'week') {
-      final startOfWeek = _selectedDate.subtract(Duration(days: _selectedDate.weekday - 1));
+      final startOfWeek = _selectedDate.subtract(
+        Duration(days: _selectedDate.weekday - 1),
+      );
       final endOfWeek = startOfWeek.add(const Duration(days: 6));
       return '${startOfWeek.day}–${endOfWeek.day} ${DateFormat.MMMM().format(_selectedDate)}';
     } else {
       return DateFormat.yMMMMd().format(_selectedDate);
     }
   }
-  
+
   Widget _buildMonthView() {
-    final firstDayOfMonth = DateTime(_selectedDate.year, _selectedDate.month, 1);
-    final lastDayOfMonth = DateTime(_selectedDate.year, _selectedDate.month + 1, 0);
+    final firstDayOfMonth = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      1,
+    );
+    final lastDayOfMonth = DateTime(
+      _selectedDate.year,
+      _selectedDate.month + 1,
+      0,
+    );
     final daysInMonth = lastDayOfMonth.day;
     final firstWeekday = firstDayOfMonth.weekday;
     final totalCells = ((daysInMonth + firstWeekday - 1) / 7).ceil() * 7;
@@ -1213,21 +1412,23 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(
             children: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-                .map((day) => Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text(
-                          day,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.6),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
-                          ),
+                .map(
+                  (day) => Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        day,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
                         ),
                       ),
-                    ))
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ),
@@ -1245,20 +1446,25 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             itemBuilder: (context, index) {
               final dayNumber = index - firstWeekday + 2;
               final isValidDay = dayNumber > 0 && dayNumber <= daysInMonth;
-              
+
               if (!isValidDay) {
                 return Container(); // Empty cell for days outside current month
               }
-              
-              final currentDate = DateTime(_selectedDate.year, _selectedDate.month, dayNumber);
+
+              final currentDate = DateTime(
+                _selectedDate.year,
+                _selectedDate.month,
+                dayNumber,
+              );
               final hasContent = _getContentForDate(currentDate).isNotEmpty;
               final contentCount = _getContentForDate(currentDate).length;
-              
-              final isToday = dayNumber == DateTime.now().day && 
-                             _selectedDate.month == DateTime.now().month &&
-                             _selectedDate.year == DateTime.now().year;
+
+              final isToday =
+                  dayNumber == DateTime.now().day &&
+                  _selectedDate.month == DateTime.now().month &&
+                  _selectedDate.year == DateTime.now().year;
               final isSelected = dayNumber == _selectedDate.day;
-              
+
               return Semantics(
                 label: isToday
                     ? 'Today, $dayNumber${hasContent ? ", has content" : ""}'
@@ -1266,71 +1472,77 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                 selected: isSelected,
                 button: true,
                 child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedDate = DateTime(_selectedDate.year, _selectedDate.month, dayNumber);
-                  });
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  decoration: BoxDecoration(
-                    color: isSelected 
-                        ? AppTheme.primaryCyan.withValues(alpha: 0.3)
-                        : isToday
-                            ? AppTheme.primaryPink.withValues(alpha: 0.2)
-                            : hasContent
-                                ? Colors.white.withValues(alpha: 0.05)
-                                : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                    border: isSelected
-                        ? Border.all(color: AppTheme.primaryCyan, width: 2)
-                        : isToday
-                            ? Border.all(color: AppTheme.primaryPink, width: 1.5)
-                            : hasContent
-                                ? Border.all(color: Colors.white.withValues(alpha: 0.2))
-                                : null,
-                  ),
-                  child: Stack(
-                    children: [
-                      Center(
-                        child: Text(
-                          dayNumber.toString(),
-                          style: TextStyle(
-                            color: isSelected 
-                                ? AppTheme.primaryCyan
-                                : isToday
-                                    ? AppTheme.primaryPink
-                                    : Colors.white.withValues(alpha: 0.9),
-                            fontSize: 14,
-                            fontWeight: isSelected || isToday
-                                ? FontWeight.w700
-                                : FontWeight.w500,
+                  onTap: () {
+                    setState(() {
+                      _selectedDate = DateTime(
+                        _selectedDate.year,
+                        _selectedDate.month,
+                        dayNumber,
+                      );
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppTheme.primaryCyan.withValues(alpha: 0.3)
+                          : isToday
+                          ? AppTheme.primaryPink.withValues(alpha: 0.2)
+                          : hasContent
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      border: isSelected
+                          ? Border.all(color: AppTheme.primaryCyan, width: 2)
+                          : isToday
+                          ? Border.all(color: AppTheme.primaryPink, width: 1.5)
+                          : hasContent
+                          ? Border.all(
+                              color: Colors.white.withValues(alpha: 0.2),
+                            )
+                          : null,
+                    ),
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: Text(
+                            dayNumber.toString(),
+                            style: TextStyle(
+                              color: isSelected
+                                  ? AppTheme.primaryCyan
+                                  : isToday
+                                  ? AppTheme.primaryPink
+                                  : Colors.white.withValues(alpha: 0.9),
+                              fontSize: 14,
+                              fontWeight: isSelected || isToday
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                            ),
                           ),
                         ),
-                      ),
-                      if (hasContent)
-                        Positioned(
-                          bottom: 6,
-                          right: 6,
-                          child: Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              color: _getCategoryColor(currentDate),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Text(
-                              contentCount.toString(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 8,
-                                fontWeight: FontWeight.w600,
+                        if (hasContent)
+                          Positioned(
+                            bottom: 6,
+                            right: 6,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: _getCategoryColor(currentDate),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                contentCount.toString(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
                 ),
               );
             },
@@ -1384,22 +1596,29 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
 
       // Combine: if Google Calendar events exist for this date, show them as entries
       if (gcalEventsForDate.isNotEmpty) {
-        final gcalItems = gcalEventsForDate.map((e) => {
-          'id': e.id,
-          'title': e.title,
-          'time': e.isAllDay ? (AppLocalizations.of(context)?.allDay ?? 'All day') :
-              TimeOfDay.fromDateTime(e.start).format(context),
-          'duration': e.end != null ? e.end!.difference(e.start).inMinutes : 60,
-          'platform': 'Google Calendar',
-          'creator': e.location ?? '',
-          'thumbnail': null,
-          'type': 'calendar',
-          'category': 'all',
-          'keywords': <String>[],
-          'educationValue': 50,
-          'entertainmentValue': 50,
-          'date': e.start,
-        }).toList();
+        final gcalItems = gcalEventsForDate
+            .map(
+              (e) => {
+                'id': e.id,
+                'title': e.title,
+                'time': e.isAllDay
+                    ? (AppLocalizations.of(context)?.allDay ?? 'All day')
+                    : TimeOfDay.fromDateTime(e.start).format(context),
+                'duration': e.end != null
+                    ? e.end!.difference(e.start).inMinutes
+                    : 60,
+                'platform': 'Google Calendar',
+                'creator': e.location ?? '',
+                'thumbnail': null,
+                'type': 'calendar',
+                'category': 'all',
+                'keywords': <String>[],
+                'educationValue': 50,
+                'entertainmentValue': 50,
+                'date': e.start,
+              },
+            )
+            .toList();
         return [...gcalItems, ...scheduledForDate];
       }
       return scheduledForDate;
@@ -1408,24 +1627,27 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       return [];
     }
   }
-  
+
   List<Map<String, dynamic>> _getFilteredContent() {
     try {
       var filtered = List<Map<String, dynamic>>.from(_scheduledContent);
-      
+
       // Apply percentage-based filter if active
       if (_isPercentageFilterActive) {
         filtered = filtered.where((content) {
           try {
             final educationValue = content['educationValue'] as int? ?? 50;
-            final entertainmentValue = content['entertainmentValue'] as int? ?? 50;
-            
+            final entertainmentValue =
+                content['entertainmentValue'] as int? ?? 50;
+
             // Check if content matches the desired percentage range (±10% tolerance)
-            final educationMatch = (educationValue >= _educationPercentage - 10) && 
-                                  (educationValue <= _educationPercentage + 10);
-            final entertainmentMatch = (entertainmentValue >= _entertainmentPercentage - 10) && 
-                                      (entertainmentValue <= _entertainmentPercentage + 10);
-            
+            final educationMatch =
+                (educationValue >= _educationPercentage - 10) &&
+                (educationValue <= _educationPercentage + 10);
+            final entertainmentMatch =
+                (entertainmentValue >= _entertainmentPercentage - 10) &&
+                (entertainmentValue <= _entertainmentPercentage + 10);
+
             return educationMatch || entertainmentMatch;
           } catch (e) {
             debugPrint('Error filtering by percentage: $e');
@@ -1437,14 +1659,15 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       else if (_selectedFilter != 'all') {
         filtered = filtered.where((content) {
           try {
-            return content['category']?.toString().toLowerCase() == _selectedFilter;
+            return content['category']?.toString().toLowerCase() ==
+                _selectedFilter;
           } catch (e) {
             debugPrint('Error filtering by category: $e');
             return false;
           }
         }).toList();
       }
-      
+
       // Filter by search query
       if (_searchQuery.isNotEmpty) {
         filtered = filtered.where((content) {
@@ -1455,24 +1678,24 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                 .map((k) => k.toString())
                 .join(' ')
                 .toLowerCase();
-            
+
             return title.contains(_searchQuery) ||
-                   creator.contains(_searchQuery) ||
-                   keywords.contains(_searchQuery);
+                creator.contains(_searchQuery) ||
+                keywords.contains(_searchQuery);
           } catch (e) {
             debugPrint('Error filtering by search query: $e');
             return false;
           }
         }).toList();
       }
-      
+
       return filtered;
     } catch (e) {
       debugPrint('Error in _getFilteredContent: $e');
       return [];
     }
   }
-  
+
   void _setPercentagePreset(String preset) {
     setState(() {
       _selectedPercentagePreset = preset;
@@ -1495,7 +1718,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       }
     });
   }
-  
+
   void _updatePercentages(double education) {
     setState(() {
       _educationPercentage = education;
@@ -1503,14 +1726,16 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       _selectedPercentagePreset = 'custom';
     });
   }
-  
+
   Color _getCategoryColor(dynamic input) {
     try {
       if (input is DateTime) {
         final content = _getContentForDate(input);
         if (content.isEmpty) return AppTheme.primaryPink;
-        
-        final categories = content.map((c) => c['category']?.toString() ?? '').toSet();
+
+        final categories = content
+            .map((c) => c['category']?.toString() ?? '')
+            .toSet();
         if (categories.contains('education')) return AppTheme.primaryCyan;
         if (categories.contains('study')) return const Color(0xFF4CAF50);
         return AppTheme.primaryPink; // entertainment
@@ -1531,16 +1756,18 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       return AppTheme.primaryPink;
     }
   }
-  
+
   Widget _buildWeekView() {
     final filteredContent = _getFilteredContent();
-    
+
     if (filteredContent.isEmpty) {
       return _buildEmptyState();
     }
-    
+
     return ListView.builder(
-      key: ValueKey('week_${_selectedDate.millisecondsSinceEpoch}_$_selectedFilter'),
+      key: ValueKey(
+        'week_${_selectedDate.millisecondsSinceEpoch}_$_selectedFilter',
+      ),
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: filteredContent.length,
       itemBuilder: (context, index) {
@@ -1552,7 +1779,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       },
     );
   }
-  
+
   Widget _buildDayView() {
     final filteredContent = _getContentForDate(_selectedDate);
 
@@ -1590,7 +1817,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     }
 
     return Column(
-      key: ValueKey('day_${_selectedDate.millisecondsSinceEpoch}_$_selectedFilter'),
+      key: ValueKey(
+        'day_${_selectedDate.millisecondsSinceEpoch}_$_selectedFilter',
+      ),
       children: [
         Container(
           padding: const EdgeInsets.all(12),
@@ -1598,18 +1827,19 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           decoration: BoxDecoration(
             color: AppTheme.primaryCyan.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppTheme.primaryCyan.withValues(alpha: 0.3)),
+            border: Border.all(
+              color: AppTheme.primaryCyan.withValues(alpha: 0.3),
+            ),
           ),
           child: Row(
             children: [
-              Icon(
-                Icons.today,
-                color: AppTheme.primaryCyan,
-                size: 20,
-              ),
+              Icon(Icons.today, color: AppTheme.primaryCyan, size: 20),
               const SizedBox(width: 8),
               Text(
-                AppLocalizations.of(context)?.itemsScheduled(filteredContent.length) ?? '${filteredContent.length} items scheduled',
+                AppLocalizations.of(
+                      context,
+                    )?.itemsScheduled(filteredContent.length) ??
+                    '${filteredContent.length} items scheduled',
                 style: TextStyle(
                   color: AppTheme.primaryCyan,
                   fontSize: 14,
@@ -1627,7 +1857,11 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               final content = filteredContent[index];
               return AnimatedContainer(
                 duration: Duration(milliseconds: 200 + (index * 50)),
-                child: _buildContentItem(content, showTime: true, showCategory: true),
+                child: _buildContentItem(
+                  content,
+                  showTime: true,
+                  showCategory: true,
+                ),
               );
             },
           ),
@@ -1635,28 +1869,32 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ],
     );
   }
-  
+
   Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            _selectedFilter == 'all' 
+            _selectedFilter == 'all'
                 ? Icons.event_busy
                 : _selectedFilter == 'entertainment'
-                    ? Icons.movie_outlined
-                    : _selectedFilter == 'education'
-                        ? Icons.school_outlined
-                        : Icons.book_outlined,
+                ? Icons.movie_outlined
+                : _selectedFilter == 'education'
+                ? Icons.school_outlined
+                : Icons.book_outlined,
             color: Colors.white.withValues(alpha: 0.3),
             size: 48,
           ),
           const SizedBox(height: 16),
           Text(
             _selectedFilter == 'all'
-                ? (AppLocalizations.of(context)?.noContentScheduled ?? 'No content scheduled')
-                : (AppLocalizations.of(context)?.noFilterContent(_selectedFilter) ?? 'No $_selectedFilter content'),
+                ? (AppLocalizations.of(context)?.noContentScheduled ??
+                      'No content scheduled')
+                : (AppLocalizations.of(
+                        context,
+                      )?.noFilterContent(_selectedFilter) ??
+                      'No $_selectedFilter content'),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.6),
               fontSize: 16,
@@ -1665,7 +1903,8 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           ),
           const SizedBox(height: 8),
           Text(
-            AppLocalizations.of(context)?.tryDifferentFilter ?? 'Try selecting a different filter or date',
+            AppLocalizations.of(context)?.tryDifferentFilter ??
+                'Try selecting a different filter or date',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.4),
               fontSize: 12,
@@ -1675,12 +1914,16 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
-  Widget _buildContentItem(Map<String, dynamic> content, {bool showTime = false, bool showCategory = false}) {
+
+  Widget _buildContentItem(
+    Map<String, dynamic> content, {
+    bool showTime = false,
+    bool showCategory = false,
+  }) {
     final educationValue = content['educationValue'] as int? ?? 50;
     final entertainmentValue = content['entertainmentValue'] as int? ?? 50;
     final categoryColor = _getCategoryColor(content['category']);
-    
+
     return Draggable<Map<String, dynamic>>(
       data: content,
       feedback: Material(
@@ -1689,26 +1932,54 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
           scale: 0.9,
           child: Opacity(
             opacity: 0.8,
-            child: _buildContentCard(content, showTime, showCategory, educationValue, entertainmentValue, categoryColor),
+            child: _buildContentCard(
+              content,
+              showTime,
+              showCategory,
+              educationValue,
+              entertainmentValue,
+              categoryColor,
+            ),
           ),
         ),
       ),
       childWhenDragging: Opacity(
         opacity: 0.5,
-        child: _buildContentCard(content, showTime, showCategory, educationValue, entertainmentValue, categoryColor),
+        child: _buildContentCard(
+          content,
+          showTime,
+          showCategory,
+          educationValue,
+          entertainmentValue,
+          categoryColor,
+        ),
       ),
       child: DragTarget<Map<String, dynamic>>(
         onAccept: (draggedContent) {
           _handleContentDrop(draggedContent, content);
         },
         builder: (context, candidateData, rejectedData) {
-          return _buildContentCard(content, showTime, showCategory, educationValue, entertainmentValue, categoryColor);
+          return _buildContentCard(
+            content,
+            showTime,
+            showCategory,
+            educationValue,
+            entertainmentValue,
+            categoryColor,
+          );
         },
       ),
     );
   }
-  
-  Widget _buildContentCard(Map<String, dynamic> content, bool showTime, bool showCategory, int educationValue, int entertainmentValue, Color categoryColor) {
+
+  Widget _buildContentCard(
+    Map<String, dynamic> content,
+    bool showTime,
+    bool showCategory,
+    int educationValue,
+    int entertainmentValue,
+    Color categoryColor,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -1771,7 +2042,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                       children: [
                         Expanded(
                           child: Text(
-                            content['title']?.toString() ?? (AppLocalizations.of(context)?.unknownTitle ?? 'Unknown Title'),
+                            content['title']?.toString() ??
+                                (AppLocalizations.of(context)?.unknownTitle ??
+                                    'Unknown Title'),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -1783,12 +2056,19 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                         ),
                         if (showCategory) ...[
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
-                              color: _getCategoryColor(content['category']).withValues(alpha: 0.2),
+                              color: _getCategoryColor(
+                                content['category'],
+                              ).withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: _getCategoryColor(content['category']).withValues(alpha: 0.5),
+                                color: _getCategoryColor(
+                                  content['category'],
+                                ).withValues(alpha: 0.5),
                                 width: 1,
                               ),
                             ),
@@ -1806,7 +2086,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      content['creator']?.toString() ?? (AppLocalizations.of(context)?.unknownCreator ?? 'Unknown Creator'),
+                      content['creator']?.toString() ??
+                          (AppLocalizations.of(context)?.unknownCreator ??
+                              'Unknown Creator'),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 12,
@@ -1833,27 +2115,34 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                         ],
                       ),
                     ],
-                    if (content['keywords'] != null && content['keywords'].isNotEmpty) ...[
+                    if (content['keywords'] != null &&
+                        content['keywords'].isNotEmpty) ...[
                       const SizedBox(height: 6),
                       Wrap(
                         spacing: 4,
                         runSpacing: 2,
-                        children: (content['keywords'] as List<String>).take(3).map((keyword) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              keyword,
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.6),
-                                fontSize: 9,
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                        children: (content['keywords'] as List<String>)
+                            .take(3)
+                            .map((keyword) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  keyword,
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.6),
+                                    fontSize: 9,
+                                  ),
+                                ),
+                              );
+                            })
+                            .toList(),
                       ),
                     ],
                   ],
@@ -1872,7 +2161,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             children: [
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.blue.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
@@ -1882,14 +2174,11 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                     children: [
                       Row(
                         children: [
-                          Icon(
-                            Icons.school,
-                            color: Colors.blue,
-                            size: 12,
-                          ),
+                          Icon(Icons.school, color: Colors.blue, size: 12),
                           const SizedBox(width: 4),
                           Text(
-                            AppLocalizations.of(context)?.education ?? 'Education',
+                            AppLocalizations.of(context)?.education ??
+                                'Education',
                             style: const TextStyle(
                               color: Colors.blue,
                               fontSize: 10,
@@ -1913,7 +2202,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
               const SizedBox(width: 8),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.orange.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
@@ -1923,14 +2215,11 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                     children: [
                       Row(
                         children: [
-                          Icon(
-                            Icons.movie,
-                            color: Colors.orange,
-                            size: 12,
-                          ),
+                          Icon(Icons.movie, color: Colors.orange, size: 12),
                           const SizedBox(width: 4),
                           Text(
-                            AppLocalizations.of(context)?.entertainment ?? 'Entertainment',
+                            AppLocalizations.of(context)?.entertainment ??
+                                'Entertainment',
                             style: const TextStyle(
                               color: Colors.orange,
                               fontSize: 10,
@@ -1957,14 +2246,21 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
-  void _handleContentDrop(Map<String, dynamic> draggedContent, Map<String, dynamic> targetContent) {
+
+  void _handleContentDrop(
+    Map<String, dynamic> draggedContent,
+    Map<String, dynamic> targetContent,
+  ) {
     // This could be used to swap positions or change categories
     // For now, we'll show a snackbar indicating the action
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          AppLocalizations.of(context)?.movedNear(draggedContent['title']?.toString() ?? '', targetContent['title']?.toString() ?? '') ?? 'Moved "${draggedContent['title']}" near "${targetContent['title']}"',
+          AppLocalizations.of(context)?.movedNear(
+                draggedContent['title']?.toString() ?? '',
+                targetContent['title']?.toString() ?? '',
+              ) ??
+              'Moved "${draggedContent['title']}" near "${targetContent['title']}"',
           style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.black.withValues(alpha: 0.8),
@@ -1972,7 +2268,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   Widget _buildAIRecommendations() {
     return Container(
       margin: const EdgeInsets.all(20),
@@ -1981,14 +2277,11 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         children: [
           Row(
             children: [
-              Icon(
-                Icons.auto_awesome,
-                color: AppTheme.primaryPink,
-                size: 20,
-              ),
+              Icon(Icons.auto_awesome, color: AppTheme.primaryPink, size: 20),
               const SizedBox(width: 8),
               Text(
-                AppLocalizations.of(context)?.aiRecommendations ?? 'AI Recommendations',
+                AppLocalizations.of(context)?.aiRecommendations ??
+                    'AI Recommendations',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -1998,12 +2291,14 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
             ],
           ),
           const SizedBox(height: 12),
-          ...(_aiRecommendations.map((rec) => _buildRecommendationCard(rec)).toList()),
+          ...(_aiRecommendations
+              .map((rec) => _buildRecommendationCard(rec))
+              .toList()),
         ],
       ),
     );
   }
-  
+
   Widget _buildRecommendationCard(Map<String, dynamic> recommendation) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -2058,7 +2353,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                   ),
                 ),
                 Text(
-                  AppLocalizations.of(context)?.suggestedFor(recommendation['time']?.toString() ?? '') ?? 'Suggested for ${recommendation['time']}',
+                  AppLocalizations.of(context)?.suggestedFor(
+                        recommendation['time']?.toString() ?? '',
+                      ) ??
+                      'Suggested for ${recommendation['time']}',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,

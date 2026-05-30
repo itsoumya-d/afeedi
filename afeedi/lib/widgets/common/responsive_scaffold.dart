@@ -42,13 +42,23 @@ class ResponsiveScaffold extends StatelessWidget {
             onDestinationSelected: onTabChanged,
             selectedIconTheme: const IconThemeData(color: Color(0xFF00D4FF)),
             unselectedIconTheme: const IconThemeData(color: Colors.white38),
-            selectedLabelTextStyle: const TextStyle(color: Color(0xFF00D4FF), fontSize: 12),
-            unselectedLabelTextStyle: const TextStyle(color: Colors.white38, fontSize: 12),
-            destinations: tabs.map((tab) => NavigationRailDestination(
-              icon: Icon(tab['icon'] as IconData),
-              selectedIcon: Icon(tab['activeIcon'] as IconData),
-              label: Text(tab['title'] as String),
-            )).toList(),
+            selectedLabelTextStyle: const TextStyle(
+              color: Color(0xFF00D4FF),
+              fontSize: 12,
+            ),
+            unselectedLabelTextStyle: const TextStyle(
+              color: Colors.white38,
+              fontSize: 12,
+            ),
+            destinations: tabs
+                .map(
+                  (tab) => NavigationRailDestination(
+                    icon: Icon(tab['icon'] as IconData),
+                    selectedIcon: Icon(tab['activeIcon'] as IconData),
+                    label: Text(tab['title'] as String),
+                  ),
+                )
+                .toList(),
           ),
           const VerticalDivider(width: 1, color: Colors.white12),
           Expanded(child: tabs[currentIndex]['widget'] as Widget),

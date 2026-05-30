@@ -60,8 +60,9 @@ class _VideosTabState extends State<VideosTab>
   void _loadVideos() async {
     setState(() => _isLoading = true);
     try {
-      final videos = await ContentService.instance
-          .getVideosByCategory(_selectedCategory);
+      final videos = await ContentService.instance.getVideosByCategory(
+        _selectedCategory,
+      );
       setState(() {
         _videos = videos;
         _isLoading = false;
@@ -209,7 +210,9 @@ class _VideosTabState extends State<VideosTab>
           child: Icon(
             icon,
             size: 20,
-            color: isActive ? Colors.black87 : Colors.white.withValues(alpha: 0.7),
+            color: isActive
+                ? Colors.black87
+                : Colors.white.withValues(alpha: 0.7),
           ),
         ),
       ),
@@ -239,15 +242,16 @@ class _VideosTabState extends State<VideosTab>
             },
             child: Container(
               margin: const EdgeInsets.only(right: 12),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 color: isSelected
                     ? color.withValues(alpha: 0.2)
                     : Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(25),
                 border: Border.all(
-                  color: isSelected ? color : Colors.white.withValues(alpha: 0.3),
+                  color: isSelected
+                      ? color
+                      : Colors.white.withValues(alpha: 0.3),
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -291,8 +295,7 @@ class _VideosTabState extends State<VideosTab>
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor:
-              AlwaysStoppedAnimation<Color>(AppTheme.primaryCyan),
+          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryCyan),
         ),
       );
     }
@@ -302,13 +305,18 @@ class _VideosTabState extends State<VideosTab>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.video_library_outlined,
-                size: 64, color: Colors.white.withValues(alpha: 0.5)),
+            Icon(
+              Icons.video_library_outlined,
+              size: 64,
+              color: Colors.white.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 16),
             Text(
               'No videos in this category',
               style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7), fontSize: 16),
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 16,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -340,8 +348,7 @@ class _VideosTabState extends State<VideosTab>
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       itemCount: _videos.length,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (context, index) =>
-          _buildVideoListTile(_videos[index]),
+      itemBuilder: (context, index) => _buildVideoListTile(_videos[index]),
     );
   }
 
@@ -370,8 +377,9 @@ class _VideosTabState extends State<VideosTab>
             Expanded(
               flex: 3,
               child: ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -385,8 +393,11 @@ class _VideosTabState extends State<VideosTab>
                           color: Colors.black.withValues(alpha: 0.7),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.play_arrow,
-                            color: Colors.white, size: 20),
+                        child: const Icon(
+                          Icons.play_arrow,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                     // Duration badge — bottom-right
@@ -437,9 +448,11 @@ class _VideosTabState extends State<VideosTab>
                     // Views + likes row
                     Row(
                       children: [
-                        Icon(Icons.visibility,
-                            size: 11,
-                            color: Colors.white.withValues(alpha: 0.6)),
+                        Icon(
+                          Icons.visibility,
+                          size: 11,
+                          color: Colors.white.withValues(alpha: 0.6),
+                        ),
                         const SizedBox(width: 2),
                         Flexible(
                           child: Text(
@@ -453,9 +466,11 @@ class _VideosTabState extends State<VideosTab>
                           ),
                         ),
                         const SizedBox(width: 6),
-                        Icon(Icons.favorite,
-                            size: 11,
-                            color: Colors.white.withValues(alpha: 0.6)),
+                        Icon(
+                          Icons.favorite,
+                          size: 11,
+                          color: Colors.white.withValues(alpha: 0.6),
+                        ),
                         const SizedBox(width: 2),
                         Flexible(
                           child: Text(
@@ -515,8 +530,9 @@ class _VideosTabState extends State<VideosTab>
           children: [
             // Thumbnail
             ClipRRect(
-              borderRadius:
-                  const BorderRadius.horizontal(left: Radius.circular(12)),
+              borderRadius: const BorderRadius.horizontal(
+                left: Radius.circular(12),
+              ),
               child: SizedBox(
                 width: 140,
                 height: 96,
@@ -531,8 +547,11 @@ class _VideosTabState extends State<VideosTab>
                           color: Colors.black.withValues(alpha: 0.7),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.play_arrow,
-                            color: Colors.white, size: 18),
+                        child: const Icon(
+                          Icons.play_arrow,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                       ),
                     ),
                     Positioned(
@@ -598,16 +617,19 @@ class _VideosTabState extends State<VideosTab>
 
   /// Thumbnail image widget with platform-colored fallback on error.
   Widget _buildThumbnailImage(
-      Content video, Color platformColor, String initial) {
+    Content video,
+    Color platformColor,
+    String initial,
+  ) {
     if (video.thumbnailUrl == null || video.thumbnailUrl!.isEmpty) {
       return _thumbnailFallback(platformColor, initial);
     }
     return CachedNetworkImage(
       imageUrl: video.thumbnailUrl!,
       fit: BoxFit.cover,
-      placeholder: (_, __) => Container(color: platformColor.withValues(alpha: 0.2)),
-      errorWidget: (_, __, ___) =>
-          _thumbnailFallback(platformColor, initial),
+      placeholder: (_, __) =>
+          Container(color: platformColor.withValues(alpha: 0.2)),
+      errorWidget: (_, __, ___) => _thumbnailFallback(platformColor, initial),
     );
   }
 

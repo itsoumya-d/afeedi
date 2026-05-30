@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 class TypingIndicator extends StatelessWidget {
   final Animation<double> typingAnimation;
 
-  const TypingIndicator({
-    super.key,
-    required this.typingAnimation,
-  });
+  const TypingIndicator({super.key, required this.typingAnimation});
 
   @override
   Widget build(BuildContext context) {
@@ -53,11 +50,20 @@ class TypingIndicator extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _BouncingDot(typingAnimation: typingAnimation, delayFraction: 0.0),
+                _BouncingDot(
+                  typingAnimation: typingAnimation,
+                  delayFraction: 0.0,
+                ),
                 const SizedBox(width: 5),
-                _BouncingDot(typingAnimation: typingAnimation, delayFraction: 0.2),
+                _BouncingDot(
+                  typingAnimation: typingAnimation,
+                  delayFraction: 0.2,
+                ),
                 const SizedBox(width: 5),
-                _BouncingDot(typingAnimation: typingAnimation, delayFraction: 0.4),
+                _BouncingDot(
+                  typingAnimation: typingAnimation,
+                  delayFraction: 0.4,
+                ),
               ],
             ),
           ),
@@ -95,9 +101,7 @@ class _BouncingDot extends StatelessWidget {
             width: 8,
             height: 8,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(
-                alpha: 0.4 + bounceProgress * 0.6,
-              ),
+              color: Colors.white.withValues(alpha: 0.4 + bounceProgress * 0.6),
               borderRadius: BorderRadius.circular(4),
             ),
           ),

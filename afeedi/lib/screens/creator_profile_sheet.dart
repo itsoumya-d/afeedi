@@ -72,8 +72,11 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
       // Load a larger pool to find cross-platform content
       final all = await ContentService.instance.getFeedContent(limit: 200);
       final creatorItems = all
-          .where((c) =>
-              c.creatorName?.toLowerCase() == widget.creatorName.toLowerCase())
+          .where(
+            (c) =>
+                c.creatorName?.toLowerCase() ==
+                widget.creatorName.toLowerCase(),
+          )
           .toList();
 
       // Group by platform
@@ -102,22 +105,28 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
         });
       }
     } catch (_) {
-      if (mounted) setState(() { _loading = false; _loadError = true; });
+      if (mounted)
+        setState(() {
+          _loading = false;
+          _loadError = true;
+        });
     }
   }
 
   /// Deterministic mock follower count for a specific platform.
   int _platformFollowers(PlatformType platform) {
-    final seed = ('${widget.creatorId ?? widget.creatorName}_${platform.name}').hashCode.abs();
+    final seed = ('${widget.creatorId ?? widget.creatorName}_${platform.name}')
+        .hashCode
+        .abs();
     switch (platform) {
       case PlatformType.youtube:
-        return 10000 + (seed % 4990000);   // 10K – 5M
+        return 10000 + (seed % 4990000); // 10K – 5M
       case PlatformType.tiktok:
-        return 5000 + (seed % 2995000);    // 5K – 3M
+        return 5000 + (seed % 2995000); // 5K – 3M
       case PlatformType.instagram:
-        return 8000 + (seed % 1992000);    // 8K – 2M
+        return 8000 + (seed % 1992000); // 8K – 2M
       case PlatformType.facebook:
-        return 3000 + (seed % 997000);     // 3K – 1M
+        return 3000 + (seed % 997000); // 3K – 1M
     }
   }
 
@@ -211,7 +220,10 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
             Expanded(
               child: ListView(
                 controller: controller,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 children: [
                   // Avatar + name
                   Center(
@@ -220,8 +232,11 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                         CircleAvatar(
                           radius: 40,
                           backgroundColor: platformColor.withValues(alpha: 0.2),
-                          backgroundImage: widget.content.creatorAvatarUrl != null
-                              ? CachedNetworkImageProvider(widget.content.creatorAvatarUrl!)
+                          backgroundImage:
+                              widget.content.creatorAvatarUrl != null
+                              ? CachedNetworkImageProvider(
+                                  widget.content.creatorAvatarUrl!,
+                                )
                               : null,
                           child: widget.content.creatorAvatarUrl == null
                               ? Text(
@@ -250,29 +265,37 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                         // Platform badge
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: platformColor.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color: platformColor.withValues(alpha: 0.4)),
+                              color: platformColor.withValues(alpha: 0.4),
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               ExcludeSemantics(
-                                child: Icon(_platformIcon(widget.platform),
-                                    color: platformColor, size: 14),
+                                child: Icon(
+                                  _platformIcon(widget.platform),
+                                  color: platformColor,
+                                  size: 14,
+                                ),
                               ),
                               const SizedBox(width: 5),
                               Text(
-                                widget.platform?.name.toUpperCase() ?? 'UNKNOWN',
+                                widget.platform?.name.toUpperCase() ??
+                                    'UNKNOWN',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                    color: platformColor,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600),
+                                  color: platformColor,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ],
                           ),
@@ -286,16 +309,16 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _Stat(
-                          label: 'Total Reach',
-                          value: _formatCount(totalFollowers)),
+                        label: 'Total Reach',
+                        value: _formatCount(totalFollowers),
+                      ),
+                      _StatDivider(),
+                      _Stat(label: 'Videos', value: _formatCount(videos)),
                       _StatDivider(),
                       _Stat(
-                          label: 'Videos',
-                          value: _formatCount(videos)),
-                      _StatDivider(),
-                      _Stat(
-                          label: 'Platforms',
-                          value: '${_activeplatforms.length}'),
+                        label: 'Platforms',
+                        value: '${_activeplatforms.length}',
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -313,10 +336,12 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                         setState(() => _isFollowed = next);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            _isFollowed ? Colors.white.withValues(alpha: 0.1) : platformColor,
-                        foregroundColor:
-                            _isFollowed ? platformColor : Colors.white,
+                        backgroundColor: _isFollowed
+                            ? Colors.white.withValues(alpha: 0.1)
+                            : platformColor,
+                        foregroundColor: _isFollowed
+                            ? platformColor
+                            : Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                           side: BorderSide(color: platformColor),
@@ -327,7 +352,9 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                       child: Text(
                         _isFollowed ? 'Following' : 'Follow',
                         style: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -346,26 +373,38 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                   const SizedBox(height: 12),
                   if (_loading)
                     const Center(
-                        child: CircularProgressIndicator(
-                            color: Color(0xFF00BCD4)))
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF00BCD4),
+                      ),
+                    )
                   else if (_loadError)
                     Semantics(
                       label: 'Could not load content. Double-tap to retry.',
                       button: true,
                       child: GestureDetector(
                         onTap: () {
-                          setState(() { _loadError = false; _loading = true; });
+                          setState(() {
+                            _loadError = false;
+                            _loading = true;
+                          });
                           _loadCreatorContent();
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           child: Row(
                             children: [
-                              const Icon(Icons.error_outline, color: Colors.white38, size: 18),
+                              const Icon(
+                                Icons.error_outline,
+                                color: Colors.white38,
+                                size: 18,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 'Could not load content. Tap to retry.',
-                                style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.5),
+                                  fontSize: 13,
+                                ),
                               ),
                             ],
                           ),
@@ -376,8 +415,9 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                     Text(
                       'No recent content found.',
                       style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.5),
-                          fontSize: 13),
+                        color: Colors.white.withValues(alpha: 0.5),
+                        fontSize: 13,
+                      ),
                     )
                   else
                     ..._recentContent.map((c) => _ContentRow(content: c)),
@@ -448,7 +488,9 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                       child: LinearProgressIndicator(
                         value: fraction,
                         backgroundColor: Colors.white.withValues(alpha: 0.08),
-                        valueColor: AlwaysStoppedAnimation<Color>(color.withValues(alpha: 0.7)),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          color.withValues(alpha: 0.7),
+                        ),
                         minHeight: 6,
                       ),
                     ),
@@ -480,15 +522,22 @@ class _Stat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(value,
-            style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 4),
-        Text(label,
-            style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.6),
+            fontSize: 12,
+          ),
+        ),
       ],
     );
   }
@@ -540,9 +589,10 @@ class _ContentRow extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500),
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -555,8 +605,11 @@ class _ContentRow extends StatelessWidget {
       width: 56,
       height: 56,
       color: Colors.white.withValues(alpha: 0.1),
-      child: Icon(Icons.video_library,
-          color: Colors.white.withValues(alpha: 0.4), size: 24),
+      child: Icon(
+        Icons.video_library,
+        color: Colors.white.withValues(alpha: 0.4),
+        size: 24,
+      ),
     );
   }
 }

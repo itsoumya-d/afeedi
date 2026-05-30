@@ -15,10 +15,12 @@ class PersonalizationSettingsWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<PersonalizationSettingsWidget> createState() => _PersonalizationSettingsWidgetState();
+  State<PersonalizationSettingsWidget> createState() =>
+      _PersonalizationSettingsWidgetState();
 }
 
-class _PersonalizationSettingsWidgetState extends State<PersonalizationSettingsWidget> {
+class _PersonalizationSettingsWidgetState
+    extends State<PersonalizationSettingsWidget> {
   late Map<String, dynamic> _settings;
 
   @override
@@ -50,51 +52,55 @@ class _PersonalizationSettingsWidgetState extends State<PersonalizationSettingsW
         _buildSectionTitle('Content Discovery Mode'),
         const SizedBox(height: 8),
         _buildDiscoveryModeSelector(),
-        
+
         const SizedBox(height: 24),
-        
+
         // Content Refresh Frequency
         _buildSectionTitle('Content Refresh Frequency'),
         const SizedBox(height: 8),
         _buildRefreshFrequencySlider(),
-        
+
         const SizedBox(height: 24),
-        
+
         // Toggle Settings
         _buildToggleSetting(
           title: 'Show Recommendation Reasoning',
           subtitle: 'Display why content was recommended to you',
           value: _settings['enableRecommendationReasoning'],
-          onChanged: (value) => _updateSettings('enableRecommendationReasoning', value),
+          onChanged: (value) =>
+              _updateSettings('enableRecommendationReasoning', value),
           icon: Icons.psychology_outlined,
         ),
-        
+
         _buildToggleSetting(
           title: 'Content Filtering',
           subtitle: 'Filter out content you might not be interested in',
           value: _settings['enableContentFiltering'],
-          onChanged: (value) => _updateSettings('enableContentFiltering', value),
+          onChanged: (value) =>
+              _updateSettings('enableContentFiltering', value),
           icon: Icons.filter_alt_outlined,
         ),
-        
+
         _buildToggleSetting(
           title: 'Calendar-Contextual Content',
           subtitle: 'Recommend content based on your calendar events',
           value: _settings['enableCalendarContextualContent'],
-          onChanged: (value) => _updateSettings('enableCalendarContextualContent', value),
+          onChanged: (value) =>
+              _updateSettings('enableCalendarContextualContent', value),
           icon: Icons.event_outlined,
         ),
-        
+
         _buildToggleSetting(
           title: 'Time-Aware Recommendations',
           subtitle: 'Adjust recommendations based on time of day',
           value: _settings['enableTimeAwareRecommendations'],
-          onChanged: (value) => _updateSettings('enableTimeAwareRecommendations', value),
+          onChanged: (value) =>
+              _updateSettings('enableTimeAwareRecommendations', value),
           icon: Icons.access_time_outlined,
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Info box
         Container(
           padding: const EdgeInsets.all(16),
@@ -126,9 +132,7 @@ class _PersonalizationSettingsWidgetState extends State<PersonalizationSettingsW
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: AppTextStyles.caption.copyWith(
-        fontWeight: FontWeight.w600,
-      ),
+      style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
     ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.05, end: 0);
   }
 
@@ -153,77 +157,92 @@ class _PersonalizationSettingsWidgetState extends State<PersonalizationSettingsW
         'icon': Icons.center_focus_strong_outlined,
       },
     ];
-    
+
     return Column(
       children: discoveryModes.asMap().entries.map((entry) {
         final index = entry.key;
         final mode = entry.value;
         final isSelected = _settings['contentDiscoveryMode'] == mode['value'];
-        
+
         return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: InkWell(
-            onTap: () => _updateSettings('contentDiscoveryMode', mode['value']),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.secondary.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.05),
+              padding: const EdgeInsets.only(bottom: 12),
+              child: InkWell(
+                onTap: () =>
+                    _updateSettings('contentDiscoveryMode', mode['value']),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isSelected ? AppColors.secondary : Colors.grey.withValues(alpha: 0.2),
-                  width: isSelected ? 2 : 1,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.secondary.withValues(alpha: 0.1)
+                        : Colors.grey.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? AppColors.secondary
+                          : Colors.grey.withValues(alpha: 0.2),
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.secondary.withValues(alpha: 0.2)
+                              : Colors.grey.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          mode['icon'],
+                          color: isSelected
+                              ? AppColors.secondary
+                              : Colors.grey[600],
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              mode['label'],
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: isSelected
+                                    ? AppColors.secondary
+                                    : Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              mode['description'],
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Radio<String>(
+                        value: mode['value'],
+                        groupValue: _settings['contentDiscoveryMode'],
+                        onChanged: (value) =>
+                            _updateSettings('contentDiscoveryMode', value),
+                        activeColor: AppColors.secondary,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: isSelected ? AppColors.secondary.withValues(alpha: 0.2) : Colors.grey.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      mode['icon'],
-                      color: isSelected ? AppColors.secondary : Colors.grey[600],
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          mode['label'],
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: isSelected ? AppColors.secondary : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          mode['description'],
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Radio<String>(
-                    value: mode['value'],
-                    groupValue: _settings['contentDiscoveryMode'],
-                    onChanged: (value) => _updateSettings('contentDiscoveryMode', value),
-                    activeColor: AppColors.secondary,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ).animate().fadeIn(duration: 300.ms, delay: (50 * index).ms).slideY(begin: 0.05, end: 0);
+            )
+            .animate()
+            .fadeIn(duration: 300.ms, delay: (50 * index).ms)
+            .slideY(begin: 0.05, end: 0);
       }).toList(),
     );
   }
@@ -234,15 +253,16 @@ class _PersonalizationSettingsWidgetState extends State<PersonalizationSettingsW
       'medium': 'Medium',
       'high': 'More Frequent',
     };
-    
+
     final Map<String, double> frequencyValues = {
       'low': 0.0,
       'medium': 1.0,
       'high': 2.0,
     };
-    
-    final currentValue = frequencyValues[_settings['contentRefreshFrequency']] ?? 1.0;
-    
+
+    final currentValue =
+        frequencyValues[_settings['contentRefreshFrequency']] ?? 1.0;
+
     return Column(
       children: [
         SliderTheme(
@@ -281,33 +301,33 @@ class _PersonalizationSettingsWidgetState extends State<PersonalizationSettingsW
               Text(
                 frequencyLabels['low']!,
                 style: TextStyle(
-                  color: _settings['contentRefreshFrequency'] == 'low' 
-                      ? AppColors.secondary 
+                  color: _settings['contentRefreshFrequency'] == 'low'
+                      ? AppColors.secondary
                       : Colors.grey[600],
-                  fontWeight: _settings['contentRefreshFrequency'] == 'low' 
-                      ? FontWeight.bold 
+                  fontWeight: _settings['contentRefreshFrequency'] == 'low'
+                      ? FontWeight.bold
                       : FontWeight.normal,
                 ),
               ),
               Text(
                 frequencyLabels['medium']!,
                 style: TextStyle(
-                  color: _settings['contentRefreshFrequency'] == 'medium' 
-                      ? AppColors.secondary 
+                  color: _settings['contentRefreshFrequency'] == 'medium'
+                      ? AppColors.secondary
                       : Colors.grey[600],
-                  fontWeight: _settings['contentRefreshFrequency'] == 'medium' 
-                      ? FontWeight.bold 
+                  fontWeight: _settings['contentRefreshFrequency'] == 'medium'
+                      ? FontWeight.bold
                       : FontWeight.normal,
                 ),
               ),
               Text(
                 frequencyLabels['high']!,
                 style: TextStyle(
-                  color: _settings['contentRefreshFrequency'] == 'high' 
-                      ? AppColors.secondary 
+                  color: _settings['contentRefreshFrequency'] == 'high'
+                      ? AppColors.secondary
                       : Colors.grey[600],
-                  fontWeight: _settings['contentRefreshFrequency'] == 'high' 
-                      ? FontWeight.bold 
+                  fontWeight: _settings['contentRefreshFrequency'] == 'high'
+                      ? FontWeight.bold
                       : FontWeight.normal,
                 ),
               ),
@@ -339,12 +359,14 @@ class _PersonalizationSettingsWidgetState extends State<PersonalizationSettingsW
       padding: const EdgeInsets.only(bottom: 16),
       child: Container(
         decoration: BoxDecoration(
-          color: value ? AppColors.secondary.withValues(alpha: 0.05) :
-          Colors.grey.withValues(alpha: 0.05),
+          color: value
+              ? AppColors.secondary.withValues(alpha: 0.05)
+              : Colors.grey.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: value ? AppColors.secondary.withValues(alpha: 0.3) :
-            Colors.grey.withValues(alpha: 0.2),
+            color: value
+                ? AppColors.secondary.withValues(alpha: 0.3)
+                : Colors.grey.withValues(alpha: 0.2),
           ),
         ),
         child: SwitchListTile(
@@ -369,17 +391,19 @@ class _PersonalizationSettingsWidgetState extends State<PersonalizationSettingsW
             padding: const EdgeInsets.only(left: 32),
             child: Text(
               subtitle,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
             ),
           ),
           value: value,
           onChanged: onChanged,
           activeColor: AppColors.secondary,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 8,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
     ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.05, end: 0);

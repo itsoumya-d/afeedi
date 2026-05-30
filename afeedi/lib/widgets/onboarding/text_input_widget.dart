@@ -91,8 +91,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
             children: [
               for (int i = 0; i < widget.suggestions.length; i++) ...[
                 _buildSuggestionChip(widget.suggestions[i]),
-                if (i < widget.suggestions.length - 1)
-                  const SizedBox(width: 8),
+                if (i < widget.suggestions.length - 1) const SizedBox(width: 8),
               ],
             ],
           ),
@@ -158,10 +157,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
         controller: widget.controller,
         focusNode: widget.focusNode,
         enabled: widget.isEnabled,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 15,
-        ),
+        style: const TextStyle(color: Colors.white, fontSize: 15),
         maxLines: 4,
         minLines: 1,
         onSubmitted: widget.onSubmitted,

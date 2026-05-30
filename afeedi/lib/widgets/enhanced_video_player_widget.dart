@@ -24,8 +24,7 @@ class EnhancedVideoPlayerWidget extends StatefulWidget {
       _EnhancedVideoPlayerWidgetState();
 }
 
-class _EnhancedVideoPlayerWidgetState
-    extends State<EnhancedVideoPlayerWidget> {
+class _EnhancedVideoPlayerWidgetState extends State<EnhancedVideoPlayerWidget> {
   late WebViewController _webViewController;
   bool _isLoading = true;
   bool _hasError = false;
@@ -92,7 +91,8 @@ class _EnhancedVideoPlayerWidgetState
         return 'https://www.tiktok.com/embed/v2/${widget.content.platformContentId}';
       default:
         throw UnsupportedError(
-            'Platform ${widget.content.platform} not supported for embed');
+          'Platform ${widget.content.platform} not supported for embed',
+        );
     }
   }
 
@@ -119,7 +119,8 @@ class _EnhancedVideoPlayerWidgetState
               ElevatedButton(
                 onPressed: _initializePlayer,
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor),
+                  backgroundColor: Theme.of(context).primaryColor,
+                ),
                 child: const Text('Retry'),
               ),
             ],
@@ -141,8 +142,10 @@ class _EnhancedVideoPlayerWidgetState
             children: [
               CircularProgressIndicator(),
               SizedBox(height: 16),
-              Text('Loading video…',
-                  style: TextStyle(color: Colors.white70, fontSize: 16)),
+              Text(
+                'Loading video…',
+                style: TextStyle(color: Colors.white70, fontSize: 16),
+              ),
             ],
           ),
         ),
@@ -151,8 +154,7 @@ class _EnhancedVideoPlayerWidgetState
 
     return Container(
       height: 200,
-      decoration:
-          BoxDecoration(borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: WebViewWidget(controller: _webViewController),

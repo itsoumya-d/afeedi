@@ -48,8 +48,9 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
   @override
   void initState() {
     super.initState();
-    _confettiController =
-        ConfettiController(duration: const Duration(seconds: 3));
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 3),
+    );
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -117,7 +118,9 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
         barrierDismissible: false,
         builder: (ctx) => AlertDialog(
           backgroundColor: const Color(0xFF1A1A2E),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Text(
             'Age Requirement',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
@@ -282,7 +285,11 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
         padding: EdgeInsets.fromLTRB(
-            24, 24, 24, 24 + MediaQuery.of(context).padding.bottom),
+          24,
+          24,
+          24,
+          24 + MediaQuery.of(context).padding.bottom,
+        ),
         decoration: const BoxDecoration(
           color: Color(0xFF1A1A2E),
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -299,21 +306,29 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
               ),
             ),
             const SizedBox(height: 24),
-            const Icon(Icons.workspace_premium, color: Color(0xFF00D4FF), size: 48),
+            const Icon(
+              Icons.workspace_premium,
+              color: Color(0xFF00D4FF),
+              size: 48,
+            ),
             const SizedBox(height: 16),
             const Text(
               'Your feed is ready! 🎉',
               style: TextStyle(
-                  color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
               'Unlock the full Afeedi experience with a free 7-day trial of Pro.',
               style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.65),
-                  fontSize: 14,
-                  height: 1.5),
+                color: Colors.white.withValues(alpha: 0.65),
+                fontSize: 14,
+                height: 1.5,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
@@ -330,7 +345,8 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
                   foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                   elevation: 0,
                 ),
                 onPressed: () {
@@ -341,9 +357,10 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
                     screen: 'enhanced_onboarding_screen',
                   );
                 },
-                child: const Text('Start Free 7-Day Trial',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Start Free 7-Day Trial',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
             const SizedBox(height: 12),
@@ -352,7 +369,9 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
               child: Text(
                 'Maybe later',
                 style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.45), fontSize: 14),
+                  color: Colors.white.withValues(alpha: 0.45),
+                  fontSize: 14,
+                ),
               ),
             ),
           ],
@@ -368,8 +387,7 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
         children: [
           Icon(icon, color: const Color(0xFF00D4FF), size: 18),
           const SizedBox(width: 12),
-          Text(text,
-              style: const TextStyle(color: Colors.white, fontSize: 14)),
+          Text(text, style: const TextStyle(color: Colors.white, fontSize: 14)),
         ],
       ),
     );
@@ -380,7 +398,9 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
 
     if (stepId == 'personal_info' || stepId == 'profile') {
       _userPreferences = _userPreferences.copyWith(
-        name: _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
+        name: _nameController.text.trim().isEmpty
+            ? null
+            : _nameController.text.trim(),
       );
     }
   }
@@ -450,7 +470,9 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
                 // Progress indicator and skip button
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 10),
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -460,7 +482,9 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
                           children: [
                             LinearProgressIndicator(
                               value: (_currentPageIndex + 1) / _flow.length,
-                              backgroundColor: Colors.white.withValues(alpha: 0.3),
+                              backgroundColor: Colors.white.withValues(
+                                alpha: 0.3,
+                              ),
                               valueColor: const AlwaysStoppedAnimation<Color>(
                                 Colors.white,
                               ),
@@ -509,24 +533,25 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
                       final step = _flow[index];
 
                       return SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(0.05, 0),
-                          end: Offset.zero,
-                        ).animate(CurvedAnimation(
-                          parent: _slideController,
-                          curve: Curves.easeOut,
-                        )),
+                        position:
+                            Tween<Offset>(
+                              begin: const Offset(0.05, 0),
+                              end: Offset.zero,
+                            ).animate(
+                              CurvedAnimation(
+                                parent: _slideController,
+                                curve: Curves.easeOut,
+                              ),
+                            ),
                         child: FadeTransition(
-                          opacity: Tween<double>(
-                            begin: 0.8,
-                            end: 1.0,
-                          ).animate(CurvedAnimation(
-                            parent: _animationController,
-                            curve: Curves.easeOut,
-                          )),
+                          opacity: Tween<double>(begin: 0.8, end: 1.0).animate(
+                            CurvedAnimation(
+                              parent: _animationController,
+                              curve: Curves.easeOut,
+                            ),
+                          ),
                           child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 24),
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
                             child: _buildStepContent(step, index),
                           ),
                         ),
@@ -538,7 +563,9 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
                 // Navigation buttons
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 20),
+                    horizontal: 24,
+                    vertical: 20,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -651,20 +678,22 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
           onLanguageSelected: (name, locale) {
             _updatePreferences(_userPreferences.copyWith(language: locale));
           },
-          slideAnimation: Tween<Offset>(
-            begin: const Offset(0.05, 0),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(
-            parent: _slideController,
-            curve: Curves.easeOut,
-          )),
-          fadeAnimation: Tween<double>(
-            begin: 0.8,
-            end: 1.0,
-          ).animate(CurvedAnimation(
-            parent: _animationController,
-            curve: Curves.easeOut,
-          )),
+          slideAnimation:
+              Tween<Offset>(
+                begin: const Offset(0.05, 0),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(
+                  parent: _slideController,
+                  curve: Curves.easeOut,
+                ),
+              ),
+          fadeAnimation: Tween<double>(begin: 0.8, end: 1.0).animate(
+            CurvedAnimation(
+              parent: _animationController,
+              curve: Curves.easeOut,
+            ),
+          ),
         );
       case 'genres':
       case 'content_interests':
@@ -672,7 +701,8 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
           selectedInterests: _userPreferences.contentInterests,
           onInterestsChanged: (interests) {
             _updatePreferences(
-                _userPreferences.copyWith(contentInterests: interests));
+              _userPreferences.copyWith(contentInterests: interests),
+            );
           },
         );
       case 'platforms':
@@ -680,9 +710,9 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
         return PlatformSelectionWidget(
           platformPriorities: _userPreferences.platformPriorities,
           onPlatformPrioritiesChanged: (platformPriorities) {
-            _updatePreferences(_userPreferences.copyWith(
-              platformPriorities: platformPriorities,
-            ));
+            _updatePreferences(
+              _userPreferences.copyWith(platformPriorities: platformPriorities),
+            );
           },
         );
       case 'profile':
@@ -696,7 +726,8 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
           selectedContentTypes: _userPreferences.contentTypes,
           onContentTypesChanged: (contentTypes) {
             _updatePreferences(
-                _userPreferences.copyWith(contentTypes: contentTypes));
+              _userPreferences.copyWith(contentTypes: contentTypes),
+            );
           },
         );
       case 'personalization':
@@ -705,7 +736,8 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
           personalizationSettings: _userPreferences.personalizationSettings,
           onPersonalizationSettingsChanged: (settings) {
             _updatePreferences(
-                _userPreferences.copyWith(personalizationSettings: settings));
+              _userPreferences.copyWith(personalizationSettings: settings),
+            );
           },
         );
       default:
@@ -827,8 +859,10 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
               hintText: 'Enter your name',
               labelStyle: const TextStyle(color: Colors.white70),
               hintStyle: const TextStyle(color: Colors.white54),
-              prefixIcon:
-                  const Icon(Icons.person_outline, color: Colors.white70),
+              prefixIcon: const Icon(
+                Icons.person_outline,
+                color: Colors.white70,
+              ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: Colors.white54),
@@ -839,13 +873,11 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: AppColors.error),
+                borderSide: BorderSide(color: AppColors.error),
               ),
               focusedErrorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: AppColors.error),
+                borderSide: BorderSide(color: AppColors.error),
               ),
             ),
             textInputAction: TextInputAction.done,
@@ -865,8 +897,11 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.privacy_tip_outlined,
-                        size: 20, color: Colors.white70),
+                    Icon(
+                      Icons.privacy_tip_outlined,
+                      size: 20,
+                      color: Colors.white70,
+                    ),
                     SizedBox(width: 8),
                     Text(
                       'Privacy Note',
@@ -898,11 +933,7 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Icon(
-          Icons.check_circle_rounded,
-          size: 100,
-          color: Colors.white,
-        ),
+        const Icon(Icons.check_circle_rounded, size: 100, color: Colors.white),
 
         const SizedBox(height: 24),
 

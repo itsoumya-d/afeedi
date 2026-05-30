@@ -33,7 +33,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
   // ---------------------------------------------------------------------------
 
   String _formatCount(int count) {
-    if (count >= 1000000000) return '${(count / 1000000000).toStringAsFixed(1)}B';
+    if (count >= 1000000000)
+      return '${(count / 1000000000).toStringAsFixed(1)}B';
     if (count >= 1000000) return '${(count / 1000000).toStringAsFixed(1)}M';
     if (count >= 1000) return '${(count / 1000).toStringAsFixed(1)}K';
     return count.toString();
@@ -123,7 +124,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
         // Apply stagger by delaying the start: treat values < delay-fraction as 0
         final totalMs = 300 + delay.inMilliseconds;
         final delayFraction = delay.inMilliseconds / totalMs;
-        final progress = ((value - delayFraction) / (1.0 - delayFraction)).clamp(0.0, 1.0);
+        final progress = ((value - delayFraction) / (1.0 - delayFraction))
+            .clamp(0.0, 1.0);
         return Opacity(
           opacity: progress,
           child: Transform.translate(
@@ -166,7 +168,11 @@ class _FeedPostCardState extends State<FeedPostCard> {
           contentId: widget.content.id,
           interactionType: InteractionType.view,
         );
-        Navigator.pushNamed(context, AppRoutes.player, arguments: widget.content);
+        Navigator.pushNamed(
+          context,
+          AppRoutes.player,
+          arguments: widget.content,
+        );
       },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
@@ -191,14 +197,11 @@ class _FeedPostCardState extends State<FeedPostCard> {
                       ),
                     ),
                   ),
-                  errorWidget: (_, __, ___) => Container(
-                    color: platformColor.withValues(alpha: 0.2),
-                  ),
+                  errorWidget: (_, __, ___) =>
+                      Container(color: platformColor.withValues(alpha: 0.2)),
                 )
               else
-                Container(
-                  color: platformColor.withValues(alpha: 0.2),
-                ),
+                Container(color: platformColor.withValues(alpha: 0.2)),
 
               // Full-width gradient overlay (top → bottom)
               const Positioned.fill(
@@ -218,7 +221,10 @@ class _FeedPostCardState extends State<FeedPostCard> {
                 top: 12,
                 left: 12,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF00D4FF),
                     borderRadius: BorderRadius.circular(4),
@@ -303,10 +309,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                           fontWeight: FontWeight.w700,
                           height: 1.2,
                           shadows: [
-                            Shadow(
-                              color: Colors.black54,
-                              blurRadius: 6,
-                            ),
+                            Shadow(color: Colors.black54, blurRadius: 6),
                           ],
                         ),
                         maxLines: 2,
@@ -316,7 +319,9 @@ class _FeedPostCardState extends State<FeedPostCard> {
                     const SizedBox(width: 10),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF00D4FF),
                         borderRadius: BorderRadius.circular(20),
@@ -357,31 +362,33 @@ class _FeedPostCardState extends State<FeedPostCard> {
         children: [
           // Creator avatar (24 dp radius circle) — taps open creator profile
           GestureDetector(
-          onTap: () => CreatorProfileSheet.show(context, widget.content),
-          child: Semantics(
-            label: 'View creator: ${widget.content.creatorName ?? 'Unknown'}',
-            button: true,
-            child: SizedBox(
-            width: 32,
-            height: 32,
-            child: CircleAvatar(
-              radius: 16,
-              backgroundColor: color.withValues(alpha: 0.15),
-              child: widget.content.creatorAvatarUrl != null
-                  ? ClipOval(
-                      child: CachedNetworkImage(
-                        imageUrl: widget.content.creatorAvatarUrl!,
-                        width: 32,
-                        height: 32,
-                        fit: BoxFit.cover,
-                        placeholder: (_, __) => _avatarInitial(initial, color),
-                        errorWidget: (_, __, ___) => _avatarInitial(initial, color),
-                      ),
-                    )
-                  : _avatarInitial(initial, color),
+            onTap: () => CreatorProfileSheet.show(context, widget.content),
+            child: Semantics(
+              label: 'View creator: ${widget.content.creatorName ?? 'Unknown'}',
+              button: true,
+              child: SizedBox(
+                width: 32,
+                height: 32,
+                child: CircleAvatar(
+                  radius: 16,
+                  backgroundColor: color.withValues(alpha: 0.15),
+                  child: widget.content.creatorAvatarUrl != null
+                      ? ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: widget.content.creatorAvatarUrl!,
+                            width: 32,
+                            height: 32,
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) =>
+                                _avatarInitial(initial, color),
+                            errorWidget: (_, __, ___) =>
+                                _avatarInitial(initial, color),
+                          ),
+                        )
+                      : _avatarInitial(initial, color),
+                ),
+              ),
             ),
-            ),
-          ),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -498,7 +505,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
   Widget _buildThumbnail() {
     final platform = widget.content.platform;
     final platformColor = _platformColor(platform);
-    final durationText = widget.content.durationSeconds != null &&
+    final durationText =
+        widget.content.durationSeconds != null &&
             widget.content.durationSeconds! > 0
         ? _formatDuration(widget.content.durationSeconds!)
         : '';
@@ -515,7 +523,11 @@ class _FeedPostCardState extends State<FeedPostCard> {
             interactionType: InteractionType.view,
           );
           if (context.mounted) {
-            Navigator.pushNamed(context, AppRoutes.player, arguments: widget.content);
+            Navigator.pushNamed(
+              context,
+              AppRoutes.player,
+              arguments: widget.content,
+            );
           }
         },
         child: ClipRRect(
@@ -556,10 +568,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                 height: 200,
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      Colors.transparent,
-                      Colors.black54,
-                    ],
+                    colors: [Colors.transparent, Colors.black54],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     stops: [0.4, 1.0],
@@ -596,8 +605,10 @@ class _FeedPostCardState extends State<FeedPostCard> {
                   right: 8,
                   bottom: 8,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.75),
                       borderRadius: BorderRadius.circular(4),
@@ -697,10 +708,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
         : null;
 
     final viewsStr = '${_formatCount(widget.content.viewCount)} views';
-    final parts = <String>[
-      viewsStr,
-      if (timeAgo != null) timeAgo,
-    ];
+    final parts = <String>[viewsStr, if (timeAgo != null) timeAgo];
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
@@ -729,11 +737,16 @@ class _FeedPostCardState extends State<FeedPostCard> {
             child: _buildActionButton(
               icon: _isLiked ? Icons.favorite : Icons.favorite_border,
               iconColor: _isLiked ? Colors.red : null,
-              label: _formatCount(widget.content.likeCount + (_isLiked ? 1 : 0)),
+              label: _formatCount(
+                widget.content.likeCount + (_isLiked ? 1 : 0),
+              ),
               animating: _likeAnimating,
               onTap: () async {
                 HapticFeedback.lightImpact();
-                setState(() { _isLiked = !_isLiked; _likeAnimating = true; });
+                setState(() {
+                  _isLiked = !_isLiked;
+                  _likeAnimating = true;
+                });
                 Future.delayed(const Duration(milliseconds: 300), () {
                   if (mounted) setState(() => _likeAnimating = false);
                 });
@@ -750,21 +763,21 @@ class _FeedPostCardState extends State<FeedPostCard> {
             label: 'Share',
             button: true,
             child: _buildActionButton(
-            icon: Icons.share_outlined,
-            label: 'Share',
-            onTap: () async {
-              final messenger = ScaffoldMessenger.of(context);
-              await ContentService.instance.trackContentInteraction(
-                contentId: widget.content.id,
-                interactionType: InteractionType.share,
-              );
-              messenger.showSnackBar(
-                const SnackBar(
-                  content: Text('Link copied!'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
+              icon: Icons.share_outlined,
+              label: 'Share',
+              onTap: () async {
+                final messenger = ScaffoldMessenger.of(context);
+                await ContentService.instance.trackContentInteraction(
+                  contentId: widget.content.id,
+                  interactionType: InteractionType.share,
+                );
+                messenger.showSnackBar(
+                  const SnackBar(
+                    content: Text('Link copied!'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
             ),
           ),
           const Spacer(),
@@ -795,7 +808,10 @@ class _FeedPostCardState extends State<FeedPostCard> {
                 ),
                 onPressed: () async {
                   HapticFeedback.lightImpact();
-                  setState(() { _isSaved = !_isSaved; _saveAnimating = true; });
+                  setState(() {
+                    _isSaved = !_isSaved;
+                    _saveAnimating = true;
+                  });
                   Future.delayed(const Duration(milliseconds: 300), () {
                     if (mounted) setState(() => _saveAnimating = false);
                   });
@@ -824,23 +840,41 @@ class _FeedPostCardState extends State<FeedPostCard> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2))),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
             const SizedBox(height: 16),
             _moreOption(Icons.share_outlined, 'Share', () {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Link copied!'), duration: Duration(seconds: 2)),
+                const SnackBar(
+                  content: Text('Link copied!'),
+                  duration: Duration(seconds: 2),
+                ),
               );
             }),
-            _moreOption(_isSaved ? Icons.bookmark : Icons.bookmark_border, _isSaved ? 'Remove bookmark' : 'Save to Watch Later', () async {
-              Navigator.pop(context);
-              setState(() => _isSaved = !_isSaved);
-              await ContentService.instance.trackContentInteraction(
-                contentId: widget.content.id,
-                interactionType: InteractionType.save,
-              );
-            }),
-            _moreOption(Icons.not_interested, 'Not interested', () => Navigator.pop(context)),
+            _moreOption(
+              _isSaved ? Icons.bookmark : Icons.bookmark_border,
+              _isSaved ? 'Remove bookmark' : 'Save to Watch Later',
+              () async {
+                Navigator.pop(context);
+                setState(() => _isSaved = !_isSaved);
+                await ContentService.instance.trackContentInteraction(
+                  contentId: widget.content.id,
+                  interactionType: InteractionType.save,
+                );
+              },
+            ),
+            _moreOption(
+              Icons.not_interested,
+              'Not interested',
+              () => Navigator.pop(context),
+            ),
             const SizedBox(height: 8),
           ],
         ),
@@ -851,7 +885,10 @@ class _FeedPostCardState extends State<FeedPostCard> {
   Widget _moreOption(IconData icon, String label, VoidCallback onTap) {
     return ListTile(
       leading: Icon(icon, color: Colors.white70),
-      title: Text(label, style: const TextStyle(color: Colors.white, fontSize: 15)),
+      title: Text(
+        label,
+        style: const TextStyle(color: Colors.white, fontSize: 15),
+      ),
       onTap: onTap,
     );
   }

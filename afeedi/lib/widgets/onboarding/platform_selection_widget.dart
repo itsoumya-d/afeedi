@@ -14,12 +14,13 @@ class PlatformSelectionWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<PlatformSelectionWidget> createState() => _PlatformSelectionWidgetState();
+  State<PlatformSelectionWidget> createState() =>
+      _PlatformSelectionWidgetState();
 }
 
 class _PlatformSelectionWidgetState extends State<PlatformSelectionWidget> {
   late Map<String, double> _platformPriorities;
-  
+
   // Platform information with icons and colors
   final List<Map<String, dynamic>> _platforms = [
     {
@@ -64,7 +65,7 @@ class _PlatformSelectionWidgetState extends State<PlatformSelectionWidget> {
   void initState() {
     super.initState();
     _platformPriorities = Map.from(widget.platformPriorities);
-    
+
     // Initialize any missing platforms with default value
     for (final platform in _platforms) {
       final name = platform['name'];
@@ -93,9 +94,9 @@ class _PlatformSelectionWidgetState extends State<PlatformSelectionWidget> {
             fontWeight: FontWeight.w500,
           ),
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         Text(
           'Drag the sliders to set how often you want to see content from each platform',
           style: AppTextStyles.bodyMedium.copyWith(
@@ -103,9 +104,9 @@ class _PlatformSelectionWidgetState extends State<PlatformSelectionWidget> {
             color: Colors.grey[600],
           ),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Platform priority sliders
         ..._platforms.asMap().entries.map((entry) {
           final index = entry.key;
@@ -113,7 +114,7 @@ class _PlatformSelectionWidgetState extends State<PlatformSelectionWidget> {
           final name = platform['name'];
           final icon = platform['icon'];
           final color = platform['color'];
-          
+
           return _buildPlatformPrioritySlider(
             name: name,
             icon: icon,
@@ -122,9 +123,9 @@ class _PlatformSelectionWidgetState extends State<PlatformSelectionWidget> {
             index: index,
           );
         }).toList(),
-        
+
         const SizedBox(height: 24),
-        
+
         // Info box
         Container(
           padding: const EdgeInsets.all(16),
@@ -161,67 +162,73 @@ class _PlatformSelectionWidgetState extends State<PlatformSelectionWidget> {
     required int index,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: color, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                name,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _getPriorityColor(value).withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  _getPriorityLabel(value),
-                  style: TextStyle(
-                    color: _getPriorityColor(value),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(icon, color: color, size: 20),
                   ),
+                  const SizedBox(width: 12),
+                  Text(
+                    name,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _getPriorityColor(value).withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      _getPriorityLabel(value),
+                      style: TextStyle(
+                        color: _getPriorityColor(value),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  activeTrackColor: color,
+                  inactiveTrackColor: Colors.grey.withValues(alpha: 0.2),
+                  thumbColor: color,
+                  overlayColor: color.withValues(alpha: 0.2),
+                  trackHeight: 4,
+                ),
+                child: Slider(
+                  value: value,
+                  min: 0,
+                  max: 1,
+                  divisions: 10,
+                  onChanged: (newValue) {
+                    _updatePlatformPriority(name, newValue);
+                  },
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              activeTrackColor: color,
-              inactiveTrackColor: Colors.grey.withValues(alpha: 0.2),
-              thumbColor: color,
-              overlayColor: color.withValues(alpha: 0.2),
-              trackHeight: 4,
-            ),
-            child: Slider(
-              value: value,
-              min: 0,
-              max: 1,
-              divisions: 10,
-              onChanged: (newValue) {
-                _updatePlatformPriority(name, newValue);
-              },
-            ),
-          ),
-        ],
-      ),
-    ).animate().fadeIn(duration: 300.ms, delay: (100 * index).ms).slideX(begin: 0.05, end: 0);
+        )
+        .animate()
+        .fadeIn(duration: 300.ms, delay: (100 * index).ms)
+        .slideX(begin: 0.05, end: 0);
   }
 
   String _getPriorityLabel(double value) {

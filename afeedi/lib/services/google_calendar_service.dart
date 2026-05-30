@@ -16,9 +16,7 @@ class GoogleCalendarService {
   static const _cacheTtlMinutes = 15;
 
   final _googleSignIn = GoogleSignIn(
-    scopes: [
-      'https://www.googleapis.com/auth/calendar.readonly',
-    ],
+    scopes: ['https://www.googleapis.com/auth/calendar.readonly'],
   );
 
   GoogleSignInAccount? _account;
@@ -81,7 +79,9 @@ class GoogleCalendarService {
       );
 
       if (response.statusCode != 200) {
-        debugPrint('Calendar API error: ${response.statusCode} ${response.body}');
+        debugPrint(
+          'Calendar API error: ${response.statusCode} ${response.body}',
+        );
         return [];
       }
 
@@ -121,20 +121,22 @@ class GoogleCalendarService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final list = events
-          .map((e) => {
-                'id': e.id,
-                'summary': e.title,
-                'start': e.isAllDay
-                    ? {'date': e.start.toIso8601String().split('T').first}
-                    : {'dateTime': e.start.toIso8601String()},
-                'end': e.end == null
-                    ? null
-                    : e.isAllDay
-                        ? {'date': e.end!.toIso8601String().split('T').first}
-                        : {'dateTime': e.end!.toIso8601String()},
-                'description': e.description,
-                'location': e.location,
-              })
+          .map(
+            (e) => {
+              'id': e.id,
+              'summary': e.title,
+              'start': e.isAllDay
+                  ? {'date': e.start.toIso8601String().split('T').first}
+                  : {'dateTime': e.start.toIso8601String()},
+              'end': e.end == null
+                  ? null
+                  : e.isAllDay
+                  ? {'date': e.end!.toIso8601String().split('T').first}
+                  : {'dateTime': e.end!.toIso8601String()},
+              'description': e.description,
+              'location': e.location,
+            },
+          )
           .toList();
       await prefs.setString(_cacheKey, jsonEncode(list));
       await prefs.setInt(_cacheTimeKey, DateTime.now().millisecondsSinceEpoch);

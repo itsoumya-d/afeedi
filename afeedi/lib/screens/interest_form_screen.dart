@@ -13,33 +13,103 @@ class _InterestFormScreenState extends State<InterestFormScreen>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
-  
+
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
-  
+
   Set<String> _selectedInterests = {};
   String? _selectedLanguage;
   bool _isFormValid = false;
-  
+
   final List<Map<String, dynamic>> _interestCategories = [
-    {'id': 'technology', 'name': 'Technology', 'icon': Icons.computer, 'color': Color(0xFF2196F3)},
-    {'id': 'entertainment', 'name': 'Entertainment', 'icon': Icons.movie, 'color': Color(0xFFE91E63)},
-    {'id': 'sports', 'name': 'Sports', 'icon': Icons.sports_soccer, 'color': Color(0xFF4CAF50)},
-    {'id': 'music', 'name': 'Music', 'icon': Icons.music_note, 'color': Color(0xFF9C27B0)},
-    {'id': 'food', 'name': 'Food & Cooking', 'icon': Icons.restaurant, 'color': Color(0xFFFF9800)},
-    {'id': 'travel', 'name': 'Travel', 'icon': Icons.flight, 'color': Color(0xFF00BCD4)},
-    {'id': 'fitness', 'name': 'Fitness & Health', 'icon': Icons.fitness_center, 'color': Color(0xFF8BC34A)},
-    {'id': 'education', 'name': 'Education', 'icon': Icons.school, 'color': Color(0xFF3F51B5)},
-    {'id': 'art', 'name': 'Art & Design', 'icon': Icons.palette, 'color': Color(0xFFE91E63)},
-    {'id': 'gaming', 'name': 'Gaming', 'icon': Icons.games, 'color': Color(0xFF673AB7)},
-    {'id': 'news', 'name': 'News & Politics', 'icon': Icons.newspaper, 'color': Color(0xFF607D8B)},
-    {'id': 'lifestyle', 'name': 'Lifestyle', 'icon': Icons.favorite, 'color': Color(0xFFFF5722)},
+    {
+      'id': 'technology',
+      'name': 'Technology',
+      'icon': Icons.computer,
+      'color': Color(0xFF2196F3),
+    },
+    {
+      'id': 'entertainment',
+      'name': 'Entertainment',
+      'icon': Icons.movie,
+      'color': Color(0xFFE91E63),
+    },
+    {
+      'id': 'sports',
+      'name': 'Sports',
+      'icon': Icons.sports_soccer,
+      'color': Color(0xFF4CAF50),
+    },
+    {
+      'id': 'music',
+      'name': 'Music',
+      'icon': Icons.music_note,
+      'color': Color(0xFF9C27B0),
+    },
+    {
+      'id': 'food',
+      'name': 'Food & Cooking',
+      'icon': Icons.restaurant,
+      'color': Color(0xFFFF9800),
+    },
+    {
+      'id': 'travel',
+      'name': 'Travel',
+      'icon': Icons.flight,
+      'color': Color(0xFF00BCD4),
+    },
+    {
+      'id': 'fitness',
+      'name': 'Fitness & Health',
+      'icon': Icons.fitness_center,
+      'color': Color(0xFF8BC34A),
+    },
+    {
+      'id': 'education',
+      'name': 'Education',
+      'icon': Icons.school,
+      'color': Color(0xFF3F51B5),
+    },
+    {
+      'id': 'art',
+      'name': 'Art & Design',
+      'icon': Icons.palette,
+      'color': Color(0xFFE91E63),
+    },
+    {
+      'id': 'gaming',
+      'name': 'Gaming',
+      'icon': Icons.games,
+      'color': Color(0xFF673AB7),
+    },
+    {
+      'id': 'news',
+      'name': 'News & Politics',
+      'icon': Icons.newspaper,
+      'color': Color(0xFF607D8B),
+    },
+    {
+      'id': 'lifestyle',
+      'name': 'Lifestyle',
+      'icon': Icons.favorite,
+      'color': Color(0xFFFF5722),
+    },
   ];
-  
+
   final List<String> _languages = [
-    'English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 
-    'Chinese', 'Japanese', 'Korean', 'Arabic', 'Hindi', 'Russian'
+    'English',
+    'Spanish',
+    'French',
+    'German',
+    'Italian',
+    'Portuguese',
+    'Chinese',
+    'Japanese',
+    'Korean',
+    'Arabic',
+    'Hindi',
+    'Russian',
   ];
 
   @override
@@ -53,7 +123,7 @@ class _InterestFormScreenState extends State<InterestFormScreen>
       CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
     );
     _fadeController.forward();
-    
+
     _nameController.addListener(_validateForm);
     _ageController.addListener(_validateForm);
   }
@@ -65,15 +135,16 @@ class _InterestFormScreenState extends State<InterestFormScreen>
     _ageController.dispose();
     super.dispose();
   }
-  
+
   void _validateForm() {
     setState(() {
-      _isFormValid = _formKey.currentState?.validate() == true &&
+      _isFormValid =
+          _formKey.currentState?.validate() == true &&
           _selectedInterests.isNotEmpty &&
           _selectedLanguage != null;
     });
   }
-  
+
   void _toggleInterest(String interestId) {
     setState(() {
       if (_selectedInterests.contains(interestId)) {
@@ -84,7 +155,7 @@ class _InterestFormScreenState extends State<InterestFormScreen>
     });
     _validateForm();
   }
-  
+
   void _continue() {
     if (_isFormValid) {
       // Save user preferences
@@ -123,7 +194,9 @@ class _InterestFormScreenState extends State<InterestFormScreen>
                           const SizedBox(height: 32),
                           _buildLanguageSection(),
                           const SizedBox(height: 40),
-                          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+                          SizedBox(
+                            height: MediaQuery.of(context).padding.bottom + 16,
+                          ),
                         ],
                       ),
                     ),
@@ -137,7 +210,7 @@ class _InterestFormScreenState extends State<InterestFormScreen>
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -151,7 +224,10 @@ class _InterestFormScreenState extends State<InterestFormScreen>
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -213,7 +289,7 @@ class _InterestFormScreenState extends State<InterestFormScreen>
       ),
     );
   }
-  
+
   Widget _buildPersonalInfoSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,7 +334,7 @@ class _InterestFormScreenState extends State<InterestFormScreen>
       ],
     );
   }
-  
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -294,23 +370,31 @@ class _InterestFormScreenState extends State<InterestFormScreen>
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.2),
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.primaryCyan, width: 2),
+              borderSide: const BorderSide(
+                color: AppTheme.primaryCyan,
+                width: 2,
+              ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Colors.red, width: 2),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
           ),
         ),
       ],
     );
   }
-  
+
   Widget _buildInterestsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -343,14 +427,17 @@ class _InterestFormScreenState extends State<InterestFormScreen>
               onTap: () => _toggleInterest(category['id']),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
-                  color: isSelected 
+                  color: isSelected
                       ? category['color'].withValues(alpha: 0.2)
                       : Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(25),
                   border: Border.all(
-                    color: isSelected 
+                    color: isSelected
                         ? category['color']
                         : Colors.white.withValues(alpha: 0.3),
                     width: isSelected ? 2 : 1,
@@ -372,7 +459,9 @@ class _InterestFormScreenState extends State<InterestFormScreen>
                       style: TextStyle(
                         color: isSelected ? category['color'] : Colors.white,
                         fontSize: 14,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
                       ),
                     ),
                   ],
@@ -388,11 +477,17 @@ class _InterestFormScreenState extends State<InterestFormScreen>
             decoration: BoxDecoration(
               color: AppTheme.primaryCyan.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.primaryCyan.withValues(alpha: 0.3)),
+              border: Border.all(
+                color: AppTheme.primaryCyan.withValues(alpha: 0.3),
+              ),
             ),
             child: Row(
               children: [
-                const Icon(Icons.check_circle, color: AppTheme.primaryCyan, size: 20),
+                const Icon(
+                  Icons.check_circle,
+                  color: AppTheme.primaryCyan,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
@@ -409,11 +504,11 @@ class _InterestFormScreenState extends State<InterestFormScreen>
               ],
             ),
           ),
-        ]
+        ],
       ],
     );
   }
-  
+
   Widget _buildLanguageSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -472,7 +567,7 @@ class _InterestFormScreenState extends State<InterestFormScreen>
       ],
     );
   }
-  
+
   Widget _buildBottomSection() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -484,8 +579,8 @@ class _InterestFormScreenState extends State<InterestFormScreen>
             child: ElevatedButton(
               onPressed: _isFormValid ? _continue : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _isFormValid 
-                    ? AppTheme.primaryCyan 
+                backgroundColor: _isFormValid
+                    ? AppTheme.primaryCyan
                     : Colors.grey.withValues(alpha: 0.3),
                 foregroundColor: Colors.white,
                 elevation: _isFormValid ? 4 : 0,
@@ -495,10 +590,7 @@ class _InterestFormScreenState extends State<InterestFormScreen>
               ),
               child: const Text(
                 'Continue',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
             ),
           ),

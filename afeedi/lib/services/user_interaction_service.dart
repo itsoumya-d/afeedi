@@ -101,7 +101,8 @@ class UserInteractionService {
 
   bool isSaved(String contentId) => _saveCache[contentId] ?? false;
 
-  bool isNotInterested(String contentId) => _notInterestedCache.contains(contentId);
+  bool isNotInterested(String contentId) =>
+      _notInterestedCache.contains(contentId);
 
   List<String> getNotInterestedIds() => _notInterestedCache.toList();
 
@@ -143,11 +144,10 @@ class UserInteractionService {
     await _prefs?.setBool('liked_$contentId', next);
 
     // Adjust local delta so displayed count tracks the toggle
-    final counts = _countsCache.putIfAbsent(contentId, () => {
-      'likeCount': 0,
-      'saveCount': 0,
-      'shareCount': 0,
-    });
+    final counts = _countsCache.putIfAbsent(
+      contentId,
+      () => {'likeCount': 0, 'saveCount': 0, 'shareCount': 0},
+    );
     counts['likeCount'] = (counts['likeCount'] ?? 0) + (next ? 1 : -1);
     await _persistCounts();
 
@@ -161,11 +161,10 @@ class UserInteractionService {
     _saveCache[contentId] = next;
     await _prefs?.setBool('saved_$contentId', next);
 
-    final counts = _countsCache.putIfAbsent(contentId, () => {
-      'likeCount': 0,
-      'saveCount': 0,
-      'shareCount': 0,
-    });
+    final counts = _countsCache.putIfAbsent(
+      contentId,
+      () => {'likeCount': 0, 'saveCount': 0, 'shareCount': 0},
+    );
     counts['saveCount'] = (counts['saveCount'] ?? 0) + (next ? 1 : -1);
     await _persistCounts();
 
@@ -184,11 +183,10 @@ class UserInteractionService {
   }
 
   Future<void> trackShare(String contentId) async {
-    final counts = _countsCache.putIfAbsent(contentId, () => {
-      'likeCount': 0,
-      'saveCount': 0,
-      'shareCount': 0,
-    });
+    final counts = _countsCache.putIfAbsent(
+      contentId,
+      () => {'likeCount': 0, 'saveCount': 0, 'shareCount': 0},
+    );
     counts['shareCount'] = (counts['shareCount'] ?? 0) + 1;
     await _persistCounts();
 

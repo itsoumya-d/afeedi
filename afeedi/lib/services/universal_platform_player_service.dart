@@ -9,13 +9,14 @@ import 'youtube_player_service.dart';
 
 class UniversalPlatformPlayerService {
   static UniversalPlatformPlayerService? _instance;
-  static UniversalPlatformPlayerService get instance => _instance ??= UniversalPlatformPlayerService._();
-  
+  static UniversalPlatformPlayerService get instance =>
+      _instance ??= UniversalPlatformPlayerService._();
+
   UniversalPlatformPlayerService._();
-  
+
   // Cache for iframe HTML content
   final Map<String, String> _iframeCache = {};
-  
+
   // Create platform-specific player with fallback to external app
   Future<PlatformPlayerResult> createPlayer({
     required Content content,
@@ -60,7 +61,7 @@ class UniversalPlatformPlayerService {
         errorMessage: error.toString(),
         screen: 'video_player',
       );
-      
+
       return PlatformPlayerResult(
         success: false,
         playerId: null,
@@ -70,7 +71,7 @@ class UniversalPlatformPlayerService {
       );
     }
   }
-  
+
   Future<PlatformPlayerResult> _createYouTubePlayer({
     required Content content,
     required String containerId,
@@ -84,7 +85,7 @@ class UniversalPlatformPlayerService {
         autoplay: autoplay,
         showControls: showControls,
       );
-      
+
       return PlatformPlayerResult(
         success: youtubeResult.success,
         playerId: youtubeResult.playerId,
@@ -99,12 +100,13 @@ class UniversalPlatformPlayerService {
         success: false,
         playerId: null,
         platform: PlatformType.youtube,
-        fallbackUrl: 'https://www.youtube.com/watch?v=${content.platformContentId}',
+        fallbackUrl:
+            'https://www.youtube.com/watch?v=${content.platformContentId}',
         errorMessage: error.toString(),
       );
     }
   }
-  
+
   Future<PlatformPlayerResult> _createInstagramPlayer({
     required Content content,
     required String containerId,
@@ -114,7 +116,8 @@ class UniversalPlatformPlayerService {
     try {
       if (kIsWeb) {
         // Create Instagram embed iframe
-        final embedUrl = 'https://www.instagram.com/p/${content.platformContentId}/embed/';
+        final embedUrl =
+            'https://www.instagram.com/p/${content.platformContentId}/embed/';
 
         await AnalyticsService.instance.trackUserInteraction(
           action: 'instagram_player_created',
@@ -125,7 +128,7 @@ class UniversalPlatformPlayerService {
             'embed_mode': 'iframe',
           },
         );
-        
+
         return PlatformPlayerResult(
           success: true,
           playerId: containerId,
@@ -133,13 +136,14 @@ class UniversalPlatformPlayerService {
           embedUrl: embedUrl,
         );
       }
-      
+
       // Fallback to external Instagram
       return PlatformPlayerResult(
         success: false,
         playerId: null,
         platform: PlatformType.instagram,
-        fallbackUrl: 'https://www.instagram.com/p/${content.platformContentId}/',
+        fallbackUrl:
+            'https://www.instagram.com/p/${content.platformContentId}/',
         errorMessage: 'Instagram embed not supported',
       );
     } catch (error) {
@@ -147,12 +151,13 @@ class UniversalPlatformPlayerService {
         success: false,
         playerId: null,
         platform: PlatformType.instagram,
-        fallbackUrl: 'https://www.instagram.com/p/${content.platformContentId}/',
+        fallbackUrl:
+            'https://www.instagram.com/p/${content.platformContentId}/',
         errorMessage: error.toString(),
       );
     }
   }
-  
+
   Future<PlatformPlayerResult> _createTikTokPlayer({
     required Content content,
     required String containerId,
@@ -168,18 +173,20 @@ class UniversalPlatformPlayerService {
           'music_info': '1',
           'description': '1',
         };
-        
+
         final queryString = queryParams.entries
             .map((e) => '${e.key}=${e.value}')
             .join('&');
-        
+
         // Use the enhanced TikTok player v1 API for better control
-        final embedUrl = 'https://www.tiktok.com/player/v1/${content.platformContentId}?$queryString';
-        
+        final embedUrl =
+            'https://www.tiktok.com/player/v1/${content.platformContentId}?$queryString';
+
         // Register iframe for web platform with postMessage support
         if (kIsWeb) {
           // Create iframe element with enhanced features
-          final iframeHtml = '''
+          final iframeHtml =
+              '''
             <iframe 
               id="$containerId"
               src="$embedUrl"
@@ -246,11 +253,11 @@ class UniversalPlatformPlayerService {
               };
             </script>
           ''';
-          
+
           // Store iframe HTML for platform view registration
           _iframeCache[containerId] = iframeHtml;
         }
-        
+
         await AnalyticsService.instance.trackUserInteraction(
           action: 'tiktok_enhanced_player_created',
           screen: 'video_player',
@@ -263,7 +270,7 @@ class UniversalPlatformPlayerService {
             'player_version': 'v1',
           },
         );
-        
+
         return PlatformPlayerResult(
           success: true,
           playerId: containerId,
@@ -271,16 +278,19 @@ class UniversalPlatformPlayerService {
           embedUrl: embedUrl,
         );
       }
-      
+
       // Enhanced mobile fallback with better URL construction
-      final mobileUrl = content.videoUrl ?? 'https://www.tiktok.com/@user/video/${content.platformContentId}';
-      
+      final mobileUrl =
+          content.videoUrl ??
+          'https://www.tiktok.com/@user/video/${content.platformContentId}';
+
       return PlatformPlayerResult(
         success: false,
         playerId: null,
         platform: PlatformType.tiktok,
         fallbackUrl: mobileUrl,
-        errorMessage: 'TikTok embed requires web platform - redirecting to TikTok app',
+        errorMessage:
+            'TikTok embed requires web platform - redirecting to TikTok app',
       );
     } catch (error) {
       await AnalyticsService.instance.trackError(
@@ -292,17 +302,19 @@ class UniversalPlatformPlayerService {
           'video_id': content.platformContentId,
         },
       );
-      
+
       return PlatformPlayerResult(
         success: false,
         playerId: null,
         platform: PlatformType.tiktok,
-        fallbackUrl: content.videoUrl ?? 'https://www.tiktok.com/@user/video/${content.platformContentId}',
+        fallbackUrl:
+            content.videoUrl ??
+            'https://www.tiktok.com/@user/video/${content.platformContentId}',
         errorMessage: error.toString(),
       );
     }
   }
-  
+
   Future<PlatformPlayerResult> _createFacebookPlayer({
     required Content content,
     required String containerId,
@@ -312,9 +324,11 @@ class UniversalPlatformPlayerService {
     try {
       if (kIsWeb) {
         // Create Facebook embed iframe
-        final videoUrl = 'https://www.facebook.com/video.php?v=${content.platformContentId}';
-        final embedUrl = 'https://www.facebook.com/plugins/video.php?href=${Uri.encodeComponent(videoUrl)}&width=500&show_text=false&appId';
-        
+        final videoUrl =
+            'https://www.facebook.com/video.php?v=${content.platformContentId}';
+        final embedUrl =
+            'https://www.facebook.com/plugins/video.php?href=${Uri.encodeComponent(videoUrl)}&width=500&show_text=false&appId';
+
         await AnalyticsService.instance.trackUserInteraction(
           action: 'facebook_player_created',
           screen: 'video_player',
@@ -324,7 +338,7 @@ class UniversalPlatformPlayerService {
             'embed_mode': 'iframe',
           },
         );
-        
+
         return PlatformPlayerResult(
           success: true,
           playerId: containerId,
@@ -332,13 +346,14 @@ class UniversalPlatformPlayerService {
           embedUrl: embedUrl,
         );
       }
-      
+
       // Fallback to external Facebook
       return PlatformPlayerResult(
         success: false,
         playerId: null,
         platform: PlatformType.facebook,
-        fallbackUrl: 'https://www.facebook.com/video.php?v=${content.platformContentId}',
+        fallbackUrl:
+            'https://www.facebook.com/video.php?v=${content.platformContentId}',
         errorMessage: 'Facebook embed not supported',
       );
     } catch (error) {
@@ -346,20 +361,21 @@ class UniversalPlatformPlayerService {
         success: false,
         playerId: null,
         platform: PlatformType.facebook,
-        fallbackUrl: 'https://www.facebook.com/video.php?v=${content.platformContentId}',
+        fallbackUrl:
+            'https://www.facebook.com/video.php?v=${content.platformContentId}',
         errorMessage: error.toString(),
       );
     }
   }
-  
+
   // Open content in external platform app/website
   Future<bool> openInPlatform(Content content) async {
     try {
       final platformUrl = _getPlatformUrl(content);
       final appUrl = _getPlatformAppUrl(content);
-      
+
       bool launched = false;
-      
+
       // Try platform app first if available
       if (appUrl != null) {
         try {
@@ -373,7 +389,7 @@ class UniversalPlatformPlayerService {
           // Platform app not available, continue to browser fallback
         }
       }
-      
+
       // Fallback to browser
       if (!launched) {
         launched = await launchUrl(
@@ -381,7 +397,7 @@ class UniversalPlatformPlayerService {
           mode: LaunchMode.externalApplication,
         );
       }
-      
+
       if (launched) {
         await AnalyticsService.instance.trackUserInteraction(
           action: '${content.platform.name}_external_launch',
@@ -393,7 +409,7 @@ class UniversalPlatformPlayerService {
           },
         );
       }
-      
+
       return launched;
     } catch (error) {
       await AnalyticsService.instance.trackError(
@@ -404,7 +420,7 @@ class UniversalPlatformPlayerService {
       return false;
     }
   }
-  
+
   String _getPlatformUrl(Content content) {
     switch (content.platform) {
       case PlatformType.youtube:
@@ -417,7 +433,7 @@ class UniversalPlatformPlayerService {
         return 'https://www.facebook.com/video.php?v=${content.platformContentId}';
     }
   }
-  
+
   String? _getPlatformAppUrl(Content content) {
     switch (content.platform) {
       case PlatformType.youtube:
@@ -430,13 +446,16 @@ class UniversalPlatformPlayerService {
         return 'fb://video/${content.platformContentId}';
     }
   }
-  
+
   // Get platform-specific thumbnail URL
-  String getPlatformThumbnailUrl(Content content, {PlatformThumbnailQuality quality = PlatformThumbnailQuality.high}) {
+  String getPlatformThumbnailUrl(
+    Content content, {
+    PlatformThumbnailQuality quality = PlatformThumbnailQuality.high,
+  }) {
     if (content.thumbnailUrl != null) {
       return content.thumbnailUrl!;
     }
-    
+
     switch (content.platform) {
       case PlatformType.youtube:
         return YouTubePlayerService.instance.getThumbnailUrl(
@@ -451,11 +470,11 @@ class UniversalPlatformPlayerService {
         return 'https://graph.facebook.com/${content.platformContentId}/picture?type=large';
     }
   }
-  
+
   // Check if platform embed is supported
   bool isPlatformEmbedSupported(PlatformType platform) {
     if (!kIsWeb) return false; // Mobile uses external apps
-    
+
     switch (platform) {
       case PlatformType.youtube:
         return YouTubePlayerService.instance.isEmbedSupported();
@@ -465,7 +484,7 @@ class UniversalPlatformPlayerService {
         return true; // Basic iframe support
     }
   }
-  
+
   // Get platform-specific player configuration
   Map<String, dynamic> getPlatformConfig(PlatformType platform) {
     switch (platform) {
@@ -522,7 +541,7 @@ class PlatformPlayerResult {
   final String? externalUrl;
   final String? fallbackUrl;
   final String? errorMessage;
-  
+
   const PlatformPlayerResult({
     required this.success,
     this.playerId,
@@ -532,16 +551,11 @@ class PlatformPlayerResult {
     this.fallbackUrl,
     this.errorMessage,
   });
-  
+
   bool get isEmbedded => embedUrl != null;
   bool get isExternal => externalUrl != null;
   bool get hasFallback => fallbackUrl != null;
 }
 
 // Platform thumbnail quality options
-enum PlatformThumbnailQuality {
-  low,
-  medium,
-  high,
-  maxres,
-}
+enum PlatformThumbnailQuality { low, medium, high, maxres }

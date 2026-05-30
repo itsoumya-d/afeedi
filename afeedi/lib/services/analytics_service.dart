@@ -183,7 +183,10 @@ class AnalyticsService with WidgetsBindingObserver {
 
   // Conversion funnel events — required for paywall & subscription optimization
 
-  Future<void> trackFirstContentViewed(String contentId, String platform) async {
+  Future<void> trackFirstContentViewed(
+    String contentId,
+    String platform,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     if (prefs.getBool('_first_content_tracked') == true) return;
     await prefs.setBool('_first_content_tracked', true);
@@ -233,7 +236,10 @@ class AnalyticsService with WidgetsBindingObserver {
     await _queueEvent(event);
   }
 
-  Future<void> trackSubscriptionCanceled(String planId, {String? reason}) async {
+  Future<void> trackSubscriptionCanceled(
+    String planId, {
+    String? reason,
+  }) async {
     final event = {
       'event_type': 'subscription',
       'action': 'canceled',
@@ -374,7 +380,9 @@ class AnalyticsService with WidgetsBindingObserver {
 
   /// Deletes analytics events older than [maxAge] (GDPR Art. 5 storage limitation).
   /// Call periodically — e.g., once on app launch — to enforce a 90-day retention policy.
-  Future<void> pruneOldEvents({Duration maxAge = const Duration(days: 90)}) async {
+  Future<void> pruneOldEvents({
+    Duration maxAge = const Duration(days: 90),
+  }) async {
     try {
       final cutoff = DateTime.now().subtract(maxAge);
       final events = await _getStoredEvents();
@@ -639,9 +647,7 @@ class AnalyticsService with WidgetsBindingObserver {
   // ---------------------------------------------------------------------------
 
   /// Called when the user switches the app language.
-  Future<void> trackLanguageChanged({
-    required String languageCode,
-  }) async {
+  Future<void> trackLanguageChanged({required String languageCode}) async {
     final event = {
       'event_type': 'settings',
       'event_name': 'language_changed',
@@ -732,7 +738,11 @@ class AnalyticsService with WidgetsBindingObserver {
     final now = DateTime.now();
 
     bool returnedOnDay(int n) {
-      final target = installDate.add(Duration(days: n)).toIso8601String().split('T').first;
+      final target = installDate
+          .add(Duration(days: n))
+          .toIso8601String()
+          .split('T')
+          .first;
       return activeDays.contains(target);
     }
 
@@ -745,4 +755,3 @@ class AnalyticsService with WidgetsBindingObserver {
     };
   }
 }
-

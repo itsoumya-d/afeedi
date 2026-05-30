@@ -5,14 +5,14 @@ class OnboardingStepWidget extends StatefulWidget {
   final Map<String, dynamic> step;
   final Map<String, dynamic> data;
   final Function(Map<String, dynamic>) onDataChanged;
-  
+
   const OnboardingStepWidget({
     super.key,
     required this.step,
     required this.data,
     required this.onDataChanged,
   });
-  
+
   @override
   State<OnboardingStepWidget> createState() => _OnboardingStepWidgetState();
 }
@@ -21,34 +21,30 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
     with TickerProviderStateMixin {
   late AnimationController _contentController;
   late Animation<double> _contentAnimation;
-  
+
   final Map<String, TextEditingController> _textControllers = {};
   final Map<String, FocusNode> _focusNodes = {};
-  
+
   @override
   void initState() {
     super.initState();
     _initializeAnimations();
     _initializeControllers();
   }
-  
+
   void _initializeAnimations() {
     _contentController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
-    _contentAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _contentController,
-      curve: Curves.easeOutCubic,
-    ));
-    
+
+    _contentAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _contentController, curve: Curves.easeOutCubic),
+    );
+
     _contentController.forward();
   }
-  
+
   void _initializeControllers() {
     final fields = widget.step['fields'] as List<String>? ?? [];
     for (final field in fields) {
@@ -58,7 +54,7 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
       _focusNodes[field] = FocusNode();
     }
   }
-  
+
   @override
   void dispose() {
     _contentController.dispose();
@@ -70,7 +66,7 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
     }
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return FadeTransition(
@@ -82,24 +78,22 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
           children: [
             _buildHeader(),
             const SizedBox(height: 32),
-            Expanded(
-              child: _buildStepContent(),
-            ),
+            Expanded(child: _buildStepContent()),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           widget.step['title'] ?? '',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
@@ -111,10 +105,10 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
       ],
     );
   }
-  
+
   Widget _buildStepContent() {
     final stepType = widget.step['type'] ?? 'form';
-    
+
     switch (stepType) {
       case 'intro':
         return _buildIntroContent();
@@ -132,7 +126,7 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
         return _buildFormContent();
     }
   }
-  
+
   Widget _buildIntroContent() {
     return Center(
       child: Column(
@@ -176,17 +170,17 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
       ),
     );
   }
-  
+
   Widget _buildFormContent() {
     final fields = widget.step['fields'] as List<String>? ?? [];
-    
+
     return SingleChildScrollView(
       child: Column(
         children: fields.map((field) => _buildFormField(field)).toList(),
       ),
     );
   }
-  
+
   Widget _buildFormField(String field) {
     switch (field) {
       case 'name':
@@ -207,14 +201,28 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
         return _buildDropdownField(
           field: 'language',
           label: 'Preferred language',
-          options: ['English', 'Spanish', 'French', 'German', 'Chinese', 'Japanese'],
+          options: [
+            'English',
+            'Spanish',
+            'French',
+            'German',
+            'Chinese',
+            'Japanese',
+          ],
           icon: Icons.language_outlined,
         );
       case 'timezone':
         return _buildDropdownField(
           field: 'timezone',
           label: 'Timezone',
-          options: ['UTC-8 (PST)', 'UTC-5 (EST)', 'UTC+0 (GMT)', 'UTC+1 (CET)', 'UTC+8 (CST)', 'UTC+9 (JST)'],
+          options: [
+            'UTC-8 (PST)',
+            'UTC-5 (EST)',
+            'UTC+0 (GMT)',
+            'UTC+1 (CET)',
+            'UTC+8 (CST)',
+            'UTC+9 (JST)',
+          ],
           icon: Icons.schedule_outlined,
         );
       case 'preferredViewingTimes':
@@ -234,7 +242,7 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
         return _buildGenericField(field);
     }
   }
-  
+
   Widget _buildTextFormField({
     required String field,
     required String label,
@@ -250,9 +258,7 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
           labelText: label,
           hintText: hint,
           prefixIcon: Icon(icon),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
         onChanged: (value) {
           widget.onDataChanged({field: value});
@@ -260,7 +266,7 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
       ),
     );
   }
-  
+
   Widget _buildNumberFormField({
     required String field,
     required String label,
@@ -278,9 +284,7 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
           labelText: label,
           hintText: hint,
           prefixIcon: Icon(icon),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
         onChanged: (value) {
           final intValue = int.tryParse(value);
@@ -289,7 +293,7 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
       ),
     );
   }
-  
+
   Widget _buildDropdownField({
     required String field,
     required String label,
@@ -303,15 +307,10 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(icon),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
         items: options.map((option) {
-          return DropdownMenuItem(
-            value: option,
-            child: Text(option),
-          );
+          return DropdownMenuItem(value: option, child: Text(option));
         }).toList(),
         onChanged: (value) {
           widget.onDataChanged({field: value});
@@ -319,7 +318,7 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
       ),
     );
   }
-  
+
   Widget _buildSliderField({
     required String field,
     required String label,
@@ -329,16 +328,13 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
     required String unit,
   }) {
     final value = (widget.data[field] ?? min).toDouble();
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          Text(label, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -371,7 +367,7 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
       ),
     );
   }
-  
+
   Widget _buildTimePreferencesField() {
     final timeSlots = [
       'Early Morning (6-9 AM)',
@@ -381,9 +377,11 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
       'Night (8-11 PM)',
       'Late Night (11 PM-2 AM)',
     ];
-    
-    final selectedTimes = List<String>.from(widget.data['preferredViewingTimes'] ?? []);
-    
+
+    final selectedTimes = List<String>.from(
+      widget.data['preferredViewingTimes'] ?? [],
+    );
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 24.0),
       child: Column(
@@ -407,7 +405,9 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
                   } else {
                     selectedTimes.remove(timeSlot);
                   }
-                  widget.onDataChanged({'preferredViewingTimes': selectedTimes});
+                  widget.onDataChanged({
+                    'preferredViewingTimes': selectedTimes,
+                  });
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -419,12 +419,13 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
       ),
     );
   }
-  
+
   Widget _buildContentLengthField() {
     final preferences = Map<String, int>.from(
-      widget.data['contentLengthPreferences'] ?? {'short': 70, 'medium': 25, 'long': 5}
+      widget.data['contentLengthPreferences'] ??
+          {'short': 70, 'medium': 25, 'long': 5},
     );
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 24.0),
       child: Column(
@@ -442,10 +443,14 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
       ),
     );
   }
-  
-  Widget _buildLengthSlider(String label, String key, Map<String, int> preferences) {
+
+  Widget _buildLengthSlider(
+    String label,
+    String key,
+    Map<String, int> preferences,
+  ) {
     final value = preferences[key]?.toDouble() ?? 0.0;
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
@@ -453,10 +458,7 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(label),
-              Text('${value.toInt()}%'),
-            ],
+            children: [Text(label), Text('${value.toInt()}%')],
           ),
           Slider(
             value: value,
@@ -472,7 +474,7 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
       ),
     );
   }
-  
+
   Widget _buildGenericField(String field) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24.0),
@@ -480,9 +482,7 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
         controller: _textControllers[field],
         decoration: InputDecoration(
           labelText: field.replaceAll('_', ' ').toUpperCase(),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
         onChanged: (value) {
           widget.onDataChanged({field: value});
@@ -490,11 +490,13 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
       ),
     );
   }
-  
+
   Widget _buildMultiSelectContent() {
     final options = widget.step['options'] as List? ?? [];
-    final selectedOptions = List<String>.from(widget.data[widget.step['id']] ?? []);
-    
+    final selectedOptions = List<String>.from(
+      widget.data[widget.step['id']] ?? [],
+    );
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -504,7 +506,7 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
             children: options.map<Widget>((option) {
               final optionText = option.toString();
               final isSelected = selectedOptions.contains(optionText);
-              
+
               return FilterChip(
                 label: Text(optionText),
                 selected: isSelected,
@@ -518,7 +520,9 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
                 },
                 backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
                 selectedColor: Theme.of(context).colorScheme.primaryContainer,
-                checkmarkColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                checkmarkColor: Theme.of(
+                  context,
+                ).colorScheme.onPrimaryContainer,
               );
             }).toList(),
           ),
@@ -526,29 +530,33 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
       ),
     );
   }
-  
+
   Widget _buildSingleSelectContent() {
     final options = widget.step['options'] as List? ?? [];
     final selectedOption = widget.data[widget.step['id']];
-    
+
     return SingleChildScrollView(
       child: Column(
         children: options.map<Widget>((option) {
-          final optionData = option is Map ? option : {'id': option, 'title': option, 'description': ''};
+          final optionData = option is Map
+              ? option
+              : {'id': option, 'title': option, 'description': ''};
           final isSelected = selectedOption == optionData['id'];
-          
+
           return Padding(
             padding: const EdgeInsets.only(bottom: 12.0),
             child: Card(
               elevation: isSelected ? 4 : 1,
-              color: isSelected 
+              color: isSelected
                   ? Theme.of(context).colorScheme.primaryContainer
                   : Theme.of(context).colorScheme.surface,
               child: ListTile(
                 title: Text(
                   optionData['title'] ?? '',
                   style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 ),
                 subtitle: optionData['description']?.isNotEmpty == true
@@ -570,18 +578,20 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
       ),
     );
   }
-  
+
   Widget _buildPriorityRankingContent() {
     final options = List<String>.from(widget.step['options'] ?? []);
-    final priorities = Map<String, double>.from(widget.data['platformPriorities'] ?? {});
-    
+    final priorities = Map<String, double>.from(
+      widget.data['platformPriorities'] ?? {},
+    );
+
     // Initialize priorities if empty
     if (priorities.isEmpty) {
       for (int i = 0; i < options.length; i++) {
         priorities[options[i]] = (options.length - i) / options.length;
       }
     }
-    
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -613,15 +623,15 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
             }).toList(),
             onReorder: (oldIndex, newIndex) {
               if (newIndex > oldIndex) newIndex--;
-              
+
               final item = options.removeAt(oldIndex);
               options.insert(newIndex, item);
-              
+
               // Recalculate priorities
               for (int i = 0; i < options.length; i++) {
                 priorities[options[i]] = (options.length - i) / options.length;
               }
-              
+
               widget.onDataChanged({'platformPriorities': priorities});
             },
           ),
@@ -629,7 +639,7 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
       ),
     );
   }
-  
+
   Widget _buildCompletionContent() {
     return Center(
       child: Column(
@@ -651,9 +661,9 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
           const SizedBox(height: 24),
           Text(
             'You\'re all set!',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Text(
@@ -667,7 +677,7 @@ class _OnboardingStepWidgetState extends State<OnboardingStepWidget>
       ),
     );
   }
-  
+
   IconData _getPlatformIcon(String platform) {
     switch (platform.toLowerCase()) {
       case 'youtube':

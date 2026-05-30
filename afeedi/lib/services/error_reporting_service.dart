@@ -83,13 +83,12 @@ class ErrorReportingService {
       _recentErrors.map((e) => e.toMap()).toList();
 
   Map<String, dynamic> get diagnostics => {
-        'total_errors': _errorCount,
-        'total_warnings': _warningCount,
-        'recent_count': _recentErrors.length,
-        'session_start': _sessionStart.toIso8601String(),
-        'uptime_seconds':
-            DateTime.now().difference(_sessionStart).inSeconds,
-      };
+    'total_errors': _errorCount,
+    'total_warnings': _warningCount,
+    'recent_count': _recentErrors.length,
+    'session_start': _sessionStart.toIso8601String(),
+    'uptime_seconds': DateTime.now().difference(_sessionStart).inSeconds,
+  };
 
   final DateTime _sessionStart = DateTime.now();
 
@@ -113,7 +112,9 @@ class ErrorReportingService {
     _addEntry(entry);
 
     if (kDebugMode) {
-      debugPrint('[ERROR/${entry.severity}] ${entry.context}: ${entry.message}');
+      debugPrint(
+        '[ERROR/${entry.severity}] ${entry.context}: ${entry.message}',
+      );
     } else {
       // In release mode: send to monitoring backend
       // TODO: Replace with Sentry.captureException(error, stackTrace: stack)
@@ -155,10 +156,10 @@ class _ErrorEntry {
   });
 
   Map<String, dynamic> toMap() => {
-        'message': message,
-        'context': context,
-        'severity': severity,
-        'timestamp': timestamp.toIso8601String(),
-        if (stackTrace != null) 'stack_trace': stackTrace,
-      };
+    'message': message,
+    'context': context,
+    'severity': severity,
+    'timestamp': timestamp.toIso8601String(),
+    if (stackTrace != null) 'stack_trace': stackTrace,
+  };
 }

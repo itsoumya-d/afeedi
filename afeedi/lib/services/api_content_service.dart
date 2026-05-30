@@ -49,7 +49,11 @@ class ApiContentService {
   // -------------------------------------------------------------------------
   // Feed
   // -------------------------------------------------------------------------
-  Future<List<Content>> getFeed({int page = 1, int limit = 10, String? platform}) async {
+  Future<List<Content>> getFeed({
+    int page = 1,
+    int limit = 10,
+    String? platform,
+  }) async {
     if (!_serverAvailable) return [];
     final query = {
       'page': '$page',
@@ -72,7 +76,10 @@ class ApiContentService {
   // -------------------------------------------------------------------------
   Future<List<Content>> search(String query, {int limit = 10}) async {
     if (!_serverAvailable || query.isEmpty) return [];
-    return _fetchList('/api/v1/content/search', {'q': query, 'limit': '$limit'});
+    return _fetchList('/api/v1/content/search', {
+      'q': query,
+      'limit': '$limit',
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -85,8 +92,7 @@ class ApiContentService {
           .get(Uri.parse('$_baseUrl/api/v1/content/$id'))
           .timeout(_timeout);
       if (resp.statusCode == 200) {
-        return Content.fromJson(
-            jsonDecode(resp.body) as Map<String, dynamic>);
+        return Content.fromJson(jsonDecode(resp.body) as Map<String, dynamic>);
       }
     } catch (e) {
       debugPrint('ApiContentService.getById error: $e');
@@ -98,7 +104,9 @@ class ApiContentService {
   // Internal helper
   // -------------------------------------------------------------------------
   Future<List<Content>> _fetchList(
-      String path, Map<String, String> params) async {
+    String path,
+    Map<String, String> params,
+  ) async {
     final uri = Uri.parse('$_baseUrl$path').replace(queryParameters: params);
     for (int attempt = 0; attempt < 3; attempt++) {
       try {

@@ -33,21 +33,22 @@ class NavigationService {
   static NavigationService get instance => _instance ??= NavigationService._();
   NavigationService._();
 
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   static NavigatorState? get navigator => navigatorKey.currentState;
 
   static void navigateToHome() {
     navigatorKey.currentState?.pushReplacementNamed(AppRoutes.dashboard);
   }
-  
+
   static Future<T?> pushNamed<T extends Object?>(
     String routeName, {
     Object? arguments,
   }) {
     return navigator!.pushNamed<T>(routeName, arguments: arguments);
   }
-  
+
   static Future<T?> pushReplacementNamed<T extends Object?, TO extends Object?>(
     String routeName, {
     Object? arguments,
@@ -59,15 +60,15 @@ class NavigationService {
       result: result,
     );
   }
-  
+
   static void pop<T extends Object?>([T? result]) {
     return navigator!.pop<T>(result);
   }
-  
+
   static Future<T?> push<T extends Object?>(Route<T> route) {
     return navigator!.push<T>(route);
   }
-  
+
   static Future<T?> pushReplacement<T extends Object?, TO extends Object?>(
     Route<T> newRoute, {
     TO? result,
@@ -85,12 +86,12 @@ class AppRoutes {
   static const String newOnboarding = '/new-onboarding';
   static const String enhancedOnboarding = '/enhanced-onboarding';
   static const String personalizedHome = '/personalized-home';
-  
+
   // Onboarding flow routes
   static const String interestForm = '/interest-form';
   static const String sourcePreference = '/source-preference';
   static const String calendarCustomization = '/calendar-customization';
-  
+
   // Main app routes
   static const String dashboard = '/dashboard';
   static const String feed = '/feed';
@@ -120,69 +121,100 @@ class AppRoutes {
   static const String adminAnalytics = '/admin/analytics';
 
   static Map<String, WidgetBuilder> get routes => {
-        // Authentication routes
-        AppRoutes.welcome: (context) => const WelcomeScreen(),
-        AppRoutes.createAccount: (context) => const CreateAccountScreen(),
-        AppRoutes.login: (context) => const LoginScreen(),
-        AppRoutes.onboardingChatbot: (context) => const EnhancedOnboardingScreen(),
-        AppRoutes.newOnboarding: (context) => const NewOnboardingScreen(),
-        AppRoutes.enhancedOnboarding: (context) => EnhancedOnboardingFlow(onComplete: () => Navigator.pushReplacementNamed(context, AppRoutes.dashboard)),
-        AppRoutes.personalizedHome: (context) => const PersonalizedHomeScreen(),
-        
-        // Onboarding flow routes
-        AppRoutes.interestForm: (context) => const InterestFormScreen(),
-        AppRoutes.sourcePreference: (context) => const SourcePreferenceScreen(),
-        AppRoutes.calendarCustomization: (context) => const CalendarCustomizationScreen(),
-        
-        // Main app routes
-        AppRoutes.dashboard: (context) => const DashboardScreen(),
-        AppRoutes.feed: (context) => const FeedScreen(),
-        AppRoutes.profile: (context) => const ProfileScreen(),
-        AppRoutes.calendar: (_) => const CalendarScreen(),
-        AppRoutes.search: (_) => const SearchScreen(),
-        AppRoutes.createContent: (_) => const CreateContentScreen(),
-        AppRoutes.notifications: (_) => const NotificationsScreen(),
-        AppRoutes.settings: (_) => const SettingsScreen(),
-        '/player': (ctx) {
-          final content = ModalRoute.of(ctx)?.settings.arguments;
-          return content != null
-              ? PlayerScreen(content: content as dynamic)
-              : const PlaceholderScreen(title: 'Player', icon: Icons.play_circle_filled);
-        },
-        '/onboarding': (_) => const EnhancedOnboardingScreen(),
-        '/onboarding_chatbot': (_) => const EnhancedOnboardingScreen(),
-        AppRoutes.privacyPolicy: (_) => const PrivacyPolicyScreen(),
-        AppRoutes.termsOfService: (_) => const TermsOfServiceScreen(),
-        AppRoutes.premium: (_) => const PremiumScreen(),
-        AppRoutes.bookmarks: (_) => const BookmarksScreen(),
-        AppRoutes.history: (_) => const HistoryScreen(),
-        AppRoutes.referral: (_) => const ReferralScreen(),
-        AppRoutes.weeklyDigest: (_) => const WeeklyDigestScreen(),
+    // Authentication routes
+    AppRoutes.welcome: (context) => const WelcomeScreen(),
+    AppRoutes.createAccount: (context) => const CreateAccountScreen(),
+    AppRoutes.login: (context) => const LoginScreen(),
+    AppRoutes.onboardingChatbot: (context) => const EnhancedOnboardingScreen(),
+    AppRoutes.newOnboarding: (context) => const NewOnboardingScreen(),
+    AppRoutes.enhancedOnboarding: (context) => EnhancedOnboardingFlow(
+      onComplete: () =>
+          Navigator.pushReplacementNamed(context, AppRoutes.dashboard),
+    ),
+    AppRoutes.personalizedHome: (context) => const PersonalizedHomeScreen(),
 
-        // Admin routes — protected by isAdmin guard
-        AppRoutes.adminPanel: (context) {
-          if (!UserService.instance.isAdmin) {
-            return const PlaceholderScreen(title: 'Access Denied', icon: Icons.lock);
-          }
-          return const PlaceholderScreen(title: 'Admin Panel', icon: Icons.admin_panel_settings);
-        },
-        AppRoutes.adminUsers: (context) {
-          if (!UserService.instance.isAdmin) {
-            return const PlaceholderScreen(title: 'Access Denied', icon: Icons.lock);
-          }
-          return const PlaceholderScreen(title: 'Admin — Users', icon: Icons.people);
-        },
-        AppRoutes.adminContent: (context) {
-          if (!UserService.instance.isAdmin) {
-            return const PlaceholderScreen(title: 'Access Denied', icon: Icons.lock);
-          }
-          return const PlaceholderScreen(title: 'Admin — Content', icon: Icons.video_library);
-        },
-        AppRoutes.adminAnalytics: (context) {
-          if (!UserService.instance.isAdmin) {
-            return const PlaceholderScreen(title: 'Access Denied', icon: Icons.lock);
-          }
-          return const PlaceholderScreen(title: 'Admin — Analytics', icon: Icons.analytics);
-        },
-      };
+    // Onboarding flow routes
+    AppRoutes.interestForm: (context) => const InterestFormScreen(),
+    AppRoutes.sourcePreference: (context) => const SourcePreferenceScreen(),
+    AppRoutes.calendarCustomization: (context) =>
+        const CalendarCustomizationScreen(),
+
+    // Main app routes
+    AppRoutes.dashboard: (context) => const DashboardScreen(),
+    AppRoutes.feed: (context) => const FeedScreen(),
+    AppRoutes.profile: (context) => const ProfileScreen(),
+    AppRoutes.calendar: (_) => const CalendarScreen(),
+    AppRoutes.search: (_) => const SearchScreen(),
+    AppRoutes.createContent: (_) => const CreateContentScreen(),
+    AppRoutes.notifications: (_) => const NotificationsScreen(),
+    AppRoutes.settings: (_) => const SettingsScreen(),
+    '/player': (ctx) {
+      final content = ModalRoute.of(ctx)?.settings.arguments;
+      return content != null
+          ? PlayerScreen(content: content as dynamic)
+          : const PlaceholderScreen(
+              title: 'Player',
+              icon: Icons.play_circle_filled,
+            );
+    },
+    '/onboarding': (_) => const EnhancedOnboardingScreen(),
+    '/onboarding_chatbot': (_) => const EnhancedOnboardingScreen(),
+    AppRoutes.privacyPolicy: (_) => const PrivacyPolicyScreen(),
+    AppRoutes.termsOfService: (_) => const TermsOfServiceScreen(),
+    AppRoutes.premium: (_) => const PremiumScreen(),
+    AppRoutes.bookmarks: (_) => const BookmarksScreen(),
+    AppRoutes.history: (_) => const HistoryScreen(),
+    AppRoutes.referral: (_) => const ReferralScreen(),
+    AppRoutes.weeklyDigest: (_) => const WeeklyDigestScreen(),
+
+    // Admin routes — protected by isAdmin guard
+    AppRoutes.adminPanel: (context) {
+      if (!UserService.instance.isAdmin) {
+        return const PlaceholderScreen(
+          title: 'Access Denied',
+          icon: Icons.lock,
+        );
+      }
+      return const PlaceholderScreen(
+        title: 'Admin Panel',
+        icon: Icons.admin_panel_settings,
+      );
+    },
+    AppRoutes.adminUsers: (context) {
+      if (!UserService.instance.isAdmin) {
+        return const PlaceholderScreen(
+          title: 'Access Denied',
+          icon: Icons.lock,
+        );
+      }
+      return const PlaceholderScreen(
+        title: 'Admin — Users',
+        icon: Icons.people,
+      );
+    },
+    AppRoutes.adminContent: (context) {
+      if (!UserService.instance.isAdmin) {
+        return const PlaceholderScreen(
+          title: 'Access Denied',
+          icon: Icons.lock,
+        );
+      }
+      return const PlaceholderScreen(
+        title: 'Admin — Content',
+        icon: Icons.video_library,
+      );
+    },
+    AppRoutes.adminAnalytics: (context) {
+      if (!UserService.instance.isAdmin) {
+        return const PlaceholderScreen(
+          title: 'Access Denied',
+          icon: Icons.lock,
+        );
+      }
+      return const PlaceholderScreen(
+        title: 'Admin — Analytics',
+        icon: Icons.analytics,
+      );
+    },
+  };
 }

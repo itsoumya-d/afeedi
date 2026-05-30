@@ -83,7 +83,10 @@ class LanguageSelectorSheet extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     trailing: isSelected
-                        ? const Icon(Icons.check_circle, color: Color(0xFF00D4FF))
+                        ? const Icon(
+                            Icons.check_circle,
+                            color: Color(0xFF00D4FF),
+                          )
                         : null,
                     onTap: () {
                       LocaleService.instance.setLocale(lang['code'] as String);

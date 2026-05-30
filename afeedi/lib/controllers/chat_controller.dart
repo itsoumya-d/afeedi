@@ -25,7 +25,7 @@ class ChatController extends ChangeNotifier {
     'Facebook': false,
     'Twitter': false,
   };
-  
+
   int _currentStep = 0;
   bool _showTyping = false;
   bool _showQuickReplies = false;
@@ -73,8 +73,14 @@ class ChatController extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('onboarding_draft_step', _currentStep);
     await prefs.setString('onboarding_draft_user_name', _userName);
-    await prefs.setStringList('onboarding_draft_genres', _selectedGenres.map((g) => g.name).toList());
-    await prefs.setString('onboarding_draft_saved_at', DateTime.now().toIso8601String());
+    await prefs.setStringList(
+      'onboarding_draft_genres',
+      _selectedGenres.map((g) => g.name).toList(),
+    );
+    await prefs.setString(
+      'onboarding_draft_saved_at',
+      DateTime.now().toIso8601String(),
+    );
   }
 
   Future<void> _resumeOrStartOnboarding() async {
@@ -84,13 +90,19 @@ class ChatController extends ChangeNotifier {
       final draftStep = prefs.getInt('onboarding_draft_step');
       if (savedAt != null && draftStep != null && draftStep > 0) {
         final savedDate = DateTime.tryParse(savedAt);
-        if (savedDate != null && DateTime.now().difference(savedDate).inDays < 7) {
+        if (savedDate != null &&
+            DateTime.now().difference(savedDate).inDays < 7) {
           _currentStep = draftStep.clamp(0, _onboardingSteps.length - 1);
           _userName = prefs.getString('onboarding_draft_user_name') ?? '';
-          final genreNames = prefs.getStringList('onboarding_draft_genres') ?? [];
-          _selectedGenres = _allGenres.where((g) => genreNames.contains(g.name)).toList();
+          final genreNames =
+              prefs.getStringList('onboarding_draft_genres') ?? [];
+          _selectedGenres = _allGenres
+              .where((g) => genreNames.contains(g.name))
+              .toList();
           Future.delayed(const Duration(milliseconds: 300), () {
-            showBotMessage('Welcome back! Let\'s pick up where you left off. 👋');
+            showBotMessage(
+              'Welcome back! Let\'s pick up where you left off. 👋',
+            );
             showStepOptions();
             notifyListeners();
           });
@@ -132,11 +144,9 @@ class ChatController extends ChangeNotifier {
 
     Future.delayed(const Duration(milliseconds: 1500), () {
       _showTyping = false;
-      _messages.add(ChatMessage(
-        text: message,
-        isBot: true,
-        timestamp: DateTime.now(),
-      ));
+      _messages.add(
+        ChatMessage(text: message, isBot: true, timestamp: DateTime.now()),
+      );
       notifyListeners();
       showStepOptions();
       scrollToBottom();
@@ -145,7 +155,7 @@ class ChatController extends ChangeNotifier {
 
   void showStepOptions() {
     final currentStepData = _onboardingSteps[_currentStep];
-    
+
     Future.delayed(const Duration(milliseconds: 500), () {
       if (currentStepData.isGenreSelection) {
         _showGenreSelection = true;
@@ -189,14 +199,14 @@ class ChatController extends ChangeNotifier {
 
   void updateSuggestions() {
     if (_currentStep >= _onboardingSteps.length) return;
-    
+
     switch (_currentStep) {
       case 0:
         _currentSuggestions = [
           'Hi there!',
           'Hello',
           'Let\'s get started',
-          'I\'m ready'
+          'I\'m ready',
         ];
         break;
       case 1: // content_interests (genre selection)
@@ -208,11 +218,7 @@ class ChatController extends ChangeNotifier {
         ];
         break;
       case 4: // personal_info (name)
-        _currentSuggestions = [
-          'My name is Alex',
-          'Call me Sam',
-          'I\'m Jordan',
-        ];
+        _currentSuggestions = ['My name is Alex', 'Call me Sam', 'I\'m Jordan'];
         break;
       case 5: // completion
         _currentSuggestions = [
@@ -228,11 +234,9 @@ class ChatController extends ChangeNotifier {
   }
 
   void addUserMessage(String text) {
-    _messages.add(ChatMessage(
-      text: text,
-      isBot: false,
-      timestamp: DateTime.now(),
-    ));
+    _messages.add(
+      ChatMessage(text: text, isBot: false, timestamp: DateTime.now()),
+    );
     _showQuickReplies = false;
     _showTextInput = false;
     _showGenreSelection = false;
@@ -258,7 +262,9 @@ class ChatController extends ChangeNotifier {
 
   void handleGenreContinue() {
     if (_selectedGenres.length < 3) {
-      showBotMessage('Please pick at least 3 genres so I can build your perfect feed! Try adding a few more categories you enjoy.');
+      showBotMessage(
+        'Please pick at least 3 genres so I can build your perfect feed! Try adding a few more categories you enjoy.',
+      );
       return;
     }
     final genreNames = _selectedGenres.map((g) => g.name).join(', ');
@@ -303,11 +309,11 @@ class ChatController extends ChangeNotifier {
         .where((entry) => entry.value)
         .map((entry) => entry.key)
         .toList();
-    
+
     final message = connectedPlatforms.isNotEmpty
         ? 'Connected: ${connectedPlatforms.join(', ')}'
         : 'I\'ll connect platforms later';
-    
+
     addUserMessage(message);
     processUserInput('Platform selection completed');
   }
@@ -320,13 +326,17 @@ class ChatController extends ChangeNotifier {
     AnalyticsService.instance.trackOnboardingEvent(
       eventName: AnalyticsEvents.onboardingStepCompleted,
       stepNumber: _currentStep,
-      stepName: _currentStep < _onboardingSteps.length ? 'step_${_currentStep + 1}' : 'final_step',
+      stepName: _currentStep < _onboardingSteps.length
+          ? 'step_${_currentStep + 1}'
+          : 'final_step',
       additionalData: {
-        'user_input': input.length > 50 ? '${input.substring(0, 50)}...' : input,
+        'user_input': input.length > 50
+            ? '${input.substring(0, 50)}...'
+            : input,
         'input_length': input.length,
       },
     );
-    
+
     Future.delayed(const Duration(milliseconds: 500), () {
       _currentStep++;
       if (_currentStep < _onboardingSteps.length) {
@@ -344,7 +354,9 @@ class ChatController extends ChangeNotifier {
       stepName: 'completed',
       additionalData: {
         'total_steps': _onboardingSteps.length,
-        'connected_platforms': _platformConnections.values.where((v) => v).length,
+        'connected_platforms': _platformConnections.values
+            .where((v) => v)
+            .length,
         'selected_genres': _selectedGenres.length,
         'completion_time': DateTime.now().toIso8601String(),
         'user_name': _userName,
@@ -365,7 +377,7 @@ class ChatController extends ChangeNotifier {
     );
 
     showBotMessage(welcomeMessage);
-    
+
     _showFinalButton = true;
     notifyListeners();
   }

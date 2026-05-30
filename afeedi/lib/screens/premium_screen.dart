@@ -16,7 +16,10 @@ class _PremiumScreenState extends State<PremiumScreen> {
   @override
   void initState() {
     super.initState();
-    AnalyticsService.instance.trackUserInteraction(action: 'screen_view', screen: 'premium');
+    AnalyticsService.instance.trackUserInteraction(
+      action: 'screen_view',
+      screen: 'premium',
+    );
     AnalyticsService.instance.trackPaywallShown('premium_screen');
   }
 
@@ -45,7 +48,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     _buildCTAButton(),
                     const SizedBox(height: 12),
                     _buildFooter(),
-                    SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+                    SizedBox(
+                      height: MediaQuery.of(context).padding.bottom + 16,
+                    ),
                   ],
                 ),
               ),
@@ -68,7 +73,10 @@ class _PremiumScreenState extends State<PremiumScreen> {
           const Spacer(),
           TextButton(
             onPressed: () => _showRestoreDialog(context),
-            child: const Text('Restore', style: TextStyle(color: Colors.white54, fontSize: 13)),
+            child: const Text(
+              'Restore',
+              style: TextStyle(color: Colors.white54, fontSize: 13),
+            ),
           ),
         ],
       ),
@@ -94,7 +102,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
         const SizedBox(height: 16),
         const Text(
           'Unlock Afeedi Premium',
-          style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
@@ -117,14 +129,28 @@ class _PremiumScreenState extends State<PremiumScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _toggleButton('Monthly', !_isAnnual, () => setState(() => _isAnnual = false)),
-          _toggleButton('Annual  ', _isAnnual, () => setState(() => _isAnnual = true), badge: 'Save 33%'),
+          _toggleButton(
+            'Monthly',
+            !_isAnnual,
+            () => setState(() => _isAnnual = false),
+          ),
+          _toggleButton(
+            'Annual  ',
+            _isAnnual,
+            () => setState(() => _isAnnual = true),
+            badge: 'Save 33%',
+          ),
         ],
       ),
     );
   }
 
-  Widget _toggleButton(String label, bool selected, VoidCallback onTap, {String? badge}) {
+  Widget _toggleButton(
+    String label,
+    bool selected,
+    VoidCallback onTap, {
+    String? badge,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -178,7 +204,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
         annualPrice: 0,
         color: const Color(0xFF2A2A4A),
         accentColor: Colors.white54,
-        features: ['Basic feed personalization', 'Up to 20 saves', 'Standard quality', 'Ads included'],
+        features: [
+          'Basic feed personalization',
+          'Up to 20 saves',
+          'Standard quality',
+          'Ads included',
+        ],
       ),
       _PlanData(
         index: 1,
@@ -187,15 +218,19 @@ class _PremiumScreenState extends State<PremiumScreen> {
         annualPrice: 39.99,
         color: const Color(0xFF003A4A),
         accentColor: const Color(0xFF00D4FF),
-        features: ['Advanced AI personalization', 'Unlimited saves', 'Ad-free experience', 'Google Calendar sync', 'Creator follow insights'],
+        features: [
+          'Advanced AI personalization',
+          'Unlimited saves',
+          'Ad-free experience',
+          'Google Calendar sync',
+          'Creator follow insights',
+        ],
         popular: true,
       ),
       // Creator tier: not yet available — removed to comply with App Store Guideline 2.1
     ];
 
-    return Column(
-      children: plans.map((plan) => _buildPlanCard(plan)).toList(),
-    );
+    return Column(children: plans.map((plan) => _buildPlanCard(plan)).toList());
   }
 
   Widget _buildPlanCard(_PlanData plan) {
@@ -203,8 +238,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
     final price = plan.index == 0
         ? 'Free'
         : _isAnnual
-            ? '\$${plan.annualPrice.toStringAsFixed(2)}/yr'
-            : '\$${plan.monthlyPrice.toStringAsFixed(2)}/mo';
+        ? '\$${plan.annualPrice.toStringAsFixed(2)}/yr'
+        : '\$${plan.monthlyPrice.toStringAsFixed(2)}/mo';
 
     return GestureDetector(
       onTap: () => setState(() => _selectedPlan = plan.index),
@@ -228,12 +263,22 @@ class _PremiumScreenState extends State<PremiumScreen> {
                 if (plan.popular)
                   Container(
                     margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: plan.accentColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text('POPULAR', style: TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      'POPULAR',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 Flexible(
                   child: Text(
@@ -264,7 +309,10 @@ class _PremiumScreenState extends State<PremiumScreen> {
                   height: 22,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: isSelected ? plan.accentColor : Colors.white24, width: 2),
+                    border: Border.all(
+                      color: isSelected ? plan.accentColor : Colors.white24,
+                      width: 2,
+                    ),
                     color: isSelected ? plan.accentColor : Colors.transparent,
                   ),
                   child: isSelected
@@ -277,16 +325,32 @@ class _PremiumScreenState extends State<PremiumScreen> {
               const SizedBox(height: 12),
               const Divider(color: Colors.white10),
               const SizedBox(height: 8),
-              ...plan.features.map((f) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 3),
-                    child: Row(
-                      children: [
-                        Icon(Icons.check_circle, color: plan.accentColor, size: 16),
-                        const SizedBox(width: 8),
-                        Expanded(child: Text(f, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white70, fontSize: 13))),
-                      ],
-                    ),
-                  )),
+              ...plan.features.map(
+                (f) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: plan.accentColor,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          f,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ],
         ),
@@ -308,7 +372,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
       children: [
         const Text(
           'Compare plans',
-          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 12),
         Table(
@@ -320,27 +388,58 @@ class _PremiumScreenState extends State<PremiumScreen> {
           },
           children: [
             TableRow(
-              decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Colors.white10))),
-              children: ['Feature', 'Free', 'Pro', 'Creator'].map((h) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-                child: Text(h, style: const TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.w600)),
-              )).toList(),
+              decoration: const BoxDecoration(
+                border: Border(bottom: BorderSide(color: Colors.white10)),
+              ),
+              children: ['Feature', 'Free', 'Pro', 'Creator']
+                  .map(
+                    (h) => Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 2,
+                      ),
+                      child: Text(
+                        h,
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
-            ...features.map((row) => TableRow(
-              decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Colors.white10, width: 0.5))),
-              children: [row.$1, row.$2, row.$3, row.$4].map((cell) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-                child: Text(
-                  cell,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: cell == 'No' ? Colors.white24 : Colors.white60,
-                    fontSize: 11,
+            ...features.map(
+              (row) => TableRow(
+                decoration: const BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.white10, width: 0.5),
                   ),
                 ),
-              )).toList(),
-            )),
+                children: [row.$1, row.$2, row.$3, row.$4]
+                    .map(
+                      (cell) => Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 2,
+                        ),
+                        child: Text(
+                          cell,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: cell == 'No'
+                                ? Colors.white24
+                                : Colors.white60,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
           ],
         ),
       ],
@@ -356,9 +455,14 @@ class _PremiumScreenState extends State<PremiumScreen> {
           style: OutlinedButton.styleFrom(
             side: const BorderSide(color: Colors.white24),
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
-          child: const Text('Continue with Free', style: TextStyle(color: Colors.white60, fontSize: 16)),
+          child: const Text(
+            'Continue with Free',
+            style: TextStyle(color: Colors.white60, fontSize: 16),
+          ),
         ),
       );
     }
@@ -391,7 +495,14 @@ class _PremiumScreenState extends State<PremiumScreen> {
               children: [
                 Icon(Icons.check_circle, color: Colors.green, size: 20),
                 SizedBox(width: 8),
-                Text('You\'re already Pro!', style: TextStyle(color: Colors.green, fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(
+                  'You\'re already Pro!',
+                  style: TextStyle(
+                    color: Colors.green,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
           );
@@ -431,10 +542,15 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     backgroundColor: color,
                     foregroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                     elevation: 0,
                   ),
-                  child: const Text('Try Again', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Try Again',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ],
@@ -449,7 +565,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
               backgroundColor: color,
               foregroundColor: Colors.black,
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
               elevation: 0,
             ),
             child: Text(
@@ -476,7 +594,10 @@ class _PremiumScreenState extends State<PremiumScreen> {
     AnalyticsService.instance.trackUserInteraction(
       action: 'subscribe_tap',
       screen: 'premium',
-      additionalData: {'plan': planName, 'billing': _isAnnual ? 'annual' : 'monthly'},
+      additionalData: {
+        'plan': planName,
+        'billing': _isAnnual ? 'annual' : 'monthly',
+      },
     );
 
     if (planName == 'Pro') {
@@ -491,7 +612,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
     // Only Pro plan is available; other plan names are not purchasable
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('This plan is not yet available. Please select Afeedi Pro.'),
+        content: Text(
+          'This plan is not yet available. Please select Afeedi Pro.',
+        ),
         duration: Duration(seconds: 3),
       ),
     );

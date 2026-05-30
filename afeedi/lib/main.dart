@@ -29,10 +29,7 @@ final themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
 void main() {
   // Wrap in runZonedGuarded so uncaught async errors are captured by
   // ErrorReportingService rather than silently crashing.
-  runZonedGuarded(
-    _appMain,
-    ErrorReportingService.instance.onZoneError,
-  );
+  runZonedGuarded(_appMain, ErrorReportingService.instance.onZoneError);
 }
 
 /// Exposed for integration tests. Initializes services and runs the app.
@@ -48,13 +45,13 @@ Future<void> _appMain() async {
   try {
     // Initialize Hive for local storage
     await Hive.initFlutter();
-    
+
     // Initialize Local Storage Service
     await LocalStorageService.instance.initialize();
-    
+
     // Initialize Local Auth Service
     await LocalAuthService.instance.initialize();
-    
+
     // Initialize Analytics Service
     await AnalyticsService.instance.initialize();
     await AnalyticsService.instance.recordAppOpen();
@@ -74,7 +71,8 @@ Future<void> _appMain() async {
 
     // ContentService — non-blocking background fetch (falls back to seed data)
     ContentService.instance.initialize().catchError(
-        (e) => debugPrint('ContentService background init error: $e'));
+      (e) => debugPrint('ContentService background init error: $e'),
+    );
 
     // Initialize Platform View Registration Service for web
     if (kIsWeb) {
@@ -82,13 +80,14 @@ Future<void> _appMain() async {
     }
 
     // Track app launch (non-blocking)
-    AnalyticsService.instance.trackUserInteraction(
-      action: 'app_launch',
-      screen: 'main',
-    ).catchError((e) => debugPrint('Analytics launch error: $e'));
+    AnalyticsService.instance
+        .trackUserInteraction(action: 'app_launch', screen: 'main')
+        .catchError((e) => debugPrint('Analytics launch error: $e'));
 
     // Update daily streak (non-blocking)
-    _updateDailyStreak().catchError((e) => debugPrint('Streak update error: $e'));
+    _updateDailyStreak().catchError(
+      (e) => debugPrint('Streak update error: $e'),
+    );
 
     // Request iOS App Tracking Transparency before initializing AdMob (required by Apple)
     await AttService.requestTrackingIfNeeded();
@@ -98,20 +97,21 @@ Future<void> _appMain() async {
 
     // Initialize AdMob (non-blocking; ads load lazily when widgets mount)
     AdService.instance.initialize().catchError(
-        (e) => debugPrint('AdService init error: $e'));
-
+      (e) => debugPrint('AdService init error: $e'),
+    );
   } catch (error) {
     // Handle initialization errors
     debugPrint('Initialization error: $error');
   }
-  
+
   runApp(const ProviderScope(child: AfeediApp()));
 }
 
 Future<void> _updateDailyStreak() async {
   final prefs = await SharedPreferences.getInstance();
   final today = DateTime.now();
-  final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+  final todayStr =
+      '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
   final lastDateStr = prefs.getString('stat_streak_last_date');
   final currentStreak = prefs.getInt('stat_streak_days') ?? 0;
 
@@ -155,8 +155,11 @@ class _AfeediAppState extends State<AfeediApp> {
     try {
       final isLoggedIn = LocalAuthService.instance.currentUser != null;
       if (isLoggedIn) {
-        final onboarded = await OnboardingService.instance.isOnboardingCompleted();
-        _initialRoute = onboarded ? AppRoutes.dashboard : AppRoutes.onboardingChatbot;
+        final onboarded = await OnboardingService.instance
+            .isOnboardingCompleted();
+        _initialRoute = onboarded
+            ? AppRoutes.dashboard
+            : AppRoutes.onboardingChatbot;
       } else {
         _initialRoute = AppRoutes.welcome;
       }
@@ -183,7 +186,9 @@ class _AfeediAppState extends State<AfeediApp> {
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           backgroundColor: Color(0xFF1A1A2E),
-          body: Center(child: CircularProgressIndicator(color: Color(0xFF00D4FF))),
+          body: Center(
+            child: CircularProgressIndicator(color: Color(0xFF00D4FF)),
+          ),
         ),
       );
     }

@@ -1,9 +1,4 @@
-enum UserRole {
-  guest,
-  registered,
-  premium,
-  admin,
-}
+enum UserRole { guest, registered, premium, admin }
 
 class User {
   final String id;
@@ -41,17 +36,17 @@ class User {
       isActive: json['is_active'] as bool? ?? true,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
-      lastLoginAt: json['last_login_at'] != null 
-          ? DateTime.parse(json['last_login_at'] as String) 
+      lastLoginAt: json['last_login_at'] != null
+          ? DateTime.parse(json['last_login_at'] as String)
           : null,
-      subscriptionExpiresAt: json['subscription_expires_at'] != null 
-          ? DateTime.parse(json['subscription_expires_at'] as String) 
+      subscriptionExpiresAt: json['subscription_expires_at'] != null
+          ? DateTime.parse(json['subscription_expires_at'] as String)
           : null,
-      termsAcceptedAt: json['terms_accepted_at'] != null 
-          ? DateTime.parse(json['terms_accepted_at'] as String) 
+      termsAcceptedAt: json['terms_accepted_at'] != null
+          ? DateTime.parse(json['terms_accepted_at'] as String)
           : null,
-      privacyPolicyAcceptedAt: json['privacy_policy_accepted_at'] != null 
-          ? DateTime.parse(json['privacy_policy_accepted_at'] as String) 
+      privacyPolicyAcceptedAt: json['privacy_policy_accepted_at'] != null
+          ? DateTime.parse(json['privacy_policy_accepted_at'] as String)
           : null,
     );
   }
@@ -91,9 +86,11 @@ class User {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
-      subscriptionExpiresAt: subscriptionExpiresAt ?? this.subscriptionExpiresAt,
+      subscriptionExpiresAt:
+          subscriptionExpiresAt ?? this.subscriptionExpiresAt,
       termsAcceptedAt: termsAcceptedAt ?? this.termsAcceptedAt,
-      privacyPolicyAcceptedAt: privacyPolicyAcceptedAt ?? this.privacyPolicyAcceptedAt,
+      privacyPolicyAcceptedAt:
+          privacyPolicyAcceptedAt ?? this.privacyPolicyAcceptedAt,
     );
   }
 
@@ -101,8 +98,8 @@ class User {
   bool get isAdmin => role == UserRole.admin;
   bool get hasAcceptedTerms => termsAcceptedAt != null;
   bool get hasAcceptedPrivacyPolicy => privacyPolicyAcceptedAt != null;
-  bool get isSubscriptionActive => 
-      subscriptionExpiresAt != null && 
+  bool get isSubscriptionActive =>
+      subscriptionExpiresAt != null &&
       subscriptionExpiresAt!.isAfter(DateTime.now());
 
   @override
@@ -158,8 +155,8 @@ class UserProfile {
       displayName: json['display_name'] as String?,
       avatarUrl: json['avatar_url'] as String?,
       bio: json['bio'] as String?,
-      dateOfBirth: json['date_of_birth'] != null 
-          ? DateTime.parse(json['date_of_birth'] as String) 
+      dateOfBirth: json['date_of_birth'] != null
+          ? DateTime.parse(json['date_of_birth'] as String)
           : null,
       timezone: json['timezone'] as String? ?? 'UTC',
       language: json['language'] as String? ?? 'en',
@@ -225,7 +222,7 @@ class UserProfile {
     if (dateOfBirth == null) return null;
     final now = DateTime.now();
     int age = now.year - dateOfBirth!.year;
-    if (now.month < dateOfBirth!.month || 
+    if (now.month < dateOfBirth!.month ||
         (now.month == dateOfBirth!.month && now.day < dateOfBirth!.day)) {
       age--;
     }
@@ -303,7 +300,8 @@ class NotificationSettings {
       push: push ?? this.push,
       email: email ?? this.email,
       inApp: inApp ?? this.inApp,
-      contentRecommendations: contentRecommendations ?? this.contentRecommendations,
+      contentRecommendations:
+          contentRecommendations ?? this.contentRecommendations,
       scheduledContent: scheduledContent ?? this.scheduledContent,
       platformUpdates: platformUpdates ?? this.platformUpdates,
       marketingEmails: marketingEmails ?? this.marketingEmails,
@@ -404,19 +402,16 @@ class UserPreferences {
       id: json['id'] as String,
       userId: json['user_id'] as String,
       contentCategories: List<String>.from(json['content_categories'] ?? []),
-      platformPriorities: Map<String, int>.from(json['platform_priorities'] ?? {
-        'youtube': 1,
-        'instagram': 2,
-        'tiktok': 3,
-        'facebook': 4,
-      }),
+      platformPriorities: Map<String, int>.from(
+        json['platform_priorities'] ??
+            {'youtube': 1, 'instagram': 2, 'tiktok': 3, 'facebook': 4},
+      ),
       notificationSettings: NotificationSettings.fromJson(
         json['notification_settings'] ?? {},
       ),
-      privacySettings: PrivacySettings.fromJson(
-        json['privacy_settings'] ?? {},
-      ),
-      aiRecommendationsEnabled: json['ai_recommendations_enabled'] as bool? ?? true,
+      privacySettings: PrivacySettings.fromJson(json['privacy_settings'] ?? {}),
+      aiRecommendationsEnabled:
+          json['ai_recommendations_enabled'] as bool? ?? true,
       matureContentEnabled: json['mature_content_enabled'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
@@ -457,7 +452,8 @@ class UserPreferences {
       platformPriorities: platformPriorities ?? this.platformPriorities,
       notificationSettings: notificationSettings ?? this.notificationSettings,
       privacySettings: privacySettings ?? this.privacySettings,
-      aiRecommendationsEnabled: aiRecommendationsEnabled ?? this.aiRecommendationsEnabled,
+      aiRecommendationsEnabled:
+          aiRecommendationsEnabled ?? this.aiRecommendationsEnabled,
       matureContentEnabled: matureContentEnabled ?? this.matureContentEnabled,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

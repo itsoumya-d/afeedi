@@ -41,7 +41,8 @@ class AIRecommendationService {
       }
 
       // Check if user has AI recommendations disabled via onboarding preferences
-      final onboardingPrefs = await OnboardingService.instance.getUserPreferences();
+      final onboardingPrefs = await OnboardingService.instance
+          .getUserPreferences();
       if (onboardingPrefs != null &&
           onboardingPrefs.enableAIRecommendations == false) {
         return [];
@@ -49,8 +50,10 @@ class AIRecommendationService {
 
       // Return cached recommendations if not forcing refresh
       if (!forceRefresh) {
-        final existingRecommendations =
-            await _getExistingRecommendations(user.id, limit);
+        final existingRecommendations = await _getExistingRecommendations(
+          user.id,
+          limit,
+        );
         if (existingRecommendations.isNotEmpty) {
           return existingRecommendations;
         }
@@ -60,11 +63,11 @@ class AIRecommendationService {
       final userBehavior = await _analyzeUserBehavior(user.id);
 
       // Get available content from the aggregation service
-      final availableContent =
-          await ContentAggregationService.instance.aggregateContent(
-        limit: limit * 5, // Get more content to choose from
-        platforms: platforms,
-      );
+      final availableContent = await ContentAggregationService.instance
+          .aggregateContent(
+            limit: limit * 5, // Get more content to choose from
+            platforms: platforms,
+          );
 
       if (availableContent.isEmpty) {
         return [];
@@ -136,8 +139,8 @@ class AIRecommendationService {
       }
 
       // Enrich from onboarding preferences (genre affinities)
-      final onboardingPrefs =
-          await OnboardingService.instance.getUserPreferences();
+      final onboardingPrefs = await OnboardingService.instance
+          .getUserPreferences();
       if (onboardingPrefs != null) {
         for (final interest in onboardingPrefs.contentInterests) {
           categoryPreferences[interest] =
@@ -189,13 +192,17 @@ class AIRecommendationService {
 
       final preferredContentTypes = contentTypePreferences.entries.toList()
         ..sort((a, b) => b.value.compareTo(a.value));
-      final topContentTypes =
-          preferredContentTypes.take(5).map((e) => e.key).toList();
+      final topContentTypes = preferredContentTypes
+          .take(5)
+          .map((e) => e.key)
+          .toList();
 
       final mostUsedFeaturesEntries = actionCounts.entries.toList()
         ..sort((a, b) => b.value.compareTo(a.value));
-      final topFeatures =
-          mostUsedFeaturesEntries.take(5).map((e) => e.key).toList();
+      final topFeatures = mostUsedFeaturesEntries
+          .take(5)
+          .map((e) => e.key)
+          .toList();
 
       return UserBehaviorInsight(
         userId: userId,
@@ -214,10 +221,7 @@ class AIRecommendationService {
       );
     } catch (error) {
       debugPrint('Error analyzing user behavior: $error');
-      return UserBehaviorInsight(
-        userId: userId,
-        lastActiveAt: DateTime.now(),
-      );
+      return UserBehaviorInsight(userId: userId, lastActiveAt: DateTime.now());
     }
   }
 
@@ -258,11 +262,13 @@ class AIRecommendationService {
 
     // Retrieve already-interacted content to avoid duplicates
     final existingInteractions = await _getUserInteractions(user.id);
-    final interactedContentIds =
-        existingInteractions.map((i) => i.contentId).toSet();
+    final interactedContentIds = existingInteractions
+        .map((i) => i.contentId)
+        .toSet();
 
-    final availableContent =
-        content.where((c) => !interactedContentIds.contains(c.id)).toList();
+    final availableContent = content
+        .where((c) => !interactedContentIds.contains(c.id))
+        .toList();
 
     for (final contentItem in availableContent) {
       if (recommendations.length >= limit) break;
@@ -279,21 +285,24 @@ class AIRecommendationService {
           score: score,
         );
 
-        recommendations.add(Recommendation(
-          id: 'rec_${now.millisecondsSinceEpoch}_${recommendations.length}',
-          userId: user.id,
-          contentId: contentItem.id,
-          recommendationScore: score,
-          recommendationReason: reason,
-          algorithmVersion: algorithmVersion,
-          createdAt: now,
-          expiresAt: now.add(const Duration(days: 7)),
-        ));
+        recommendations.add(
+          Recommendation(
+            id: 'rec_${now.millisecondsSinceEpoch}_${recommendations.length}',
+            userId: user.id,
+            contentId: contentItem.id,
+            recommendationScore: score,
+            recommendationReason: reason,
+            algorithmVersion: algorithmVersion,
+            createdAt: now,
+            expiresAt: now.add(const Duration(days: 7)),
+          ),
+        );
       }
     }
 
-    recommendations
-        .sort((a, b) => b.recommendationScore.compareTo(a.recommendationScore));
+    recommendations.sort(
+      (a, b) => b.recommendationScore.compareTo(a.recommendationScore),
+    );
 
     return recommendations.take(limit).toList();
   }
@@ -308,8 +317,8 @@ class AIRecommendationService {
     // Platform preference score (30%)
     final platformPrefs =
         userBehavior.additionalMetrics['platform_preferences']
-                as Map<String, int>? ??
-            {};
+            as Map<String, int>? ??
+        {};
     final platformScore = _calculatePreferenceScore(
       content.platform.name,
       platformPrefs,
@@ -319,8 +328,8 @@ class AIRecommendationService {
     // Content type preference score (25%)
     final contentTypePrefs =
         userBehavior.additionalMetrics['content_type_preferences']
-                as Map<String, int>? ??
-            {};
+            as Map<String, int>? ??
+        {};
     final contentTypeScore = _calculatePreferenceScore(
       content.contentType.name,
       contentTypePrefs,
@@ -330,8 +339,8 @@ class AIRecommendationService {
     // Category preference score (25%)
     final categoryPrefs =
         userBehavior.additionalMetrics['category_preferences']
-                as Map<String, int>? ??
-            {};
+            as Map<String, int>? ??
+        {};
     double categoryScore = 0.0;
     for (final category in content.categories) {
       categoryScore = math.max(
@@ -356,10 +365,7 @@ class AIRecommendationService {
   }
 
   // Calculate preference score for a specific item
-  double _calculatePreferenceScore(
-    String item,
-    Map<String, int> preferences,
-  ) {
+  double _calculatePreferenceScore(String item, Map<String, int> preferences) {
     if (preferences.isEmpty) return 0.5;
 
     final itemCount = preferences[item] ?? 0;
@@ -404,21 +410,22 @@ class AIRecommendationService {
 
     final platformPrefs =
         userBehavior.additionalMetrics['platform_preferences']
-                as Map<String, int>? ??
-            {};
+            as Map<String, int>? ??
+        {};
     if ((platformPrefs[content.platform.name] ?? 0) > 0) {
-      reasons.add('You frequently engage with ${content.platform.name} content');
+      reasons.add(
+        'You frequently engage with ${content.platform.name} content',
+      );
     }
 
-    if (userBehavior.preferredContentTypes
-        .contains(content.contentType.name)) {
+    if (userBehavior.preferredContentTypes.contains(content.contentType.name)) {
       reasons.add('You enjoy ${content.contentType.name} content');
     }
 
     final categoryPrefs =
         userBehavior.additionalMetrics['category_preferences']
-                as Map<String, int>? ??
-            {};
+            as Map<String, int>? ??
+        {};
     for (final category in content.categories) {
       if ((categoryPrefs[category] ?? 0) > 0) {
         reasons.add('You like $category content');
@@ -443,8 +450,7 @@ class AIRecommendationService {
   }
 
   // Get user preferences from LocalStorageService (user_model.UserPreferences)
-  Future<UserPreferences?> _getUserPreferencesFromStorage(
-      String userId) async {
+  Future<UserPreferences?> _getUserPreferencesFromStorage(String userId) async {
     try {
       return await _storage.getUserPreferences(userId);
     } catch (error) {
@@ -475,7 +481,8 @@ class AIRecommendationService {
           .toList();
 
       valid.sort(
-          (a, b) => b.recommendationScore.compareTo(a.recommendationScore));
+        (a, b) => b.recommendationScore.compareTo(a.recommendationScore),
+      );
       return valid.take(limit).toList();
     } catch (error) {
       debugPrint('Error getting existing recommendations: $error');
@@ -505,7 +512,8 @@ class AIRecommendationService {
 
   // Persist recommendations to local storage
   Future<void> _saveRecommendations(
-      List<Recommendation> recommendations) async {
+    List<Recommendation> recommendations,
+  ) async {
     try {
       for (final rec in recommendations) {
         await _storage.saveRecommendation(rec.toJson());
@@ -518,8 +526,9 @@ class AIRecommendationService {
   // Mark recommendation as shown
   Future<void> markRecommendationShown(String recommendationId) async {
     try {
-      final rawRecs = await _storage
-          .getRecommendations(AuthService.instance.currentUser?.id ?? '');
+      final rawRecs = await _storage.getRecommendations(
+        AuthService.instance.currentUser?.id ?? '',
+      );
       for (final raw in rawRecs) {
         if (raw['id'] == recommendationId) {
           final updated = Map<String, dynamic>.from(raw);
@@ -536,8 +545,9 @@ class AIRecommendationService {
   // Mark recommendation as clicked
   Future<void> markRecommendationClicked(String recommendationId) async {
     try {
-      final rawRecs = await _storage
-          .getRecommendations(AuthService.instance.currentUser?.id ?? '');
+      final rawRecs = await _storage.getRecommendations(
+        AuthService.instance.currentUser?.id ?? '',
+      );
       for (final raw in rawRecs) {
         if (raw['id'] == recommendationId) {
           final updated = Map<String, dynamic>.from(raw);
@@ -558,8 +568,7 @@ class AIRecommendationService {
   }
 
   // Get recommendation performance metrics from local storage
-  Future<Map<String, dynamic>> getRecommendationMetrics(
-      String userId) async {
+  Future<Map<String, dynamic>> getRecommendationMetrics(String userId) async {
     try {
       final rawRecs = await _storage.getRecommendations(userId);
       final recommendations = rawRecs
@@ -574,10 +583,12 @@ class AIRecommendationService {
           .toList();
 
       final totalRecommendations = recommendations.length;
-      final shownRecommendations =
-          recommendations.where((r) => r.isShown).length;
-      final clickedRecommendations =
-          recommendations.where((r) => r.isClicked).length;
+      final shownRecommendations = recommendations
+          .where((r) => r.isShown)
+          .length;
+      final clickedRecommendations = recommendations
+          .where((r) => r.isClicked)
+          .length;
 
       final showRate = totalRecommendations > 0
           ? shownRecommendations / totalRecommendations
@@ -594,9 +605,9 @@ class AIRecommendationService {
         'click_through_rate': clickThroughRate,
         'average_score': recommendations.isNotEmpty
             ? recommendations
-                    .map((r) => r.recommendationScore)
-                    .reduce((a, b) => a + b) /
-                recommendations.length
+                      .map((r) => r.recommendationScore)
+                      .reduce((a, b) => a + b) /
+                  recommendations.length
             : 0.0,
       };
     } catch (error) {

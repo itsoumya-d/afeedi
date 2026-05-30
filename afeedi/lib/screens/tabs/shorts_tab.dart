@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
@@ -231,15 +233,18 @@ class _ShortsTabState extends State<ShortsTab> {
                 _scrollCount++;
               });
               if (_shortsContent.isNotEmpty && index < _shortsContent.length) {
+                final viewed = _shortsContent[index];
                 AnalyticsService.instance.trackUserInteraction(
                   action: 'short_viewed',
                   screen: 'shorts',
                   additionalData: {
-                    'content_id': _shortsContent[index].id,
-                    'platform': _shortsContent[index].platform.name,
+                    'content_id': viewed.id,
+                    'platform': viewed.platform.name,
                     'index': index,
                   },
                 );
+                // Viewing a short signals interest — 1 point per tag
+                if (viewed.tags.isNotEmpty) _updateGenreWeights(viewed.tags);
               }
               _checkShortsUpsell();
             },
@@ -370,68 +375,14 @@ class _ShortsTabState extends State<ShortsTab> {
     final likeCount = UserInteractionService.instance
         .getLikeCount(content.id, baseCount: content.likeCount);
 
-    final overlay = Stack(
-      fit: StackFit.expand,
-      children: [
-        // ── Bottom-to-top gradient overlay for readability ───────────────────
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withValues(alpha: 0.7),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: const [0.4, 1.0],
-              ),
-            ),
-          ),
-        ),
-
-        // ── Platform badge (top-right, below safe area) ──────────────────────
-        Positioned(
-          top: 56,
-          right: 16,
-          child: _buildPlatformBadge(content.platform, platformColor),
-        ),
-
-        // ── Right-side action buttons ────────────────────────────────────────
-        Positioned(
-          right: 10,
-          bottom: 110,
-          child: _buildInteractionButtons(
-            content: content,
-            isLiked: isLiked,
-            isSaved: isSaved,
-            likeCount: likeCount,
-          ),
-        ),
-
-        // ── Bottom-left content info ─────────────────────────────────────────
-        Positioned(
-          left: 14,
-          right: 80,
-          bottom: 110,
-          child: _buildContentInfo(content),
-        ),
-      ],
-    );
-
-    if (content.platform == PlatformType.youtube && index == _currentIndex) {
-      return _InlineYouTubeShort(
-        videoId: content.platformContentId,
-        overlay: overlay,
-        onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
-        onDoubleTap: () {
-          _showHeartAnimation(context);
-          _handleLike(content);
-        },
-      );
-    }
-
-    return GestureDetector(
+    return _ShortItemWrapper(
+      key: ValueKey(content.id),
+      content: content,
+      platformColor: platformColor,
+      isLiked: isLiked,
+      isSaved: isSaved,
+      likeCount: likeCount,
+      isCurrentIndex: index == _currentIndex,
       onTap: () async {
         if (content.platform == PlatformType.youtube) {
           Navigator.pushNamed(context, AppRoutes.player, arguments: content);
@@ -449,13 +400,23 @@ class _ShortsTabState extends State<ShortsTab> {
         _showHeartAnimation(context);
         _handleLike(content);
       },
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // ── Full-screen thumbnail ──────────────────────────────────────────
-          _buildThumbnail(content, platformColor),
-          overlay,
-        ],
+      interactionButtons: _buildInteractionButtons(
+        content: content,
+        isLiked: isLiked,
+        isSaved: isSaved,
+        likeCount: likeCount,
+      ),
+      contentInfo: _buildContentInfo(content),
+      platformBadge: _buildPlatformBadge(content.platform, platformColor),
+      thumbnailWidget: _buildThumbnail(content, platformColor),
+      youtubeOverlayBuilder: (overlay) => _InlineYouTubeShort(
+        videoId: content.platformContentId,
+        overlay: overlay,
+        onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
+        onDoubleTap: () {
+          _showHeartAnimation(context);
+          _handleLike(content);
+        },
       ),
     );
   }
@@ -1166,6 +1127,29 @@ class _ShortsTabState extends State<ShortsTab> {
         'platform': content.platform.name,
       },
     );
+    // Liking a short is a strong engagement signal — update implicit weights
+    if (!wasLiked && content.tags.isNotEmpty) {
+      _updateGenreWeights(content.tags, points: 3);
+    }
+  }
+
+  Future<void> _updateGenreWeights(List<String> tags, {int points = 1}) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final weightsRaw = prefs.getString('genre_implicit_weights') ?? '';
+      final weights = <String, int>{};
+      for (final entry in weightsRaw.split(',')) {
+        final parts = entry.split(':');
+        if (parts.length == 2) weights[parts[0]] = int.tryParse(parts[1]) ?? 0;
+      }
+      for (final tag in tags) {
+        if (tag.isNotEmpty) weights[tag] = (weights[tag] ?? 0) + points;
+      }
+      await prefs.setString(
+        'genre_implicit_weights',
+        weights.entries.where((e) => e.key.isNotEmpty).map((e) => '${e.key}:${e.value}').join(','),
+      );
+    } catch (_) {}
   }
 
   Future<void> _handleSave(Content content) async {
@@ -1413,6 +1397,175 @@ class _ShortsTabState extends State<ShortsTab> {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     }
+  }
+}
+
+// ─── Per-short wrapper with animated opacity + progress indicator ──────────
+
+class _ShortItemWrapper extends StatefulWidget {
+  final Content content;
+  final Color platformColor;
+  final bool isLiked;
+  final bool isSaved;
+  final int likeCount;
+  final bool isCurrentIndex;
+  final VoidCallback onTap;
+  final VoidCallback onDoubleTap;
+  final Widget interactionButtons;
+  final Widget contentInfo;
+  final Widget platformBadge;
+  final Widget thumbnailWidget;
+  final Widget Function(Widget overlay) youtubeOverlayBuilder;
+
+  const _ShortItemWrapper({
+    super.key,
+    required this.content,
+    required this.platformColor,
+    required this.isLiked,
+    required this.isSaved,
+    required this.likeCount,
+    required this.isCurrentIndex,
+    required this.onTap,
+    required this.onDoubleTap,
+    required this.interactionButtons,
+    required this.contentInfo,
+    required this.platformBadge,
+    required this.thumbnailWidget,
+    required this.youtubeOverlayBuilder,
+  });
+
+  @override
+  State<_ShortItemWrapper> createState() => _ShortItemWrapperState();
+}
+
+class _ShortItemWrapperState extends State<_ShortItemWrapper> {
+  bool _buttonsVisible = false;
+  Timer? _visibilityTimer;
+  final ValueNotifier<double> _progressNotifier = ValueNotifier(0.0);
+  Timer? _progressTimer;
+
+  static const _shortDurationSeconds = 60;
+
+  @override
+  void initState() {
+    super.initState();
+    _startFadeInTimer();
+    _startProgressTimer();
+  }
+
+  void _startFadeInTimer() {
+    _visibilityTimer?.cancel();
+    _visibilityTimer = Timer(const Duration(seconds: 1), () {
+      if (mounted) setState(() => _buttonsVisible = true);
+    });
+  }
+
+  void _startProgressTimer() {
+    _progressTimer?.cancel();
+    _progressNotifier.value = 0.0;
+    _progressTimer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      if (!mounted) return;
+      final next = _progressNotifier.value + (0.2 / _shortDurationSeconds);
+      if (next >= 1.0) {
+        _progressNotifier.value = 1.0;
+        _progressTimer?.cancel();
+      } else {
+        _progressNotifier.value = next;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _visibilityTimer?.cancel();
+    _progressTimer?.cancel();
+    _progressNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final overlay = Stack(
+      fit: StackFit.expand,
+      children: [
+        // Gradient for readability
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.7),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.4, 1.0],
+              ),
+            ),
+          ),
+        ),
+
+        // Platform badge top-right
+        Positioned(
+          top: 56,
+          right: 16,
+          child: widget.platformBadge,
+        ),
+
+        // Interaction buttons — animated fade-in after 1 second
+        Positioned(
+          right: 10,
+          bottom: 110,
+          child: AnimatedOpacity(
+            opacity: _buttonsVisible ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeIn,
+            child: widget.interactionButtons,
+          ),
+        ),
+
+        // Content info bottom-left
+        Positioned(
+          left: 14,
+          right: 80,
+          bottom: 110,
+          child: widget.contentInfo,
+        ),
+
+        // Progress indicator at the very bottom
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: ValueListenableBuilder<double>(
+            valueListenable: _progressNotifier,
+            builder: (_, value, __) => LinearProgressIndicator(
+              value: value,
+              backgroundColor: Colors.white24,
+              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF00D4FF)),
+              minHeight: 3,
+            ),
+          ),
+        ),
+      ],
+    );
+
+    if (widget.content.platform == PlatformType.youtube &&
+        widget.isCurrentIndex) {
+      return widget.youtubeOverlayBuilder(overlay);
+    }
+
+    return GestureDetector(
+      onTap: widget.onTap,
+      onDoubleTap: widget.onDoubleTap,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          widget.thumbnailWidget,
+          overlay,
+        ],
+      ),
+    );
   }
 }
 

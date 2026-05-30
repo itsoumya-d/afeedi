@@ -131,6 +131,26 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
     watchedList.remove(widget.content.id);
     watchedList.insert(0, widget.content.id);
     await prefs.setStringList('watched_ids', watchedList.take(100).toList());
+
+    // Update implicit genre weights when user watches >20% of content
+    if (progress > 0.2 && widget.content.tags.isNotEmpty) {
+      final weightsRaw = prefs.getString('genre_implicit_weights') ?? '';
+      final weights = <String, int>{};
+      for (final entry in weightsRaw.split(',')) {
+        final parts = entry.split(':');
+        if (parts.length == 2) weights[parts[0]] = int.tryParse(parts[1]) ?? 0;
+      }
+      // Weight increases proportionally to watch completion (0.2→1.0 mapped to 1→5 points)
+      final points = ((progress - 0.2) / 0.8 * 4 + 1).round().clamp(1, 5);
+      for (final tag in widget.content.tags) {
+        if (tag.isNotEmpty) weights[tag] = (weights[tag] ?? 0) + points;
+      }
+      final newWeightsRaw = weights.entries
+          .where((e) => e.key.isNotEmpty)
+          .map((e) => '${e.key}:${e.value}')
+          .join(',');
+      await prefs.setString('genre_implicit_weights', newWeightsRaw);
+    }
   }
 
   String _formatCount(int count) {

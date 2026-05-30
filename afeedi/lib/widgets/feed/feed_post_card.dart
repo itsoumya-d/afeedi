@@ -8,8 +8,15 @@ import '../../services/navigation_service.dart';
 
 class FeedPostCard extends StatefulWidget {
   final Content content;
+  final bool isHero;
+  final int index;
 
-  const FeedPostCard({super.key, required this.content});
+  const FeedPostCard({
+    super.key,
+    required this.content,
+    this.isHero = false,
+    this.index = 0,
+  });
 
   @override
   State<FeedPostCard> createState() => _FeedPostCardState();
@@ -106,6 +113,30 @@ class _FeedPostCardState extends State<FeedPostCard> {
 
   @override
   Widget build(BuildContext context) {
+    final delay = Duration(milliseconds: widget.index * 50);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+      // ignore: avoid_types_on_closure_parameters
+      builder: (context, value, child) {
+        // Apply stagger by delaying the start: treat values < delay-fraction as 0
+        final totalMs = 300 + delay.inMilliseconds;
+        final delayFraction = delay.inMilliseconds / totalMs;
+        final progress = ((value - delayFraction) / (1.0 - delayFraction)).clamp(0.0, 1.0);
+        return Opacity(
+          opacity: progress,
+          child: Transform.translate(
+            offset: Offset(0, (1.0 - progress) * 20),
+            child: child,
+          ),
+        );
+      },
+      child: widget.isHero ? _buildHeroCard() : _buildRegularCard(),
+    );
+  }
+
+  Widget _buildRegularCard() {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -118,6 +149,193 @@ class _FeedPostCardState extends State<FeedPostCard> {
           _buildEngagementRow(),
           _buildActions(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHeroCard() {
+    final platform = widget.content.platform;
+    final platformColor = _platformColor(platform);
+    final initial = (widget.content.creatorName ?? 'U').isNotEmpty
+        ? (widget.content.creatorName ?? 'U')[0].toUpperCase()
+        : 'U';
+
+    return GestureDetector(
+      onTap: () {
+        ContentService.instance.trackContentInteraction(
+          contentId: widget.content.id,
+          interactionType: InteractionType.view,
+        );
+        Navigator.pushNamed(context, AppRoutes.player, arguments: widget.content);
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: SizedBox(
+          height: 220,
+          width: double.infinity,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Full-bleed thumbnail
+              if (widget.content.thumbnailUrl != null)
+                CachedNetworkImage(
+                  imageUrl: widget.content.thumbnailUrl!,
+                  fit: BoxFit.cover,
+                  placeholder: (_, __) => Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          platformColor.withValues(alpha: 0.6),
+                          platformColor.withValues(alpha: 0.3),
+                        ],
+                      ),
+                    ),
+                  ),
+                  errorWidget: (_, __, ___) => Container(
+                    color: platformColor.withValues(alpha: 0.2),
+                  ),
+                )
+              else
+                Container(
+                  color: platformColor.withValues(alpha: 0.2),
+                ),
+
+              // Full-width gradient overlay (top → bottom)
+              const Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.transparent, Colors.black87],
+                    ),
+                  ),
+                ),
+              ),
+
+              // FEATURED badge — top-left
+              Positioned(
+                top: 12,
+                left: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00D4FF),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text(
+                    'FEATURED',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ),
+              ),
+
+              // Creator avatar — top-right
+              Positioned(
+                top: 10,
+                right: 12,
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                    color: platformColor.withValues(alpha: 0.3),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: widget.content.creatorAvatarUrl != null
+                      ? CachedNetworkImage(
+                          imageUrl: widget.content.creatorAvatarUrl!,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => Center(
+                            child: Text(
+                              initial,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          errorWidget: (_, __, ___) => Center(
+                            child: Text(
+                              initial,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Text(
+                            initial,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                ),
+              ),
+
+              // Bottom info: title + Watch Now CTA
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 12,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        widget.content.title ?? 'Featured Video',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          height: 1.2,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black54,
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF00D4FF),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        '▶ Watch Now',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

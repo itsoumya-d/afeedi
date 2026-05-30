@@ -281,6 +281,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
         Navigator.of(context).pushNamed(AppRoutes.search);
       case 'achievement':
         Navigator.of(context).pushNamed(AppRoutes.profile);
+      case 'system':
+        Navigator.of(context).pushNamed(AppRoutes.dashboard);
       default:
         break;
     }

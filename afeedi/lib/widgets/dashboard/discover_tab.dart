@@ -18,6 +18,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
   String _selectedCategory = 'All';
   String _selectedTimeWindow = '7d';
   String _selectedTimeFilter = 'Today';
+  String _sortMode = 'hot'; // 'hot' = sorted by viewCount desc, 'rising' = sorted by publishedAt desc
   List<Content> _content = [];
   List<Content> _trending = [];
   bool _isLoading = true;
@@ -91,7 +92,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
       if (mounted) {
         setState(() {
           _trending = data;
-          _content = _applyTimeFilter(data);
+          _content = _applySort(_applyTimeFilter(data));
           _isLoading = false;
         });
       }
@@ -112,7 +113,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
       if (mounted) {
         setState(() {
           _trending = data;
-          _content = _applyTimeFilter(data);
+          _content = _applySort(_applyTimeFilter(data));
           _isLoading = false;
         });
       }
@@ -123,7 +124,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
     setState(() {
       _selectedCategory = category;
       _hasError = false;
-      if (category == 'All') _content = _applyTimeFilter(_trending);
+      if (category == 'All') _content = _applySort(_applyTimeFilter(_trending));
     });
     if (category == 'All' || category == 'Trending') return;
     ContentService.instance
@@ -140,7 +141,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                           .any((t) => t.toLowerCase() == category.toLowerCase()))
                   .toList()
               : data;
-          _content = _applyTimeFilter(base);
+          _content = _applySort(_applyTimeFilter(base));
         });
       }
     });
@@ -168,7 +169,29 @@ class _DiscoverTabState extends State<DiscoverTab> {
   void _onTimeFilterSelected(String filter) {
     setState(() {
       _selectedTimeFilter = filter;
-      _content = _applyTimeFilter(_trending);
+      _content = _applySort(_applyTimeFilter(_trending));
+    });
+  }
+
+  List<Content> _applySort(List<Content> items) {
+    final sorted = List<Content>.from(items);
+    if (_sortMode == 'hot') {
+      sorted.sort((a, b) => b.viewCount.compareTo(a.viewCount));
+    } else {
+      // rising: newer first
+      sorted.sort((a, b) {
+        final aDate = a.publishedAt ?? DateTime(2000);
+        final bDate = b.publishedAt ?? DateTime(2000);
+        return bDate.compareTo(aDate);
+      });
+    }
+    return sorted;
+  }
+
+  void _onSortModeChanged(String mode) {
+    setState(() {
+      _sortMode = mode;
+      _content = _applySort(_content);
     });
   }
 
@@ -228,57 +251,131 @@ class _DiscoverTabState extends State<DiscoverTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: 36,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              itemCount: _timeFilters.length,
-              itemBuilder: (context, index) {
-                final filter = _timeFilters[index];
-                final isSelected = _selectedTimeFilter == filter;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: GestureDetector(
-                    onTap: () => _onTimeFilterSelected(filter),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? const Color(0xFF00D4FF)
-                            : Colors.white24,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: isSelected
-                              ? const Color(0xFF00D4FF)
-                              : Colors.white24,
-                          width: 1,
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 36,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    itemCount: _timeFilters.length,
+                    itemBuilder: (context, index) {
+                      final filter = _timeFilters[index];
+                      final isSelected = _selectedTimeFilter == filter;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: GestureDetector(
+                          onTap: () => _onTimeFilterSelected(filter),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xFF00D4FF)
+                                  : Colors.white24,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isSelected
+                                    ? const Color(0xFF00D4FF)
+                                    : Colors.white24,
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              filter,
+                              style: TextStyle(
+                                color:
+                                    isSelected ? Colors.black : Colors.white,
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w400,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        filter,
-                        style: TextStyle(
-                          color:
-                              isSelected ? Colors.black : Colors.white,
-                          fontWeight: isSelected
-                              ? FontWeight.w700
-                              : FontWeight.w400,
-                          fontSize: 13,
+                      );
+                    },
+                  ),
+                ),
+              ),
+              // Hot / Rising sort toggle
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Tooltip(
+                      message: 'Hot',
+                      child: GestureDetector(
+                        onTap: () => _onSortModeChanged('hot'),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: _sortMode == 'hot'
+                                ? const Color(0xFFFF4500).withValues(alpha: 0.25)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: _sortMode == 'hot'
+                                  ? const Color(0xFFFF4500)
+                                  : Colors.white24,
+                              width: 1,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.local_fire_department,
+                            size: 18,
+                            color: _sortMode == 'hot'
+                                ? const Color(0xFFFF4500)
+                                : Colors.white54,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
+                    const SizedBox(width: 4),
+                    Tooltip(
+                      message: 'Rising',
+                      child: GestureDetector(
+                        onTap: () => _onSortModeChanged('rising'),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: _sortMode == 'rising'
+                                ? const Color(0xFF32D74B).withValues(alpha: 0.25)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: _sortMode == 'rising'
+                                  ? const Color(0xFF32D74B)
+                                  : Colors.white24,
+                              width: 1,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.trending_up,
+                            size: 18,
+                            color: _sortMode == 'rising'
+                                ? const Color(0xFF32D74B)
+                                : Colors.white54,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           if (!_isLoading && !_hasError)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
               child: Text(
-                'Showing $_filteredCount trending items • $_selectedTimeFilter',
+                'Showing $_filteredCount trending items • $_selectedTimeFilter • ${_sortMode == 'hot' ? 'Hot' : 'Rising'}',
                 style: const TextStyle(
                   color: Colors.white54,
                   fontSize: 11,
@@ -950,6 +1047,18 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     fontSize: 11,
                   ),
                 ),
+                if (content.viewCount > 0) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    content.formattedViewCount,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white38,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

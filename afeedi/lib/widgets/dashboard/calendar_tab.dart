@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/enhanced_calendar_service.dart';
 import '../../services/analytics_service.dart';
+import '../../services/content_service.dart';
 import '../../services/google_calendar_service.dart';
 import '../../models/calendar_event.dart';
 import '../../l10n/app_localizations.dart';
@@ -46,163 +47,13 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   late AnimationController _filterAnimationController;
   late Animation<double> _filterAnimation;
   
-  late final List<Map<String, dynamic>> _scheduledContent = [
-    {
-      'id': '1',
-      'title': 'Morning Tech News',
-      'time': '08:00',
-      'duration': 15,
-      'platform': 'YouTube',
-      'creator': 'TechDaily',
-      'thumbnail': 'https://picsum.photos/60/60?random=1',
-      'type': 'scheduled',
-      'category': 'entertainment',
-      'keywords': ['tech', 'news', 'daily'],
-      'educationValue': 30,
-      'entertainmentValue': 70,
-      'date': DateTime.now(),
-    },
-    {
-      'id': '2',
-      'title': 'Flutter Tutorial',
-      'time': '14:30',
-      'duration': 45,
-      'platform': 'YouTube',
-      'creator': 'CodeMaster',
-      'thumbnail': 'https://picsum.photos/60/60?random=2',
-      'type': 'scheduled',
-      'category': 'education',
-      'keywords': ['flutter', 'programming', 'tutorial'],
-      'educationValue': 90,
-      'entertainmentValue': 10,
-      'date': DateTime.now(),
-    },
-    {
-      'id': '3',
-      'title': 'Relaxing Music Playlist',
-      'time': '20:00',
-      'duration': 60,
-      'platform': 'YouTube',
-      'creator': 'ChillBeats',
-      'thumbnail': 'https://picsum.photos/60/60?random=3',
-      'type': 'scheduled',
-      'category': 'entertainment',
-      'keywords': ['music', 'relaxing', 'chill'],
-      'educationValue': 5,
-      'entertainmentValue': 95,
-      'date': DateTime.now().subtract(const Duration(days: 1)),
-    },
-    {
-      'id': '4',
-      'title': 'Mathematics Study Session',
-      'time': '10:00',
-      'duration': 90,
-      'platform': 'YouTube',
-      'creator': 'Khan Academy',
-      'thumbnail': 'https://picsum.photos/60/60?random=6',
-      'type': 'scheduled',
-      'category': 'study',
-      'keywords': ['mathematics', 'calculus', 'study'],
-      'educationValue': 95,
-      'entertainmentValue': 5,
-      'date': DateTime.now().add(const Duration(days: 2)),
-    },
-    {
-      'id': '5',
-      'title': 'Gaming Highlights: Best Plays',
-      'time': '16:00',
-      'duration': 20,
-      'platform': 'YouTube',
-      'creator': 'GamingPro',
-      'thumbnail': 'https://picsum.photos/60/60?random=7',
-      'type': 'scheduled',
-      'category': 'entertainment',
-      'keywords': ['gaming', 'highlights', 'esports'],
-      'educationValue': 10,
-      'entertainmentValue': 90,
-      'date': DateTime.now().add(const Duration(days: 3)),
-    },
-    {
-      'id': '6',
-      'title': 'Cooking Masterclass: Italian',
-      'time': '12:00',
-      'duration': 35,
-      'platform': 'YouTube',
-      'creator': 'ChefMario',
-      'thumbnail': 'https://picsum.photos/60/60?random=8',
-      'type': 'scheduled',
-      'category': 'lifestyle',
-      'keywords': ['cooking', 'italian', 'food'],
-      'educationValue': 60,
-      'entertainmentValue': 40,
-      'date': DateTime.now().add(const Duration(days: 5)),
-    },
-    {
-      'id': '7',
-      'title': 'Weekly Tech Roundup',
-      'time': '09:00',
-      'duration': 25,
-      'platform': 'YouTube',
-      'creator': 'TechWeekly',
-      'thumbnail': 'https://picsum.photos/60/60?random=9',
-      'type': 'scheduled',
-      'category': 'education',
-      'keywords': ['tech', 'weekly', 'roundup'],
-      'educationValue': 70,
-      'entertainmentValue': 30,
-      'date': DateTime.now().subtract(const Duration(days: 3)),
-    },
-    {
-      'id': '8',
-      'title': 'Fitness HIIT Workout',
-      'time': '07:00',
-      'duration': 30,
-      'platform': 'YouTube',
-      'creator': 'FitLife',
-      'thumbnail': 'https://picsum.photos/60/60?random=10',
-      'type': 'scheduled',
-      'category': 'health',
-      'keywords': ['fitness', 'workout', 'hiit'],
-      'educationValue': 40,
-      'entertainmentValue': 60,
-      'date': DateTime.now().subtract(const Duration(days: 5)),
-    },
-    {
-      'id': '9',
-      'title': 'Mindfulness Meditation',
-      'time': '19:00',
-      'duration': 20,
-      'platform': 'YouTube',
-      'creator': 'ZenMaster',
-      'thumbnail': 'https://picsum.photos/60/60?random=11',
-      'type': 'scheduled',
-      'category': 'health',
-      'keywords': ['meditation', 'mindfulness', 'wellness'],
-      'educationValue': 50,
-      'entertainmentValue': 50,
-      'date': DateTime.now().add(const Duration(days: 7)),
-    },
-    {
-      'id': '10',
-      'title': 'Documentary: Ocean Life',
-      'time': '21:00',
-      'duration': 50,
-      'platform': 'YouTube',
-      'creator': 'NatureFilms',
-      'thumbnail': 'https://picsum.photos/60/60?random=12',
-      'type': 'scheduled',
-      'category': 'education',
-      'keywords': ['documentary', 'nature', 'ocean'],
-      'educationValue': 80,
-      'entertainmentValue': 20,
-      'date': DateTime.now().add(const Duration(days: 10)),
-    },
-  ];
+  final List<Map<String, dynamic>> _scheduledContent = [];
   
   @override
   void initState() {
     super.initState();
     _initGoogleCalendar();
+    _loadScheduledContentFromService();
     _loadContentForSelectedDate();
     _calendarAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
@@ -233,6 +84,63 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     super.dispose();
   }
   
+  /// Populates _scheduledContent with real content from ContentService,
+  /// distributed across 7 days starting today (3 items per day).
+  Future<void> _loadScheduledContentFromService() async {
+    try {
+      final allContent = await ContentService.instance.getFeedContent(limit: 21);
+      final now = DateTime.now();
+      // Time slots to distribute content across the day
+      const timeSlots = ['08:00', '14:30', '20:00'];
+      final newItems = <Map<String, dynamic>>[];
+      for (int i = 0; i < 7; i++) {
+        final day = DateTime(now.year, now.month, now.day + i);
+        final dayItems = allContent.skip(i * 3).take(3).toList();
+        for (int j = 0; j < dayItems.length; j++) {
+          final c = dayItems[j];
+          final durationMinutes = c.durationSeconds != null
+              ? (c.durationSeconds! / 60).round()
+              : 30;
+          final platform = c.platform.name[0].toUpperCase() +
+              c.platform.name.substring(1);
+          // Determine category from tags/categories
+          String category = 'entertainment';
+          final allTags = [...c.tags.map((t) => t.toLowerCase()),
+                           ...c.categories.map((cat) => cat.toLowerCase())];
+          if (allTags.any((t) => t.contains('education') || t.contains('tutorial') || t.contains('study') || t.contains('learn'))) {
+            category = 'education';
+          } else if (allTags.any((t) => t.contains('fitness') || t.contains('workout') || t.contains('health') || t.contains('meditation'))) {
+            category = 'health';
+          }
+          newItems.add({
+            'id': 'feed_${c.id}_day$i',
+            'title': c.title ?? 'Untitled',
+            'time': timeSlots[j % timeSlots.length],
+            'duration': durationMinutes,
+            'platform': platform,
+            'creator': c.creatorName ?? 'Unknown',
+            'thumbnail': c.thumbnailUrl ?? '',
+            'type': 'scheduled',
+            'category': category,
+            'keywords': c.tags.take(3).toList(),
+            'educationValue': category == 'education' ? 80 : category == 'health' ? 50 : 20,
+            'entertainmentValue': category == 'education' ? 20 : category == 'health' ? 50 : 80,
+            'date': day,
+          });
+        }
+      }
+      if (mounted) {
+        setState(() {
+          _scheduledContent
+            ..clear()
+            ..addAll(newItems);
+        });
+      }
+    } catch (e) {
+      debugPrint('_loadScheduledContentFromService error: $e');
+    }
+  }
+
   Future<void> _initGoogleCalendar() async {
     await GoogleCalendarService.instance.initialize();
     if (GoogleCalendarService.instance.isConnected && mounted) {

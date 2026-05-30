@@ -21,6 +21,9 @@ class _ShortsTabState extends State<ShortsTab> {
   bool _isLoading = true;
   bool _hasError = false;
   Set<String> _followedCreators = {};
+  Set<String> _likedContent = {};
+  // Double-tap heart animation
+  OverlayEntry? _heartOverlay;
 
   @override
   void initState() {
@@ -248,31 +251,19 @@ class _ShortsTabState extends State<ShortsTab> {
           }
         }
       },
+      onDoubleTap: () => _handleLike(content),
       child: Stack(
       children: [
         // Background: thumbnail image with gradient fallback
         Positioned.fill(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.black,
-                  platformColor.withValues(alpha: 0.4),
-                  Colors.black,
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-            child: content.thumbnailUrl != null
-                ? Image.network(
-                    content.thumbnailUrl!,
-                    fit: BoxFit.cover,
-                    semanticLabel: content.title ?? 'Short video thumbnail',
-                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                  )
-                : null,
-          ),
+          child: content.thumbnailUrl != null && content.thumbnailUrl!.isNotEmpty
+              ? Image.network(
+                  content.thumbnailUrl!,
+                  fit: BoxFit.cover,
+                  semanticLabel: content.title ?? 'Short video thumbnail',
+                  errorBuilder: (_, __, ___) => _buildThumbnailFallback(content, platformColor),
+                )
+              : _buildThumbnailFallback(content, platformColor),
         ),
 
         // Dark gradient overlay at bottom for readability
@@ -345,6 +336,42 @@ class _ShortsTabState extends State<ShortsTab> {
     );
   }
 
+  Widget _buildThumbnailFallback(Content content, Color platformColor) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.black,
+            platformColor.withValues(alpha: 0.6),
+            Colors.black,
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.play_circle_outline, size: 72, color: Colors.white.withValues(alpha: 0.7)),
+            const SizedBox(height: 12),
+            if (content.title != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Text(
+                  content.title!,
+                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildFollowButton(String creatorId) {
     final isFollowed = _followedCreators.contains(creatorId);
     return GestureDetector(
@@ -385,12 +412,14 @@ class _ShortsTabState extends State<ShortsTab> {
   }
 
   Widget _buildInteractionButtons(Content content) {
+    final isLiked = _likedContent.contains(content.id);
     return Column(
       children: [
         _buildActionButton(
-          icon: Icons.favorite_border,
-          label: _formatCount(content.likeCount),
+          icon: isLiked ? Icons.favorite : Icons.favorite_border,
+          label: _formatCount(content.likeCount + (isLiked ? 1 : 0)),
           onTap: () => _handleLike(content),
+          color: isLiked ? Colors.red : Colors.white,
         ),
         const SizedBox(height: 20),
         _buildActionButton(
@@ -482,6 +511,14 @@ class _ShortsTabState extends State<ShortsTab> {
   }
   
   void _handleLike(Content content) {
+    setState(() {
+      if (_likedContent.contains(content.id)) {
+        _likedContent.remove(content.id);
+      } else {
+        _likedContent.add(content.id);
+      }
+    });
+    UserInteractionService.instance.toggleLike(content.id);
     AnalyticsService.instance.trackUserInteraction(
       action: 'short_liked',
       screen: 'shorts',
@@ -776,6 +813,7 @@ class _ShortsTabState extends State<ShortsTab> {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    Color color = Colors.white,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -789,7 +827,7 @@ class _ShortsTabState extends State<ShortsTab> {
             ),
             child: Icon(
               icon,
-              color: Colors.white,
+              color: color,
               size: 24,
             ),
           ),

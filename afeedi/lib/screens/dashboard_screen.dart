@@ -132,20 +132,35 @@ class _DashboardScreenState extends State<DashboardScreen>
         children: [
           // Logo/Brand
           Container(
-            padding: const EdgeInsets.all(6),
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [AppTheme.primaryCyan, AppTheme.primaryPink],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: const Text(
-              'A',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Stack(
+              children: [
+                Positioned(
+                  bottom: 4,
+                  right: 4,
+                  child: Icon(Icons.play_arrow, color: Colors.white.withValues(alpha: 0.4), size: 16),
+                ),
+                const Center(
+                  child: Text(
+                    'Af',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 10),

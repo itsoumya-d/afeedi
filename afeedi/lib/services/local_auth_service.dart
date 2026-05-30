@@ -344,8 +344,9 @@ class LocalAuthService {
     await _storage.saveUserPreferences(preferences);
   }
 
-  /// Checks if an account with [email] exists and marks a reset token pending.
-  /// Returns true if the email is registered, false otherwise.
+  /// Initiates a password reset for [email]. Always returns true to prevent
+  /// account enumeration attacks (OWASP A07 / GDPR Art. 32 — do not confirm
+  /// whether an email address is registered to an unauthenticated caller).
   Future<bool> sendPasswordReset(String email) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -353,14 +354,11 @@ class LocalAuthService {
       for (final userId in allUserIds) {
         final storedEmail = prefs.getString('user_email_$userId');
         if (storedEmail?.toLowerCase() == email.toLowerCase()) {
-          // Mark a pending reset so the user can verify via change-password flow
           await prefs.setString('pending_reset_email', email);
-          return true;
+          break; // found — mark pending silently
         }
       }
-      return false;
-    } catch (_) {
-      return false;
-    }
+    } catch (_) {}
+    return true; // always true — never reveal whether email is registered
   }
 }

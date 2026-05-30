@@ -300,6 +300,32 @@ class AnalyticsService with WidgetsBindingObserver {
     }
   }
 
+  /// Deletes analytics events older than [maxAge] (GDPR Art. 5 storage limitation).
+  /// Call periodically — e.g., once on app launch — to enforce a 90-day retention policy.
+  Future<void> pruneOldEvents({Duration maxAge = const Duration(days: 90)}) async {
+    try {
+      final cutoff = DateTime.now().subtract(maxAge);
+      final events = await _getStoredEvents();
+      final kept = events.where((e) {
+        try {
+          return DateTime.parse(e['timestamp'] as String).isAfter(cutoff);
+        } catch (_) {
+          return false;
+        }
+      }).toList();
+      if (kept.length < events.length) {
+        await _persistEvents(kept);
+        _eventQueue.removeWhere((e) {
+          try {
+            return DateTime.parse(e['timestamp'] as String).isBefore(cutoff);
+          } catch (_) {
+            return true;
+          }
+        });
+      }
+    } catch (_) {}
+  }
+
   // Private helper methods
   Future<void> _queueEvent(Map<String, dynamic> event) async {
     // Respect user's data-collection consent toggle (GDPR Art. 7).

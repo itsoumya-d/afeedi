@@ -27,6 +27,7 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget> {
   late YoutubePlayerController _controller;
   bool _isReady = false;
   bool _hasError = false;
+  bool _isBuffering = false;
 
   @override
   void initState() {
@@ -50,8 +51,9 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget> {
 
     _controller.listen((event) {
       if (!mounted) return;
-      if (event.playerState == PlayerState.playing && !_isReady) {
-        setState(() => _isReady = true);
+      final state = event.playerState;
+      if (state == PlayerState.playing && !_isReady) {
+        setState(() { _isReady = true; _isBuffering = false; });
         widget.onReady?.call();
         AnalyticsService.instance.trackUserInteraction(
           action: 'youtube_player_ready',
@@ -61,6 +63,12 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget> {
             'video_id': videoId,
           },
         );
+      } else if (state == PlayerState.buffering) {
+        if (!_isBuffering) setState(() => _isBuffering = true);
+      } else if (state == PlayerState.playing || state == PlayerState.paused) {
+        if (_isBuffering) setState(() => _isBuffering = false);
+      } else if (state == PlayerState.unknown && !_isReady) {
+        if (!_isBuffering) setState(() => _isBuffering = true);
       }
     });
   }
@@ -81,9 +89,24 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget> {
       borderRadius: BorderRadius.circular(8),
       child: AspectRatio(
         aspectRatio: 16 / 9,
-        child: YoutubePlayerControllerProvider(
-          controller: _controller,
-          child: YoutubePlayer(controller: _controller),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            YoutubePlayerControllerProvider(
+              controller: _controller,
+              child: YoutubePlayer(controller: _controller),
+            ),
+            if (!_isReady || _isBuffering)
+              Container(
+                color: Colors.black54,
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF00D4FF),
+                    strokeWidth: 2,
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

@@ -3,6 +3,7 @@ import 'dart:math' show pi;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:confetti/confetti.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../models/user_preferences.dart';
@@ -65,6 +66,80 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
       action: 'screen_view',
       screen: 'enhanced_onboarding_screen',
     );
+
+    // COPPA/GDPR Art. 8 age gate — show once per device, block under-13 users
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkAgeGate());
+  }
+
+  Future<void> _checkAgeGate() async {
+    final prefs = await SharedPreferences.getInstance();
+    final verified = prefs.getBool('coppa_age_verified') ?? false;
+    if (verified || !mounted) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A2E),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Age Verification',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+        ),
+        content: const Text(
+          'You must be 13 or older to use Afeedi. Are you 13 years of age or older?',
+          style: TextStyle(color: Colors.white70, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('No', style: TextStyle(color: Colors.white54)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF00D4FF),
+              foregroundColor: Colors.black,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Yes, I am 13+'),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted) return;
+    if (confirmed == true) {
+      await prefs.setBool('coppa_age_verified', true);
+    } else {
+      // User is under 13 — block registration per COPPA §312.3
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: const Color(0xFF1A1A2E),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text(
+            'Age Requirement',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
+          content: const Text(
+            'Afeedi is not available to users under 13 years of age.',
+            style: TextStyle(color: Colors.white70, height: 1.5),
+          ),
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00D4FF),
+                foregroundColor: Colors.black,
+              ),
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      if (mounted) Navigator.of(context).pop(); // return to welcome
+    }
   }
 
   Future<void> _loadExistingPreferences() async {

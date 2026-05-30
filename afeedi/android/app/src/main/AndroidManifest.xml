@@ -34,10 +34,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <!-- AdMob App ID — replace with real ID before Play Store submission -->
+        <!-- AdMob App ID — injected from ADMOB_APP_ID_ANDROID env var at build time.
+             Set the env var before release: export ADMOB_APP_ID_ANDROID=ca-app-pub-REAL~REAL -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="${admobAppId}"/>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

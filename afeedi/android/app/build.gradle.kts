@@ -40,10 +40,18 @@ android {
 
     defaultConfig {
         applicationId = "com.afeedi.app"
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 23
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Inject AdMob App ID at build time. Override with the real production ID by
+        // setting the ADMOB_APP_ID_ANDROID environment variable before building:
+        //   export ADMOB_APP_ID_ANDROID=ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY
+        //   flutter build appbundle --release
+        val admobAppIdAndroid = System.getenv("ADMOB_APP_ID_ANDROID")
+            ?: "ca-app-pub-3940256099942544~3347511713"  // Google test ID — replace before release
+        manifestPlaceholders["admobAppId"] = admobAppIdAndroid
     }
 
     buildTypes {

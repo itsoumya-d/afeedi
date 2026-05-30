@@ -51,9 +51,10 @@
 	<string>Afeedi needs camera access to let you take a profile picture.</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>Afeedi uses analytics to improve app performance and personalize your content feed. No personal data is shared with third parties for advertising.</string>
-	<!-- AdMob App ID — replace with real iOS App ID from AdMob console before App Store submission -->
+	<!-- AdMob App ID — set ADMOB_APP_ID_IOS in Xcode build settings or Release.xcconfig to inject
+	     the real production value at build time without editing this file. -->
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>$(ADMOB_APP_ID_IOS)</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

@@ -145,7 +145,8 @@ class AppRoutes {
               ? PlayerScreen(content: content as dynamic)
               : const PlaceholderScreen(title: 'Player', icon: Icons.play_circle_filled);
         },
-        '/onboarding': (_) => const PlaceholderScreen(title: 'Onboarding', icon: Icons.start),
+        '/onboarding': (_) => const EnhancedOnboardingScreen(),
+        '/onboarding_chatbot': (_) => const EnhancedOnboardingScreen(),
         AppRoutes.privacyPolicy: (_) => const PrivacyPolicyScreen(),
         AppRoutes.termsOfService: (_) => const TermsOfServiceScreen(),
         AppRoutes.premium: (_) => const PremiumScreen(),

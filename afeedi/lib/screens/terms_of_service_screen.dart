@@ -44,7 +44,7 @@ class TermsOfServiceScreen extends StatelessWidget {
             ),
             _section(
               '5. Subscriptions & Billing',
-              'Afeedi Pro is available at \$4.99/month or \$39.99/year, billed through your Apple App Store or Google Play account. A 7-day free trial is available for new subscribers. You may cancel at any time through your App Store or Google Play subscription settings. Cancellation takes effect at the end of the current billing period. No refunds are issued for partial subscription periods, in accordance with Apple and Google platform policies.',
+              'Afeedi Pro is available at \$4.99/month or \$39.99/year, billed through your Apple App Store or Google Play account. A 7-day free trial is available for new subscribers. YOUR SUBSCRIPTION WILL AUTOMATICALLY RENEW at the end of each billing period unless you cancel at least 24 hours before the renewal date. You may cancel at any time through your App Store or Google Play subscription settings — cancellation takes effect at the end of the current billing period. No refunds are issued for partial subscription periods, in accordance with Apple and Google platform policies.',
             ),
             _section(
               '6. Intellectual Property',

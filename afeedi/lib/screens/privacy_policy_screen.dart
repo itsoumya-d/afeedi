@@ -75,8 +75,12 @@ class PrivacyPolicyScreen extends StatelessWidget {
               'To request deletion of your data, email privacy@afeedi.com with subject \'Data Deletion Request\'. All local data can be deleted by uninstalling the app. We will process data deletion requests within 30 days.',
             ),
             _section(
-              '13. Contact & Effective Date',
-              'Effective date: June 1, 2026. If you have questions about this Privacy Policy or how we handle your data, please contact us at privacy@afeedi.com.',
+              '13. Third-Party Data Processors',
+              'Afeedi uses the following third-party data processors. Each operates under its own privacy policy and, where required by GDPR Article 28, under a Data Processing Agreement with Afeedi:\n\n• Google AdMob (advertising): policies.google.com/privacy\n• YouTube IFrame API (video playback): youtube.com/t/terms\n• Google Calendar API (optional integration): policies.google.com/privacy\n• Google Sign-In (authentication): policies.google.com/privacy\n• Facebook Login (authentication): facebook.com/policy\n\nFor a complete sub-processor list or to request a copy of applicable Data Processing Agreements, email privacy@afeedi.com.',
+            ),
+            _section(
+              '14. Contact & Effective Date',
+              'Effective date: May 30, 2026. If you have questions about this Privacy Policy or how we handle your data, please contact us at privacy@afeedi.com.',
             ),
             const SizedBox(height: 40),
           ],
@@ -104,8 +108,6 @@ class PrivacyPolicyScreen extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(color: Colors.white54, fontSize: 13),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
       ),
     );
   }

@@ -213,8 +213,7 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
                   },
                 );
 
-                // Navigate to onboarding
-                Navigator.of(context).pushNamed('/onboarding');
+                Navigator.of(context).pushNamed('/onboarding_chatbot');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF00D4FF),

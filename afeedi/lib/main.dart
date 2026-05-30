@@ -58,6 +58,8 @@ Future<void> _appMain() async {
     // Initialize Analytics Service
     await AnalyticsService.instance.initialize();
     await AnalyticsService.instance.recordAppOpen();
+    // Prune events older than 90 days (GDPR Art. 5 storage limitation)
+    AnalyticsService.instance.pruneOldEvents().catchError((_) {});
 
     // Initialize Onboarding Service
     await OnboardingService.instance.initialize();

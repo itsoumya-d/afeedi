@@ -1,2 +1,6 @@
 #include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"
 #include "Generated.xcconfig"
+// Set ADMOB_APP_ID_IOS in your CI environment or Xcode build settings before release.
+// Example (CI): xcodebuild ... ADMOB_APP_ID_IOS=ca-app-pub-REAL~REAL
+// Fallback: Google test ID — will be rejected by Play/App Store scanner
+ADMOB_APP_ID_IOS=ca-app-pub-3940256099942544~1458002511

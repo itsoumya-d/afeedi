@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/content_model.dart';
@@ -22,51 +23,57 @@ class _ShortsTabState extends State<ShortsTab> {
   bool _hasError = false;
   Set<String> _followedCreators = {};
   Set<String> _likedContent = {};
-  // Double-tap heart animation
-  OverlayEntry? _heartOverlay;
+  Set<String> _savedContent = {};
 
   @override
   void initState() {
     super.initState();
     _loadShortsContent();
   }
-  
+
   Future<void> _loadShortsContent() async {
     try {
       setState(() {
         _isLoading = true;
         _hasError = false;
       });
-      
-      // Load short-form content from ContentService
+
       final allContent = await ContentService.instance.getFeedContent();
-      final shorts = allContent.where((content) => 
-        content.contentType == ContentType.short || 
-        content.contentType == ContentType.reel ||
-        (content.durationSeconds != null && content.durationSeconds! <= 180)
-      ).toList();
-      
-      final followed = UserInteractionService.instance.getFollowedCreatorIds().toSet();
+      final shorts = allContent.where((content) =>
+          content.contentType == ContentType.short ||
+          content.contentType == ContentType.reel ||
+          (content.durationSeconds != null &&
+              content.durationSeconds! <= 180)).toList();
+
+      final followed =
+          UserInteractionService.instance.getFollowedCreatorIds().toSet();
+
+      // Pre-populate liked/saved state from the persistence service
+      final likedIds = <String>{};
+      final savedIds = <String>{};
+      for (final c in shorts) {
+        if (UserInteractionService.instance.isLiked(c.id)) likedIds.add(c.id);
+        if (UserInteractionService.instance.isSaved(c.id)) savedIds.add(c.id);
+      }
+
       setState(() {
         _shortsContent = shorts;
         _isLoading = false;
         _followedCreators = followed;
+        _likedContent = likedIds;
+        _savedContent = savedIds;
       });
-      
-      // Track shorts tab view
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'shorts_tab_viewed',
         screen: 'shorts',
-        additionalData: {
-          'shorts_count': shorts.length,
-        },
+        additionalData: {'shorts_count': shorts.length},
       );
     } catch (error) {
       setState(() {
         _isLoading = false;
         _hasError = true;
       });
-      
       await AnalyticsService.instance.trackError(
         errorType: 'shorts_loading_error',
         errorMessage: error.toString(),
@@ -75,7 +82,7 @@ class _ShortsTabState extends State<ShortsTab> {
     }
   }
 
-  // Fallback data shown only when ContentService fails
+  // Fallback mock data shown only when ContentService returns nothing
   final List<Map<String, dynamic>> _mockShortsData = [
     {
       'id': 'dQw4w9WgXcQ',
@@ -145,82 +152,8 @@ class _ShortsTabState extends State<ShortsTab> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryCyan),
-          ),
-        ),
-      );
-    }
-    
-    if (_hasError) {
-      return Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                color: Colors.white,
-                size: 64,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Failed to load shorts',
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _loadShortsContent,
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: PageView.builder(
-        controller: _pageController,
-        scrollDirection: Axis.vertical,
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-          
-          // Track short view
-          if (_shortsContent.isNotEmpty && index < _shortsContent.length) {
-            AnalyticsService.instance.trackUserInteraction(
-              action: 'short_viewed',
-              screen: 'shorts',
-              additionalData: {
-                'content_id': _shortsContent[index].id,
-                'platform': _shortsContent[index].platform.name,
-                'index': index,
-              },
-            );
-          }
-        },
-        itemCount: _shortsContent.isNotEmpty ? _shortsContent.length : _mockShortsData.length,
-        itemBuilder: (context, index) {
-          if (_shortsContent.isNotEmpty) {
-            return _buildShortItemFromContent(_shortsContent[index]);
-          } else {
-            return _buildShortItem(_mockShortsData[index]);
-          }
-        },
-      ),
-    );
-  }
-  
+  // ─── Platform helpers ──────────────────────────────────────────────────────
+
   Color _getPlatformColor(PlatformType platform) {
     switch (platform) {
       case PlatformType.youtube:
@@ -234,8 +167,193 @@ class _ShortsTabState extends State<ShortsTab> {
     }
   }
 
+  String _getPlatformLabel(PlatformType platform) {
+    switch (platform) {
+      case PlatformType.youtube:
+        return 'YT';
+      case PlatformType.instagram:
+        return 'IG';
+      case PlatformType.tiktok:
+        return 'TT';
+      case PlatformType.facebook:
+        return 'FB';
+    }
+  }
+
+  String _formatCount(int count) {
+    if (count >= 1000000000) {
+      return '${(count / 1000000000).toStringAsFixed(1)}B';
+    }
+    if (count >= 1000000) return '${(count / 1000000).toStringAsFixed(1)}M';
+    if (count >= 1000) return '${(count / 1000).toStringAsFixed(1)}K';
+    return count.toString();
+  }
+
+  // ─── Build ─────────────────────────────────────────────────────────────────
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: _ShimmerFeed(),
+      );
+    }
+
+    if (_hasError) {
+      return _buildErrorState();
+    }
+
+    final itemCount = _shortsContent.isNotEmpty
+        ? _shortsContent.length
+        : _mockShortsData.length;
+
+    if (itemCount == 0) {
+      return _buildEmptyState();
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          PageView.builder(
+            controller: _pageController,
+            scrollDirection: Axis.vertical,
+            onPageChanged: (index) {
+              setState(() => _currentIndex = index);
+              if (_shortsContent.isNotEmpty && index < _shortsContent.length) {
+                AnalyticsService.instance.trackUserInteraction(
+                  action: 'short_viewed',
+                  screen: 'shorts',
+                  additionalData: {
+                    'content_id': _shortsContent[index].id,
+                    'platform': _shortsContent[index].platform.name,
+                    'index': index,
+                  },
+                );
+              }
+            },
+            itemCount: itemCount,
+            itemBuilder: (context, index) {
+              if (_shortsContent.isNotEmpty) {
+                return _buildShortItemFromContent(_shortsContent[index]);
+              } else {
+                return _buildMockShortItem(_mockShortsData[index]);
+              }
+            },
+          ),
+          // Progress dots overlaid at the top
+          _buildProgressDots(itemCount),
+        ],
+      ),
+    );
+  }
+
+  // ─── Error / empty states ──────────────────────────────────────────────────
+
+  Widget _buildErrorState() {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white54, size: 64),
+            const SizedBox(height: 16),
+            const Text(
+              'Failed to load shorts',
+              style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadShortsContent,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.videocam_off_outlined,
+              color: Colors.white.withValues(alpha: 0.4),
+              size: 72,
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'No shorts available',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Check back later for new content',
+              style: TextStyle(color: Colors.white38, fontSize: 14),
+            ),
+            const SizedBox(height: 24),
+            TextButton.icon(
+              onPressed: _loadShortsContent,
+              icon: const Icon(Icons.refresh, color: AppTheme.primaryCyan),
+              label: const Text(
+                'Refresh',
+                style: TextStyle(color: AppTheme.primaryCyan),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── Progress dots (animated pill indicators) ──────────────────────────────
+
+  Widget _buildProgressDots(int count) {
+    // Cap dots at 10 to avoid horizontal overflow on long feeds
+    final displayCount = count.clamp(0, 10);
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(displayCount, (i) {
+            final active = i == _currentIndex.clamp(0, displayCount - 1);
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              margin: const EdgeInsets.symmetric(horizontal: 2),
+              width: active ? 16 : 6,
+              height: 4,
+              decoration: BoxDecoration(
+                color: active
+                    ? Colors.white
+                    : Colors.white.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
+  // ─── Content short card ────────────────────────────────────────────────────
+
   Widget _buildShortItemFromContent(Content content) {
     final platformColor = _getPlatformColor(content.platform);
+    final isLiked = _likedContent.contains(content.id);
+    final isSaved = _savedContent.contains(content.id);
+    final likeCount = UserInteractionService.instance
+        .getLikeCount(content.id, baseCount: content.likeCount);
 
     return GestureDetector(
       onTap: () async {
@@ -253,87 +371,73 @@ class _ShortsTabState extends State<ShortsTab> {
       },
       onDoubleTap: () => _handleLike(content),
       child: Stack(
-      children: [
-        // Background: thumbnail image with gradient fallback
-        Positioned.fill(
-          child: content.thumbnailUrl != null && content.thumbnailUrl!.isNotEmpty
-              ? Image.network(
-                  content.thumbnailUrl!,
-                  fit: BoxFit.cover,
-                  semanticLabel: content.title ?? 'Short video thumbnail',
-                  errorBuilder: (_, __, ___) => _buildThumbnailFallback(content, platformColor),
-                )
-              : _buildThumbnailFallback(content, platformColor),
-        ),
+        fit: StackFit.expand,
+        children: [
+          // ── Full-screen thumbnail ──────────────────────────────────────────
+          _buildThumbnail(content, platformColor),
 
-        // Dark gradient overlay at bottom for readability
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.transparent, Colors.black.withValues(alpha: 0.7)],
-                begin: Alignment.center,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-        ),
-
-        // Platform logo top-right
-        Positioned(
-          top: 48,
-          right: 16,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: platformColor,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              content.platform.name.toUpperCase(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-        ),
-
-        // Play button in center
-        Positioned.fill(
-          child: Center(
-            child: Container(
-              width: 64,
-              height: 64,
+          // ── Bottom-to-top gradient overlay for readability ─────────────────
+          Positioned.fill(
+            child: DecoratedBox(
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 2),
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.7),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.4, 1.0],
+                ),
               ),
-              child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 40),
             ),
           ),
-        ),
 
-        // Interaction buttons right side
-        Positioned(
-          right: 12,
-          bottom: 100,
-          child: _buildInteractionButtons(content),
-        ),
+          // ── Platform badge (top-right, below safe area) ────────────────────
+          Positioned(
+            top: 56,
+            right: 16,
+            child: _buildPlatformBadge(content.platform, platformColor),
+          ),
 
-        // Content info bottom left
-        Positioned(
-          left: 12,
-          bottom: 100,
-          right: 80,
-          child: _buildContentInfo(content),
-        ),
-      ],
+          // ── Right-side action buttons ──────────────────────────────────────
+          Positioned(
+            right: 10,
+            bottom: 110,
+            child: _buildInteractionButtons(
+              content: content,
+              isLiked: isLiked,
+              isSaved: isSaved,
+              likeCount: likeCount,
+            ),
+          ),
+
+          // ── Bottom-left content info ───────────────────────────────────────
+          Positioned(
+            left: 14,
+            right: 80,
+            bottom: 110,
+            child: _buildContentInfo(content),
+          ),
+        ],
       ),
     );
+  }
+
+  // ─── Thumbnail ─────────────────────────────────────────────────────────────
+
+  Widget _buildThumbnail(Content content, Color platformColor) {
+    final url = content.thumbnailUrl;
+    if (url != null && url.isNotEmpty) {
+      return Image.network(
+        url,
+        fit: BoxFit.cover,
+        semanticLabel: content.title ?? 'Short video thumbnail',
+        errorBuilder: (_, __, ___) =>
+            _buildThumbnailFallback(content, platformColor),
+      );
+    }
+    return _buildThumbnailFallback(content, platformColor);
   }
 
   Widget _buildThumbnailFallback(Content content, Color platformColor) {
@@ -342,7 +446,7 @@ class _ShortsTabState extends State<ShortsTab> {
         gradient: LinearGradient(
           colors: [
             Colors.black,
-            platformColor.withValues(alpha: 0.6),
+            platformColor.withValues(alpha: 0.55),
             Colors.black,
           ],
           begin: Alignment.topCenter,
@@ -353,18 +457,251 @@ class _ShortsTabState extends State<ShortsTab> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.play_circle_outline, size: 72, color: Colors.white.withValues(alpha: 0.7)),
-            const SizedBox(height: 12),
-            if (content.title != null)
+            Icon(
+              Icons.play_circle_outline,
+              size: 72,
+              color: Colors.white.withValues(alpha: 0.7),
+            ),
+            if (content.title != null) ...[
+              const SizedBox(height: 12),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: Text(
                   content.title!,
-                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                   textAlign: TextAlign.center,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── Platform badge ────────────────────────────────────────────────────────
+
+  Widget _buildPlatformBadge(PlatformType platform, Color color) {
+    final isInstagram = platform == PlatformType.instagram;
+    final label = _getPlatformLabel(platform);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        gradient: isInstagram
+            ? const LinearGradient(
+                colors: [
+                  Color(0xFF833AB4),
+                  Color(0xFFE1306C),
+                  Color(0xFFFD1D1D),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        color: isInstagram ? null : color,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.4),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.8,
+        ),
+      ),
+    );
+  }
+
+  // ─── Right-side interaction buttons ────────────────────────────────────────
+
+  Widget _buildInteractionButtons({
+    required Content content,
+    required bool isLiked,
+    required bool isSaved,
+    required int likeCount,
+  }) {
+    final creatorId = content.creatorId ?? content.creatorName ?? content.id;
+    final isFollowed = _followedCreators.contains(creatorId);
+    final commentCount =
+        (content.metadata['comments'] as num?)?.toInt() ?? 0;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Creator avatar with follow "+" badge at the top of the button stack
+        _buildCreatorAvatarButton(content, creatorId, isFollowed),
+        const SizedBox(height: 22),
+
+        // Like — filled red when liked
+        _buildActionButton(
+          icon: isLiked ? Icons.favorite : Icons.favorite_border,
+          label: _formatCount(likeCount),
+          onTap: () => _handleLike(content),
+          iconColor: isLiked ? Colors.red : Colors.white,
+        ),
+        const SizedBox(height: 22),
+
+        // Comment
+        _buildActionButton(
+          icon: Icons.chat_bubble_outline,
+          label: _formatCount(commentCount),
+          onTap: () => _handleComment(content),
+        ),
+        const SizedBox(height: 22),
+
+        // Share — launches content URL externally
+        _buildActionButton(
+          icon: Icons.reply_outlined,
+          label: 'Share',
+          onTap: () => _handleShare(content),
+        ),
+        const SizedBox(height: 22),
+
+        // Save / Bookmark
+        _buildActionButton(
+          icon: isSaved ? Icons.bookmark : Icons.bookmark_border,
+          label: isSaved ? 'Saved' : 'Save',
+          onTap: () => _handleSave(content),
+          iconColor: isSaved ? AppTheme.primaryCyan : Colors.white,
+        ),
+      ],
+    );
+  }
+
+  /// Creator avatar circle (40 dp) with a "+" or check follow badge overlaid.
+  Widget _buildCreatorAvatarButton(
+      Content content, String creatorId, bool isFollowed) {
+    final avatarUrl = content.creatorAvatarUrl;
+    final initial = (content.creatorName ?? '?')[0].toUpperCase();
+
+    return GestureDetector(
+      onTap: () => _handleFollow(creatorId),
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 52,
+        height: 56,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.topCenter,
+          children: [
+            // Avatar circle — 40 dp diameter as required
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+                color: AppTheme.darkSecondary,
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: avatarUrl != null && avatarUrl.isNotEmpty
+                  ? Image.network(
+                      avatarUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Center(
+                        child: Text(
+                          initial,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Center(
+                      child: Text(
+                        initial,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+            ),
+            // Follow badge at the bottom of the avatar
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  width: 18,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: isFollowed ? Colors.green.shade600 : Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    isFollowed ? Icons.check : Icons.add,
+                    color: Colors.white,
+                    size: 11,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Single action button with minimum 44×44 dp touch target.
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    Color iconColor = Colors.white,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 52,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 44,
+              height: 44,
+              child: Center(
+                child: Icon(icon, color: iconColor, size: 26),
+              ),
+            ),
+            if (label.isNotEmpty)
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black54,
+                      blurRadius: 4,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
               ),
           ],
         ),
@@ -372,82 +709,17 @@ class _ShortsTabState extends State<ShortsTab> {
     );
   }
 
-  Widget _buildFollowButton(String creatorId) {
-    final isFollowed = _followedCreators.contains(creatorId);
-    return GestureDetector(
-      onTap: () async {
-        final next = await UserInteractionService.instance.toggleFollow(creatorId);
-        setState(() {
-          if (next) {
-            _followedCreators.add(creatorId);
-          } else {
-            _followedCreators.remove(creatorId);
-          }
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        decoration: BoxDecoration(
-          color: isFollowed ? Colors.white : Colors.transparent,
-          border: Border.all(color: Colors.white, width: 1.5),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Text(
-          isFollowed ? 'Following' : 'Follow',
-          style: TextStyle(
-            color: isFollowed ? Colors.black : Colors.white,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
+  // ─── Content info (bottom-left overlay) ────────────────────────────────────
 
-  String _formatCount(int count) {
-    if (count >= 1000000000) return '${(count / 1000000000).toStringAsFixed(1)}B';
-    if (count >= 1000000) return '${(count / 1000000).toStringAsFixed(1)}M';
-    if (count >= 1000) return '${(count / 1000).toStringAsFixed(1)}K';
-    return count.toString();
-  }
-
-  Widget _buildInteractionButtons(Content content) {
-    final isLiked = _likedContent.contains(content.id);
-    return Column(
-      children: [
-        _buildActionButton(
-          icon: isLiked ? Icons.favorite : Icons.favorite_border,
-          label: _formatCount(content.likeCount + (isLiked ? 1 : 0)),
-          onTap: () => _handleLike(content),
-          color: isLiked ? Colors.red : Colors.white,
-        ),
-        const SizedBox(height: 20),
-        _buildActionButton(
-          icon: Icons.comment,
-          label: '${content.metadata['comments'] ?? 0}',
-          onTap: () => _handleComment(content),
-        ),
-        const SizedBox(height: 20),
-        _buildActionButton(
-          icon: Icons.share,
-          label: 'Share',
-          onTap: () => _handleShare(content),
-        ),
-        const SizedBox(height: 20),
-        _buildActionButton(
-          icon: Icons.more_vert,
-          label: '',
-          onTap: () => _showMoreOptions(content),
-        ),
-      ],
-    );
-  }
-  
   Widget _buildContentInfo(Content content) {
+    final creatorId = content.creatorId ?? content.creatorName ?? content.id;
+    final isFollowed = _followedCreators.contains(creatorId);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        // Creator name + Follow button (Instagram Reels / YouTube Shorts pattern)
+        // Creator name + inline follow button
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -458,47 +730,56 @@ class _ShortsTabState extends State<ShortsTab> {
                   color: Colors.white,
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
+                  shadows: [Shadow(color: Colors.black54, blurRadius: 6)],
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(width: 10),
-            _buildFollowButton(content.creatorName ?? content.id),
+            const SizedBox(width: 8),
+            _buildInlineFollowButton(creatorId, isFollowed),
           ],
         ),
         const SizedBox(height: 6),
+
+        // Title — maxLines 2
         if (content.title != null)
           Text(
             content.title!,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 13,
+              fontWeight: FontWeight.w500,
+              shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-        if (content.description != null) ...[
-          const SizedBox(height: 3),
+
+        // Hashtags from content.tags — maxLines 1
+        if (content.tags.isNotEmpty) ...[
+          const SizedBox(height: 4),
           Text(
-            content.description!,
+            content.tags.take(4).map((t) => '#$t').join(' '),
             style: const TextStyle(
               color: Colors.white70,
-              fontSize: 11,
+              fontSize: 12,
+              shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
             ),
-            maxLines: 2,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
         ],
-        // Music info line (Instagram Reels pattern)
+
+        // Audio info row
         const SizedBox(height: 6),
         Row(
           children: [
-            const Icon(Icons.music_note, color: Colors.white70, size: 12),
+            const Icon(Icons.music_note, color: Colors.white70, size: 13),
             const SizedBox(width: 4),
             Flexible(
               child: Text(
-                '${content.creatorName ?? 'Original'} · Original Audio',
+                'Original audio · @${content.creatorName ?? 'Unknown'}',
                 style: const TextStyle(color: Colors.white70, fontSize: 11),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -509,18 +790,242 @@ class _ShortsTabState extends State<ShortsTab> {
       ],
     );
   }
-  
+
+  Widget _buildInlineFollowButton(String creatorId, bool isFollowed) {
+    return GestureDetector(
+      onTap: () => _handleFollow(creatorId),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: isFollowed
+              ? Colors.white.withValues(alpha: 0.25)
+              : Colors.transparent,
+          border: Border.all(color: Colors.white, width: 1.5),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          isFollowed ? 'Following' : 'Follow',
+          style: TextStyle(
+            color: isFollowed ? Colors.white70 : Colors.white,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─── Mock short card (shown when service returns 0 results) ───────────────
+
+  Widget _buildMockShortItem(Map<String, dynamic> shortData) {
+    final thumbnailUrl = shortData['thumbnail'] as String?;
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Background thumbnail or gradient fallback
+        if (thumbnailUrl != null && thumbnailUrl.isNotEmpty)
+          Image.network(
+            thumbnailUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => _buildMockFallbackBg(),
+          )
+        else
+          _buildMockFallbackBg(),
+
+        // Gradient overlay
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.75),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.4, 1.0],
+              ),
+            ),
+          ),
+        ),
+
+        // Centre play button
+        Positioned.fill(
+          child: Center(
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  width: 2,
+                ),
+              ),
+              child: const Icon(
+                Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+          ),
+        ),
+
+        // Right-side actions
+        Positioned(
+          right: 10,
+          bottom: 110,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildActionButton(
+                icon: Icons.favorite_border,
+                label: shortData['likes'] as String? ?? '',
+                onTap: () {},
+              ),
+              const SizedBox(height: 22),
+              _buildActionButton(
+                icon: Icons.chat_bubble_outline,
+                label: shortData['comments'] as String? ?? '',
+                onTap: () {},
+              ),
+              const SizedBox(height: 22),
+              _buildActionButton(
+                icon: Icons.reply_outlined,
+                label: shortData['shares'] as String? ?? '',
+                onTap: () {},
+              ),
+              const SizedBox(height: 22),
+              _buildActionButton(
+                icon: Icons.bookmark_border,
+                label: 'Save',
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+
+        // Bottom-left info
+        Positioned(
+          left: 14,
+          right: 80,
+          bottom: 110,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundColor: AppTheme.primaryCyan,
+                    child: Text(
+                      ((shortData['creator'] as String?) ?? '?')[0]
+                          .toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      '@${shortData['creator'] ?? 'Unknown'}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white, width: 1.2),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      'Follow',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                shortData['description'] as String? ?? '',
+                style: const TextStyle(color: Colors.white, fontSize: 13),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 5),
+              Row(
+                children: [
+                  const Icon(Icons.music_note, color: Colors.white70, size: 13),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      'Original audio · @${shortData['creator'] ?? 'Unknown'}',
+                      style: const TextStyle(
+                          color: Colors.white70, fontSize: 11),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMockFallbackBg() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.darkPrimary,
+            AppTheme.primaryCyan.withValues(alpha: 0.25),
+            AppTheme.darkPrimary,
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+    );
+  }
+
+  // ─── Interaction handlers ──────────────────────────────────────────────────
+
+  /// Toggles the like state for [content] and persists via [UserInteractionService].
   void _handleLike(Content content) {
+    final wasLiked = _likedContent.contains(content.id);
     setState(() {
-      if (_likedContent.contains(content.id)) {
+      if (wasLiked) {
         _likedContent.remove(content.id);
       } else {
         _likedContent.add(content.id);
       }
     });
-    UserInteractionService.instance.toggleLike(content.id);
+    UserInteractionService.instance
+        .toggleLike(content.id, baseCount: content.likeCount);
     AnalyticsService.instance.trackUserInteraction(
-      action: 'short_liked',
+      action: wasLiked ? 'short_unliked' : 'short_liked',
       screen: 'shorts',
       additionalData: {
         'content_id': content.id,
@@ -528,7 +1033,44 @@ class _ShortsTabState extends State<ShortsTab> {
       },
     );
   }
-  
+
+  Future<void> _handleSave(Content content) async {
+    final wasSaved = _savedContent.contains(content.id);
+    setState(() {
+      if (wasSaved) {
+        _savedContent.remove(content.id);
+      } else {
+        _savedContent.add(content.id);
+      }
+    });
+    await UserInteractionService.instance.toggleSave(content.id);
+    await AnalyticsService.instance.trackUserInteraction(
+      action: wasSaved ? 'short_unsaved' : 'short_saved',
+      screen: 'shorts',
+      additionalData: {
+        'content_id': content.id,
+        'platform': content.platform.name,
+      },
+    );
+  }
+
+  Future<void> _handleFollow(String creatorId) async {
+    final wasFollowed = _followedCreators.contains(creatorId);
+    final next = await UserInteractionService.instance.toggleFollow(creatorId);
+    setState(() {
+      if (next) {
+        _followedCreators.add(creatorId);
+      } else {
+        _followedCreators.remove(creatorId);
+      }
+    });
+    await AnalyticsService.instance.trackUserInteraction(
+      action: wasFollowed ? 'creator_unfollowed' : 'creator_followed',
+      screen: 'shorts',
+      additionalData: {'creator_id': creatorId},
+    );
+  }
+
   void _handleComment(Content content) {
     AnalyticsService.instance.trackUserInteraction(
       action: 'short_comment_opened',
@@ -538,11 +1080,13 @@ class _ShortsTabState extends State<ShortsTab> {
         'platform': content.platform.name,
       },
     );
-    // TODO: Open comment sheet
+    // TODO: Open comments bottom sheet
   }
-  
-  void _handleShare(Content content) {
-    AnalyticsService.instance.trackUserInteraction(
+
+  /// Tracks the share, then launches the content URL in an external browser.
+  Future<void> _handleShare(Content content) async {
+    await UserInteractionService.instance.trackShare(content.id);
+    await AnalyticsService.instance.trackUserInteraction(
       action: 'short_shared',
       screen: 'shorts',
       additionalData: {
@@ -550,298 +1094,72 @@ class _ShortsTabState extends State<ShortsTab> {
         'platform': content.platform.name,
       },
     );
-    // TODO: Implement share functionality
-  }
-  
-  void _showMoreOptions(Content content) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.grey[900],
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.report, color: Colors.white),
-              title: const Text('Report', style: TextStyle(color: Colors.white)),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.block, color: Colors.white),
-              title: const Text('Not Interested', style: TextStyle(color: Colors.white)),
-              onTap: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildShortItem(Map<String, dynamic> shortData) {
-    return Stack(
-      children: [
-        // Video/Content Background
-        Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withValues(alpha: 0.3),
-                Colors.black.withValues(alpha: 0.7),
+    final shareUrl = content.videoUrl ?? content.embedUrl;
+    if (shareUrl != null && shareUrl.isNotEmpty) {
+      final uri = Uri.tryParse(shareUrl);
+      if (uri != null) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    }
+  }
+}
+
+// ─── Shimmer loading placeholder (shown while content is fetching) ─────────
+
+class _ShimmerFeed extends StatelessWidget {
+  const _ShimmerFeed();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade900,
+      highlightColor: Colors.grey.shade700,
+      child: Stack(
+        children: [
+          // Fake full-screen card background
+          Container(color: Colors.grey.shade900),
+
+          // Right-side action button stubs
+          Positioned(
+            right: 10,
+            bottom: 120,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(4, (i) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 22),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+
+          // Bottom-left text stubs
+          Positioned(
+            left: 14,
+            right: 80,
+            bottom: 120,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(width: 120, height: 14, color: Colors.white),
+                const SizedBox(height: 8),
+                Container(
+                    width: double.infinity, height: 12, color: Colors.white),
+                const SizedBox(height: 6),
+                Container(width: 160, height: 10, color: Colors.white),
               ],
             ),
           ),
-          child: Center(
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                color: AppTheme.primaryCyan.withValues(alpha: 0.1),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.play_circle_outline,
-                    size: 80,
-                    color: Colors.white.withValues(alpha: 0.8),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    shortData['title'],
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryPink,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      shortData['category'],
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-        // Right Side Actions
-        Positioned(
-          right: 12,
-          bottom: 100,
-          child: Column(
-            children: [
-              _buildActionButton(
-                icon: Icons.favorite_border,
-                label: shortData['likes'],
-                onTap: () {},
-              ),
-              const SizedBox(height: 20),
-              _buildActionButton(
-                icon: Icons.comment_outlined,
-                label: shortData['comments'],
-                onTap: () {},
-              ),
-              const SizedBox(height: 20),
-              _buildActionButton(
-                icon: Icons.share_outlined,
-                label: shortData['shares'],
-                onTap: () {},
-              ),
-              const SizedBox(height: 20),
-              _buildActionButton(
-                icon: Icons.bookmark_border,
-                label: '',
-                onTap: () {},
-              ),
-            ],
-          ),
-        ),
-
-        // Bottom Content Info
-        Positioned(
-          left: 12,
-          right: 80,
-          bottom: 100,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: AppTheme.primaryCyan,
-                    child: Text(
-                      shortData['creator'][0],
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    shortData['creator'],
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.white, width: 1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      'Follow',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                shortData['description'],
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(
-                    Icons.access_time,
-                    size: 14,
-                    color: Colors.white.withValues(alpha: 0.7),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    shortData['duration'],
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        // Top Safe Area with Progress Indicators
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: List.generate(
-                        _shortsContent.isNotEmpty ? _shortsContent.length : _mockShortsData.length,
-                        (index) => Expanded(
-                          child: Container(
-                            height: 2,
-                            margin: const EdgeInsets.symmetric(horizontal: 1),
-                            decoration: BoxDecoration(
-                              color: index <= _currentIndex
-                                  ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.3),
-                              borderRadius: BorderRadius.circular(1),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    Color color = Colors.white,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.5),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 24,
-            ),
-          ),
-          if (label.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ]
         ],
       ),
     );

@@ -511,7 +511,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppTheme.primaryCyan.withValues(alpha: 0.3)
+                      ? AppTheme.primaryCyan
                       : Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
@@ -526,13 +526,13 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                     Icon(
                       filter['icon'] as IconData,
                       size: 14,
-                      color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.7),
+                      color: isSelected ? Colors.black87 : Colors.white.withValues(alpha: 0.7),
                     ),
                     const SizedBox(width: 5),
                     Text(
                       filter['name'] as String,
                       style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.7),
+                        color: isSelected ? Colors.black87 : Colors.white.withValues(alpha: 0.7),
                         fontSize: 12,
                         fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                       ),

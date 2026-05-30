@@ -17,19 +17,40 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   final TextEditingController _searchController = TextEditingController();
   List<Content> _allContent = [];
   List<Content> _results = [];
-  bool _isLoading = false;
+  List<Content> _trendingContent = [];
+  final bool _isLoading = false;
   bool _hasSearched = false;
   String _query = '';
   late TabController _tabController;
   List<String> _recentSearches = [];
+
+  // Filter state
   PlatformType? _selectedPlatform;
+  String? _selectedCategory;
 
   final List<String> _trendingTopics = [
     'Flutter', 'JavaScript', 'Python', 'React', 'AI', 'Machine Learning',
     'Web Dev', 'Data Science', 'DevOps', 'Mobile Dev',
   ];
 
+  // Genre chips with their matching tag keywords
+  final List<Map<String, dynamic>> _genres = [
+    {'label': 'Gaming', 'icon': Icons.sports_esports, 'keywords': ['gaming', 'game', 'esports', 'gameplay', 'streaming', 'minecraft', 'fortnite']},
+    {'label': 'Music', 'icon': Icons.music_note, 'keywords': ['music', 'pop', 'kpop', 'latin', 'dance', 'song', 'audio']},
+    {'label': 'Food', 'icon': Icons.restaurant, 'keywords': ['cooking', 'food', 'recipe', 'pasta', 'italian', 'chef', 'hack']},
+    {'label': 'Fitness', 'icon': Icons.fitness_center, 'keywords': ['workout', 'fitness', 'health', 'exercise', 'gym', 'abs']},
+    {'label': 'Travel', 'icon': Icons.flight, 'keywords': ['travel', 'destinations', 'adventure', 'culture', 'vlog']},
+    {'label': 'Tech', 'icon': Icons.computer, 'keywords': ['tech', 'ai', 'programming', 'javascript', 'python', 'flutter', 'react']},
+    {'label': 'Art', 'icon': Icons.palette, 'keywords': ['art', 'drawing', 'painting', 'creative', 'watercolour', 'acrylic']},
+    {'label': 'Nature', 'icon': Icons.eco, 'keywords': ['nature', 'outdoors', 'wildlife', 'environment', 'animals']},
+    {'label': 'Comedy', 'icon': Icons.sentiment_very_satisfied, 'keywords': ['funny', 'humor', 'comedy', 'jokes', 'memes', 'relatable']},
+    {'label': 'Fashion', 'icon': Icons.checkroom, 'keywords': ['fashion', 'style', 'outfits', 'trends']},
+  ];
+
   final List<String> _categories = ['All', 'Videos', 'Shorts', 'Reels'];
+
+  int get _activeFilterCount =>
+      (_selectedPlatform != null ? 1 : 0) + (_selectedCategory != null ? 1 : 0);
 
   @override
   void initState() {
@@ -37,6 +58,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
     _tabController = TabController(length: _categories.length, vsync: this);
     _loadContent();
     _loadRecentSearches();
+    _loadTrending();
   }
 
   @override
@@ -49,6 +71,11 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   Future<void> _loadContent() async {
     final content = await ContentService.instance.getFeedContent(limit: 100);
     if (mounted) setState(() => _allContent = content);
+  }
+
+  Future<void> _loadTrending() async {
+    final trending = await ContentService.instance.getTrendingVideos(limit: 10);
+    if (mounted) setState(() => _trendingContent = trending);
   }
 
   Future<void> _loadRecentSearches() async {
@@ -92,12 +119,35 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
     }
   }
 
+  void _clearAllFilters() {
+    setState(() {
+      _selectedPlatform = null;
+      _selectedCategory = null;
+    });
+  }
+
+  bool _contentMatchesCategory(Content c, String category) {
+    final keywords = (_genres.firstWhere(
+      (g) => g['label'] == category,
+      orElse: () => {'keywords': <String>[]},
+    )['keywords'] as List<String>);
+    return c.tags.any((t) => keywords.any((k) => t.toLowerCase().contains(k))) ||
+        c.categories.any((cat) => keywords.any((k) => cat.toLowerCase().contains(k)));
+  }
+
   List<Content> get _filteredResults {
     var results = _results;
+
     // Apply platform filter
     if (_selectedPlatform != null) {
       results = results.where((c) => c.platform == _selectedPlatform).toList();
     }
+
+    // Apply category/genre filter
+    if (_selectedCategory != null) {
+      results = results.where((c) => _contentMatchesCategory(c, _selectedCategory!)).toList();
+    }
+
     // Apply content type filter (tab)
     final tab = _tabController.index;
     if (tab == 0) return results;
@@ -115,7 +165,12 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
         child: Column(
           children: [
             _buildSearchBar(),
-            if (_hasSearched) _buildTabBar(),
+            if (_hasSearched) ...[
+              _buildPlatformFilterRow(),
+              _buildGenreFilterRow(),
+              if (_activeFilterCount > 0) _buildActiveFilterBanner(),
+              _buildTabBar(),
+            ],
             Expanded(
               child: _hasSearched ? _buildResults() : _buildDiscover(),
             ),
@@ -128,11 +183,11 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   Widget _buildSearchBar() {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [const Color(0xFF1A1A2E), const Color(0xFF0D0B1E)],
+          colors: [Color(0xFF1A1A2E), Color(0xFF0D0B1E)],
         ),
       ),
       child: Row(
@@ -182,6 +237,166 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
     );
   }
 
+  Widget _buildPlatformFilterRow() {
+    const platforms = [
+      {'label': 'All', 'platform': null, 'color': Color(0xFF00D4FF)},
+      {'label': 'YouTube', 'platform': PlatformType.youtube, 'color': Color(0xFFFF0000)},
+      {'label': 'TikTok', 'platform': PlatformType.tiktok, 'color': Color(0xFF69C9D0)},
+      {'label': 'Instagram', 'platform': PlatformType.instagram, 'color': Color(0xFFE1306C)},
+      {'label': 'Facebook', 'platform': PlatformType.facebook, 'color': Color(0xFF1877F2)},
+    ];
+    return SizedBox(
+      height: 44,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        scrollDirection: Axis.horizontal,
+        children: platforms.map((p) {
+          final platform = p['platform'] as PlatformType?;
+          final color = p['color'] as Color;
+          final label = p['label'] as String;
+          final isSelected = platform == null
+              ? _selectedPlatform == null
+              : _selectedPlatform == platform;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedPlatform = platform),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isSelected ? color.withValues(alpha: 0.25) : const Color(0xFF1E1E3A),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected ? color : Colors.white.withValues(alpha: 0.15),
+                    width: isSelected ? 1.5 : 1,
+                  ),
+                ),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected ? color : Colors.white54,
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildGenreFilterRow() {
+    return SizedBox(
+      height: 40,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        scrollDirection: Axis.horizontal,
+        children: _genres.map((genre) {
+          final label = genre['label'] as String;
+          final icon = genre['icon'] as IconData;
+          final isSelected = _selectedCategory == label;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () => setState(() {
+                _selectedCategory = isSelected ? null : label;
+              }),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color(0xFF00D4FF).withValues(alpha: 0.2)
+                      : const Color(0xFF1E1E3A),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected
+                        ? const Color(0xFF00D4FF)
+                        : Colors.white.withValues(alpha: 0.1),
+                    width: isSelected ? 1.5 : 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, size: 13,
+                        color: isSelected ? const Color(0xFF00D4FF) : Colors.white38),
+                    const SizedBox(width: 5),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        color: isSelected ? const Color(0xFF00D4FF) : Colors.white54,
+                        fontSize: 12,
+                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildActiveFilterBanner() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: const Color(0xFF00D4FF).withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.filter_list, size: 13, color: Color(0xFF00D4FF)),
+                const SizedBox(width: 4),
+                Text(
+                  '$_activeFilterCount filter${_activeFilterCount == 1 ? '' : 's'} active',
+                  style: const TextStyle(
+                    color: Color(0xFF00D4FF),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: _clearAllFilters,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.close, size: 12, color: Colors.white54),
+                  SizedBox(width: 3),
+                  Text(
+                    'Clear all',
+                    style: TextStyle(color: Colors.white54, fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTabBar() {
     return AnimatedBuilder(
       animation: _tabController,
@@ -204,21 +419,54 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
     if (_isLoading) return const LoadingShimmer();
     if (results.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.search_off, size: 56, color: Colors.white24),
-            const SizedBox(height: 16),
-            Text(
-              'No results for "$_query"',
-              style: const TextStyle(color: Colors.white54, fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Try different keywords',
-              style: TextStyle(color: Colors.white38, fontSize: 13),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.search_off, size: 56, color: Colors.white24),
+              const SizedBox(height: 16),
+              Text(
+                'No results for "$_query"',
+                style: const TextStyle(color: Colors.white54, fontSize: 16),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Try different keywords or adjust filters',
+                style: TextStyle(color: Colors.white38, fontSize: 13),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+              if (_activeFilterCount > 0) ...[
+                const SizedBox(height: 20),
+                GestureDetector(
+                  onTap: _clearAllFilters,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00D4FF).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: const Color(0xFF00D4FF).withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: const Text(
+                      'Clear filters',
+                      style: TextStyle(
+                        color: Color(0xFF00D4FF),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       );
     }
@@ -268,7 +516,11 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                   children: [
                     Text(
                       content.title ?? 'Untitled',
-                      style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -295,6 +547,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                           child: Text(
                             content.creatorName ?? '',
                             style: const TextStyle(color: Colors.white54, fontSize: 12),
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -304,6 +557,8 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                     Text(
                       content.formattedViewCount,
                       style: const TextStyle(color: Colors.white38, fontSize: 11),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -319,8 +574,8 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
     return Container(
       width: 100,
       height: 64,
-      color: const Color(0xFF252545),
-      child: const Icon(Icons.play_circle_outline, color: Colors.white38, size: 28),
+      color: const Color(0xFF1A1A2E),
+      child: const Icon(Icons.image_not_supported, color: Colors.white38, size: 28),
     );
   }
 
@@ -339,6 +594,23 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Trending section from ContentService
+          if (_trendingContent.isNotEmpty) ...[
+            const Text(
+              'Trending Now',
+              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 140,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _trendingContent.length,
+                itemBuilder: (context, i) => _buildTrendingCard(_trendingContent[i]),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
           const Text(
             'Trending Topics',
             style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
@@ -365,7 +637,10 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                     children: [
                       const Icon(Icons.trending_up, size: 14, color: Color(0xFF00D4FF)),
                       const SizedBox(width: 6),
-                      Text(topic, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                      Text(
+                        topic,
+                        style: const TextStyle(color: Colors.white70, fontSize: 13),
+                      ),
                     ],
                   ),
                 ),
@@ -411,6 +686,61 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
     );
   }
 
+  Widget _buildTrendingCard(Content content) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
+      child: Container(
+        width: 140,
+        margin: const EdgeInsets.only(right: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1A2E),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+              child: content.thumbnailUrl != null
+                  ? Image.network(
+                      content.thumbnailUrl!,
+                      width: 140,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        width: 140,
+                        height: 80,
+                        color: const Color(0xFF1A1A2E),
+                        child: const Icon(Icons.image_not_supported, color: Colors.white38),
+                      ),
+                    )
+                  : Container(
+                      width: 140,
+                      height: 80,
+                      color: const Color(0xFF252545),
+                      child: const Icon(Icons.play_circle_outline, color: Colors.white38, size: 28),
+                    ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                content.title ?? 'Untitled',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _platformChip(String name, Color color, IconData icon, PlatformType platform) {
     final isSelected = _selectedPlatform == platform;
     return Expanded(
@@ -419,7 +749,6 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
           setState(() {
             _selectedPlatform = isSelected ? null : platform;
           });
-          // If there's already a search query, re-run search to apply filter
           if (_query.isNotEmpty) _search(_query);
         },
         child: AnimatedContainer(
@@ -428,13 +757,27 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
           decoration: BoxDecoration(
             color: isSelected ? color.withValues(alpha: 0.25) : color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: isSelected ? color : color.withValues(alpha: 0.3), width: isSelected ? 2 : 1),
+            border: Border.all(
+              color: isSelected ? color : color.withValues(alpha: 0.3),
+              width: isSelected ? 2 : 1,
+            ),
           ),
           child: Row(
             children: [
               Icon(icon, color: color, size: 20),
               const SizedBox(width: 8),
-              Flexible(child: Text(name, style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 14), overflow: TextOverflow.ellipsis)),
+              Flexible(
+                child: Text(
+                  name,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
               if (isSelected) ...[
                 const SizedBox(width: 4),
                 Icon(Icons.check_circle, color: color, size: 14),
@@ -450,7 +793,12 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: const Icon(Icons.history, color: Colors.white38, size: 20),
-      title: Text(query, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+      title: Text(
+        query,
+        style: const TextStyle(color: Colors.white70, fontSize: 14),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
       trailing: const Icon(Icons.north_west, color: Colors.white24, size: 16),
       onTap: () {
         _searchController.text = query;

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
-import '../services/local_auth_service.dart';
-import '../services/navigation_service.dart'; // provides AppRoutes
+import '../services/navigation_service.dart';
 
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({super.key});
@@ -26,6 +25,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
   bool _obscureConfirmPassword = true;
   bool _agreeToTerms = false;
   bool _isLoading = false;
+
+  // Server-side / post-submit error
+  String? _serverError;
 
   @override
   void initState() {
@@ -55,10 +57,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
       curve: Curves.easeOutCubic,
     ));
 
-    // Start animations
     _fadeController.forward();
     Future.delayed(const Duration(milliseconds: 300), () {
-      _slideController.forward();
+      if (mounted) _slideController.forward();
     });
   }
 
@@ -73,12 +74,33 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
     super.dispose();
   }
 
+  Future<void> _handleCreateAccount() async {
+    setState(() => _serverError = null);
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+    try {
+      // Placeholder: replace with real sign-up call
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _serverError = 'Account creation failed. Email may already be in use.';
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      backgroundColor: const Color(0xFF0D0B1E),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -94,7 +116,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
         ),
         child: Stack(
           children: [
-            // Background blur effects
+            // Background ambient glow — top-right cyan
             Positioned(
               top: screenHeight * 0.1,
               right: -screenWidth * 0.2,
@@ -105,14 +127,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      const Color(0xFF00D4FF).withValues(alpha: 0.3),
-                      const Color(0xFF00D4FF).withValues(alpha: 0.1),
+                      const Color(0xFF00D4FF).withOpacity(0.3),
+                      const Color(0xFF00D4FF).withOpacity(0.1),
                       Colors.transparent,
                     ],
                   ),
                 ),
               ),
             ),
+            // Background ambient glow — bottom-left pink
             Positioned(
               bottom: screenHeight * 0.2,
               left: -screenWidth * 0.3,
@@ -123,20 +146,18 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      const Color(0xFFFF3C7E).withValues(alpha: 0.2),
-                      const Color(0xFFFF3C7E).withValues(alpha: 0.05),
+                      const Color(0xFFFF3C7E).withOpacity(0.2),
+                      const Color(0xFFFF3C7E).withOpacity(0.05),
                       Colors.transparent,
                     ],
                   ),
                 ),
               ),
             ),
-            // Backdrop filter for blur effect
+            // Backdrop blur
             BackdropFilter(
               filter: ui.ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-              child: Container(
-                color: Colors.transparent,
-              ),
+              child: Container(color: Colors.transparent),
             ),
             // Main content
             SafeArea(
@@ -150,9 +171,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                       child: FadeTransition(
                         opacity: _fadeAnimation,
                         child: IconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
+                          onPressed: () => Navigator.pop(context),
                           icon: const Icon(
                             Icons.arrow_back_ios,
                             color: Colors.white70,
@@ -169,7 +188,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                         opacity: _fadeAnimation,
                         child: Column(
                           children: [
-                            // Logo
                             Container(
                               width: 60,
                               height: 60,
@@ -191,7 +209,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                               ),
                             ),
                             const SizedBox(height: 24),
-                            // Title
                             const Text(
                               'Create Account',
                               style: TextStyle(
@@ -201,22 +218,26 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                 letterSpacing: -0.5,
                               ),
                               textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 8),
                             const Text(
                               'Join Afeedi and start your premium experience',
                               style: TextStyle(
-                                color: Colors.white70,
+                                color: Colors.white54,
                                 fontSize: 16,
                                 height: 1.5,
                               ),
                               textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 32),
                     // Form
                     Expanded(
                       child: SlideTransition(
@@ -227,6 +248,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                             key: _formKey,
                             child: SingleChildScrollView(
                               child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   // Full Name Field
                                   _buildTextField(
@@ -240,7 +262,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                       return null;
                                     },
                                   ),
-                                  const SizedBox(height: 20),
+                                  const SizedBox(height: 16),
                                   // Email Field
                                   _buildTextField(
                                     controller: _emailController,
@@ -251,13 +273,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                       if (value == null || value.isEmpty) {
                                         return 'Please enter your email';
                                       }
-                                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$').hasMatch(value)) {
+                                      if (!RegExp(
+                                              r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$')
+                                          .hasMatch(value)) {
                                         return 'Please enter a valid email';
                                       }
                                       return null;
                                     },
                                   ),
-                                  const SizedBox(height: 20),
+                                  const SizedBox(height: 16),
                                   // Password Field
                                   _buildTextField(
                                     controller: _passwordController,
@@ -271,7 +295,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                         });
                                       },
                                       icon: Icon(
-                                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                        _obscurePassword
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
                                         color: Colors.white54,
                                       ),
                                     ),
@@ -285,7 +311,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                       return null;
                                     },
                                   ),
-                                  const SizedBox(height: 20),
+                                  const SizedBox(height: 16),
                                   // Confirm Password Field
                                   _buildTextField(
                                     controller: _confirmPasswordController,
@@ -295,11 +321,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                     suffixIcon: IconButton(
                                       onPressed: () {
                                         setState(() {
-                                          _obscureConfirmPassword = !_obscureConfirmPassword;
+                                          _obscureConfirmPassword =
+                                              !_obscureConfirmPassword;
                                         });
                                       },
                                       icon: Icon(
-                                        _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                                        _obscureConfirmPassword
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
                                         color: Colors.white54,
                                       ),
                                     ),
@@ -313,9 +342,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                       return null;
                                     },
                                   ),
-                                  const SizedBox(height: 24),
+                                  const SizedBox(height: 20),
                                   // Terms and Conditions
                                   Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Checkbox(
                                         value: _agreeToTerms,
@@ -326,22 +357,27 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                         },
                                         activeColor: const Color(0xFF00D4FF),
                                         checkColor: const Color(0xFF0D0B1E),
-                                        side: const BorderSide(color: Colors.white54),
+                                        side: const BorderSide(
+                                            color: Colors.white54),
                                       ),
                                       Expanded(
                                         child: RichText(
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
                                           text: const TextSpan(
                                             style: TextStyle(
                                               color: Colors.white70,
                                               fontSize: 14,
                                             ),
                                             children: [
-                                              TextSpan(text: 'I agree to Afeedi\'s '),
+                                              TextSpan(
+                                                  text: "I agree to Afeedi's "),
                                               TextSpan(
                                                 text: 'Terms',
                                                 style: TextStyle(
                                                   color: Color(0xFF00D4FF),
-                                                  decoration: TextDecoration.underline,
+                                                  decoration:
+                                                      TextDecoration.underline,
                                                 ),
                                               ),
                                               TextSpan(text: ' & '),
@@ -349,7 +385,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                                 text: 'Privacy Policy',
                                                 style: TextStyle(
                                                   color: Color(0xFF00D4FF),
-                                                  decoration: TextDecoration.underline,
+                                                  decoration:
+                                                      TextDecoration.underline,
                                                 ),
                                               ),
                                             ],
@@ -358,59 +395,78 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 32),
+                                  // Server-side error
+                                  if (_serverError != null) ...[
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      _serverError!,
+                                      style: const TextStyle(
+                                        color: Color(0xFFFF3C7E),
+                                        fontSize: 13,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                  const SizedBox(height: 24),
                                   // Create Account Button
                                   SizedBox(
                                     width: double.infinity,
                                     height: 52,
                                     child: ElevatedButton(
-                                      onPressed: (_agreeToTerms && !_isLoading) ? () async {
-                                        if (!_formKey.currentState!.validate()) return;
-                                        setState(() => _isLoading = true);
-                                        try {
-                                          final user = await LocalAuthService.instance.signUp(
-                                            email: _emailController.text.trim(),
-                                            password: _passwordController.text,
-                                            fullName: _nameController.text.trim(),
-                                          );
-                                          if (!mounted) return;
-                                          if (user != null) {
-                                            Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
-                                          } else {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(content: Text('Account creation failed. Email may already be in use.'), backgroundColor: Colors.red),
-                                            );
-                                          }
-                                        } finally {
-                                          if (mounted) setState(() => _isLoading = false);
-                                        }
-                                      } : null,
+                                      onPressed: (_agreeToTerms && !_isLoading)
+                                          ? _handleCreateAccount
+                                          : null,
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF00D4FF),
-                                        disabledBackgroundColor: Colors.white24,
-                                        foregroundColor: const Color(0xFF0D0B1E),
+                                        backgroundColor:
+                                            const Color(0xFF00D4FF),
+                                        disabledBackgroundColor:
+                                            Colors.white24,
+                                        foregroundColor:
+                                            const Color(0xFF0D0B1E),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(26),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                         elevation: 0,
                                       ),
                                       child: _isLoading
-                                          ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0D0B1E)))
-                                          : const Text('Create Account', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                          ? const SizedBox(
+                                              width: 22,
+                                              height: 22,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: Color(0xFF0D0B1E),
+                                              ),
+                                            )
+                                          : const Text(
+                                              'Create Account',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                     ),
                                   ),
                                   const SizedBox(height: 24),
-                                  // Login Link
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pushReplacementNamed(context, '/login');
-                                    },
-                                    child: const Text(
-                                      'Already have an account? Log in',
-                                      style: TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
+                                  // Login link
+                                  Center(
+                                    child: TextButton(
+                                      onPressed: () {
+                                        Navigator.pushReplacementNamed(
+                                            context, AppRoutes.login);
+                                      },
+                                      child: const Text(
+                                        'Already have an account? Log in',
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                   ),
@@ -451,6 +507,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -458,19 +516,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
           keyboardType: keyboardType,
           obscureText: obscureText,
           validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-          ),
+          style: const TextStyle(color: Colors.white, fontSize: 16),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(
-              color: Colors.white54,
-              fontSize: 16,
-            ),
+            hintStyle: const TextStyle(color: Colors.white54, fontSize: 16),
             suffixIcon: suffixIcon,
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.1),
+            fillColor: const Color(0xFF1A1A2E),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Colors.white24),
@@ -481,17 +533,25 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF00D4FF), width: 2),
+              borderSide:
+                  const BorderSide(color: Color(0xFF00D4FF), width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFFF3C7E), width: 2),
+              borderSide:
+                  const BorderSide(color: Color(0xFFFF3C7E), width: 2),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFFF3C7E), width: 2),
+              borderSide:
+                  const BorderSide(color: Color(0xFFFF3C7E), width: 2),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            errorStyle: const TextStyle(
+              color: Color(0xFFFF3C7E),
+              fontSize: 12,
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
         ),
       ],

@@ -4,8 +4,6 @@ import 'dart:ui' as ui;
 import '../services/navigation_service.dart';
 import '../services/auth_service.dart';
 import '../services/analytics_service.dart';
-import '../services/local_auth_service.dart';
-import '../services/onboarding_service.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -53,21 +51,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     // Start animations
     _fadeController.forward();
     Future.delayed(const Duration(milliseconds: 300), () {
-      _slideController.forward();
+      if (mounted) _slideController.forward();
     });
-    _checkAuthAndRedirect();
-  }
-
-  Future<void> _checkAuthAndRedirect() async {
-    if (LocalAuthService.instance.currentUser != null) {
-      final isOnboarded = await OnboardingService.instance.isOnboardingCompleted();
-      if (mounted) {
-        Navigator.pushReplacementNamed(
-          context,
-          isOnboarded ? AppRoutes.dashboard : AppRoutes.onboardingChatbot,
-        );
-      }
-    }
   }
 
   Future<void> _launchUrl(String urlString) async {
@@ -75,7 +60,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     if (!await launchUrl(url)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not launch $urlString')),
+          SnackBar(
+            content: Text(
+              'Could not launch $urlString',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         );
       }
     }
@@ -90,22 +81,19 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   Future<void> _handleGoogleSignIn() async {
     if (_isLoading) return;
-    
+
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Track analytics
       await AnalyticsService.instance.trackOAuthEvent(
         platform: 'google',
         action: 'connect',
       );
 
-      // Sign in with OAuth (this will handle both OAuth connection and authentication)
       final authResult = await AuthService.instance.signInWithOAuth('google');
       if (authResult.success) {
-        // Navigate to onboarding chatbot
         if (mounted) {
           Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
         }
@@ -130,22 +118,19 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   Future<void> _handleAppleSignIn() async {
     if (_isLoading) return;
-    
+
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Track analytics
       await AnalyticsService.instance.trackOAuthEvent(
         platform: 'apple',
         action: 'connect',
       );
 
-      // Sign in with OAuth (this will handle both OAuth connection and authentication)
       final authResult = await AuthService.instance.signInWithOAuth('apple');
       if (authResult.success) {
-        // Navigate to onboarding chatbot
         if (mounted) {
           Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
         }
@@ -172,7 +157,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(message),
+          content: Text(
+            message,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 3),
         ),
@@ -186,6 +175,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      backgroundColor: const Color(0xFF0D0B1E),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -201,7 +191,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         ),
         child: Stack(
           children: [
-            // Background blur effects
+            // Background ambient glow — top-right cyan
             Positioned(
               top: screenHeight * 0.1,
               right: -screenWidth * 0.2,
@@ -212,14 +202,15 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      const Color(0xFF00D4FF).withValues(alpha: 0.3),
-                      const Color(0xFF00D4FF).withValues(alpha: 0.1),
+                      const Color(0xFF00D4FF).withOpacity(0.3),
+                      const Color(0xFF00D4FF).withOpacity(0.1),
                       Colors.transparent,
                     ],
                   ),
                 ),
               ),
             ),
+            // Background ambient glow — bottom-left pink
             Positioned(
               bottom: screenHeight * 0.2,
               left: -screenWidth * 0.3,
@@ -230,28 +221,32 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      const Color(0xFFFF6B9D).withValues(alpha: 0.2),
-                      const Color(0xFFFF6B9D).withValues(alpha: 0.05),
+                      const Color(0xFFFF6B9D).withOpacity(0.2),
+                      const Color(0xFFFF6B9D).withOpacity(0.05),
                       Colors.transparent,
                     ],
                   ),
                 ),
               ),
             ),
-            // Backdrop filter for blur effect
+            // Backdrop blur for atmospheric depth
             BackdropFilter(
               filter: ui.ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-              child: Container(
-                color: Colors.transparent,
-              ),
+              child: Container(color: Colors.transparent),
             ),
             // Main content
             SafeArea(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                  children: [
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height -
+                          MediaQuery.of(context).padding.top -
+                          MediaQuery.of(context).padding.bottom,
+                    ),
+                    child: Column(
+                      children: [
                     // Skip button
                     Align(
                       alignment: Alignment.topRight,
@@ -259,7 +254,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         opacity: _fadeAnimation,
                         child: TextButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, AppRoutes.onboardingChatbot);
+                            Navigator.pushNamed(
+                                context, AppRoutes.onboardingChatbot);
                           },
                           child: const Text(
                             'Skip',
@@ -268,25 +264,27 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 48),
-                    // Logo and main content
+                    const SizedBox(height: 60),
+                    // Hero: logo + app name + tagline
                     SlideTransition(
                       position: _slideAnimation,
                       child: FadeTransition(
                         opacity: _fadeAnimation,
                         child: Column(
                           children: [
-                            // Logo - matching HTML reference
+                            // Gradient logo badge
                             Container(
                               width: 80,
                               height: 80,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
-                                gradient: const LinearGradient(
+                                gradient: LinearGradient(
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
                                   colors: [
@@ -301,53 +299,61 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 size: 40,
                               ),
                             ),
-                            const SizedBox(height: 40),
-                            // Welcome text
+                            const SizedBox(height: 32),
+                            // App name — large and bold
                             const Text(
-                              'Welcome to Afeedi',
+                              'Afeedi',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 32,
+                                fontSize: 36,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: -0.5,
                               ),
                               textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 12),
+                            // Tagline — muted, 16sp
                             const Text(
                               'All your favorite videos. One premium experience.',
                               style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 18,
+                                color: Colors.white54,
+                                fontSize: 16,
                                 height: 1.5,
                               ),
                               textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 64),
-                    // Social login buttons
+                    const SizedBox(height: 48),
+                    // CTA buttons
                     SlideTransition(
                       position: _slideAnimation,
                       child: FadeTransition(
                         opacity: _fadeAnimation,
                         child: Column(
                           children: [
-                            // Google Sign In
+                            // Continue with Google
                             SizedBox(
                               width: double.infinity,
-                              height: 56,
+                              height: 52,
                               child: OutlinedButton.icon(
-                                onPressed: _isLoading ? null : _handleGoogleSignIn,
+                                onPressed:
+                                    _isLoading ? null : _handleGoogleSignIn,
                                 icon: _isLoading
                                     ? const SizedBox(
                                         width: 20,
                                         height: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Colors.white),
                                         ),
                                       )
                                     : const Icon(
@@ -356,18 +362,20 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                         size: 24,
                                       ),
                                 label: Text(
-                                  _isLoading ? 'Signing in...' : 'Continue with Google',
+                                  _isLoading
+                                      ? 'Signing in...'
+                                      : 'Continue with Google',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                                 style: OutlinedButton.styleFrom(
                                   side: const BorderSide(
-                                    color: Colors.white24,
-                                    width: 1,
-                                  ),
+                                      color: Colors.white24, width: 1),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -375,19 +383,22 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               ),
                             ),
                             const SizedBox(height: 16),
-                            // Apple Sign In
+                            // Continue with Apple
                             SizedBox(
                               width: double.infinity,
-                              height: 56,
+                              height: 52,
                               child: OutlinedButton.icon(
-                                onPressed: _isLoading ? null : _handleAppleSignIn,
+                                onPressed:
+                                    _isLoading ? null : _handleAppleSignIn,
                                 icon: _isLoading
                                     ? const SizedBox(
                                         width: 20,
                                         height: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Colors.white),
                                         ),
                                       )
                                     : const Icon(
@@ -396,18 +407,20 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                         size: 24,
                                       ),
                                 label: Text(
-                                  _isLoading ? 'Signing in...' : 'Continue with Apple',
+                                  _isLoading
+                                      ? 'Signing in...'
+                                      : 'Continue with Apple',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                                 style: OutlinedButton.styleFrom(
                                   side: const BorderSide(
-                                    color: Colors.white24,
-                                    width: 1,
-                                  ),
+                                      color: Colors.white24, width: 1),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -415,36 +428,53 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               ),
                             ),
                             const SizedBox(height: 24),
-                            // Create Account Button
+                            // Get Started — gradient CTA
                             SizedBox(
                               width: double.infinity,
-                              height: 56,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pushNamed(context, AppRoutes.createAccount);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF00D4FF),
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                              height: 52,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF00D4FF),
+                                      Color(0xFFFF006E),
+                                    ],
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
                                   ),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Text(
-                                  'Create an account',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pushNamed(
+                                        context, AppRoutes.createAccount);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Get Started',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ),
                             ),
                             const SizedBox(height: 16),
-                            // Log In Button
+                            // Already have an account? Sign in
                             SizedBox(
                               width: double.infinity,
-                              height: 56,
+                              height: 52,
                               child: TextButton(
                                 onPressed: () {
                                   Navigator.pushNamed(context, AppRoutes.login);
@@ -456,11 +486,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                   ),
                                 ),
                                 child: const Text(
-                                  'Log in',
+                                  'Already have an account? Sign in',
                                   style: TextStyle(
                                     fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white70,
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ),
@@ -469,16 +502,15 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       ),
                     ),
                     const SizedBox(height: 24),
-                    // Terms and Privacy
+                    // Terms & Privacy
                     FadeTransition(
                       opacity: _fadeAnimation,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           TextButton(
-                            onPressed: () {
-                              _launchUrl('https://afeedi.com/terms');
-                            },
+                            onPressed: () =>
+                                _launchUrl('https://afeedi.com/terms'),
                             child: const Text(
                               'Terms',
                               style: TextStyle(
@@ -486,19 +518,18 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 fontSize: 14,
                                 decoration: TextDecoration.underline,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const Text(
                             ' • ',
-                            style: TextStyle(
-                              color: Colors.white54,
-                              fontSize: 14,
-                            ),
+                            style:
+                                TextStyle(color: Colors.white54, fontSize: 14),
                           ),
                           TextButton(
-                            onPressed: () {
-                              _launchUrl('https://afeedi.com/privacy');
-                            },
+                            onPressed: () =>
+                                _launchUrl('https://afeedi.com/privacy'),
                             child: const Text(
                               'Privacy Policy',
                               style: TextStyle(
@@ -506,17 +537,20 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 fontSize: 14,
                                 decoration: TextDecoration.underline,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 16),
-                  ],
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
           ],
         ),
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'dart:math';
 import 'package:crypto/crypto.dart';
 import '../models/user_model.dart';
 import '../core/storage/local_storage_service.dart';
@@ -57,11 +58,15 @@ class LocalAuthService {
       // Save user to storage
       await _storage.saveUser(user);
       
-      // Save credentials with hashed password
+      // Save credentials with PBKDF2-hashed password
       final prefs = await SharedPreferences.getInstance();
+      final salt = _generateSalt();
       await prefs.setString('user_credentials_${user.id}', jsonEncode({
         'email': email,
-        'password': _hashPassword(password),
+        'kdf': 'pbkdf2-sha256',
+        'iterations': _pbkdf2Iterations,
+        'salt': salt,
+        'hash': _pbkdf2Hash(password, salt),
       }));
       
       // Set as current user
@@ -71,10 +76,6 @@ class LocalAuthService {
       await AnalyticsService.instance.trackUserInteraction(
         action: 'user_signup',
         screen: 'auth',
-        additionalData: {
-          'user_id': user.id,
-          'email': email,
-        },
       );
       
       return user;
@@ -102,26 +103,41 @@ class LocalAuthService {
       final credentialsJson = prefs.getString('user_credentials_${user.id}');
       
       if (credentialsJson != null) {
-        final credentials = jsonDecode(credentialsJson);
-        final hashedPassword = _hashPassword(password);
-        if (credentials['password'] == hashedPassword) {
+        final credentials = jsonDecode(credentialsJson) as Map<String, dynamic>;
+        bool passwordValid = false;
+        if (credentials['kdf'] == 'pbkdf2-sha256') {
+          // New PBKDF2 format
+          final candidateHash = _pbkdf2Hash(password, credentials['salt'] as String);
+          passwordValid = candidateHash == (credentials['hash'] as String);
+        } else {
+          // Legacy SHA-256: verify and upgrade on success
+          passwordValid = credentials['password'] == _legacySha256(password);
+          if (passwordValid) {
+            // Upgrade stored credential to PBKDF2 silently
+            final salt = _generateSalt();
+            await prefs.setString('user_credentials_${user.id}', jsonEncode({
+              'email': email,
+              'kdf': 'pbkdf2-sha256',
+              'iterations': _pbkdf2Iterations,
+              'salt': salt,
+              'hash': _pbkdf2Hash(password, salt),
+            }));
+          }
+        }
+        if (passwordValid) {
           // Set as current user
           await _setCurrentUser(user);
-          
+
           // Track analytics
           await AnalyticsService.instance.trackUserInteraction(
             action: 'user_signin',
             screen: 'auth',
-            additionalData: {
-              'user_id': user.id,
-              'email': email,
-            },
           );
-          
+
           return user;
         }
       }
-      
+
       throw Exception('Invalid credentials');
     } catch (error) {
       debugPrint('Error during sign in: $error');
@@ -223,11 +239,37 @@ class LocalAuthService {
   // Check if user is authenticated
   bool get isAuthenticated => _currentUser != null;
   
-  // Hash password using SHA-256
-  String _hashPassword(String password) {
+  static const int _pbkdf2Iterations = 10000;
+  static const int _saltLength = 32;
+
+  String _generateSalt() {
+    final random = Random.secure();
+    final saltBytes = Uint8List.fromList(
+      List<int>.generate(_saltLength, (_) => random.nextInt(256)),
+    );
+    return base64Encode(saltBytes);
+  }
+
+  String _pbkdf2Hash(String password, String saltBase64) {
+    final passwordBytes = utf8.encode(password);
+    final saltBytes = base64Decode(saltBase64);
+    final hmac = Hmac(sha256, passwordBytes);
+    // PBKDF2 block 1: U1 = PRF(password, salt || 0x00000001)
+    List<int> u = hmac.convert([...saltBytes, 0, 0, 0, 1]).bytes;
+    List<int> derived = List<int>.from(u);
+    for (int i = 1; i < _pbkdf2Iterations; i++) {
+      u = hmac.convert(u).bytes;
+      for (int j = 0; j < derived.length; j++) {
+        derived[j] ^= u[j];
+      }
+    }
+    return base64Encode(derived);
+  }
+
+  // Legacy SHA-256 hash — used only to verify and upgrade old credentials
+  String _legacySha256(String password) {
     final bytes = utf8.encode(password);
-    final digest = sha256.convert(bytes);
-    return digest.toString();
+    return sha256.convert(bytes).toString();
   }
 
   // Get user preferences

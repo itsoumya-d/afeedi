@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/content_model.dart';
 import '../../services/content_service.dart';
@@ -242,7 +243,7 @@ class _ShortsTabState extends State<ShortsTab> {
             itemCount: itemCount,
             itemBuilder: (context, index) {
               if (_shortsContent.isNotEmpty) {
-                return _buildShortItemFromContent(_shortsContent[index]);
+                return _buildShortItemFromContent(_shortsContent[index], index);
               } else {
                 return _buildMockShortItem(_mockShortsData[index]);
               }
@@ -354,12 +355,68 @@ class _ShortsTabState extends State<ShortsTab> {
 
   // ─── Content short card ────────────────────────────────────────────────────
 
-  Widget _buildShortItemFromContent(Content content) {
+  Widget _buildShortItemFromContent(Content content, int index) {
     final platformColor = _getPlatformColor(content.platform);
     final isLiked = _likedContent.contains(content.id);
     final isSaved = _savedContent.contains(content.id);
     final likeCount = UserInteractionService.instance
         .getLikeCount(content.id, baseCount: content.likeCount);
+
+    final overlay = Stack(
+      fit: StackFit.expand,
+      children: [
+        // ── Bottom-to-top gradient overlay for readability ───────────────────
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.7),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.4, 1.0],
+              ),
+            ),
+          ),
+        ),
+
+        // ── Platform badge (top-right, below safe area) ──────────────────────
+        Positioned(
+          top: 56,
+          right: 16,
+          child: _buildPlatformBadge(content.platform, platformColor),
+        ),
+
+        // ── Right-side action buttons ────────────────────────────────────────
+        Positioned(
+          right: 10,
+          bottom: 110,
+          child: _buildInteractionButtons(
+            content: content,
+            isLiked: isLiked,
+            isSaved: isSaved,
+            likeCount: likeCount,
+          ),
+        ),
+
+        // ── Bottom-left content info ─────────────────────────────────────────
+        Positioned(
+          left: 14,
+          right: 80,
+          bottom: 110,
+          child: _buildContentInfo(content),
+        ),
+      ],
+    );
+
+    if (content.platform == PlatformType.youtube && index == _currentIndex) {
+      return _InlineYouTubeShort(
+        videoId: content.platformContentId,
+        overlay: overlay,
+      );
+    }
 
     return GestureDetector(
       onTap: () async {
@@ -381,50 +438,7 @@ class _ShortsTabState extends State<ShortsTab> {
         children: [
           // ── Full-screen thumbnail ──────────────────────────────────────────
           _buildThumbnail(content, platformColor),
-
-          // ── Bottom-to-top gradient overlay for readability ─────────────────
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.7),
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: const [0.4, 1.0],
-                ),
-              ),
-            ),
-          ),
-
-          // ── Platform badge (top-right, below safe area) ────────────────────
-          Positioned(
-            top: 56,
-            right: 16,
-            child: _buildPlatformBadge(content.platform, platformColor),
-          ),
-
-          // ── Right-side action buttons ──────────────────────────────────────
-          Positioned(
-            right: 10,
-            bottom: 110,
-            child: _buildInteractionButtons(
-              content: content,
-              isLiked: isLiked,
-              isSaved: isSaved,
-              likeCount: likeCount,
-            ),
-          ),
-
-          // ── Bottom-left content info ───────────────────────────────────────
-          Positioned(
-            left: 14,
-            right: 80,
-            bottom: 110,
-            child: _buildContentInfo(content),
-          ),
+          overlay,
         ],
       ),
     );
@@ -1295,6 +1309,57 @@ class _ShortsTabState extends State<ShortsTab> {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     }
+  }
+}
+
+// ─── Inline YouTube player widget ──────────────────────────────────────────
+
+class _InlineYouTubeShort extends StatefulWidget {
+  final String videoId;
+  final Widget overlay;
+  const _InlineYouTubeShort({required this.videoId, required this.overlay});
+
+  @override
+  State<_InlineYouTubeShort> createState() => _InlineYouTubeShortState();
+}
+
+class _InlineYouTubeShortState extends State<_InlineYouTubeShort> {
+  late final YoutubePlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = YoutubePlayerController.fromVideoId(
+      videoId: widget.videoId,
+      autoPlay: true,
+      params: const YoutubePlayerParams(
+        showControls: false,
+        showFullscreenButton: false,
+        playsInline: true,
+        mute: true,
+        loop: true,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        YoutubePlayerControllerProvider(
+          controller: _controller,
+          child: YoutubePlayer(controller: _controller),
+        ),
+        widget.overlay,
+      ],
+    );
   }
 }
 

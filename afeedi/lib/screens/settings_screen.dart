@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
+import '../services/local_auth_service.dart';
 import '../services/navigation_service.dart';
 import '../services/locale_service.dart';
 import '../services/subscription_service.dart';
@@ -335,6 +336,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: _confirmSignOut,
             showChevron: false,
           ),
+          _navTile(
+            icon: Icons.delete_forever,
+            title: 'Delete Account',
+            iconColor: Colors.red,
+            titleColor: Colors.red,
+            onTap: _confirmDeleteAccount,
+            showChevron: false,
+          ),
           const Divider(color: Colors.white10, height: 1),
 
           // ── ABOUT ────────────────────────────────────────────────────
@@ -639,6 +648,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
             child: const Text('Sign Out',
                 style: TextStyle(color: Color(0xFFFF6B6B))),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteAccount() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A2E),
+        title: const Text('Delete Account',
+            style: TextStyle(color: Colors.white),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis),
+        content: const Text(
+          'Are you sure? This cannot be undone.',
+          style: TextStyle(color: Colors.white70),
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel',
+                  style: TextStyle(color: Colors.white54))),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await LocalAuthService.instance.deleteAccount();
+              if (mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, AppRoutes.welcome, (route) => false);
+              }
+            },
+            child: const Text('Delete',
+                style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

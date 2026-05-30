@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
-class AnalyticsService {
+class AnalyticsService with WidgetsBindingObserver {
   static final AnalyticsService _instance = AnalyticsService._internal();
   static AnalyticsService get instance => _instance;
 
@@ -13,10 +15,48 @@ class AnalyticsService {
   SharedPreferences? _prefs;
   final List<Map<String, dynamic>> _eventQueue = [];
 
+  static String _endpointUrl = '';
+  static const int _flushThreshold = 50;
+  bool _flushInProgress = false;
+
+  static void setEndpoint(String url) => _endpointUrl = url;
+
   // Initialize the analytics service
   Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
     await _loadQueuedEvents();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      flushToRemote();
+    }
+  }
+
+  Future<void> flushToRemote() async {
+    if (_endpointUrl.isEmpty || _flushInProgress || _eventQueue.isEmpty) return;
+    _flushInProgress = true;
+    final batch = List<Map<String, dynamic>>.from(_eventQueue);
+    try {
+      final response = await http
+          .post(
+            Uri.parse(_endpointUrl),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'events': batch}),
+          )
+          .timeout(const Duration(seconds: 10));
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        _eventQueue.removeRange(0, batch.length);
+        await _persistEvents(_eventQueue);
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('Analytics flush failed (will retry): $e');
+    } finally {
+      _flushInProgress = false;
+    }
   }
 
   // Track onboarding events
@@ -268,6 +308,10 @@ class AnalyticsService {
     final allEvents = await _getStoredEvents();
     allEvents.add(event);
     await _persistEvents(allEvents);
+
+    if (_eventQueue.length >= _flushThreshold) {
+      flushToRemote(); // fire-and-forget, does not block event tracking
+    }
 
     // Log event in debug mode
     if (kDebugMode) {

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
@@ -362,26 +363,19 @@ class AuthService {
   Future<List<PlatformConnection>> getPlatformConnections() async {
     try {
       if (_currentUser == null) return [];
-      
       final prefs = await SharedPreferences.getInstance();
       final connectionsJson = prefs.getStringList('platform_connections_${_currentUser!.id}') ?? [];
-      
-      return connectionsJson.map((json) {
-        final data = Map<String, dynamic>.from({
-          'id': 'conn_${DateTime.now().millisecondsSinceEpoch}',
-          'user_id': _currentUser!.id,
-          'platform': 'youtube',
-          'platform_user_id': 'user123',
-          'platform_username': 'testuser',
-          'access_token': 'token123',
-          'refresh_token': 'refresh123',
-          'expires_at': DateTime.now().add(Duration(hours: 1)).toIso8601String(),
-          'is_active': true,
-          'created_at': DateTime.now().toIso8601String(),
-          'updated_at': DateTime.now().toIso8601String(),
-        });
-        return PlatformConnection.fromJson(data);
-      }).toList();
+      return connectionsJson
+          .map((jsonStr) {
+            try {
+              final data = jsonDecode(jsonStr) as Map<String, dynamic>;
+              return PlatformConnection.fromJson(data);
+            } catch (_) {
+              return null;
+            }
+          })
+          .whereType<PlatformConnection>()
+          .toList();
     } catch (e) {
       debugPrint('Error getting platform connections: $e');
       return [];

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../core/constants/app_urls.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/local_auth_service.dart';
 import '../../services/navigation_service.dart';
@@ -800,9 +802,14 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              Navigator.pushNamed(context, AppRoutes.termsOfService);
+              final uri = Uri.parse(AppUrls.termsOfService);
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              } else if (mounted) {
+                Navigator.pushNamed(context, AppRoutes.termsOfService);
+              }
             },
             child: const Text(
               'Open',
@@ -836,9 +843,14 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              Navigator.pushNamed(context, AppRoutes.privacyPolicy);
+              final uri = Uri.parse(AppUrls.privacyPolicy);
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              } else if (mounted) {
+                Navigator.pushNamed(context, AppRoutes.privacyPolicy);
+              }
             },
             child: const Text(
               'Open',

@@ -74,25 +74,14 @@ class OAuthService {
     return null;
   }
 
-  // TikTok OAuth (using Web Auth)
+  // TikTok OAuth
+  // TikTok's OAuth requires registration in the TikTok for Developers portal
+  // (https://developers.tiktok.com) and approval for the Login Kit product.
+  // Until a real client_key is configured, this returns null to prevent
+  // a fake "Connected" badge from appearing to users.
   static Future<Map<String, dynamic>?> connectTikTok() async {
-    try {
-      // Simulate OAuth flow with mock data for development
-      await Future.delayed(const Duration(seconds: 2));
-      
-      // Return mock successful connection
-      return {
-        'platform': 'tiktok',
-        'authCode': 'mock_tiktok_code_${DateTime.now().millisecondsSinceEpoch}',
-        'accessToken': 'mock_tiktok_token_${DateTime.now().millisecondsSinceEpoch}',
-        'userId': 'mock_tiktok_user_${DateTime.now().millisecondsSinceEpoch}',
-        'displayName': 'TikTok User',
-        'connected_at': DateTime.now().toIso8601String(),
-      };
-    } catch (error) {
-      debugPrint('TikTok OAuth Error: $error');
-      return null;
-    }
+    debugPrint('TikTok OAuth: not configured — register at developers.tiktok.com');
+    return null;
   }
 
   // Facebook OAuth

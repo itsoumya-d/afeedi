@@ -18,6 +18,7 @@ import 'services/notification_service.dart';
 import 'services/subscription_service.dart';
 import 'services/ad_service.dart';
 import 'services/att_service.dart';
+import 'services/ump_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/storage/local_storage_service.dart';
 import 'l10n/app_localizations.dart';
@@ -97,6 +98,9 @@ Future<void> _appMain() async {
 
     // Request iOS App Tracking Transparency before initializing AdMob (required by Apple)
     await AttService.requestTrackingIfNeeded();
+
+    // Request GDPR/EU consent via Google UMP before AdMob initializes (required by Play Policy)
+    await UmpService.requestConsentIfRequired();
 
     // Initialize AdMob (non-blocking; ads load lazily when widgets mount)
     AdService.instance.initialize().catchError(

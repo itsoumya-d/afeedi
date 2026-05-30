@@ -61,42 +61,34 @@ Future<void> _appMain() async {
     // Prune events older than 90 days (GDPR Art. 5 storage limitation)
     AnalyticsService.instance.pruneOldEvents().catchError((_) {});
 
-    // Initialize Onboarding Service
-    await OnboardingService.instance.initialize();
-    
-    // Initialize Recommendation Integration Service
-    await RecommendationIntegrationService.instance.initialize();
+    // Parallelize all independent service initializations (cuts startup time
+    // from sum-of-all to max-of-any on the critical path)
+    await Future.wait([
+      OnboardingService.instance.initialize(),
+      RecommendationIntegrationService.instance.initialize(),
+      UserInteractionService.instance.initialize(),
+      NotificationService.instance.initialize(),
+      LocaleService.instance.initialize(),
+      SubscriptionService.instance.initialize(),
+    ]);
 
-    // Initialize User Interaction Service (Phase 4: like, save, share, follow)
-    await UserInteractionService.instance.initialize();
-
-    // Initialize ContentService — fetches real YouTube content in background
-    // (non-blocking: failure falls back to seed data silently)
+    // ContentService — non-blocking background fetch (falls back to seed data)
     ContentService.instance.initialize().catchError(
         (e) => debugPrint('ContentService background init error: $e'));
-    
+
     // Initialize Platform View Registration Service for web
     if (kIsWeb) {
       await PlatformViewRegistrationService.instance.initialize();
     }
-    
-    // Track app launch
-    await AnalyticsService.instance.trackUserInteraction(
+
+    // Track app launch (non-blocking)
+    AnalyticsService.instance.trackUserInteraction(
       action: 'app_launch',
       screen: 'main',
-    );
+    ).catchError((e) => debugPrint('Analytics launch error: $e'));
 
-    // Update daily streak
+    // Update daily streak (non-blocking)
     _updateDailyStreak().catchError((e) => debugPrint('Streak update error: $e'));
-
-    // Initialize notification service
-    await NotificationService.instance.initialize();
-
-    // Initialize locale service for multilingual support
-    await LocaleService.instance.initialize();
-
-    // Initialize subscription service (loads cached premium state + sets up IAP stream)
-    await SubscriptionService.instance.initialize();
 
     // Request iOS App Tracking Transparency before initializing AdMob (required by Apple)
     await AttService.requestTrackingIfNeeded();

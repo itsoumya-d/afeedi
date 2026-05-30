@@ -21,6 +21,7 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
 
   List<Content> _picks = [];
   bool _loading = true;
+  bool _isPro = false;
   String _userName = '';
   List<String> _genres = [];
 
@@ -38,11 +39,14 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
     final prefs = await SharedPreferences.getInstance();
     _userName = prefs.getString('onboarding_user_name') ?? '';
     _genres = prefs.getStringList('onboarding_selected_genres') ?? [];
+    final isPro = prefs.getBool('is_premium') ?? false;
 
     final content = await ContentService.instance.getOnboardingBasedRecommendations(limit: 5);
     if (!mounted) return;
     setState(() {
-      _picks = content.take(5).toList();
+      _isPro = isPro;
+      // Free users see first 2 picks; Pro sees all 5
+      _picks = isPro ? content.take(5).toList() : content.take(2).toList();
       _loading = false;
     });
   }
@@ -112,6 +116,10 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
                   if (_genres.isNotEmpty) _buildGenreChips(),
                   if (_genres.isNotEmpty) const SizedBox(height: 20),
                   _buildPicksList(),
+                  if (!_isPro && _picks.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    _buildProUnlockBanner(),
+                  ],
                   const SizedBox(height: 24),
                   _buildShareCTA(),
                   const SizedBox(height: 24),
@@ -387,6 +395,66 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
       height: 60,
       color: color.withValues(alpha: 0.2),
       child: Icon(Icons.play_circle_filled, color: color, size: 28),
+    );
+  }
+
+  Widget _buildProUnlockBanner() {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, AppRoutes.premium),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF7C3AED).withValues(alpha: 0.18),
+              const Color(0xFF00D4FF).withValues(alpha: 0.18),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFF7C3AED).withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.lock_outline, color: Color(0xFF7C3AED), size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '3 more picks locked',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                  Text(
+                    'Upgrade to Pro for all 5 personalized picks.',
+                    style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.55),
+                        fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              decoration: BoxDecoration(
+                color: const Color(0xFF7C3AED),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                'Unlock',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

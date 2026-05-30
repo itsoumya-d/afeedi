@@ -241,7 +241,11 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
         },
       );
 
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(milliseconds: 1200));
+
+      if (mounted) {
+        await _showTrialOffer();
+      }
 
       if (mounted) {
         NavigationService.navigateToHome();
@@ -265,6 +269,110 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
         });
       }
     }
+  }
+
+  Future<void> _showTrialOffer() async {
+    final prefs = await SharedPreferences.getInstance();
+    final alreadyPremium = prefs.getBool('is_premium') ?? false;
+    if (alreadyPremium || !mounted) return;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        padding: EdgeInsets.fromLTRB(
+            24, 24, 24, 24 + MediaQuery.of(context).padding.bottom),
+        decoration: const BoxDecoration(
+          color: Color(0xFF1A1A2E),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Icon(Icons.workspace_premium, color: Color(0xFF00D4FF), size: 48),
+            const SizedBox(height: 16),
+            const Text(
+              'Your feed is ready! 🎉',
+              style: TextStyle(
+                  color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Unlock the full Afeedi experience with a free 7-day trial of Pro.',
+              style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.65),
+                  fontSize: 14,
+                  height: 1.5),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            _trialFeatureRow(Icons.bookmark_border, 'Unlimited saves'),
+            _trialFeatureRow(Icons.block, 'No ads'),
+            _trialFeatureRow(Icons.auto_awesome, 'Weekly AI Digest'),
+            _trialFeatureRow(Icons.search, 'Cross-platform search filters'),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF00D4FF),
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                  elevation: 0,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, AppRoutes.premium);
+                  AnalyticsService.instance.trackUserInteraction(
+                    action: 'onboarding_trial_cta_tapped',
+                    screen: 'enhanced_onboarding_screen',
+                  );
+                },
+                child: const Text('Start Free 7-Day Trial',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Maybe later',
+                style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.45), fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _trialFeatureRow(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color(0xFF00D4FF), size: 18),
+          const SizedBox(width: 12),
+          Text(text,
+              style: const TextStyle(color: Colors.white, fontSize: 14)),
+        ],
+      ),
+    );
   }
 
   void _saveCurrentStepData() {

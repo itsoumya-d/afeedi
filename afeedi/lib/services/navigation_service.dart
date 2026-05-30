@@ -20,6 +20,7 @@ import '../screens/calendar_screen.dart';
 import '../screens/create_content_screen.dart';
 import '../screens/player_screen.dart';
 import '../screens/privacy_policy_screen.dart';
+import '../screens/terms_of_service_screen.dart';
 import '../screens/premium_screen.dart';
 import '../screens/bookmarks_screen.dart';
 import '../screens/history_screen.dart';
@@ -100,6 +101,7 @@ class AppRoutes {
 
   // Info routes
   static const String privacyPolicy = '/privacy-policy';
+  static const String termsOfService = '/terms';
   static const String premium = '/premium';
 
   // Library routes
@@ -144,6 +146,7 @@ class AppRoutes {
         },
         '/onboarding': (_) => const PlaceholderScreen(title: 'Onboarding', icon: Icons.start),
         AppRoutes.privacyPolicy: (_) => const PrivacyPolicyScreen(),
+        AppRoutes.termsOfService: (_) => const TermsOfServiceScreen(),
         AppRoutes.premium: (_) => const PremiumScreen(),
         AppRoutes.bookmarks: (_) => const BookmarksScreen(),
         AppRoutes.history: (_) => const HistoryScreen(),

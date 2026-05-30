@@ -15,9 +15,18 @@ class DiscoverTab extends StatefulWidget {
 
 class _DiscoverTabState extends State<DiscoverTab> {
   String _selectedCategory = 'All';
+  String _selectedTimeWindow = '7d';
   List<Content> _content = [];
   List<Content> _trending = [];
   bool _isLoading = true;
+
+  static const Map<String, String> _timeWindowLabels = {
+    'today': 'Today',
+    '7d':    'Last 7 Days',
+    '30d':   'Last Month',
+    '60d':   'Last 60 Days',
+    '1y':    'Last Year',
+  };
 
   static const List<String> _categories = [
     'All',
@@ -66,11 +75,30 @@ class _DiscoverTabState extends State<DiscoverTab> {
   @override
   void initState() {
     super.initState();
-    ContentService.instance.getTrendingVideos(limit: 20).then((data) {
+    ContentService.instance
+        .getTrendingVideos(limit: 20, timeWindow: _selectedTimeWindow)
+        .then((data) {
       if (mounted) {
         setState(() {
           _trending = data;
           _content = data;
+          _isLoading = false;
+        });
+      }
+    });
+  }
+
+  void _onTimeWindowSelected(String window) {
+    setState(() {
+      _selectedTimeWindow = window;
+      _isLoading = true;
+    });
+    ContentService.instance
+        .getTrendingVideos(limit: 20, timeWindow: window)
+        .then((data) {
+      if (mounted) {
+        setState(() {
+          _trending = data;
           _isLoading = false;
         });
       }
@@ -266,6 +294,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
     return ListView(
       padding: EdgeInsets.zero,
       children: [
+        _buildTimeWindowChips(),
         _buildSectionHeader('🔥 Trending Now'),
         _buildTrendingHorizontalScroll(),
         _buildSectionHeader('📈 Rising'),
@@ -274,6 +303,44 @@ class _DiscoverTabState extends State<DiscoverTab> {
         _buildCategoryGrid(),
         const SizedBox(height: 20),
       ],
+    );
+  }
+
+  Widget _buildTimeWindowChips() {
+    return SizedBox(
+      height: 40,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        children: _timeWindowLabels.entries.map((entry) {
+          final isSelected = _selectedTimeWindow == entry.key;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () => _onTimeWindowSelected(entry.key),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xFFFF4500) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected ? const Color(0xFFFF4500) : Colors.white24,
+                  ),
+                ),
+                child: Text(
+                  entry.value,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : Colors.white60,
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 

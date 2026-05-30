@@ -65,10 +65,30 @@ class UserBehaviorInsight {
 class EnhancedRecommendationService {
   static EnhancedRecommendationService? _instance;
   static EnhancedRecommendationService get instance => _instance ??= EnhancedRecommendationService._();
-  
+
   EnhancedRecommendationService._();
-  
-  // Get time-based recommendations
+
+  static const Map<String, List<String>> _genreTagMap = {
+    'gaming':        ['gaming', 'game', 'games', 'esports', 'fps', 'rpg', 'minecraft', 'fortnite', 'valorant', 'streamer'],
+    'music':         ['music', 'song', 'songs', 'artist', 'album', 'concert', 'pop', 'hip-hop', 'rap', 'edm', 'classical', 'guitar', 'piano', 'singing'],
+    'technology':    ['technology', 'tech', 'programming', 'coding', 'software', 'hardware', 'ai', 'machine-learning', 'flutter', 'javascript', 'python', 'react', 'startup'],
+    'comedy':        ['comedy', 'funny', 'humor', 'memes', 'satire', 'standup', 'sketch', 'parody', 'hilarious'],
+    'fitness':       ['fitness', 'workout', 'exercise', 'gym', 'yoga', 'running', 'health', 'nutrition', 'weight', 'muscle'],
+    'food':          ['food', 'cooking', 'recipe', 'cuisine', 'chef', 'baking', 'restaurant', 'foodie', 'meal'],
+    'travel':        ['travel', 'adventure', 'tourism', 'vacation', 'destination', 'backpacking', 'explore', 'vlog'],
+    'education':     ['education', 'learning', 'tutorial', 'how-to', 'science', 'history', 'math', 'language', 'study', 'course'],
+    'sports':        ['sports', 'football', 'basketball', 'soccer', 'tennis', 'cricket', 'athletics', 'nfl', 'nba', 'match'],
+    'fashion':       ['fashion', 'style', 'outfit', 'clothing', 'designer', 'trends', 'beauty', 'makeup', 'skincare'],
+    'art':           ['art', 'design', 'drawing', 'painting', 'illustration', 'photography', 'creative', 'animation'],
+    'news':          ['news', 'politics', 'world', 'breaking', 'journalism', 'reporter'],
+    'business':      ['business', 'entrepreneur', 'startup', 'marketing', 'finance', 'investing', 'economy', 'stocks'],
+    'science':       ['science', 'physics', 'chemistry', 'biology', 'space', 'nasa', 'research', 'discovery'],
+    'entertainment': ['entertainment', 'celebrity', 'movie', 'films', 'series', 'hollywood', 'bollywood'],
+    'lifestyle':     ['lifestyle', 'vlog', 'daily', 'routine', 'motivation', 'wellness', 'mindfulness', 'productivity'],
+    'cars':          ['cars', 'automotive', 'vehicle', 'driving', 'racing', 'tesla', 'bmw'],
+    'pets':          ['pets', 'dogs', 'cats', 'animals', 'cute', 'adorable', 'animal', 'wildlife'],
+  };
+
   Future<List<Recommendation>> getTimeBasedRecommendations({
     required String userId,
     int limit = 10,
@@ -249,9 +269,26 @@ class EnhancedRecommendationService {
     ].join(' ').toLowerCase();
 
     for (final genre in genres) {
-      if (searchable.contains(genre.toLowerCase())) {
-        score += 1.5; // genre boost
+      final genreKey = genre.toLowerCase();
+      // Direct match in tags or categories
+      final directMatch =
+          content.tags.any((t) => t.toLowerCase().contains(genreKey)) ||
+          content.categories.any((c) => c.toLowerCase().contains(genreKey));
+      if (directMatch) {
+        score += 1.5;
+        continue;
       }
+      // Expanded synonym match via genre map — also checks title/description
+      final synonyms = _genreTagMap[genreKey] ??
+          _genreTagMap.entries
+              .where((e) => e.key.contains(genreKey) || genreKey.contains(e.key))
+              .expand((e) => e.value)
+              .toList();
+      final synonymMatch = synonyms.any((syn) =>
+          content.tags.any((t) => t.toLowerCase().contains(syn)) ||
+          (content.title?.toLowerCase().contains(syn) ?? false) ||
+          (content.description?.toLowerCase().contains(syn) ?? false));
+      if (synonymMatch) score += 1.2;
     }
 
     // --- Basic interest match ---

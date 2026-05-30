@@ -2035,12 +2035,44 @@ class ContentService {
     return _withCreatorIds(filteredVideos.take(limit).toList());
   }
 
-  Future<List<Content>> getTrendingVideos({int limit = 5}) async {
+  /// Returns trending content scored by engagement-velocity (X/Twitter-inspired):
+  /// score = engagement / (ageHours^0.8 + 1)  — rewards high-engagement recent content.
+  /// [timeWindow]: 'today' (24h) | '7d' | '30d' | '60d' | '1y' | 'all'
+  Future<List<Content>> getTrendingVideos({int limit = 20, String timeWindow = '7d'}) async {
+    final now = DateTime.now();
+    final cutoff = _trendingCutoff(now, timeWindow);
 
-    List<Content> trending = List.from(_allContent);
-    trending.sort((a, b) => (b.viewCount + b.likeCount).compareTo(a.viewCount + a.likeCount));
-    
-    return _withCreatorIds(trending.take(limit).toList());
+    List<Content> candidates = _allContent.where((c) {
+      if (cutoff == null) return true;
+      final pub = c.publishedAt ?? c.createdAt;
+      return pub.isAfter(cutoff);
+    }).toList();
+
+    // Fallback: if window too narrow, use all content
+    if (candidates.length < 5) candidates = List.from(_allContent);
+
+    candidates.sort((a, b) => _velocityScore(b, now).compareTo(_velocityScore(a, now)));
+    return _withCreatorIds(candidates.take(limit).toList());
+  }
+
+  DateTime? _trendingCutoff(DateTime now, String window) {
+    switch (window) {
+      case 'today': return now.subtract(const Duration(hours: 24));
+      case '7d':    return now.subtract(const Duration(days: 7));
+      case '30d':   return now.subtract(const Duration(days: 30));
+      case '60d':   return now.subtract(const Duration(days: 60));
+      case '1y':    return now.subtract(const Duration(days: 365));
+      case 'all':   return null;
+      default:      return now.subtract(const Duration(days: 7));
+    }
+  }
+
+  /// Engagement-velocity: high engagement + recency → high score.
+  double _velocityScore(Content c, DateTime now) {
+    final pub = c.publishedAt ?? c.createdAt;
+    final ageHours = now.difference(pub).inMinutes / 60.0;
+    final engagement = c.viewCount * 0.1 + c.likeCount * 2.0;
+    return engagement / ((ageHours + 1.0).clamp(1.0, double.infinity) * 0.8);
   }
 
   // Get videos by category

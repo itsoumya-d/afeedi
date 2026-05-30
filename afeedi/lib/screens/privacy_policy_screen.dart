@@ -24,7 +24,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _header('Afeedi Privacy Policy'),
-            _body('Last updated: January 1, 2025'),
+            _body('Last updated: June 1, 2026'),
             const SizedBox(height: 20),
             _section(
               '1. Information We Collect',
@@ -59,8 +59,24 @@ class PrivacyPolicyScreen extends StatelessWidget {
               'We may update this Privacy Policy from time to time. We will notify you of significant changes via an in-app notification. Continued use of the app after changes constitutes acceptance of the updated policy.',
             ),
             _section(
-              '9. Contact Us',
-              'If you have questions about this Privacy Policy or how we handle your data, please contact us at privacy@afeedi.com.',
+              '9. iOS App Tracking Transparency',
+              'We use Apple\'s App Tracking Transparency framework on iOS. You may be asked to allow or deny tracking when you first launch the app. We use this permission only to show relevant ads through Google AdMob. You can change this preference at any time in your device Settings > Privacy.',
+            ),
+            _section(
+              '10. Google AdMob & Advertising',
+              'We use Google AdMob to serve ads to users on the free tier. AdMob may collect device identifiers and usage data to personalize ads. For more information, see Google\'s Privacy & Terms at policies.google.com. Premium subscribers (Afeedi Pro) see no ads and AdMob is not active for their sessions.',
+            ),
+            _section(
+              '11. In-App Purchases',
+              'Afeedi Pro subscriptions are billed through your Apple App Store or Google Play account. We do not store payment information. Subscription management, cancellation, and refunds are handled by Apple or Google per their standard policies.',
+            ),
+            _section(
+              '12. Data Deletion',
+              'To request deletion of your data, email privacy@afeedi.com with subject \'Data Deletion Request\'. All local data can be deleted by uninstalling the app. We will process data deletion requests within 30 days.',
+            ),
+            _section(
+              '13. Contact & Effective Date',
+              'Effective date: June 1, 2026. If you have questions about this Privacy Policy or how we handle your data, please contact us at privacy@afeedi.com.',
             ),
             const SizedBox(height: 40),
           ],

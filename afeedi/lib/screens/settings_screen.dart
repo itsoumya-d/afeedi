@@ -354,12 +354,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _navTile(
             icon: Icons.description_outlined,
             title: 'Terms of Service',
-            onTap: () async {
-              final uri = Uri.parse('https://afeedi.com/terms');
-              if (await canLaunchUrl(uri)) {
-                launchUrl(uri, mode: LaunchMode.externalApplication);
-              }
-            },
+            onTap: () => Navigator.pushNamed(context, AppRoutes.termsOfService),
           ),
 
           // Bottom safe area padding

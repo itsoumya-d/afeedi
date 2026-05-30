@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' show min;
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -106,18 +107,27 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
     if (query.isEmpty) return;
     _recentSearches.remove(query);
     _recentSearches.insert(0, query);
-    if (_recentSearches.length > 10) _recentSearches = _recentSearches.take(10).toList();
+    if (_recentSearches.length > 5) _recentSearches = _recentSearches.take(5).toList();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('recent_searches', jsonEncode(_recentSearches));
   }
 
+  /// Sanitize a raw search query:
+  /// - Trim surrounding whitespace
+  /// - Strip HTML/script tags (prevent XSS-style injection into downstream systems)
+  /// - Limit to 200 characters maximum
+  String _sanitizeQuery(String raw) {
+    final stripped = raw.trim().replaceAll(RegExp(r'<[^>]*>'), '');
+    return stripped.substring(0, min(stripped.length, 200));
+  }
+
   void _search(String query) {
-    final trimmed = query.trim();
+    final sanitized = _sanitizeQuery(query);
     setState(() {
       _hasError = false;
       _selectedPlatform = null;
       _selectedCategory = null;
-      _query = trimmed;
+      _query = sanitized;
       _hasSearched = _query.isNotEmpty;
       if (_query.isEmpty) {
         _results = [];
@@ -131,8 +141,8 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
             c.tags.any((t) => t.toLowerCase().contains(q));
       }).toList();
     });
-    if (trimmed.isNotEmpty) {
-      _saveRecentSearch(trimmed);
+    if (sanitized.isNotEmpty) {
+      _saveRecentSearch(sanitized);
       setState(() => _recentSearches = _recentSearches);
     }
   }
@@ -177,22 +187,25 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0D0B1E),
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildSearchBar(),
-            if (_hasSearched) ...[
-              _buildPlatformFilterRow(),
-              _buildGenreFilterRow(),
-              if (_activeFilterCount > 0) _buildActiveFilterBanner(),
-              _buildTabBar(),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: const Color(0xFF0D0B1E),
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildSearchBar(),
+              if (_hasSearched) ...[
+                _buildPlatformFilterRow(),
+                _buildGenreFilterRow(),
+                if (_activeFilterCount > 0) _buildActiveFilterBanner(),
+                _buildTabBar(),
+              ],
+              Expanded(
+                child: _hasSearched ? _buildResults() : _buildDiscover(),
+              ),
             ],
-            Expanded(
-              child: _hasSearched ? _buildResults() : _buildDiscover(),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -459,17 +472,22 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
     final results = _filteredResults;
     if (_isLoading) return const LoadingShimmer();
     if (results.isEmpty) {
+      const suggestionTopics = ['Gaming', 'Comedy', 'Music', 'News'];
       return Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.search_off, size: 56, color: Colors.white24),
-              const SizedBox(height: 16),
+              const Icon(Icons.search, size: 80, color: Colors.white30),
+              const SizedBox(height: 20),
               Text(
-                AppLocalizations.of(context)!.noResultsFor(_query),
-                style: const TextStyle(color: Colors.white54, fontSize: 16),
+                'No results for "$_query"',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
@@ -477,10 +495,42 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
               const SizedBox(height: 8),
               const Text(
                 'Try different keywords or adjust filters',
-                style: TextStyle(color: Colors.white60, fontSize: 13),
+                style: TextStyle(color: Colors.white54, fontSize: 14),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
+                children: suggestionTopics.map((topic) {
+                  return GestureDetector(
+                    onTap: () {
+                      _searchController.text = topic;
+                      _search(topic);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E1E3A),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: const Color(0xFF00D4FF).withValues(alpha: 0.35),
+                        ),
+                      ),
+                      child: Text(
+                        topic,
+                        style: const TextStyle(
+                          color: Color(0xFF00D4FF),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
               if (_activeFilterCount > 0) ...[
                 const SizedBox(height: 20),
@@ -651,37 +701,40 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   }
 
   Widget _buildDiscover() {
+    const popularTopics = ['Gaming', 'Tech', 'Comedy', 'Music', 'News', 'Sports', 'Food', 'Travel'];
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Trending section from ContentService
-          if (_trendingContent.isNotEmpty) ...[
-            Text(
-              AppLocalizations.of(context)!.trending,
-              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 140,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: _trendingContent.length,
-                itemBuilder: (context, i) => _buildTrendingCard(_trendingContent[i]),
+          // Recent Searches section
+          const Text(
+            'Recent Searches',
+            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          if (_recentSearches.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: const Text(
+                'No recent searches yet',
+                style: TextStyle(color: Colors.white60, fontSize: 13),
               ),
-            ),
-            const SizedBox(height: 24),
-          ],
-          Text(
-            '${AppLocalizations.of(context)!.trending} Topics',
-            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            )
+          else
+            ..._recentSearches.take(5).map(_buildRecentSearchItem),
+          const SizedBox(height: 20),
+
+          // Popular topics
+          const Text(
+            'Popular Topics',
+            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: _trendingTopics.map((topic) {
+            children: popularTopics.map((topic) {
               return GestureDetector(
                 onTap: () {
                   _searchController.text = topic;
@@ -697,8 +750,8 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.trending_up, size: 14, color: Color(0xFF00D4FF)),
-                      const SizedBox(width: 6),
+                      const Icon(Icons.tag, size: 13, color: Color(0xFF00D4FF)),
+                      const SizedBox(width: 5),
                       Text(
                         topic,
                         style: const TextStyle(color: Colors.white70, fontSize: 13),
@@ -710,6 +763,25 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
             }).toList(),
           ),
           const SizedBox(height: 28),
+
+          // Trending section from ContentService
+          if (_trendingContent.isNotEmpty) ...[
+            Text(
+              AppLocalizations.of(context)!.trending,
+              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 140,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _trendingContent.length,
+                itemBuilder: (context, i) => _buildTrendingCard(_trendingContent[i]),
+              ),
+            ),
+            const SizedBox(height: 28),
+          ],
+
           const Text(
             'Browse by Platform',
             style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
@@ -730,19 +802,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
               _platformChip('Facebook', const Color(0xFF1877F2), Icons.facebook, PlatformType.facebook),
             ],
           ),
-          const SizedBox(height: 28),
-          const Text(
-            'Recent Searches',
-            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          if (_recentSearches.isEmpty)
-            const Text(
-              'No recent searches yet',
-              style: TextStyle(color: Colors.white60, fontSize: 13),
-            )
-          else
-            ..._recentSearches.take(5).map(_buildRecentSearchItem),
+          const SizedBox(height: 20),
         ],
       ),
     );

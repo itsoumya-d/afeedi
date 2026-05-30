@@ -6,6 +6,10 @@ import 'oauth_service.dart';
 import 'analytics_service.dart';
 import 'local_auth_service.dart';
 
+// NOTE: user_id and user_email are stored in SharedPreferences (unencrypted).
+// In production, migrate these to flutter_secure_storage to prevent
+// exposure on non-encrypted or rooted devices.
+
 // Simple auth result class
 class AuthResult {
   final bool success;
@@ -18,9 +22,13 @@ class AuthResult {
 class AuthService {
   static AuthService? _instance;
   static AuthService get instance => _instance ??= AuthService._();
-  
+
   AuthService._();
-  
+
+  // Rate limiting constants for email/password login
+  static const int _maxLoginAttempts = 5;
+  static const int _lockoutMinutes = 15;
+
   User? _currentUser;
   
   // Get current user
@@ -73,6 +81,40 @@ class AuthService {
     }
   }
   
+  // Rate limiting helpers — keyed per email address
+  Future<bool> _isAccountLocked(String email) async {
+    final prefs = await SharedPreferences.getInstance();
+    final lockoutTime = prefs.getInt('login_lockout_time_${email.toLowerCase()}');
+    if (lockoutTime == null) return false;
+    final lockoutEnd = DateTime.fromMillisecondsSinceEpoch(lockoutTime);
+    if (DateTime.now().isBefore(lockoutEnd)) return true;
+    // Lockout expired — clear it
+    await prefs.remove('login_lockout_time_${email.toLowerCase()}');
+    await prefs.remove('login_failed_attempts_${email.toLowerCase()}');
+    return false;
+  }
+
+  Future<void> _recordFailedAttempt(String email) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'login_failed_attempts_${email.toLowerCase()}';
+    final attempts = (prefs.getInt(key) ?? 0) + 1;
+    await prefs.setInt(key, attempts);
+    if (attempts >= _maxLoginAttempts) {
+      final lockoutEnd = DateTime.now()
+          .add(Duration(minutes: _lockoutMinutes));
+      await prefs.setInt(
+        'login_lockout_time_${email.toLowerCase()}',
+        lockoutEnd.millisecondsSinceEpoch,
+      );
+    }
+  }
+
+  Future<void> _clearFailedAttempts(String email) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('login_failed_attempts_${email.toLowerCase()}');
+    await prefs.remove('login_lockout_time_${email.toLowerCase()}');
+  }
+
   // Sign up with email and password
   Future<AuthResult> signUp({
     required String email,
@@ -122,11 +164,27 @@ class AuthService {
     required String password,
   }) async {
     try {
+      // Per-email rate limiting: check lockout before attempting auth
+      if (await _isAccountLocked(email)) {
+        final prefs = await SharedPreferences.getInstance();
+        final lockoutTime =
+            prefs.getInt('login_lockout_time_${email.toLowerCase()}') ?? 0;
+        final remaining =
+            (lockoutTime - DateTime.now().millisecondsSinceEpoch) ~/ 60000;
+        return AuthResult(
+          success: false,
+          error:
+              'Account temporarily locked. Try again in ${remaining + 1} minute(s).',
+        );
+      }
+
       final user = await LocalAuthService.instance.signIn(
         email: email,
         password: password,
       );
       if (user != null) {
+        // Successful login — clear per-email failed attempt counter
+        await _clearFailedAttempts(email);
         _currentUser = user;
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('user_id', user.id);
@@ -138,9 +196,15 @@ class AuthService {
         );
         return AuthResult(success: true, user: user);
       }
-      return AuthResult(success: false, error: 'Invalid email or password');
+      // Record the failed attempt for per-email rate limiting
+      await _recordFailedAttempt(email);
+      return AuthResult(
+          success: false, error: 'Authentication failed. Please try again.');
     } catch (e) {
-      return AuthResult(success: false, error: e.toString());
+      // Do not expose internal error details to the caller
+      debugPrint('SignIn error: $e');
+      return AuthResult(
+          success: false, error: 'Authentication failed. Please try again.');
     }
   }
   

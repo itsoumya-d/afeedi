@@ -270,6 +270,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                       if (value == null || value.isEmpty) {
                                         return 'Please enter your full name';
                                       }
+                                      if (value.trim().length > 50) {
+                                        return 'Name must be 50 characters or fewer';
+                                      }
+                                      if (!RegExp(r"^[a-zA-Z0-9 \-']+$")
+                                          .hasMatch(value.trim())) {
+                                        return "Name may only contain letters, numbers, spaces, hyphens and apostrophes";
+                                      }
                                       return null;
                                     },
                                   ),
@@ -285,7 +292,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                         return 'Please enter your email';
                                       }
                                       if (!RegExp(
-                                              r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$')
+                                              r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$')
                                           .hasMatch(value)) {
                                         return 'Please enter a valid email';
                                       }
@@ -318,6 +325,12 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                       }
                                       if (value.length < 8) {
                                         return 'Password must be at least 8 characters';
+                                      }
+                                      if (!RegExp(r'[a-zA-Z]').hasMatch(value)) {
+                                        return 'Password must contain at least one letter';
+                                      }
+                                      if (!RegExp(r'[0-9]').hasMatch(value)) {
+                                        return 'Password must contain at least one number';
                                       }
                                       return null;
                                     },

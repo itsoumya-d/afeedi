@@ -62,7 +62,12 @@ class LocalAuthService {
       // Save user to storage
       await _storage.saveUser(user);
 
-      // Save credentials with PBKDF2-hashed password
+      // Save credentials with PBKDF2-hashed password.
+      // NOTE: SharedPreferences is unencrypted on Android/iOS.
+      // The stored value here is a PBKDF2 hash — not the raw password — so
+      // exposure is limited. However, for production, migrate user_credentials_*
+      // and current_user_id to flutter_secure_storage to prevent enumeration
+      // on rooted or compromised devices.
       final prefs = await SharedPreferences.getInstance();
       final salt = _generateSalt();
       await prefs.setString('user_credentials_${user.id}', jsonEncode({

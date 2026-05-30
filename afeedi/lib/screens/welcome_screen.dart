@@ -57,13 +57,31 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   }
 
   Future<void> _launchUrl(String urlString) async {
-    final Uri url = Uri.parse(urlString);
-    if (!await launchUrl(url)) {
+    // Validate that the URL uses http or https before launching
+    final uri = Uri.tryParse(urlString);
+    if (uri == null ||
+        !uri.hasScheme ||
+        (!urlString.startsWith('http://') &&
+            !urlString.startsWith('https://'))) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text(
-              'Could not launch $urlString',
+              'Invalid URL: only http and https links are supported.',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        );
+      }
+      return;
+    }
+    if (!await launchUrl(uri)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Could not open the link. Please try again.',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -99,7 +117,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
         }
       } else {
-        _showErrorSnackBar('Authentication failed: ${authResult.error}');
+        _showErrorSnackBar(AppLocalizations.of(context)?.authFailed ?? 'Sign-in failed. Please try again.');
       }
     } catch (error) {
       await AnalyticsService.instance.trackOAuthEvent(
@@ -107,7 +125,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         action: 'error',
         errorMessage: error.toString(),
       );
-      _showErrorSnackBar('Google sign-in error: $error');
+      _showErrorSnackBar(AppLocalizations.of(context)?.authFailed ?? 'Sign-in failed. Please try again.');
     } finally {
       if (mounted) {
         setState(() {
@@ -136,7 +154,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
         }
       } else {
-        _showErrorSnackBar('Authentication failed: ${authResult.error}');
+        _showErrorSnackBar(AppLocalizations.of(context)?.authFailed ?? 'Sign-in failed. Please try again.');
       }
     } catch (error) {
       await AnalyticsService.instance.trackOAuthEvent(
@@ -144,7 +162,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         action: 'error',
         errorMessage: error.toString(),
       );
-      _showErrorSnackBar('Apple sign-in error: $error');
+      _showErrorSnackBar(AppLocalizations.of(context)?.authFailed ?? 'Sign-in failed. Please try again.');
     } finally {
       if (mounted) {
         setState(() {

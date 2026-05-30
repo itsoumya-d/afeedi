@@ -529,38 +529,64 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
 
   Widget _buildTrendingTopics() {
     final topics = _trendingTopics;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppLocalizations.of(context)?.trending ?? 'Trending',
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.9),
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
+        Row(
+          children: [
+            const Icon(Icons.local_fire_department_rounded,
+                color: AppTheme.primaryPink, size: 14),
+            const SizedBox(width: 4),
+            Text(
+              AppLocalizations.of(context)?.trending ?? 'Trending',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         SizedBox(
-          height: 24,
+          height: 30,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.zero,
             itemCount: topics.length,
             itemBuilder: (context, index) {
-              return Container(
-                margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryPink.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  topics[index],
-                  style: TextStyle(
-                    color: AppTheme.primaryPink,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
+              return Semantics(
+                label: 'Trending topic ${topics[index]}',
+                button: true,
+                child: GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppTheme.primaryPink.withValues(alpha: 0.25),
+                          AppTheme.primaryPink.withValues(alpha: 0.1),
+                        ],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                          color: AppTheme.primaryPink.withValues(alpha: 0.35)),
+                    ),
+                    child: Text(
+                      topics[index],
+                      style: const TextStyle(
+                        color: AppTheme.primaryPink,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
               );
@@ -572,55 +598,77 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   }
 
   Widget _buildQuickFilters() {
-    final filters = [
-      {'name': 'For You', 'platform': null, 'icon': Icons.auto_awesome},
-      {'name': 'YouTube', 'platform': PlatformType.youtube, 'icon': Icons.play_circle},
-      {'name': 'Instagram', 'platform': PlatformType.instagram, 'icon': Icons.camera_alt},
-      {'name': 'TikTok', 'platform': PlatformType.tiktok, 'icon': Icons.music_video},
-      {'name': 'Facebook', 'platform': PlatformType.facebook, 'icon': Icons.facebook},
+    const filters = [
+      (name: 'All', platform: null, icon: Icons.auto_awesome_rounded),
+      (name: 'YouTube', platform: PlatformType.youtube, icon: Icons.play_circle_rounded),
+      (name: 'Instagram', platform: PlatformType.instagram, icon: Icons.camera_alt_rounded),
+      (name: 'TikTok', platform: PlatformType.tiktok, icon: Icons.music_video_rounded),
+      (name: 'Facebook', platform: PlatformType.facebook, icon: Icons.facebook_rounded),
     ];
 
     return SizedBox(
-      height: 38,
+      height: 36,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.zero,
         itemCount: filters.length,
         itemBuilder: (context, index) {
           final filter = filters[index];
-          final isSelected = _selectedPlatform == filter['platform'];
+          final isSelected = _selectedPlatform == filter.platform;
 
-          return Container(
-            margin: const EdgeInsets.only(right: 8),
+          return Semantics(
+            label: 'Filter by ${filter.name}',
+            button: true,
+            selected: isSelected,
             child: GestureDetector(
-              onTap: () => _handlePlatformFilter(filter['platform'] as PlatformType?),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              onTap: () => _handlePlatformFilter(filter.platform),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                margin: const EdgeInsets.only(right: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppTheme.primaryCyan
-                      : Colors.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
+                      ? const Color(0xFF00D4FF)
+                      : Colors.white.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(18),
                   border: Border.all(
                     color: isSelected
-                        ? AppTheme.primaryCyan
-                        : Colors.white.withValues(alpha: 0.3),
+                        ? const Color(0xFF00D4FF)
+                        : Colors.white.withValues(alpha: 0.18),
+                    width: 1,
                   ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: const Color(0xFF00D4FF).withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          )
+                        ]
+                      : null,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      filter['icon'] as IconData,
-                      size: 14,
-                      color: isSelected ? Colors.black87 : Colors.white.withValues(alpha: 0.7),
+                      filter.icon,
+                      size: 13,
+                      color:
+                          isSelected ? Colors.black87 : Colors.white.withValues(alpha: 0.75),
                     ),
                     const SizedBox(width: 5),
                     Text(
-                      filter['name'] as String,
+                      filter.name,
                       style: TextStyle(
-                        color: isSelected ? Colors.black87 : Colors.white.withValues(alpha: 0.7),
+                        color: isSelected
+                            ? Colors.black87
+                            : Colors.white.withValues(alpha: 0.75),
                         fontSize: 12,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w400,
+                        letterSpacing: isSelected ? 0.1 : 0,
                       ),
                     ),
                   ],
@@ -633,6 +681,37 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     );
   }
   
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.3,
+            ),
+          ),
+          GestureDetector(
+            onTap: () {},
+            child: Text(
+              'See all',
+              style: TextStyle(
+                color: AppTheme.primaryCyan,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFeed() {
     final displayPosts = _filteredPosts;
 
@@ -640,34 +719,132 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       return const LoadingShimmer(itemCount: 4);
     }
 
+    if (_loadError && _posts.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 88,
+                height: 88,
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.wifi_off_rounded,
+                  size: 44,
+                  color: Colors.redAccent,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Couldn't load content",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.3,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Check your connection and try again',
+                style: TextStyle(
+                  color: Colors.white54,
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                width: 160,
+                height: 44,
+                child: ElevatedButton.icon(
+                  onPressed: _loadInitialPosts,
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: const Text('Try Again'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryCyan,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(22)),
+                    textStyle: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 14),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (!_isLoading && _posts.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              _loadError ? Icons.wifi_off_outlined : Icons.video_library_outlined,
-              size: 64,
-              color: Colors.white24,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _loadError ? 'Could not load content' : 'No content available',
-              style: const TextStyle(color: Colors.white54, fontSize: 18),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _loadError
-                  ? 'Check your connection and try again'
-                  : 'Pull down to refresh',
-              style: const TextStyle(color: Colors.white60, fontSize: 14),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _loadInitialPosts,
-              child: const Text('Refresh'),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 88,
+                height: 88,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryCyan.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.video_library_rounded,
+                  size: 44,
+                  color: AppTheme.primaryCyan,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'No content yet',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.3,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Pull down to refresh or adjust your filters',
+                style: TextStyle(
+                  color: Colors.white54,
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                width: 160,
+                height: 44,
+                child: ElevatedButton.icon(
+                  onPressed: _loadInitialPosts,
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: const Text('Refresh'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryCyan,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(22)),
+                    textStyle: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 14),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -744,6 +921,25 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       }
     }
 
+    // Build the interleaved list with section headers every 10 content cards.
+    // A null entry in _feedItems means it's a section header, a Content? null
+    // means an ad slot. We use a separate parallel list to track types.
+    final List<_FeedItem> feedItems = [];
+    int contentCardCount = 0;
+    for (int i = 0; i < mixedList.length; i++) {
+      final post = mixedList[i];
+      if (post != null) {
+        // Insert a section header before every 10th content card (but not the very first)
+        if (contentCardCount > 0 && contentCardCount % 10 == 0) {
+          feedItems.add(const _FeedItem.sectionHeader('Trending Now'));
+        }
+        feedItems.add(_FeedItem.content(post));
+        contentCardCount++;
+      } else {
+        feedItems.add(const _FeedItem.ad());
+      }
+    }
+
     final extraItems = (continueSection != null ? 1 : 0) +
         (_isLoading ? 1 : 0) +
         (_showFollowSuggestion ? 1 : 0);
@@ -755,7 +951,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       child: ListView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: mixedList.length + extraItems,
+        itemCount: feedItems.length + extraItems,
         addRepaintBoundaries: false, // we add our own RepaintBoundary per card
         addAutomaticKeepAlives: false,
         itemBuilder: (context, index) {
@@ -772,7 +968,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
               ? offsetIndex - 1
               : offsetIndex;
 
-          if (listIndex >= mixedList.length) {
+          if (listIndex >= feedItems.length) {
             return const Padding(
               padding: EdgeInsets.all(20),
               child: Center(
@@ -783,8 +979,11 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             );
           }
 
-          final item = mixedList[listIndex];
-          if (item == null) {
+          final feedItem = feedItems[listIndex];
+          if (feedItem.isSectionHeader) {
+            return _buildSectionHeader(feedItem.sectionTitle!);
+          }
+          if (feedItem.isAd) {
             // Ad slot — render native in-feed ad
             return const InFeedAdCard();
           }
@@ -792,7 +991,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           return RepaintBoundary(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 16),
-              child: FeedPostCard(content: item),
+              child: FeedPostCard(content: feedItem.content!),
             ),
           );
         },
@@ -807,14 +1006,31 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              AppLocalizations.of(context)!.continueWatching,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.continueWatching,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {},
+                  child: const Text(
+                    'See all',
+                    style: TextStyle(
+                      color: AppTheme.primaryCyan,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           SizedBox(
@@ -846,34 +1062,58 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                               fit: BoxFit.cover,
                               width: double.infinity,
                               height: double.infinity,
-                              errorWidget: (_, __, ___) => Container(color: const Color(0xFF252545)),
+                              errorWidget: (_, __, ___) =>
+                                  Container(color: const Color(0xFF252545)),
                             ),
+                          // Gradient overlay for title readability
+                          Positioned.fill(
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.black.withValues(alpha: 0.7),
+                                  ],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  stops: const [0.4, 1.0],
+                                ),
+                              ),
+                            ),
+                          ),
                           Positioned(
                             bottom: 0,
                             left: 0,
                             right: 0,
                             child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                LinearProgressIndicator(
-                                  value: item.progress,
-                                  backgroundColor: Colors.white24,
-                                  valueColor: const AlwaysStoppedAnimation<Color>(
-                                      AppTheme.primaryCyan),
-                                  minHeight: 3,
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.fromLTRB(6, 4, 6, 6),
-                                  width: double.infinity,
-                                  color: Colors.black54,
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(8, 0, 8, 4),
                                   child: Text(
                                     item.content.title ?? '',
                                     style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 11,
-                                        fontWeight: FontWeight.w500),
-                                    maxLines: 1,
+                                        fontWeight: FontWeight.w600,
+                                        shadows: [
+                                          Shadow(
+                                            color: Colors.black54,
+                                            blurRadius: 4,
+                                          ),
+                                        ]),
+                                    maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
+                                ),
+                                LinearProgressIndicator(
+                                  value: item.progress,
+                                  backgroundColor: Colors.white24,
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                          AppTheme.primaryCyan),
+                                  minHeight: 3,
                                 ),
                               ],
                             ),
@@ -883,11 +1123,11 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                             right: 6,
                             child: Container(
                               padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                color: Colors.black54,
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.6),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.play_arrow,
+                              child: const Icon(Icons.play_arrow_rounded,
                                   color: Colors.white, size: 14),
                             ),
                           ),
@@ -963,6 +1203,32 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       ),
     );
   }
+}
+
+/// A discriminated-union item used to build the feed list.
+class _FeedItem {
+  final Content? content;
+  final bool isAd;
+  final bool isSectionHeader;
+  final String? sectionTitle;
+
+  const _FeedItem.content(Content c)
+      : content = c,
+        isAd = false,
+        isSectionHeader = false,
+        sectionTitle = null;
+
+  const _FeedItem.ad()
+      : content = null,
+        isAd = true,
+        isSectionHeader = false,
+        sectionTitle = null;
+
+  const _FeedItem.sectionHeader(String title)
+      : content = null,
+        isAd = false,
+        isSectionHeader = true,
+        sectionTitle = title;
 }
 
 class _FilterBottomSheet extends StatefulWidget {

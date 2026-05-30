@@ -410,6 +410,59 @@ class _DiscoverTabState extends State<DiscoverTab> {
   }
 
   Widget _buildTrendingSection() {
+    if (_trending.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.trending_up,
+                size: 72,
+                color: Colors.white24,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'No trending content right now',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Come back later or try different filters',
+                style: TextStyle(color: Colors.white54, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  setState(() { _isLoading = true; _hasError = false; });
+                  ContentService.instance
+                      .getTrendingVideos(limit: 20, timeWindow: _selectedTimeWindow)
+                      .then((data) {
+                    if (mounted) setState(() { _trending = data; _content = _applyTimeFilter(data); _isLoading = false; });
+                  }).catchError((e) {
+                    if (mounted) setState(() { _isLoading = false; _hasError = true; });
+                  });
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Refresh'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF00D4FF),
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     final risingContent = _trending.skip(5).take(10).toList();
     return ListView(
       padding: EdgeInsets.zero,
@@ -419,7 +472,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
         _buildTrendingHorizontalScroll(),
         _buildSectionHeader('📈 Rising'),
         _buildVideoGrid(risingContent),
-        _buildSectionHeader('🎯 Popular Categories'),
+        _buildSectionHeader('⭐ Top Picks'),
         _buildCategoryGrid(),
         const SizedBox(height: 20),
       ],
@@ -488,13 +541,21 @@ class _DiscoverTabState extends State<DiscoverTab> {
         itemCount: trendingItems.length,
         itemBuilder: (context, index) {
           final content = trendingItems[index];
-          return _buildTrendingCard(content);
+          return _buildTrendingCard(content, rank: index + 1);
         },
       ),
     );
   }
 
-  Widget _buildTrendingCard(Content content) {
+  Color? _rankBadgeColor(int rank) {
+    if (rank == 1) return const Color(0xFFFFD700); // gold
+    if (rank == 2) return const Color(0xFFC0C0C0); // silver
+    if (rank == 3) return const Color(0xFFCD7F32); // bronze
+    return null;
+  }
+
+  Widget _buildTrendingCard(Content content, {int rank = 0}) {
+    final badgeColor = _rankBadgeColor(rank);
     return GestureDetector(
       onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
       child: Padding(
@@ -591,6 +652,37 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   ),
                 ),
               ),
+              // Rank badge for top 3
+              if (badgeColor != null)
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: badgeColor,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: badgeColor.withValues(alpha: 0.5),
+                          blurRadius: 6,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$rank',
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

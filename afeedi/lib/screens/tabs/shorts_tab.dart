@@ -289,38 +289,43 @@ class _ShortsTabState extends State<ShortsTab> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.videocam_off_outlined,
-              color: Colors.white.withValues(alpha: 0.4),
-              size: 72,
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'No shorts available',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.play_circle_outline,
+                size: 80,
+                color: Colors.white30,
               ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Check back later for new content',
-              style: TextStyle(color: Colors.white38, fontSize: 14),
-            ),
-            const SizedBox(height: 24),
-            TextButton.icon(
-              onPressed: _loadShortsContent,
-              icon: const Icon(Icons.refresh, color: AppTheme.primaryCyan),
-              label: const Text(
-                'Refresh',
-                style: TextStyle(color: AppTheme.primaryCyan),
+              const SizedBox(height: 24),
+              const Text(
+                'No Shorts available',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-          ],
+              const SizedBox(height: 10),
+              const Text(
+                'Check back soon for new shorts',
+                style: TextStyle(color: Colors.white54, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 28),
+              TextButton.icon(
+                onPressed: _loadShortsContent,
+                icon: const Icon(Icons.refresh, color: AppTheme.primaryCyan),
+                label: const Text(
+                  'Refresh',
+                  style: TextStyle(color: AppTheme.primaryCyan),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

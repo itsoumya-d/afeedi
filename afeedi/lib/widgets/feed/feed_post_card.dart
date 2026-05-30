@@ -191,7 +191,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                   widget.content.publishedAt != null
                       ? _formatTimeAgo(widget.content.publishedAt!)
                       : 'Unknown time',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                  style: const TextStyle(color: Colors.white54, fontSize: 11),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -262,9 +262,10 @@ class _FeedPostCardState extends State<FeedPostCard> {
       child: Text(
         widget.content.title ?? 'No title',
         style: const TextStyle(
-          fontSize: 13,
-          height: 1.3,
-          fontWeight: FontWeight.w500,
+          fontSize: 15,
+          height: 1.35,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.1,
         ),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
@@ -332,17 +333,18 @@ class _FeedPostCardState extends State<FeedPostCard> {
                       )
                     : _buildThumbnailFallback(platformColor, initial),
               ),
-              // Bottom gradient overlay for badge legibility
+              // Bottom gradient overlay for title legibility (Netflix/YouTube style)
               Container(
                 height: 200,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
                       Colors.transparent,
-                      Colors.black.withValues(alpha: 0.3),
+                      Colors.black54,
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
+                    stops: [0.4, 1.0],
                   ),
                 ),
               ),
@@ -476,9 +478,9 @@ class _FeedPostCardState extends State<FeedPostCard> {
         ? _formatTimeAgo(widget.content.publishedAt!)
         : null;
 
+    final viewsStr = '${_formatCount(widget.content.viewCount)} views';
     final parts = <String>[
-      '${_formatCount(widget.content.viewCount)} views',
-      '${_formatCount(widget.content.likeCount)} likes',
+      viewsStr,
       if (timeAgo != null) timeAgo,
     ];
 
@@ -486,7 +488,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
       padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
       child: Text(
         parts.join(' • '),
-        style: TextStyle(color: Colors.grey[600], fontSize: 11),
+        style: const TextStyle(color: Colors.white54, fontSize: 12),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
@@ -551,8 +553,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
           // Duration label
           Text(
             widget.content.formattedDuration,
-            style: TextStyle(
-              color: Colors.grey[600],
+            style: const TextStyle(
+              color: Colors.white54,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),

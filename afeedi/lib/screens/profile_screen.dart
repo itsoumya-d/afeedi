@@ -699,8 +699,8 @@ class _ProfileScreenState extends State<ProfileScreen>
     if (_likedItems.isEmpty) {
       return _buildEmptyState(
         icon: Icons.favorite_outline,
-        title: AppLocalizations.of(context)?.noLikedContent ?? 'No liked content',
-        subtitle: AppLocalizations.of(context)?.noLikedContentHint ?? 'Videos you like will appear here',
+        title: AppLocalizations.of(context)?.noLikedContent ?? 'No liked videos yet',
+        subtitle: AppLocalizations.of(context)?.noLikedContentHint ?? 'Like videos to see them here',
       );
     }
     return GridView.builder(
@@ -737,7 +737,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         ),
         Expanded(
           child: _savedItems.isEmpty
-              ? _buildEmptyState(icon: Icons.bookmark_outline, title: AppLocalizations.of(context)?.nothingSavedYet ?? 'Nothing saved yet', subtitle: AppLocalizations.of(context)?.bookmarkContentHint ?? 'Bookmark content to see it here')
+              ? _buildEmptyState(icon: Icons.bookmark_outline, title: AppLocalizations.of(context)?.nothingSavedYet ?? 'No saved videos yet', subtitle: AppLocalizations.of(context)?.bookmarkContentHint ?? 'Save videos to watch later')
               : GridView.builder(
                   padding: const EdgeInsets.all(12),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -841,7 +841,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           child: _viewingHistory.isEmpty
               ? _buildEmptyState(
                   icon: Icons.history,
-                  title: AppLocalizations.of(context)?.noHistoryYet ?? 'No history yet',
+                  title: AppLocalizations.of(context)?.noHistoryYet ?? 'No watch history yet',
                   subtitle: AppLocalizations.of(context)?.noHistoryHint ?? 'Videos you watch will appear here',
                 )
               : ListView.builder(
@@ -1294,19 +1294,23 @@ class _ProfileScreenState extends State<ProfileScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 60, color: Colors.white.withValues(alpha: 0.18)),
-            const SizedBox(height: 16),
+            Icon(icon, size: 72, color: Colors.white.withValues(alpha: 0.20)),
+            const SizedBox(height: 20),
             Text(
               title,
-              style: const TextStyle(color: Colors.white70, fontSize: 16),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text(
               subtitle,
-              style: const TextStyle(color: Colors.white60, fontSize: 13),
+              style: const TextStyle(color: Colors.white54, fontSize: 14),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,

@@ -54,8 +54,8 @@ void main() {
       await tester.pumpWidget(_buildApp(const SearchScreen()));
       await tester.pump();
 
-      // The discover section (shown when no query) shows "Trending Topics" heading
-      expect(find.text('Trending Topics'), findsOneWidget);
+      // The discover section (shown when no query) shows "Popular Topics" heading
+      expect(find.text('Popular Topics'), findsOneWidget);
     });
 
     testWidgets('SearchScreen shows search field', (tester) async {
@@ -77,7 +77,7 @@ void main() {
       await tester.pump();
 
       // When query is empty, no results are shown and discover view appears
-      expect(find.text('Trending Topics'), findsOneWidget);
+      expect(find.text('Popular Topics'), findsOneWidget);
     });
 
     testWidgets('SearchScreen shows discover content by platform', (tester) async {

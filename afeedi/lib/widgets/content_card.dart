@@ -24,7 +24,7 @@ class ContentCard extends StatelessWidget {
       width: isCompact ? UIScaling.cardWidth(context) * 0.8 : UIScaling.cardWidth(context),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
@@ -175,24 +175,41 @@ class ContentCard extends StatelessWidget {
                 color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
               ),
         ),
-        
+
+        // Gradient overlay for title legibility (Netflix/YouTube style)
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.54),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.45, 1.0],
+              ),
+            ),
+          ),
+        ),
+
         // Duration badge
         if (item.durationSeconds > 0)
           Positioned(
             bottom: 8,
             right: 8,
             child: Container(
-              padding: EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                 horizontal: 6,
                 vertical: 2,
               ),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.7),
+                color: Colors.black.withValues(alpha: 0.75),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
                 _formatDuration(item.durationSeconds),
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -200,14 +217,14 @@ class ContentCard extends StatelessWidget {
               ),
             ),
           ),
-          
+
         // New badge
         if (item.isNew)
           Positioned(
             top: 8,
             left: 8,
             child: Container(
-              padding: EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                 horizontal: 6,
                 vertical: 2,
               ),

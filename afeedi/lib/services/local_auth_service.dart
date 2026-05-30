@@ -302,20 +302,37 @@ class LocalAuthService {
     return base64Encode(saltBytes);
   }
 
-  String _pbkdf2Hash(String password, String saltBase64) {
+  // PBKDF2-HMAC-SHA256 per RFC 2898 §5.2.
+  // dkLen = 32 bytes (SHA-256 output) → one block is always sufficient, but the
+  // implementation supports multiple blocks so it is formally complete.
+  String _pbkdf2Hash(String password, String saltBase64, {int dkLen = 32}) {
     final passwordBytes = utf8.encode(password);
     final saltBytes = base64Decode(saltBase64);
-    final hmac = Hmac(sha256, passwordBytes);
-    // PBKDF2 block 1: U1 = PRF(password, salt || 0x00000001)
-    List<int> u = hmac.convert([...saltBytes, 0, 0, 0, 1]).bytes;
-    List<int> derived = List<int>.from(u);
-    for (int i = 1; i < _pbkdf2Iterations; i++) {
-      u = hmac.convert(u).bytes;
-      for (int j = 0; j < derived.length; j++) {
-        derived[j] ^= u[j];
+    final hLen = 32; // SHA-256 output length in bytes
+    final numBlocks = (dkLen / hLen).ceil();
+    final derived = <int>[];
+
+    for (int blockIndex = 1; blockIndex <= numBlocks; blockIndex++) {
+      final hmac = Hmac(sha256, passwordBytes);
+      // U1 = PRF(password, salt || INT(blockIndex))
+      final blockCounter = [
+        (blockIndex >> 24) & 0xFF,
+        (blockIndex >> 16) & 0xFF,
+        (blockIndex >> 8) & 0xFF,
+        blockIndex & 0xFF,
+      ];
+      List<int> u = hmac.convert([...saltBytes, ...blockCounter]).bytes;
+      final block = List<int>.from(u);
+      for (int iter = 1; iter < _pbkdf2Iterations; iter++) {
+        u = Hmac(sha256, passwordBytes).convert(u).bytes;
+        for (int j = 0; j < block.length; j++) {
+          block[j] ^= u[j];
+        }
       }
+      derived.addAll(block);
     }
-    return base64Encode(derived);
+
+    return base64Encode(derived.take(dkLen).toList());
   }
 
   // Legacy SHA-256 hash — used only to verify and upgrade old credentials

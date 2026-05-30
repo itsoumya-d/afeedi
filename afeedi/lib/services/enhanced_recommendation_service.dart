@@ -337,6 +337,24 @@ class EnhancedRecommendationService {
       score += platformScore * 0.2;
     }
 
+    // --- Implicit taste profile (dynamic learning from watch history) ---
+    final implicitWeights = await _loadImplicitWeights();
+    if (implicitWeights.isNotEmpty) {
+      final totalImplicit = implicitWeights.values.fold(0, (a, b) => a + b);
+      if (totalImplicit > 0) {
+        double implicitBoost = 0.0;
+        for (final signal in [...content.tags, ...content.categories]) {
+          final key = signal.toLowerCase();
+          final count = implicitWeights[key] ?? 0;
+          if (count > 0) {
+            // Logarithmic scaling: heavy watchers get diminishing returns
+            implicitBoost += (count / totalImplicit) * 1.0;
+          }
+        }
+        score += implicitBoost.clamp(0.0, 2.0);
+      }
+    }
+
     return score;
   }
 
@@ -354,11 +372,67 @@ class EnhancedRecommendationService {
     return score * multiplier;
   }
   
-  // Track content interaction for future recommendations
+  static const String _implicitWeightsKey = 'genre_implicit_weights';
+
+  // Track content interaction and update implicit genre weights in SharedPreferences.
+  // Each interaction increments the genre counters, which are read back by
+  // _computeRelevanceScore() to bias future recommendations toward watched genres.
   Future<void> trackContentInteraction(Map<String, dynamic> interaction) async {
-    // TODO: Implement interaction tracking
-    // For now, just log the interaction
-    debugPrint('Content interaction tracked: $interaction');
+    try {
+      final tags = List<String>.from(interaction['tags'] as List? ?? []);
+      final categories = List<String>.from(interaction['categories'] as List? ?? []);
+      final allSignals = [...tags, ...categories].map((s) => s.toLowerCase()).toList();
+      if (allSignals.isEmpty) return;
+
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_implicitWeightsKey);
+      final weights = <String, int>{};
+      if (raw != null) {
+        try {
+          final decoded = raw.split(',').where((e) => e.contains(':'));
+          for (final entry in decoded) {
+            final parts = entry.split(':');
+            if (parts.length == 2) weights[parts[0]] = int.tryParse(parts[1]) ?? 0;
+          }
+        } catch (_) {}
+      }
+
+      // Map raw tags/categories to canonical genre names via the genre tag map
+      for (final signal in allSignals) {
+        for (final entry in _genreTagMap.entries) {
+          if (entry.key == signal || entry.value.any((v) => signal.contains(v) || v.contains(signal))) {
+            weights[entry.key] = (weights[entry.key] ?? 0) + 1;
+            break;
+          }
+        }
+        // Also directly track by signal if no genre match
+        weights[signal] = (weights[signal] ?? 0) + 1;
+      }
+
+      // Persist as a compact "key:value,..." string (SharedPreferences has no Map support)
+      await prefs.setString(
+        _implicitWeightsKey,
+        weights.entries.map((e) => '${e.key}:${e.value}').join(','),
+      );
+    } catch (e) {
+      if (kDebugMode) debugPrint('Error tracking implicit genre weight: $e');
+    }
+  }
+
+  Future<Map<String, int>> _loadImplicitWeights() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_implicitWeightsKey);
+      if (raw == null || raw.isEmpty) return {};
+      final weights = <String, int>{};
+      for (final entry in raw.split(',').where((e) => e.contains(':'))) {
+        final parts = entry.split(':');
+        if (parts.length == 2) weights[parts[0]] = int.tryParse(parts[1]) ?? 0;
+      }
+      return weights;
+    } catch (_) {
+      return {};
+    }
   }
   
   // Get personalized recommendations

@@ -2511,19 +2511,29 @@ class ContentService {
     try {
       final enhancedService = EnhancedRecommendationService.instance;
       final authService = AuthService.instance;
-      
+
       final user = authService.currentUser;
       if (user == null) return;
-      
+
+      // Look up the content to pass its tags/categories as implicit learning signals
+      final content = await getVideoById(contentId);
+      final interactionData = <String, dynamic>{};
+      if (watchTimeSeconds != null) interactionData['watchTimeSeconds'] = watchTimeSeconds;
+      if (content != null) {
+        interactionData['tags'] = content.tags;
+        interactionData['categories'] = content.categories;
+        interactionData['platform'] = content.platform.name;
+      }
+
       final interaction = ContentInteraction(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         userId: user.id,
         contentId: contentId,
         interactionType: interactionType,
-        interactionData: watchTimeSeconds != null ? {'watchTimeSeconds': watchTimeSeconds} : {},
+        interactionData: interactionData,
         createdAt: DateTime.now(),
       );
-      
+
       await enhancedService.trackContentInteraction(interaction.toJson());
     } catch (e) {
       if (kDebugMode) debugPrint('Error tracking content interaction: $e');

@@ -274,10 +274,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
     final type = notification['type'] as String?;
     switch (type) {
       case 'new_content':
-      case 'recommendation':
         Navigator.of(context).pushNamed(AppRoutes.search);
-      case 'trending':
+      case 'recommendation':
         Navigator.of(context).pushNamed(AppRoutes.dashboard);
+      case 'trending':
+        Navigator.of(context).pushNamed(AppRoutes.search);
+      case 'achievement':
+        Navigator.of(context).pushNamed(AppRoutes.profile);
       default:
         break;
     }

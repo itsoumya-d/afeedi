@@ -207,7 +207,9 @@ class _ProfileScreenState extends State<ProfileScreen>
         final bio = prefs.getString('user_bio');
         if (bio != null && bio.isNotEmpty) _bioText = bio;
         final savedAvatarPath = prefs.getString('user_avatar_path');
-        if (savedAvatarPath != null && File(savedAvatarPath).existsSync()) {
+        if (savedAvatarPath != null &&
+            !savedAvatarPath.contains('..') &&
+            File(savedAvatarPath).existsSync()) {
           _localAvatarPath = savedAvatarPath;
         }
         _isLoading = false;
@@ -1022,12 +1024,44 @@ class _ProfileScreenState extends State<ProfileScreen>
               ],
             ),
           ),
-          IconButton(
-            onPressed: () {},
-            constraints:
-                const BoxConstraints.tightFor(width: 44, height: 44),
-            icon: const Icon(Icons.more_vert,
-                color: Colors.white54, size: 18),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.white54, size: 18),
+            color: const Color(0xFF1E1E2E),
+            constraints: const BoxConstraints.tightFor(width: 44, height: 44),
+            onSelected: (value) async {
+              if (value == 'play' && content != null) {
+                Navigator.pushNamed(context, AppRoutes.player, arguments: content);
+              } else if (value == 'remove' && content != null) {
+                final prefs = await SharedPreferences.getInstance();
+                final ids = prefs.getStringList('watched_ids') ?? [];
+                ids.remove(content.id);
+                await prefs.setStringList('watched_ids', ids);
+                await prefs.remove('watch_progress_${content.id}');
+                await prefs.remove('watched_at_${content.id}');
+                if (mounted) {
+                  setState(() => _viewingHistory.removeWhere(
+                    (i) => (i['content'] as Content?)?.id == content.id));
+                }
+              }
+            },
+            itemBuilder: (_) => [
+              const PopupMenuItem(
+                value: 'play',
+                child: Row(children: [
+                  Icon(Icons.play_arrow, color: Colors.white70, size: 18),
+                  SizedBox(width: 8),
+                  Text('Play', style: TextStyle(color: Colors.white70)),
+                ]),
+              ),
+              const PopupMenuItem(
+                value: 'remove',
+                child: Row(children: [
+                  Icon(Icons.delete_outline, color: Colors.redAccent, size: 18),
+                  SizedBox(width: 8),
+                  Text('Remove from history', style: TextStyle(color: Colors.redAccent)),
+                ]),
+              ),
+            ],
           ),
         ],
       ),

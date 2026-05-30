@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/analytics_service.dart';
+import '../services/subscription_service.dart';
 
 class PremiumScreen extends StatefulWidget {
   const PremiumScreen({super.key});
@@ -375,30 +376,101 @@ class _PremiumScreenState extends State<PremiumScreen> {
     final price = prices[_selectedPlan - 1];
     final color = _selectedPlan == 1 ? const Color(0xFF00D4FF) : const Color(0xFF7B61FF);
 
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () => _handleSubscribe(context, planName),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.black,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          elevation: 0,
-        ),
-        child: Text(
-          'Start $planName — $price',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-      ),
+    return ListenableBuilder(
+      listenable: SubscriptionService.instance,
+      builder: (context, _) {
+        final sub = SubscriptionService.instance;
+
+        if (sub.isPremium) {
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.green.withOpacity(0.4)),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.check_circle, color: Colors.green, size: 20),
+                SizedBox(width: 8),
+                Text('You\'re already Pro!', style: TextStyle(color: Colors.green, fontSize: 16, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          );
+        }
+
+        if (sub.isLoading) {
+          return const SizedBox(
+            width: double.infinity,
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00D4FF)),
+                ),
+              ),
+            ),
+          );
+        }
+
+        if (sub.purchaseState == PurchaseState.error) {
+          return Column(
+            children: [
+              Text(
+                sub.errorMessage ?? 'Purchase failed. Please try again.',
+                style: const TextStyle(color: Colors.redAccent, fontSize: 12),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    sub.resetError();
+                    _handleSubscribe(context, planName);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: color,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    elevation: 0,
+                  ),
+                  child: const Text('Try Again', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          );
+        }
+
+        return SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () => _handleSubscribe(context, planName),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: color,
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              elevation: 0,
+            ),
+            child: Text(
+              'Start 7-Day Free Trial — $price after',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildFooter() {
     return const Text(
-      'Cancel anytime. Billed via App Store / Google Play.\nSubscription auto-renews unless cancelled.',
+      'Cancel anytime during trial. No charge until trial ends.\nBilled via App Store / Google Play.',
       style: TextStyle(color: Colors.white24, fontSize: 11, height: 1.6),
       textAlign: TextAlign.center,
     );
@@ -410,14 +482,25 @@ class _PremiumScreenState extends State<PremiumScreen> {
       screen: 'premium',
       additionalData: {'plan': planName, 'billing': _isAnnual ? 'annual' : 'monthly'},
     );
+
+    if (planName == 'Pro') {
+      if (_isAnnual) {
+        SubscriptionService.instance.purchaseYearly();
+      } else {
+        SubscriptionService.instance.purchaseMonthly();
+      }
+      return;
+    }
+
+    // Creator tier: coming soon
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFF1A1A2E),
-        title: const Text('Coming Soon', style: TextStyle(color: Colors.white)),
-        content: Text(
-          'In-app purchases for $planName will be available when Afeedi launches on the App Store and Google Play.',
-          style: const TextStyle(color: Colors.white70),
+        title: const Text('Creator Tier — Coming Soon', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'Creator tier with analytics dashboard and multi-platform posting will be available at launch.',
+          style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
@@ -430,21 +513,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
   }
 
   void _showRestoreDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
-        title: const Text('Restore Purchases', style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'No previous purchases found for this account.',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK', style: TextStyle(color: Color(0xFF00D4FF))),
-          ),
-        ],
+    SubscriptionService.instance.restorePurchases();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Checking previous purchases...'),
+        backgroundColor: Color(0xFF1A1A2E),
+        duration: Duration(seconds: 3),
       ),
     );
   }

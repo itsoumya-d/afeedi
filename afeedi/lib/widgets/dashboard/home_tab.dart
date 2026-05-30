@@ -11,6 +11,8 @@ import '../../services/auth_service.dart';
 import '../../services/connectivity_service.dart';
 import '../../services/user_interaction_service.dart';
 import '../../services/navigation_service.dart';
+import '../../services/subscription_service.dart';
+import '../ads/in_feed_ad_card.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -73,6 +75,15 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     _loadContinueWatching();
     _scrollController.addListener(_onScroll);
     _checkConnectivity();
+    _checkProactivePaywall();
+  }
+
+  Future<void> _checkProactivePaywall() async {
+    final shouldShow = await SubscriptionService.instance.shouldShowProactivePaywall();
+    if (shouldShow && mounted) {
+      await Future.delayed(const Duration(milliseconds: 800));
+      if (mounted) Navigator.of(context).pushNamed(AppRoutes.premium);
+    }
   }
 
   Future<void> _loadContinueWatching() async {
@@ -649,6 +660,17 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     final continueSection = _continueWatching.isNotEmpty
         ? _buildContinueWatchingSection()
         : null;
+
+    // Build mixed list: inject ad slot (null) every 6 content cards for free users
+    final isPremium = SubscriptionService.instance.isPremium;
+    final List<Content?> mixedList = [];
+    for (int i = 0; i < displayPosts.length; i++) {
+      mixedList.add(displayPosts[i]);
+      if (!isPremium && (i + 1) % 6 == 0) {
+        mixedList.add(null); // null = ad slot
+      }
+    }
+
     final extraItems = (continueSection != null ? 1 : 0) +
         (_isLoading ? 1 : 0) +
         (_showFollowSuggestion ? 1 : 0);
@@ -660,7 +682,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       child: ListView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: displayPosts.length + extraItems,
+        itemCount: mixedList.length + extraItems,
         addRepaintBoundaries: false, // we add our own RepaintBoundary per card
         addAutomaticKeepAlives: false,
         itemBuilder: (context, index) {
@@ -673,10 +695,11 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             return _buildFollowSuggestionBanner(context);
           }
           // Adjust index for the injected banner
-          final postIndex = _showFollowSuggestion && offsetIndex > 2
+          final listIndex = _showFollowSuggestion && offsetIndex > 2
               ? offsetIndex - 1
               : offsetIndex;
-          if (postIndex >= displayPosts.length) {
+
+          if (listIndex >= mixedList.length) {
             return const Padding(
               padding: EdgeInsets.all(20),
               child: Center(
@@ -687,11 +710,16 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             );
           }
 
-          final post = displayPosts[postIndex];
+          final item = mixedList[listIndex];
+          if (item == null) {
+            // Ad slot — render native in-feed ad
+            return const InFeedAdCard();
+          }
+
           return RepaintBoundary(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 16),
-              child: FeedPostCard(content: post),
+              child: FeedPostCard(content: item),
             ),
           );
         },

@@ -16,6 +16,8 @@ import 'services/platform_view_registration_service.dart';
 import 'services/recommendation_integration_service.dart';
 import 'services/user_interaction_service.dart';
 import 'services/notification_service.dart';
+import 'services/subscription_service.dart';
+import 'services/ad_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/storage/local_storage_service.dart';
 import 'l10n/app_localizations.dart';
@@ -89,6 +91,13 @@ Future<void> _appMain() async {
 
     // Initialize locale service for multilingual support
     await LocaleService.instance.initialize();
+
+    // Initialize subscription service (loads cached premium state + sets up IAP stream)
+    await SubscriptionService.instance.initialize();
+
+    // Initialize AdMob (non-blocking; ads load lazily when widgets mount)
+    AdService.instance.initialize().catchError(
+        (e) => debugPrint('AdService init error: $e'));
 
   } catch (error) {
     // Handle initialization errors

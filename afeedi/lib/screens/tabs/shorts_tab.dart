@@ -6,6 +6,7 @@ import '../../models/content_model.dart';
 import '../../services/content_service.dart';
 import '../../services/analytics_service.dart';
 import '../../services/navigation_service.dart';
+import '../../services/subscription_service.dart';
 import '../../services/user_interaction_service.dart';
 
 class ShortsTab extends StatefulWidget {
@@ -24,6 +25,7 @@ class _ShortsTabState extends State<ShortsTab> {
   Set<String> _followedCreators = {};
   Set<String> _likedContent = {};
   Set<String> _savedContent = {};
+  int _scrollCount = 0;
 
   @override
   void initState() {
@@ -220,7 +222,10 @@ class _ShortsTabState extends State<ShortsTab> {
             controller: _pageController,
             scrollDirection: Axis.vertical,
             onPageChanged: (index) {
-              setState(() => _currentIndex = index);
+              setState(() {
+                _currentIndex = index;
+                _scrollCount++;
+              });
               if (_shortsContent.isNotEmpty && index < _shortsContent.length) {
                 AnalyticsService.instance.trackUserInteraction(
                   action: 'short_viewed',
@@ -232,6 +237,7 @@ class _ShortsTabState extends State<ShortsTab> {
                   },
                 );
               }
+              _checkShortsUpsell();
             },
             itemCount: itemCount,
             itemBuilder: (context, index) {
@@ -1024,6 +1030,34 @@ class _ShortsTabState extends State<ShortsTab> {
   }
 
   // ─── Interaction handlers ──────────────────────────────────────────────────
+
+  Future<void> _checkShortsUpsell() async {
+    final shouldShow = await SubscriptionService.instance.shouldShowShortsUpsell(_scrollCount);
+    if (!shouldShow || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(seconds: 5),
+        backgroundColor: const Color(0xFF1A1A2E),
+        content: const Row(
+          children: [
+            Icon(Icons.bolt, color: Color(0xFF00D4FF), size: 18),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Go ad-free with Afeedi Pro',
+                style: TextStyle(color: Colors.white, fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+        action: SnackBarAction(
+          label: 'Upgrade',
+          textColor: const Color(0xFF00D4FF),
+          onPressed: () => Navigator.of(context).pushNamed(AppRoutes.premium),
+        ),
+      ),
+    );
+  }
 
   /// Toggles the like state for [content] and persists via [UserInteractionService].
   void _handleLike(Content content) {

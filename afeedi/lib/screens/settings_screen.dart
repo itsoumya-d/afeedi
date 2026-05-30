@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/navigation_service.dart';
 import '../services/locale_service.dart';
+import '../services/subscription_service.dart';
 import '../widgets/common/language_selector_sheet.dart';
 
 /// Settings screen — grouped sections with SwitchListTile, dropdown tiles,
@@ -371,67 +372,82 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // ── Premium banner ─────────────────────────────────────────────────
 
   Widget _buildPremiumBanner(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, AppRoutes.premium),
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF003A4A), Color(0xFF2A1A4A)],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
+    return ListenableBuilder(
+      listenable: SubscriptionService.instance,
+      builder: (context, _) {
+        final isPremium = SubscriptionService.instance.isPremium;
+        return GestureDetector(
+          onTap: () => Navigator.pushNamed(context, AppRoutes.premium),
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isPremium
+                    ? [const Color(0xFF003A2A), const Color(0xFF0A2A1A)]
+                    : [const Color(0xFF003A4A), const Color(0xFF2A1A4A)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                  color: (isPremium ? Colors.green : const Color(0xFF00D4FF))
+                      .withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  isPremium ? Icons.verified : Icons.bolt,
+                  color: isPremium ? Colors.green : const Color(0xFF00D4FF),
+                  size: 28,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isPremium ? 'Afeedi Pro — Active' : 'Upgrade to Pro',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        isPremium
+                            ? 'Ad-free · Unlimited saves · AI feed'
+                            : 'Ad-free, AI feed, unlimited saves',
+                        style:
+                            const TextStyle(color: Colors.white54, fontSize: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isPremium ? Colors.green : const Color(0xFF00D4FF),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    isPremium ? 'Manage' : 'See Plans',
+                    style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
           ),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-              color: const Color(0xFF00D4FF).withOpacity(0.3)),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.bolt, color: Color(0xFF00D4FF), size: 28),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Upgrade to Pro',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 2),
-                  Text(
-                    'Ad-free, AI feed, unlimited saves',
-                    style:
-                        TextStyle(color: Colors.white54, fontSize: 12),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFF00D4FF),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                'See Plans',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 

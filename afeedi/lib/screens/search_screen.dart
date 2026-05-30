@@ -32,11 +32,6 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   PlatformType? _selectedPlatform;
   String? _selectedCategory;
 
-  final List<String> _trendingTopics = [
-    'Flutter', 'JavaScript', 'Python', 'React', 'AI', 'Machine Learning',
-    'Web Dev', 'Data Science', 'DevOps', 'Mobile Dev',
-  ];
-
   // Genre chips with their matching tag keywords
   final List<Map<String, dynamic>> _genres = [
     {'label': 'Gaming', 'icon': Icons.sports_esports, 'keywords': ['gaming', 'game', 'esports', 'gameplay', 'streaming', 'minecraft', 'fortnite']},

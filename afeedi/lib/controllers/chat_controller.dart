@@ -5,7 +5,6 @@ import '../models/genre.dart';
 import '../models/onboarding_step.dart';
 import '../services/onboarding_service.dart';
 import '../services/analytics_service.dart';
-import '../services/navigation_service.dart';
 
 class ChatController extends ChangeNotifier {
   final OnboardingService _onboardingService = OnboardingService();

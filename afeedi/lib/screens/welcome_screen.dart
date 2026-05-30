@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui' as ui;
 import '../l10n/app_localizations.dart';
 import '../services/navigation_service.dart';
@@ -54,41 +53,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) _slideController.forward();
     });
-  }
-
-  Future<void> _launchUrl(String urlString) async {
-    // Validate that the URL uses http or https before launching
-    final uri = Uri.tryParse(urlString);
-    if (uri == null ||
-        !uri.hasScheme ||
-        (!urlString.startsWith('http://') &&
-            !urlString.startsWith('https://'))) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Invalid URL: only http and https links are supported.',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        );
-      }
-      return;
-    }
-    if (!await launchUrl(uri)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Could not open the link. Please try again.',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        );
-      }
-    }
   }
 
   @override

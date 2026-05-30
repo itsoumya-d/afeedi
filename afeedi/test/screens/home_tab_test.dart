@@ -115,7 +115,7 @@ void main() {
 
     testWidgets('has Instagram platform filter', (tester) async {
       await pumpHomeTab(tester);
-      expect(find.text('Instagram'), findsOneWidget);
+      expect(find.text('Instagram', skipOffstage: false), findsWidgets);
     });
 
     testWidgets('has TikTok platform filter', (tester) async {

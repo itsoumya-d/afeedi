@@ -154,8 +154,12 @@ class ChatController extends ChangeNotifier {
     switch (key) {
       case 'welcome':
         _currentSuggestions = ['Hi there!', 'Hello!', 'Let\'s go!', 'I\'m ready'];
-      case 'viewing_habits':
+      case 'viewing_frequency':
         _currentSuggestions = ['Watch daily', 'A few times a week', 'Mostly weekends', 'All the time!'];
+      case 'content_goals':
+        _currentSuggestions = ['Entertainment & fun', 'Learning new things', 'Stay on trends', 'Just to relax'];
+      case 'content_language':
+        _currentSuggestions = ['English', 'Hindi', 'Spanish', 'Mix of languages'];
       case 'personal_info':
         _currentSuggestions = ['Alex', 'Sam', 'Jordan', 'Casey'];
       case 'completion':

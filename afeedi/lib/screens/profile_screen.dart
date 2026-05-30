@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/theme/app_theme.dart';
 import '../services/local_auth_service.dart';
-import '../services/user_interaction_service.dart';
+
+// ─── Color palette ───────────────────────────────────────────────────────────
+const Color _bgPrimary       = Color(0xFF0D0B1E);
+const Color _surface         = Color(0xFF1A1A2E);
+const Color _surfaceElevated = Color(0xFF252545);
+const Color _accent          = Color(0xFF00D4FF);
+const Color _accentPink      = Color(0xFFFF006E);
+// ─────────────────────────────────────────────────────────────────────────────
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -11,21 +17,26 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateMixin {
+class _ProfileScreenState extends State<ProfileScreen>
+    with TickerProviderStateMixin {
   late TabController _tabController;
-  
+
   final Map<String, dynamic> _userProfile = {
     'name': 'You',
     'email': '',
     'joinDate': 'Today',
     'avatar': null,
+    'coverPhoto': null,
     'isPremium': false,
     'level': 1,
     'totalWatchTime': '0 min',
     'videosWatched': 0,
     'streakDays': 1,
+    'savedCount': 0,
+    'likedCount': 0,
+    'followingCount': 0,
   };
-  
+
   final List<Map<String, dynamic>> _achievements = [
     {
       'id': 'welcome',
@@ -64,18 +75,25 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       'progress': 0.14,
     },
   ];
-  
+
   final List<Map<String, dynamic>> _viewingHistory = [];
+  final List<Map<String, dynamic>> _likedItems     = [];
+  final List<Map<String, dynamic>> _savedItems     = [];
+
+  bool _bioExpanded = false;
+
+  static const String _bioText =
+      'Curious mind. Content explorer. Watching the world one feed at a time.';
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _loadUserData();
   }
 
   Future<void> _loadUserData() async {
-    final user = LocalAuthService.instance.currentUser;
+    final user  = LocalAuthService.instance.currentUser;
     final prefs = await SharedPreferences.getInstance();
 
     String name;
@@ -86,28 +104,24 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       name = prefs.getString('onboarding_user_name') ??
           prefs.getString('user_name') ??
           user.email.split('@').first;
-      email = user.email;
+      email    = user.email;
       joinDate = '${_monthName(user.createdAt.month)} ${user.createdAt.year}';
     } else {
-      name = prefs.getString('onboarding_user_name') ?? 'You';
-      email = '';
+      name     = prefs.getString('onboarding_user_name') ?? 'You';
+      email    = '';
       joinDate = 'Today';
     }
 
-    // Load persisted stats
     final videosWatched = prefs.getInt('stat_videos_watched') ?? 0;
-    final streakDays = prefs.getInt('stat_streak_days') ?? 1;
-    final watchMinutes = prefs.getInt('stat_watch_minutes') ?? 0;
-    final watchTimeStr = watchMinutes >= 60
+    final streakDays    = prefs.getInt('stat_streak_days')    ?? 1;
+    final watchMinutes  = prefs.getInt('stat_watch_minutes')  ?? 0;
+    final watchTimeStr  = watchMinutes >= 60
         ? '${watchMinutes ~/ 60}h ${watchMinutes % 60}m'
         : '${watchMinutes}m';
 
-    // Load interaction stats from UserInteractionService
-    final interactionService = UserInteractionService.instance;
-    final likedCount = interactionService.getSavedContentIds().length +
-        interactionService.getFollowedCreatorIds().length; // proxies for activity
-    final savedCount = interactionService.getSavedContentIds().length;
-    final followingCount = interactionService.getFollowedCreatorIds().length;
+    final savedCount     = prefs.getInt('stat_saved_count')     ?? 0;
+    final followingCount = prefs.getInt('stat_following_count') ?? 0;
+    final likedCount     = prefs.getInt('stat_liked_count')     ?? 0;
 
     // Update achievements based on real activity
     if (user != null || name != 'You') {
@@ -130,16 +144,16 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
 
     if (mounted) {
       setState(() {
-        _userProfile['name'] = name;
-        _userProfile['email'] = email;
-        _userProfile['joinDate'] = joinDate;
-        _userProfile['videosWatched'] = videosWatched;
-        _userProfile['streakDays'] = streakDays;
+        _userProfile['name']           = name;
+        _userProfile['email']          = email;
+        _userProfile['joinDate']       = joinDate;
+        _userProfile['videosWatched']  = videosWatched;
+        _userProfile['streakDays']     = streakDays;
         _userProfile['totalWatchTime'] = watchTimeStr;
-        _userProfile['level'] = (videosWatched ~/ 10) + 1;
-        _userProfile['savedCount'] = savedCount;
+        _userProfile['level']          = (videosWatched ~/ 10) + 1;
+        _userProfile['savedCount']     = savedCount;
         _userProfile['followingCount'] = followingCount;
-        _userProfile['likedCount'] = likedCount;
+        _userProfile['likedCount']     = likedCount;
       });
     }
   }
@@ -147,385 +161,791 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   String _monthName(int month) {
     const months = [
       '', 'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'July', 'August', 'September', 'October', 'November', 'December',
     ];
     return months[month];
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
 
+  // ───────────────────────────────────────────────── BUILD ──────────────────
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.darkPrimary,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppTheme.primaryCyan.withValues(alpha: 0.1),
-              AppTheme.darkPrimary,
-              AppTheme.primaryPink.withValues(alpha: 0.1),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildAppBar(),
-              _buildProfileHeader(),
-              _buildStatsRow(),
-              _buildTabBar(),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildAchievementsTab(),
-                    _buildHistoryTab(),
-                    _buildSubscriptionTab(),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildAppBar() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.arrow_back,
-                color: Colors.white,
-                size: 24,
-              ),
-            ),
-          ),
-          const Spacer(),
-          const Text(
-            'Profile',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => _showEditProfileDialog(),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.edit,
-                color: AppTheme.primaryCyan,
-                size: 24,
-              ),
-            ),
-          ),
+      backgroundColor: _bgPrimary,
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) => [
+          _buildSliverHeader(),
         ],
-      ),
-    );
-  }
-  
-  Widget _buildProfileHeader() {
-    final name = _userProfile['name'] as String;
-    final initial = name.isNotEmpty ? name[0].toUpperCase() : 'A';
-
-    return Column(
-      children: [
-        // Banner / cover photo (TikTok/YouTube Channel pattern)
-        Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.bottomCenter,
+        body: Column(
           children: [
-            // Banner gradient
-            Container(
-              height: 100,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppTheme.primaryCyan.withValues(alpha: 0.7),
-                    AppTheme.primaryPink.withValues(alpha: 0.7),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-              child: Opacity(
-                opacity: 0.15,
-                child: GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
-                  itemCount: 80,
-                  itemBuilder: (_, __) => Container(
-                    margin: const EdgeInsets.all(1),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // Avatar overlaid on banner bottom (offset 50% below)
-            Positioned(
-              bottom: -50,
-              child: Stack(
+            _buildTabBar(),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
                 children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppTheme.darkPrimary, width: 4),
-                      gradient: const LinearGradient(
-                        colors: [AppTheme.primaryCyan, AppTheme.primaryPink],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        initial,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (_userProfile['isPremium'])
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryPink,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppTheme.darkPrimary, width: 2),
-                        ),
-                        child: const Icon(Icons.star, color: Colors.white, size: 14),
-                      ),
-                    ),
+                  _buildLikedTab(),
+                  _buildSavedTab(),
+                  _buildHistoryTab(),
+                  _buildAchievementsTab(),
                 ],
               ),
             ),
           ],
         ),
-        const SizedBox(height: 60), // Space for avatar overflow
-        Text(
-          _userProfile['name'],
+      ),
+    );
+  }
+
+  // ─── SLIVER HEADER ────────────────────────────────────────────────────────
+
+  Widget _buildSliverHeader() {
+    return SliverToBoxAdapter(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildCoverAndAvatar(),
+          _buildProfileInfo(),
+          _buildStatsRow(),
+        ],
+      ),
+    );
+  }
+
+  // ─── COVER + AVATAR ───────────────────────────────────────────────────────
+
+  Widget _buildCoverAndAvatar() {
+    final coverUrl = _userProfile['coverPhoto'] as String?;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // Cover photo — 200dp height
+        SizedBox(
+          height: 200,
+          width: double.infinity,
+          child: coverUrl != null && coverUrl.isNotEmpty
+              ? Image.network(
+                  coverUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _coverGradient(),
+                )
+              : _coverGradient(),
+        ),
+
+        // Back button — top-left, 44x44 touch target
+        Positioned(
+          top: 12,
+          left: 12,
+          child: SafeArea(
+            bottom: false,
+            child: IconButton(
+              onPressed: () => Navigator.maybePop(context),
+              constraints: const BoxConstraints.tightFor(width: 44, height: 44),
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.black.withValues(alpha: 0.45),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+              tooltip: 'Back',
+            ),
+          ),
+        ),
+
+        // Edit profile button — top-right, 44x44 touch target
+        Positioned(
+          top: 12,
+          right: 12,
+          child: SafeArea(
+            bottom: false,
+            child: IconButton(
+              onPressed: _showEditProfileDialog,
+              constraints: const BoxConstraints.tightFor(width: 44, height: 44),
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.black.withValues(alpha: 0.45),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              icon: const Icon(Icons.edit, color: Colors.white, size: 20),
+              tooltip: 'Edit profile',
+            ),
+          ),
+        ),
+
+        // Avatar — 80dp circle overlapping cover bottom by 40dp, 16dp from left
+        Positioned(
+          bottom: -40,
+          left: 16,
+          child: _buildAvatar(),
+        ),
+      ],
+    );
+  }
+
+  Widget _coverGradient() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF1C1C2E), Color(0xFF0D0D1A)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatar() {
+    final avatarUrl = _userProfile['avatar'] as String?;
+    final name      = _userProfile['name']   as String? ?? '';
+    final initial   = name.isNotEmpty ? name[0].toUpperCase() : 'A';
+
+    return Stack(
+      children: [
+        // Outer border ring — 80dp avatar + 4dp border each side = 88dp
+        Container(
+          width: 88,
+          height: 88,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: _bgPrimary, width: 4),
+            color: _surfaceElevated,
+          ),
+          child: ClipOval(
+            child: avatarUrl != null && avatarUrl.isNotEmpty
+                ? Image.network(
+                    avatarUrl,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: _surfaceElevated,
+                      child: const Icon(Icons.person, color: Colors.white38),
+                    ),
+                  )
+                : _avatarFallback(initial),
+          ),
+        ),
+        // Premium / verified badge
+        if (_userProfile['isPremium'] == true)
+          Positioned(
+            bottom: 4,
+            right: 4,
+            child: Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                color: _accentPink,
+                shape: BoxShape.circle,
+                border: Border.all(color: _bgPrimary, width: 2),
+              ),
+              child: const Icon(Icons.star, color: Colors.white, size: 12),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _avatarFallback(String initial) {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [_accent, _accentPink],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(
+        child: Text(
+          initial,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 24,
+            fontSize: 32,
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          _userProfile['email'],
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 16,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppTheme.primaryCyan.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppTheme.primaryCyan.withValues(alpha: 0.5)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+      ),
+    );
+  }
+
+  // ─── PROFILE INFO ─────────────────────────────────────────────────────────
+
+  Widget _buildProfileInfo() {
+    final name     = _userProfile['name']     as String? ?? '';
+    final email    = _userProfile['email']    as String? ?? '';
+    final joinDate = _userProfile['joinDate'] as String? ?? '';
+
+    return Padding(
+      // 40dp for avatar overhang + 8dp gap
+      padding: const EdgeInsets.fromLTRB(16, 50, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Name + PRO badge row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(
-                Icons.calendar_today,
-                color: AppTheme.primaryCyan,
-                size: 16,
+              Expanded(
+                child: Text(
+                  name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    height: 1.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              const SizedBox(width: 6),
-              Text(
-                'Joined ${_userProfile['joinDate']}',
-                style: TextStyle(
-                  color: AppTheme.primaryCyan,
-                  fontSize: 14,
+              if (_userProfile['isPremium'] == true) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [_accent, _accentPink],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'PRO',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 4),
+
+          // @handle / email
+          if (email.isNotEmpty)
+            Text(
+              email.contains('@') ? '@${email.split('@').first}' : email,
+              style: const TextStyle(color: Colors.white60, fontSize: 14),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          const SizedBox(height: 10),
+
+          // Bio
+          _buildBioSection(),
+          const SizedBox(height: 10),
+
+          // Member since chip
+          Row(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: _accent.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(20),
+                  border:
+                      Border.all(color: _accent.withValues(alpha: 0.35)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.calendar_today,
+                        color: _accent, size: 13),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Member since $joinDate',
+                      style: const TextStyle(
+                        color: _accent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBioSection() {
+    return GestureDetector(
+      onTap: () => setState(() => _bioExpanded = !_bioExpanded),
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _bioText,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+              height: 1.4,
+            ),
+            maxLines: _bioExpanded ? null : 2,
+            overflow:
+                _bioExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            _bioExpanded ? 'Show less' : 'Show more',
+            style: const TextStyle(color: _accent, fontSize: 13),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── STATS ROW ────────────────────────────────────────────────────────────
+
+  Widget _buildStatsRow() {
+    final videosWatched  = _userProfile['videosWatched']  as int?    ?? 0;
+    final totalWatchTime = _userProfile['totalWatchTime'] as String? ?? '0m';
+    final streakDays     = _userProfile['streakDays']     as int?    ?? 0;
+    final savedCount     = _userProfile['savedCount']     as int?    ?? 0;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        color: _surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Row(
+        children: [
+          _buildStatItem('$videosWatched', 'Videos\nWatched'),
+          _buildStatDivider(),
+          _buildStatItem(totalWatchTime, 'Watch\nTime'),
+          _buildStatDivider(),
+          _buildStatItem('${streakDays}d', 'Streak'),
+          _buildStatDivider(),
+          _buildStatItem('$savedCount', 'Saved'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String value, String label) {
+    return Expanded(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white38, fontSize: 11),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatDivider() {
+    return Container(
+      width: 1,
+      height: 36,
+      margin: const EdgeInsets.symmetric(horizontal: 2),
+      color: Colors.white.withValues(alpha: 0.12),
+    );
+  }
+
+  // ─── TAB BAR ──────────────────────────────────────────────────────────────
+
+  Widget _buildTabBar() {
+    return Container(
+      color: _bgPrimary,
+      child: TabBar(
+        controller: _tabController,
+        indicatorColor: _accent,
+        indicatorWeight: 2.5,
+        labelColor: _accent,
+        unselectedLabelColor: Colors.white38,
+        labelStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w400,
+        ),
+        isScrollable: false,
+        tabs: const [
+          Tab(text: 'Liked'),
+          Tab(text: 'Saved'),
+          Tab(text: 'History'),
+          Tab(text: 'Achievements'),
+        ],
+      ),
+    );
+  }
+
+  // ─── LIKED TAB ────────────────────────────────────────────────────────────
+
+  Widget _buildLikedTab() {
+    if (_likedItems.isEmpty) {
+      return _buildEmptyState(
+        icon: Icons.favorite_outline,
+        title: 'No liked content',
+        subtitle: 'Videos you like will appear here',
+      );
+    }
+    return GridView.builder(
+      padding: const EdgeInsets.all(12),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 16 / 9,
+      ),
+      itemCount: _likedItems.length,
+      itemBuilder: (context, index) => _buildVideoTile(_likedItems[index]),
+    );
+  }
+
+  // ─── SAVED TAB ────────────────────────────────────────────────────────────
+
+  Widget _buildSavedTab() {
+    if (_savedItems.isEmpty) {
+      return _buildEmptyState(
+        icon: Icons.bookmark_outline,
+        title: 'Nothing saved yet',
+        subtitle: 'Bookmark content to see it here',
+      );
+    }
+    return GridView.builder(
+      padding: const EdgeInsets.all(12),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 16 / 9,
+      ),
+      itemCount: _savedItems.length,
+      itemBuilder: (context, index) => _buildVideoTile(_savedItems[index]),
+    );
+  }
+
+  Widget _buildVideoTile(Map<String, dynamic> item) {
+    final thumb = item['thumbnail'] as String? ?? '';
+    final title = item['title']     as String? ?? '';
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          thumb.isNotEmpty
+              ? Image.network(
+                  thumb,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: _surfaceElevated,
+                    child: const Icon(Icons.person, color: Colors.white38),
+                  ),
+                )
+              : Container(color: _surfaceElevated),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(6, 12, 6, 6),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.75),
+                  ],
+                ),
+              ),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
                   fontWeight: FontWeight.w500,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── HISTORY TAB ──────────────────────────────────────────────────────────
+
+  Widget _buildHistoryTab() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
+          child: Row(
+            children: [
+              const Text(
+                'Recent Activity',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: _showClearHistoryDialog,
+                child: const Text(
+                  'Clear All',
+                  style: TextStyle(color: _accent, fontSize: 13),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 8),
+        Expanded(
+          child: _viewingHistory.isEmpty
+              ? _buildEmptyState(
+                  icon: Icons.history,
+                  title: 'No history yet',
+                  subtitle: 'Videos you watch will appear here',
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  itemCount: _viewingHistory.length,
+                  itemBuilder: (context, index) =>
+                      _buildHistoryItem(_viewingHistory[index]),
+                ),
+        ),
       ],
     );
   }
 
-  Widget _buildStatsRow() {
+  Widget _buildHistoryItem(Map<String, dynamic> item) {
+    final completed       = item['completed']       as bool?   ?? false;
+    final watchedDuration = item['watchedDuration'] as String? ?? '';
+    final totalDuration   = item['duration']        as String? ?? '';
+    final thumbUrl        = item['thumbnail']       as String? ?? '';
+    final title           = item['title']           as String? ?? '';
+    final creator         = item['creator']         as String? ?? '';
+    final platform        = item['platform']        as String? ?? '';
+    final watchedAt       = item['watchedAt']       as String? ?? '';
+
     return Container(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        color: _surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
       ),
       child: Row(
         children: [
-          _buildStatItem(
-            'Level',
-            _userProfile['level'].toString(),
-            Icons.trending_up,
-            AppTheme.primaryCyan,
+          // Thumbnail stack
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: thumbUrl.isNotEmpty
+                    ? Image.network(
+                        thumbUrl,
+                        width: 96,
+                        height: 64,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          width: 96,
+                          height: 64,
+                          color: _surfaceElevated,
+                          child: const Icon(
+                            Icons.play_circle_outline,
+                            color: Colors.white38,
+                            size: 24,
+                          ),
+                        ),
+                      )
+                    : Container(
+                        width: 96,
+                        height: 64,
+                        color: _surfaceElevated,
+                        child: const Icon(
+                          Icons.play_circle_outline,
+                          color: Colors.white38,
+                          size: 24,
+                        ),
+                      ),
+              ),
+              if (completed)
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: Container(
+                    width: 18,
+                    height: 18,
+                    decoration: const BoxDecoration(
+                      color: _accent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.check,
+                        color: Colors.white, size: 11),
+                  ),
+                ),
+              if (totalDuration.isNotEmpty)
+                Positioned(
+                  bottom: 4,
+                  right: 4,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 4, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.78),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      totalDuration,
+                      style: const TextStyle(
+                          color: Colors.white, fontSize: 9),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+            ],
           ),
-          _buildStatDivider(),
-          _buildStatItem(
-            'Watch Time',
-            _userProfile['totalWatchTime'],
-            Icons.access_time,
-            AppTheme.primaryPink,
+          const SizedBox(width: 12),
+          // Info column
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  creator,
+                  style: const TextStyle(
+                      color: Colors.white60, fontSize: 11),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    if (platform.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: _getPlatformColor(platform)
+                              .withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          platform,
+                          style: TextStyle(
+                            color: _getPlatformColor(platform),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    if (platform.isNotEmpty && watchedAt.isNotEmpty)
+                      const SizedBox(width: 6),
+                    if (watchedAt.isNotEmpty)
+                      Flexible(
+                        child: Text(
+                          watchedAt,
+                          style: const TextStyle(
+                              color: Colors.white38, fontSize: 10),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                ),
+                if (!completed && watchedDuration.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Watched $watchedDuration of $totalDuration',
+                    style: const TextStyle(color: _accent, fontSize: 10),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
           ),
-          _buildStatDivider(),
-          _buildStatItem(
-            'Videos',
-            _userProfile['videosWatched'].toString(),
-            Icons.play_circle,
-            const Color(0xFFFFE66D),
-          ),
-          _buildStatDivider(),
-          _buildStatItem(
-            'Streak',
-            '${_userProfile['streakDays']} days',
-            Icons.local_fire_department,
-            const Color(0xFFFF8A65),
+          IconButton(
+            onPressed: () {},
+            constraints:
+                const BoxConstraints.tightFor(width: 44, height: 44),
+            icon: const Icon(Icons.more_vert,
+                color: Colors.white38, size: 18),
           ),
         ],
       ),
     );
   }
-  
-  Widget _buildStatItem(String label, String value, IconData icon, Color color) {
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 20,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildStatDivider() {
-    return Container(
-      width: 1,
-      height: 40,
-      color: Colors.white.withValues(alpha: 0.2),
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-    );
-  }
-  
-  Widget _buildTabBar() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: TabBar(
-        controller: _tabController,
-        indicator: BoxDecoration(
-          color: AppTheme.primaryCyan.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        indicatorPadding: const EdgeInsets.all(4),
-        labelColor: AppTheme.primaryCyan,
-        unselectedLabelColor: Colors.white.withValues(alpha: 0.7),
-        labelStyle: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
-        ),
-        tabs: const [
-          Tab(text: 'Achievements'),
-          Tab(text: 'History'),
-          Tab(text: 'Subscription'),
-        ],
-      ),
-    );
-  }
-  
+
+  // ─── ACHIEVEMENTS TAB ─────────────────────────────────────────────────────
+
   Widget _buildAchievementsTab() {
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(child: _buildEngagementScore()),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
           sliver: SliverGrid(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
+              crossAxisSpacing: 14,
+              mainAxisSpacing: 14,
               childAspectRatio: 1,
             ),
             delegate: SliverChildBuilderDelegate(
-              (context, index) => _buildAchievementCard(_achievements[index]),
+              (context, index) =>
+                  _buildAchievementCard(_achievements[index]),
               childCount: _achievements.length,
             ),
           ),
@@ -533,675 +953,54 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ],
     );
   }
-  
-  Widget _buildAchievementCard(Map<String, dynamic> achievement) {
-    final isUnlocked = achievement['unlocked'];
-    final progress = achievement['progress'];
-    
+
+  Widget _buildEngagementScore() {
+    final videos = _userProfile['videosWatched'] as int? ?? 0;
+    final streak = _userProfile['streakDays']    as int? ?? 0;
+    final saved  = _userProfile['savedCount']    as int? ?? 0;
+    final score  =
+        ((videos * 2) + (streak * 5) + (saved * 3)).clamp(0, 999);
+
     return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isUnlocked 
-            ? achievement['color'].withValues(alpha: 0.1)
-            : Colors.white.withValues(alpha: 0.05),
+        gradient: LinearGradient(colors: [
+          _accent.withValues(alpha: 0.14),
+          _accentPink.withValues(alpha: 0.14),
+        ]),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isUnlocked 
-              ? achievement['color'].withValues(alpha: 0.5)
-              : Colors.white.withValues(alpha: 0.1),
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              if (!isUnlocked)
-                SizedBox(
-                  width: 50,
-                  height: 50,
-                  child: CircularProgressIndicator(
-                    value: progress,
-                    strokeWidth: 3,
-                    backgroundColor: Colors.white.withValues(alpha: 0.2),
-                    valueColor: AlwaysStoppedAnimation<Color>(achievement['color']),
-                  ),
-                ),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isUnlocked 
-                      ? achievement['color'].withValues(alpha: 0.2)
-                      : Colors.white.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  achievement['icon'],
-                  color: isUnlocked 
-                      ? achievement['color']
-                      : Colors.white.withValues(alpha: 0.5),
-                  size: 24,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            achievement['title'],
-            style: TextStyle(
-              color: isUnlocked 
-                  ? Colors.white
-                  : Colors.white.withValues(alpha: 0.7),
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            achievement['description'],
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
-              fontSize: 12,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (!isUnlocked) ...[
-            const SizedBox(height: 8),
-            Text(
-              '${(progress * 100).toInt()}%',
-              style: TextStyle(
-                color: achievement['color'],
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildHistoryTab() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Recent Activity',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              TextButton(
-                onPressed: () => _showClearHistoryDialog(),
-                child: const Text(
-                  'Clear All',
-                  style: TextStyle(
-                    color: AppTheme.primaryCyan,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: _viewingHistory.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.history, size: 56, color: Colors.white.withValues(alpha: 0.2)),
-                        const SizedBox(height: 12),
-                        Text(
-                          'No history yet',
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 16),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Videos you watch will appear here',
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 13),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: _viewingHistory.length,
-                    itemBuilder: (context, index) {
-                      final item = _viewingHistory[index];
-                      return _buildHistoryItem(item);
-                    },
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildHistoryItem(Map<String, dynamic> item) {
-    final completed = item['completed'];
-    final watchedDuration = item['watchedDuration'];
-    final totalDuration = item['duration'];
-    
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border.all(color: _accent.withValues(alpha: 0.28)),
       ),
       child: Row(
         children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  item['thumbnail'],
-                  width: 80,
-                  height: 60,
-                  fit: BoxFit.cover,
-                  semanticLabel: item['title'] ?? 'Video thumbnail',
-                  errorBuilder: (_, __, ___) => Container(
-                    width: 80,
-                    height: 60,
-                    color: const Color(0xFF252545),
-                    child: const Icon(Icons.play_circle_outline, color: Colors.white38, size: 24),
-                  ),
-                ),
-              ),
-              if (completed)
-                Positioned(
-                  top: 4,
-                  right: 4,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryCyan,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 12,
-                    ),
-                  ),
-                ),
-              Positioned(
-                bottom: 4,
-                right: 4,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.8),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    totalDuration,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  item['title'],
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 2,
+                const Text(
+                  'Engagement Score',
+                  style: TextStyle(color: Colors.white60, fontSize: 12),
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  item['creator'],
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 12,
+                  '$score pts',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: _getPlatformColor(item['platform']).withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        item['platform'],
-                        style: TextStyle(
-                          color: _getPlatformColor(item['platform']),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      item['watchedAt'],
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.5),
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
-                ),
-                if (!completed) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    'Watched $watchedDuration of $totalDuration',
-                    style: TextStyle(
-                      color: AppTheme.primaryCyan,
-                      fontSize: 10,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          Icon(
-            Icons.more_vert,
-            color: Colors.white.withValues(alpha: 0.5),
-            size: 20,
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildSubscriptionTab() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          _buildSubscriptionCard(),
-          const SizedBox(height: 20),
-          _buildSubscriptionFeatures(),
-          const Spacer(),
-          if (!_userProfile['isPremium'])
-            _buildUpgradeButton(),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildSubscriptionCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: _userProfile['isPremium']
-              ? [AppTheme.primaryCyan, AppTheme.primaryPink]
-              : [Colors.white.withValues(alpha: 0.1), Colors.white.withValues(alpha: 0.05)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: _userProfile['isPremium']
-              ? Colors.transparent
-              : Colors.white.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            _userProfile['isPremium'] ? Icons.star : Icons.star_border,
-            color: Colors.white,
-            size: 40,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            _userProfile['isPremium'] ? 'Premium Member' : 'Free Member',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _userProfile['isPremium']
-                ? 'Enjoy unlimited access to all features'
-                : 'Upgrade to unlock premium features',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
-              fontSize: 14,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          if (_userProfile['isPremium']) ...[
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text(
-                'Renews March 15, 2024',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildSubscriptionFeatures() {
-    final features = [
-      {
-        'title': 'Ad-free Experience',
-        'description': 'Watch without interruptions',
-        'icon': Icons.block,
-        'available': _userProfile['isPremium'],
-      },
-      {
-        'title': 'Offline Downloads',
-        'description': 'Save videos for offline viewing',
-        'icon': Icons.download,
-        'available': _userProfile['isPremium'],
-      },
-      {
-        'title': 'Premium Analytics',
-        'description': 'Detailed viewing insights',
-        'icon': Icons.analytics,
-        'available': _userProfile['isPremium'],
-      },
-      {
-        'title': 'Priority Support',
-        'description': '24/7 customer support',
-        'icon': Icons.support_agent,
-        'available': _userProfile['isPremium'],
-      },
-    ];
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Features',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 16),
-        ...features.map((feature) => _buildFeatureItem(feature)).toList(),
-      ],
-    );
-  }
-  
-  Widget _buildFeatureItem(Map<String, dynamic> feature) {
-    final available = feature['available'];
-    
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: available 
-            ? AppTheme.primaryCyan.withValues(alpha: 0.1)
-            : Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: available 
-              ? AppTheme.primaryCyan.withValues(alpha: 0.3)
-              : Colors.white.withValues(alpha: 0.1),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: available 
-                  ? AppTheme.primaryCyan.withValues(alpha: 0.2)
-                  : Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              feature['icon'],
-              color: available 
-                  ? AppTheme.primaryCyan
-                  : Colors.white.withValues(alpha: 0.5),
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  feature['title'],
-                  style: TextStyle(
-                    color: available 
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.7),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  feature['description'],
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(
-            available ? Icons.check_circle : Icons.lock,
-            color: available 
-                ? AppTheme.primaryCyan
-                : Colors.white.withValues(alpha: 0.3),
-            size: 20,
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildUpgradeButton() {
-    return Container(
-      width: double.infinity,
-      height: 50,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppTheme.primaryCyan, AppTheme.primaryPink],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-        borderRadius: BorderRadius.circular(25),
-      ),
-      child: ElevatedButton(
-        onPressed: () => _showUpgradeDialog(),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25),
-          ),
-        ),
-        child: const Text(
-          'Upgrade to Premium',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-  
-  Color _getPlatformColor(String platform) {
-    switch (platform.toLowerCase()) {
-      case 'youtube':
-        return const Color(0xFFFF0000);
-      case 'instagram':
-        return const Color(0xFFE4405F);
-      case 'tiktok':
-        return const Color(0xFF000000);
-      case 'facebook':
-        return const Color(0xFF1877F2);
-      default:
-        return AppTheme.primaryCyan;
-    }
-  }
-  
-  // Dialog methods
-  void _showEditProfileDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2D1B69),
-        title: const Text(
-          'Edit Profile',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'Profile editing functionality will be implemented here.',
-          style: TextStyle(color: Colors.white),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Close',
-              style: TextStyle(color: AppTheme.primaryCyan),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  void _showClearHistoryDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2D1B69),
-        title: const Text(
-          'Clear History',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'Are you sure you want to clear your viewing history? This action cannot be undone.',
-          style: TextStyle(color: Colors.white),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                _viewingHistory.clear();
-              });
-            },
-            child: const Text(
-              'Clear',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  void _showUpgradeDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2D1B69),
-        title: const Text(
-          'Upgrade to Premium',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'Premium subscription functionality will be implemented here.',
-          style: TextStyle(color: Colors.white),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Close',
-              style: TextStyle(color: AppTheme.primaryCyan),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEngagementScore() {
-    final videos = _userProfile['videosWatched'] as int? ?? 0;
-    final streak = _userProfile['streakDays'] as int? ?? 0;
-    final saved = _userProfile['savedCount'] as int? ?? 0;
-    final score = ((videos * 2) + (streak * 5) + (saved * 3)).clamp(0, 999);
-
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [
-          AppTheme.primaryCyan.withValues(alpha: 0.15),
-          AppTheme.primaryPink.withValues(alpha: 0.15),
-        ]),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.primaryCyan.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Engagement Score', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                const SizedBox(height: 4),
-                Text('$score pts', style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 Text(
                   '${(score / 10).clamp(0, 100).toInt()}% of max — keep watching!',
-                  style: TextStyle(color: AppTheme.primaryCyan, fontSize: 12),
+                  style: const TextStyle(color: _accent, fontSize: 12),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -1224,9 +1023,232 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   Widget _miniStat(String value, String label) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
-        Text(label, style: const TextStyle(color: Colors.white54, fontSize: 10)),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white38, fontSize: 10),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ],
+    );
+  }
+
+  Widget _buildAchievementCard(Map<String, dynamic> achievement) {
+    final isUnlocked = achievement['unlocked'] as bool? ?? false;
+    final progress   = (achievement['progress'] as double?) ?? 0.0;
+    final color      = achievement['color'] as Color;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isUnlocked
+            ? color.withValues(alpha: 0.10)
+            : Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isUnlocked
+              ? color.withValues(alpha: 0.45)
+              : Colors.white.withValues(alpha: 0.08),
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              if (!isUnlocked)
+                SizedBox(
+                  width: 52,
+                  height: 52,
+                  child: CircularProgressIndicator(
+                    value: progress,
+                    strokeWidth: 3,
+                    backgroundColor:
+                        Colors.white.withValues(alpha: 0.15),
+                    valueColor: AlwaysStoppedAnimation<Color>(color),
+                  ),
+                ),
+              Container(
+                padding: const EdgeInsets.all(11),
+                decoration: BoxDecoration(
+                  color: isUnlocked
+                      ? color.withValues(alpha: 0.2)
+                      : Colors.white.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  achievement['icon'] as IconData,
+                  color: isUnlocked
+                      ? color
+                      : Colors.white.withValues(alpha: 0.45),
+                  size: 22,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            achievement['title'] as String? ?? '',
+            style: TextStyle(
+              color: isUnlocked ? Colors.white : Colors.white70,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 3),
+          Text(
+            achievement['description'] as String? ?? '',
+            style: const TextStyle(color: Colors.white38, fontSize: 11),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          if (!isUnlocked) ...[
+            const SizedBox(height: 6),
+            Text(
+              '${(progress * 100).toInt()}%',
+              style: TextStyle(
+                color: color,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // ─── EMPTY STATE ──────────────────────────────────────────────────────────
+
+  Widget _buildEmptyState({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 60, color: Colors.white.withValues(alpha: 0.18)),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              subtitle,
+              style: const TextStyle(color: Colors.white30, fontSize: 13),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── HELPERS ──────────────────────────────────────────────────────────────
+
+  Color _getPlatformColor(String platform) {
+    switch (platform.toLowerCase()) {
+      case 'youtube':
+        return const Color(0xFFFF0000);
+      case 'instagram':
+        return const Color(0xFFE4405F);
+      case 'tiktok':
+        return const Color(0xFF00E5FF);
+      case 'facebook':
+        return const Color(0xFF1877F2);
+      default:
+        return _accent;
+    }
+  }
+
+  // ─── DIALOGS ──────────────────────────────────────────────────────────────
+
+  void _showEditProfileDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A2E),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Edit Profile',
+          style: TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Profile editing will be available in the next update.',
+          style: TextStyle(color: Colors.white70, fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close',
+                style: TextStyle(color: _accent)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showClearHistoryDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A2E),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Clear History',
+          style: TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Are you sure you want to clear your viewing history? This action cannot be undone.',
+          style: TextStyle(color: Colors.white70, fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel',
+                style: TextStyle(color: Colors.white60)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              setState(() => _viewingHistory.clear());
+            },
+            child: const Text('Clear',
+                style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
+      ),
     );
   }
 }

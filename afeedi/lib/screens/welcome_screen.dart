@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui' as ui;
+import '../l10n/app_localizations.dart';
 import '../services/navigation_service.dart';
 import '../services/auth_service.dart';
 import '../services/analytics_service.dart';
@@ -192,9 +193,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         child: Stack(
           children: [
             // Background ambient glow — top-right cyan
-            Positioned(
+            PositionedDirectional(
               top: screenHeight * 0.1,
-              right: -screenWidth * 0.2,
+              end: -screenWidth * 0.2,
               child: Container(
                 width: screenWidth * 0.6,
                 height: screenWidth * 0.6,
@@ -211,9 +212,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               ),
             ),
             // Background ambient glow — bottom-left pink
-            Positioned(
+            PositionedDirectional(
               bottom: screenHeight * 0.2,
-              left: -screenWidth * 0.3,
+              start: -screenWidth * 0.3,
               child: Container(
                 width: screenWidth * 0.8,
                 height: screenWidth * 0.8,
@@ -257,9 +258,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             Navigator.pushNamed(
                                 context, AppRoutes.onboardingChatbot);
                           },
-                          child: const Text(
-                            'Skip',
-                            style: TextStyle(
+                          child: Text(
+                            AppLocalizations.of(context)!.skip,
+                            style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -315,9 +316,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             ),
                             const SizedBox(height: 12),
                             // Tagline — muted, 16sp
-                            const Text(
-                              'All your favorite videos. One premium experience.',
-                              style: TextStyle(
+                            Text(
+                              AppLocalizations.of(context)!.tagline,
+                              style: const TextStyle(
                                 color: Colors.white54,
                                 fontSize: 16,
                                 height: 1.5,
@@ -363,8 +364,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                       ),
                                 label: Text(
                                   _isLoading
-                                      ? 'Signing in...'
-                                      : 'Continue with Google',
+                                      ? AppLocalizations.of(context)!.signingIn
+                                      : AppLocalizations.of(context)!.continueWithGoogle,
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -408,8 +409,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                       ),
                                 label: Text(
                                   _isLoading
-                                      ? 'Signing in...'
-                                      : 'Continue with Apple',
+                                      ? AppLocalizations.of(context)!.signingIn
+                                      : AppLocalizations.of(context)!.continueWithApple,
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -429,7 +430,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             ),
                             const SizedBox(height: 24),
                             // Get Started — gradient CTA
-                            SizedBox(
+                            Semantics(
+                              button: true,
+                              label: 'Get started with Afeedi',
+                              child: SizedBox(
                               width: double.infinity,
                               height: 52,
                               child: DecoratedBox(
@@ -458,9 +462,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
-                                  child: const Text(
-                                    'Get Started',
-                                    style: TextStyle(
+                                  child: Text(
+                                    AppLocalizations.of(context)!.getStarted,
+                                    style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -469,10 +473,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                   ),
                                 ),
                               ),
+                              ),
                             ),
                             const SizedBox(height: 16),
                             // Already have an account? Sign in
-                            SizedBox(
+                            Semantics(
+                              button: true,
+                              label: 'Sign in to Afeedi',
+                              child: SizedBox(
                               width: double.infinity,
                               height: 52,
                               child: TextButton(
@@ -485,9 +493,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                child: const Text(
-                                  'Already have an account? Sign in',
-                                  style: TextStyle(
+                                child: Text(
+                                  AppLocalizations.of(context)!.alreadyHaveAccount,
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.white70,
@@ -495,6 +503,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
+                              ),
                               ),
                             ),
                           ],
@@ -511,9 +520,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           TextButton(
                             onPressed: () =>
                                 Navigator.pushNamed(context, AppRoutes.termsOfService),
-                            child: const Text(
-                              'Terms',
-                              style: TextStyle(
+                            child: Text(
+                              AppLocalizations.of(context)!.terms,
+                              style: const TextStyle(
                                 color: Colors.white54,
                                 fontSize: 14,
                                 decoration: TextDecoration.underline,
@@ -530,9 +539,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           TextButton(
                             onPressed: () =>
                                 Navigator.pushNamed(context, AppRoutes.privacyPolicy),
-                            child: const Text(
-                              'Privacy Policy',
-                              style: TextStyle(
+                            child: Text(
+                              AppLocalizations.of(context)!.privacyPolicy,
+                              style: const TextStyle(
                                 color: Colors.white54,
                                 fontSize: 14,
                                 decoration: TextDecoration.underline,

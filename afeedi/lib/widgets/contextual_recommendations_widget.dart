@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../models/content_item.dart';
@@ -387,21 +388,20 @@ class _ContextualRecommendationsWidgetState
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(
-                    item.thumbnailUrl ?? '',
+                  CachedNetworkImage(
+                    imageUrl: item.thumbnailUrl ?? '',
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: AppColors.getPlatformColor(item.platform),
-                        child: Center(
-                          child: Icon(
-                            Icons.image,
-                            color: AppColors.white,
-                            size: 32,
-                          ),
+                    placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+                    errorWidget: (ctx, url, err) => Container(
+                      color: AppColors.getPlatformColor(item.platform),
+                      child: Center(
+                        child: Icon(
+                          Icons.image,
+                          color: AppColors.white,
+                          size: 32,
                         ),
-                      );
-                    },
+                      ),
+                    ),
                   ),
                   // Platform badge
                   Positioned(

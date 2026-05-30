@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/content_model.dart';
 import 'enhanced_recommendation_service.dart';
 import 'onboarding_service.dart';
@@ -664,7 +665,7 @@ class ContentService {
       platformContentId: '2Gg7EPzq5Vs',
       title: 'Top 10 Gaming Moments of the Year',
       description: 'The most incredible esports plays and gaming highlights from 2024. Featuring Valorant, League of Legends, CS2, and more.',
-      videoUrl: 'https://www.youtube.com/watch?v=2Gg7EPzq5Vs',
+      videoUrl: 'https://www.youtube.com/embed/2Gg7EPzq5Vs',
       thumbnailUrl: 'https://img.youtube.com/vi/2Gg7EPzq5Vs/mqdefault.jpg',
       creatorName: 'GamersHub',
       durationSeconds: 1245,
@@ -722,7 +723,7 @@ class ContentService {
       platformContentId: '7JZbBgBJPCM',
       title: 'Skincare Routine for Beginners 2024',
       description: 'Build your perfect skincare routine from scratch. We cover cleansers, moisturizers, SPF and serums for every skin type.',
-      videoUrl: 'https://www.youtube.com/watch?v=7JZbBgBJPCM',
+      videoUrl: 'https://www.youtube.com/embed/7JZbBgBJPCM',
       thumbnailUrl: 'https://img.youtube.com/vi/7JZbBgBJPCM/mqdefault.jpg',
       creatorName: 'Skincare Science',
       durationSeconds: 1560,
@@ -762,7 +763,7 @@ class ContentService {
       platformContentId: 'UrfTFk6YIUA',
       title: 'Top 50 Football Goals of 2024',
       description: 'The most stunning goals from the Premier League, Champions League, La Liga and more. Best football moments of the year!',
-      videoUrl: 'https://www.youtube.com/watch?v=UrfTFk6YIUA',
+      videoUrl: 'https://www.youtube.com/embed/UrfTFk6YIUA',
       thumbnailUrl: 'https://img.youtube.com/vi/UrfTFk6YIUA/mqdefault.jpg',
       creatorName: 'Football Daily',
       durationSeconds: 1800,
@@ -801,7 +802,7 @@ class ContentService {
       platformContentId: '4HXBT2XJXzo',
       title: 'Every Marvel Movie Ranked Worst to Best',
       description: 'A comprehensive ranking of all 33 MCU films based on storytelling, visuals, and cultural impact. From Thor: The Dark World to Infinity War.',
-      videoUrl: 'https://www.youtube.com/watch?v=4HXBT2XJXzo',
+      videoUrl: 'https://www.youtube.com/embed/4HXBT2XJXzo',
       thumbnailUrl: 'https://img.youtube.com/vi/4HXBT2XJXzo/mqdefault.jpg',
       creatorName: 'Cinema Critics',
       durationSeconds: 2400,
@@ -841,7 +842,7 @@ class ContentService {
       platformContentId: '1BSkSf8F7e4',
       title: 'We Bought the Cheapest Lamborghini on the Internet',
       description: 'Found a Lamborghini Gallardo for £28,000 and had it shipped to the UK. Here\'s what happened after 6 months of ownership.',
-      videoUrl: 'https://www.youtube.com/watch?v=1BSkSf8F7e4',
+      videoUrl: 'https://www.youtube.com/embed/1BSkSf8F7e4',
       thumbnailUrl: 'https://img.youtube.com/vi/1BSkSf8F7e4/mqdefault.jpg',
       creatorName: 'Car Throttle',
       durationSeconds: 2160,
@@ -861,7 +862,7 @@ class ContentService {
       platformContentId: 'Ahg6qcgoay4',
       title: 'Build a Gaming PC for £500 in 2024',
       description: 'Complete step-by-step guide to building your first gaming PC from scratch. Parts list, cable management, and BIOS setup included.',
-      videoUrl: 'https://www.youtube.com/watch?v=Ahg6qcgoay4',
+      videoUrl: 'https://www.youtube.com/embed/Ahg6qcgoay4',
       thumbnailUrl: 'https://img.youtube.com/vi/Ahg6qcgoay4/mqdefault.jpg',
       creatorName: 'DIY Tech Builds',
       durationSeconds: 3600,
@@ -882,7 +883,7 @@ class ContentService {
       platformContentId: 'hHJm4w2x7hQ',
       title: 'Stand-Up Special: Airport Security Is Wild',
       description: 'A hilarious set about the absurdity of airport security checks, travel delays, and fellow passengers. Crowd favourite from 2024.',
-      videoUrl: 'https://www.youtube.com/watch?v=hHJm4w2x7hQ',
+      videoUrl: 'https://www.youtube.com/embed/hHJm4w2x7hQ',
       thumbnailUrl: 'https://img.youtube.com/vi/hHJm4w2x7hQ/mqdefault.jpg',
       creatorName: 'Comedy Central',
       durationSeconds: 780,
@@ -960,7 +961,7 @@ class ContentService {
       platformContentId: 'Pk48cJYRjrg',
       title: 'Drawing a Hyperrealistic Eye in 60 Minutes',
       description: 'Watch a full time-lapse and step-by-step breakdown of how to draw a photorealistic eye using graphite pencils. Suitable for intermediate artists.',
-      videoUrl: 'https://www.youtube.com/watch?v=Pk48cJYRjrg',
+      videoUrl: 'https://www.youtube.com/embed/Pk48cJYRjrg',
       thumbnailUrl: 'https://img.youtube.com/vi/Pk48cJYRjrg/mqdefault.jpg',
       creatorName: 'Realistic Art Studio',
       durationSeconds: 1860,
@@ -1038,7 +1039,7 @@ class ContentService {
       platformContentId: 'J3kGMJ6KFhw',
       title: '10 Books That Changed How I Think',
       description: 'An honest deep-dive into the ten books that had the biggest impact on my worldview: from Sapiens to Atomic Habits and The Power of Now.',
-      videoUrl: 'https://www.youtube.com/watch?v=J3kGMJ6KFhw',
+      videoUrl: 'https://www.youtube.com/embed/J3kGMJ6KFhw',
       thumbnailUrl: 'https://img.youtube.com/vi/J3kGMJ6KFhw/mqdefault.jpg',
       creatorName: 'Better Reading',
       durationSeconds: 2040,
@@ -1116,7 +1117,7 @@ class ContentService {
       platformContentId: 'OqjF4XeeTRs',
       title: 'Master Manual Mode in 15 Minutes',
       description: 'The simplest explanation of ISO, shutter speed, and aperture on the internet. After this video you will never shoot on Auto again.',
-      videoUrl: 'https://www.youtube.com/watch?v=OqjF4XeeTRs',
+      videoUrl: 'https://www.youtube.com/embed/OqjF4XeeTRs',
       thumbnailUrl: 'https://img.youtube.com/vi/OqjF4XeeTRs/mqdefault.jpg',
       creatorName: 'Camera Craft',
       durationSeconds: 900,
@@ -1194,7 +1195,7 @@ class ContentService {
       platformContentId: 'pCDS0s3SLKQ',
       title: 'Learn the Viral TikTok Dance in 10 Minutes',
       description: 'Step-by-step beginner-friendly tutorial for the biggest TikTok dance trend of 2024. We break it down 8 counts at a time.',
-      videoUrl: 'https://www.youtube.com/watch?v=pCDS0s3SLKQ',
+      videoUrl: 'https://www.youtube.com/embed/pCDS0s3SLKQ',
       thumbnailUrl: 'https://img.youtube.com/vi/pCDS0s3SLKQ/mqdefault.jpg',
       creatorName: 'Dance With Me',
       durationSeconds: 605,
@@ -1272,7 +1273,7 @@ class ContentService {
       platformContentId: 'Gc2en3nHxA4',
       title: 'Planet Earth III: Deep Ocean Episode',
       description: 'Breathtaking footage from the deepest points of the ocean, revealing creatures never before captured on film. A BBC Natural World masterpiece.',
-      videoUrl: 'https://www.youtube.com/watch?v=Gc2en3nHxA4',
+      videoUrl: 'https://www.youtube.com/embed/Gc2en3nHxA4',
       thumbnailUrl: 'https://img.youtube.com/vi/Gc2en3nHxA4/mqdefault.jpg',
       creatorName: 'BBC Earth',
       durationSeconds: 3180,
@@ -1350,7 +1351,7 @@ class ContentService {
       platformContentId: 'FoU37T1RFEM',
       title: 'I Spent 100 Days in Minecraft — Here\'s What Happened',
       description: 'The ultimate 100-day Minecraft survival series. From a dirt house to a mega-castle, every milestone documented.',
-      videoUrl: 'https://www.youtube.com/watch?v=FoU37T1RFEM',
+      videoUrl: 'https://www.youtube.com/embed/FoU37T1RFEM',
       thumbnailUrl: 'https://img.youtube.com/vi/FoU37T1RFEM/mqdefault.jpg',
       creatorName: 'BlockCraft Master',
       durationSeconds: 4200,
@@ -1409,7 +1410,7 @@ class ContentService {
       platformContentId: 'WxfZkMm3wcg',
       title: 'Solo Travel in Morocco: A Complete Guide',
       description: 'Everything you need to know for a solo trip to Morocco — Marrakech, the Sahara, the Atlas Mountains, and the blue city of Chefchaouen.',
-      videoUrl: 'https://www.youtube.com/watch?v=WxfZkMm3wcg',
+      videoUrl: 'https://www.youtube.com/embed/WxfZkMm3wcg',
       thumbnailUrl: 'https://img.youtube.com/vi/WxfZkMm3wcg/mqdefault.jpg',
       creatorName: 'Off the Beaten Path',
       durationSeconds: 2760,
@@ -1468,7 +1469,7 @@ class ContentService {
       platformContentId: 'UItWltVZgxI',
       title: '30-Day Ab Challenge — Full Month Workout Plan',
       description: 'A complete 30-day ab challenge with progressive difficulty. No equipment needed. Full calendar included in the description.',
-      videoUrl: 'https://www.youtube.com/watch?v=UItWltVZgxI',
+      videoUrl: 'https://www.youtube.com/embed/UItWltVZgxI',
       thumbnailUrl: 'https://img.youtube.com/vi/UItWltVZgxI/mqdefault.jpg',
       creatorName: 'Fit For Life',
       durationSeconds: 1320,
@@ -1527,7 +1528,7 @@ class ContentService {
       platformContentId: 'kfFhsYNfCwk',
       title: 'Men\'s Style Guide 2024: Build a Capsule Wardrobe',
       description: 'How to build a versatile men\'s capsule wardrobe with just 20 pieces that work for every occasion — office, casual, and date night.',
-      videoUrl: 'https://www.youtube.com/watch?v=kfFhsYNfCwk',
+      videoUrl: 'https://www.youtube.com/embed/kfFhsYNfCwk',
       thumbnailUrl: 'https://img.youtube.com/vi/kfFhsYNfCwk/mqdefault.jpg',
       creatorName: 'The Style OG',
       durationSeconds: 1740,
@@ -1765,7 +1766,7 @@ class ContentService {
       platformContentId: 'LmCB9dLQlhs',
       title: 'How to Train Any Dog in 7 Days',
       description: 'Positive reinforcement training system that works on any breed. Cover sit, stay, recall, and loose-lead walking in just one week.',
-      videoUrl: 'https://www.youtube.com/watch?v=LmCB9dLQlhs',
+      videoUrl: 'https://www.youtube.com/embed/LmCB9dLQlhs',
       thumbnailUrl: 'https://img.youtube.com/vi/LmCB9dLQlhs/mqdefault.jpg',
       creatorName: 'Zak George',
       durationSeconds: 2640,
@@ -1824,7 +1825,7 @@ class ContentService {
       platformContentId: 'aBZjxFuqLTs',
       title: 'Build a Floating Bookshelf for £20',
       description: 'A complete woodworking project — hidden bracket floating bookshelf from raw pine. Full materials list, cut list, and finishing guide included.',
-      videoUrl: 'https://www.youtube.com/watch?v=aBZjxFuqLTs',
+      videoUrl: 'https://www.youtube.com/embed/aBZjxFuqLTs',
       thumbnailUrl: 'https://img.youtube.com/vi/aBZjxFuqLTs/mqdefault.jpg',
       creatorName: 'Weekend Woodworker',
       durationSeconds: 2280,
@@ -1883,7 +1884,7 @@ class ContentService {
       platformContentId: 'gdZLi9oWNZg',
       title: 'Best Live Concerts of 2024 — Highlights',
       description: 'The most electrifying moments from Beyoncé, Taylor Swift, Coldplay, and The Weeknd\'s 2024 tours. Epic concerts, epic performances.',
-      videoUrl: 'https://www.youtube.com/watch?v=gdZLi9oWNZg',
+      videoUrl: 'https://www.youtube.com/embed/gdZLi9oWNZg',
       thumbnailUrl: 'https://img.youtube.com/vi/gdZLi9oWNZg/mqdefault.jpg',
       creatorName: 'Concert Weekly',
       durationSeconds: 1560,
@@ -1923,7 +1924,7 @@ class ContentService {
       platformContentId: 'CZKc5-SMxm8',
       title: 'Gordon Ramsay\'s Ultimate Burger Guide',
       description: 'Everything Gordon Ramsay knows about burgers in one video — from beef blend to bun toasting. A masterclass in burger construction.',
-      videoUrl: 'https://www.youtube.com/watch?v=CZKc5-SMxm8',
+      videoUrl: 'https://www.youtube.com/embed/CZKc5-SMxm8',
       thumbnailUrl: 'https://img.youtube.com/vi/CZKc5-SMxm8/mqdefault.jpg',
       creatorName: 'Gordon Ramsay',
       durationSeconds: 1380,
@@ -1982,7 +1983,7 @@ class ContentService {
       platformContentId: 'HluANRwPyNo',
       title: 'How to Learn Anything 10x Faster',
       description: 'The science of accelerated learning: spaced repetition, active recall, the Feynman technique, and interleaving explained with actionable steps.',
-      videoUrl: 'https://www.youtube.com/watch?v=HluANRwPyNo',
+      videoUrl: 'https://www.youtube.com/embed/HluANRwPyNo',
       thumbnailUrl: 'https://img.youtube.com/vi/HluANRwPyNo/mqdefault.jpg',
       creatorName: 'Thomas Frank',
       durationSeconds: 1500,
@@ -2312,34 +2313,51 @@ class ContentService {
   }
 
   // Get onboarding-based recommendations for new users
-  Future<List<Content>> getOnboardingBasedRecommendations({int limit = 10}) async {
+  Future<List<Content>> getOnboardingBasedRecommendations({int limit = 20}) async {
     try {
-      final enhancedService = EnhancedRecommendationService.instance;
-      final onboardingService = OnboardingService();
-      final authService = AuthService.instance;
-      
-      final user = authService.currentUser;
-      if (user == null) {
+      final prefs = await SharedPreferences.getInstance();
+      final selectedGenres = prefs.getStringList('onboarding_selected_genres') ?? [];
+      final selectedPlatforms = prefs.getStringList('onboarding_connected_platforms') ?? [];
+
+      if (selectedGenres.isEmpty) {
         return getFeedContent(limit: limit);
       }
-      
-      // Get user preferences from onboarding
-      final preferences = await onboardingService.getCurrentPreferences();
-      if (preferences == null) {
-        return getFeedContent(limit: limit);
+
+      // Score all content by genre match
+      final scored = _allContent.map((c) {
+        double score = 0.0;
+        final contentTags = [...c.tags, ...c.categories].join(' ').toLowerCase();
+        for (final genre in selectedGenres) {
+          if (contentTags.contains(genre.toLowerCase())) score += 1.5;
+        }
+        // Platform preference boost
+        for (final platform in selectedPlatforms) {
+          if (c.platform.name.toLowerCase() == platform.toLowerCase()) score += 0.5;
+        }
+        // Recency boost
+        if (c.publishedAt != null) {
+          final ageHours = DateTime.now().difference(c.publishedAt!).inHours;
+          if (ageHours < 72) score += 0.3;
+        }
+        return MapEntry(c, score);
+      }).toList()
+        ..sort((a, b) => b.value.compareTo(a.value));
+
+      // Diversity: max 4 items per platform
+      final result = <Content>[];
+      final platformCounts = <String, int>{};
+      for (final entry in scored) {
+        final platform = entry.key.platform.name;
+        if ((platformCounts[platform] ?? 0) < 4) {
+          result.add(entry.key);
+          platformCounts[platform] = (platformCounts[platform] ?? 0) + 1;
+        }
+        if (result.length >= limit) break;
       }
-      
-      // Get onboarding-based recommendations
-      final recommendations = await enhancedService.getOnboardingBasedRecommendations(
-        userId: user.id,
-        limit: limit,
-      );
-      
-      // Convert recommendations to content objects
-      return recommendations.map((rec) => rec.content).toList();
+
+      return result.isEmpty ? getFeedContent(limit: limit) : result;
     } catch (e) {
-      if (kDebugMode) debugPrint('Error getting onboarding-based recommendations: $e');
-      // Fallback to regular feed content
+      debugPrint('getOnboardingBasedRecommendations error: $e');
       return getFeedContent(limit: limit);
     }
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
@@ -415,6 +416,10 @@ class _ShortsTabState extends State<ShortsTab> {
       return _InlineYouTubeShort(
         videoId: content.platformContentId,
         overlay: overlay,
+        onDoubleTap: () {
+          _showHeartAnimation(context);
+          _handleLike(content);
+        },
       );
     }
 
@@ -432,7 +437,10 @@ class _ShortsTabState extends State<ShortsTab> {
           }
         }
       },
-      onDoubleTap: () => _handleLike(content),
+      onDoubleTap: () {
+        _showHeartAnimation(context);
+        _handleLike(content);
+      },
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -449,11 +457,11 @@ class _ShortsTabState extends State<ShortsTab> {
   Widget _buildThumbnail(Content content, Color platformColor) {
     final url = content.thumbnailUrl;
     if (url != null && url.isNotEmpty) {
-      return Image.network(
-        url,
+      return CachedNetworkImage(
+        imageUrl: url,
         fit: BoxFit.cover,
-        semanticLabel: content.title ?? 'Short video thumbnail',
-        errorBuilder: (_, __, ___) =>
+        placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+        errorWidget: (ctx, url, err) =>
             _buildThumbnailFallback(content, platformColor),
       );
     }
@@ -637,10 +645,11 @@ class _ShortsTabState extends State<ShortsTab> {
               ),
               clipBehavior: Clip.antiAlias,
               child: avatarUrl != null && avatarUrl.isNotEmpty
-                  ? Image.network(
-                      avatarUrl,
+                  ? CachedNetworkImage(
+                      imageUrl: avatarUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Center(
+                      placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+                      errorWidget: (ctx, url, err) => Center(
                         child: Text(
                           initial,
                           style: const TextStyle(
@@ -859,10 +868,11 @@ class _ShortsTabState extends State<ShortsTab> {
       children: [
         // Background thumbnail or gradient fallback
         if (thumbnailUrl != null && thumbnailUrl.isNotEmpty)
-          Image.network(
-            thumbnailUrl,
+          CachedNetworkImage(
+            imageUrl: thumbnailUrl,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => _buildMockFallbackBg(),
+            placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+            errorWidget: (ctx, url, err) => _buildMockFallbackBg(),
           )
         else
           _buildMockFallbackBg(),
@@ -1071,6 +1081,28 @@ class _ShortsTabState extends State<ShortsTab> {
         ),
       ),
     );
+  }
+
+  void _showHeartAnimation(BuildContext context) {
+    final overlay = Overlay.of(context);
+    late OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (_) => Center(
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.0, end: 1.0),
+          duration: const Duration(milliseconds: 600),
+          onEnd: () => entry.remove(),
+          builder: (_, value, child) => Opacity(
+            opacity: value < 0.5 ? value * 2 : (1 - value) * 2,
+            child: Transform.scale(
+              scale: 0.5 + value * 0.5,
+              child: const Icon(Icons.favorite, color: Colors.white, size: 100),
+            ),
+          ),
+        ),
+      ),
+    );
+    overlay.insert(entry);
   }
 
   /// Toggles the like state for [content] and persists via [UserInteractionService].
@@ -1317,7 +1349,12 @@ class _ShortsTabState extends State<ShortsTab> {
 class _InlineYouTubeShort extends StatefulWidget {
   final String videoId;
   final Widget overlay;
-  const _InlineYouTubeShort({required this.videoId, required this.overlay});
+  final VoidCallback onDoubleTap;
+  const _InlineYouTubeShort({
+    required this.videoId,
+    required this.overlay,
+    required this.onDoubleTap,
+  });
 
   @override
   State<_InlineYouTubeShort> createState() => _InlineYouTubeShortState();
@@ -1325,6 +1362,7 @@ class _InlineYouTubeShort extends StatefulWidget {
 
 class _InlineYouTubeShortState extends State<_InlineYouTubeShort> {
   late final YoutubePlayerController _controller;
+  bool _isMuted = true;
 
   @override
   void initState() {
@@ -1342,6 +1380,15 @@ class _InlineYouTubeShortState extends State<_InlineYouTubeShort> {
     );
   }
 
+  void _toggleMute() {
+    setState(() { _isMuted = !_isMuted; });
+    if (_isMuted) {
+      _controller.mute();
+    } else {
+      _controller.unMute();
+    }
+  }
+
   @override
   void dispose() {
     _controller.close();
@@ -1350,15 +1397,37 @@ class _InlineYouTubeShortState extends State<_InlineYouTubeShort> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        YoutubePlayerControllerProvider(
-          controller: _controller,
-          child: YoutubePlayer(controller: _controller),
-        ),
-        widget.overlay,
-      ],
+    return GestureDetector(
+      onDoubleTap: widget.onDoubleTap,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          YoutubePlayerControllerProvider(
+            controller: _controller,
+            child: YoutubePlayer(controller: _controller),
+          ),
+          widget.overlay,
+          Positioned(
+            top: 56,
+            left: 16,
+            child: GestureDetector(
+              onTap: _toggleMute,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  _isMuted ? Icons.volume_off : Icons.volume_up,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

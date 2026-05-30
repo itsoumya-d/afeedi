@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+import '../l10n/app_localizations.dart';
 import '../services/navigation_service.dart';
 
 class CreateAccountScreen extends StatefulWidget {
@@ -117,9 +118,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
         child: Stack(
           children: [
             // Background ambient glow — top-right cyan
-            Positioned(
+            PositionedDirectional(
               top: screenHeight * 0.1,
-              right: -screenWidth * 0.2,
+              end: -screenWidth * 0.2,
               child: Container(
                 width: screenWidth * 0.6,
                 height: screenWidth * 0.6,
@@ -136,9 +137,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
               ),
             ),
             // Background ambient glow — bottom-left pink
-            Positioned(
+            PositionedDirectional(
               bottom: screenHeight * 0.2,
-              left: -screenWidth * 0.3,
+              start: -screenWidth * 0.3,
               child: Container(
                 width: screenWidth * 0.8,
                 height: screenWidth * 0.8,
@@ -209,9 +210,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                               ),
                             ),
                             const SizedBox(height: 24),
-                            const Text(
-                              'Create Account',
-                              style: TextStyle(
+                            Text(
+                              AppLocalizations.of(context)!.createAccount,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
@@ -253,7 +254,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                   // Full Name Field
                                   _buildTextField(
                                     controller: _nameController,
-                                    label: 'Full Name',
+                                    label: AppLocalizations.of(context)!.name,
                                     hint: 'Enter your full name',
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
@@ -266,7 +267,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                   // Email Field
                                   _buildTextField(
                                     controller: _emailController,
-                                    label: 'Email',
+                                    label: AppLocalizations.of(context)!.email,
                                     hint: 'Enter your email address',
                                     keyboardType: TextInputType.emailAddress,
                                     validator: (value) {
@@ -285,7 +286,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                   // Password Field
                                   _buildTextField(
                                     controller: _passwordController,
-                                    label: 'Password',
+                                    label: AppLocalizations.of(context)!.password,
                                     hint: 'Create a strong password',
                                     obscureText: _obscurePassword,
                                     suffixIcon: IconButton(
@@ -439,9 +440,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                                 color: Color(0xFF0D0B1E),
                                               ),
                                             )
-                                          : const Text(
-                                              'Create Account',
-                                              style: TextStyle(
+                                          : Text(
+                                              AppLocalizations.of(context)!.createAccount,
+                                              style: const TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
                                               ),
@@ -458,9 +459,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                         Navigator.pushReplacementNamed(
                                             context, AppRoutes.login);
                                       },
-                                      child: const Text(
-                                        'Already have an account? Log in',
-                                        style: TextStyle(
+                                      child: Text(
+                                        AppLocalizations.of(context)!.alreadyHaveAccount,
+                                        style: const TextStyle(
                                           color: Colors.white70,
                                           fontSize: 16,
                                           fontWeight: FontWeight.w500,

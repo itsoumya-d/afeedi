@@ -82,7 +82,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     },
   ];
 
-  final List<Map<String, dynamic>> _viewingHistory = [];
+  List<Map<String, dynamic>> _viewingHistory = [];
   final List<Content> _likedItems     = [];
   final List<Content> _savedItems     = [];
 
@@ -166,6 +166,20 @@ class _ProfileScreenState extends State<ProfileScreen>
       if (c != null) likedContent.add(c);
     }
 
+    // Load viewing history
+    final watchedIdsRaw = prefs.getStringList('watched_ids') ?? [];
+    final historyItems = <Map<String, dynamic>>[];
+    for (final id in watchedIdsRaw.take(50).toList().reversed) {
+      final content = await ContentService.instance.getVideoById(id);
+      if (content != null) {
+        historyItems.add({
+          'content': content,
+          'progress': prefs.getDouble('watch_progress_$id') ?? 0.0,
+          'watched_at': prefs.getString('watched_at_$id') ?? 'Recently',
+        });
+      }
+    }
+
     if (mounted) {
       setState(() {
         _userProfile['name']           = name;
@@ -184,6 +198,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         _likedItems
           ..clear()
           ..addAll(likedContent);
+        _viewingHistory = historyItems;
         _isLoading = false;
       });
     }
@@ -255,10 +270,11 @@ class _ProfileScreenState extends State<ProfileScreen>
           height: 200,
           width: double.infinity,
           child: coverUrl != null && coverUrl.isNotEmpty
-              ? Image.network(
-                  coverUrl,
+              ? CachedNetworkImage(
+                  imageUrl: coverUrl,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => _coverGradient(),
+                  placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+                  errorWidget: (ctx, url, err) => _coverGradient(),
                 )
               : _coverGradient(),
         ),
@@ -343,12 +359,13 @@ class _ProfileScreenState extends State<ProfileScreen>
           ),
           child: ClipOval(
             child: avatarUrl != null && avatarUrl.isNotEmpty
-                ? Image.network(
-                    avatarUrl,
+                ? CachedNetworkImage(
+                    imageUrl: avatarUrl,
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+                    errorWidget: (ctx, url, err) => Container(
                       color: _surfaceElevated,
                       child: const Icon(Icons.person, color: Colors.white38),
                     ),
@@ -700,51 +717,54 @@ class _ProfileScreenState extends State<ProfileScreen>
   Widget _buildContentTile(Content content) {
     final thumb = content.thumbnailUrl ?? '';
     final title = content.title ?? '';
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          thumb.isNotEmpty
-              ? CachedNetworkImage(
-                  imageUrl: thumb,
-                  fit: BoxFit.cover,
-                  errorWidget: (_, __, ___) => Container(
-                    color: _surfaceElevated,
-                    child: const Icon(Icons.play_circle_outline, color: Colors.white38),
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            thumb.isNotEmpty
+                ? CachedNetworkImage(
+                    imageUrl: thumb,
+                    fit: BoxFit.cover,
+                    errorWidget: (_, __, ___) => Container(
+                      color: _surfaceElevated,
+                      child: const Icon(Icons.play_circle_outline, color: Colors.white38),
+                    ),
+                    placeholder: (_, __) => Container(color: _surfaceElevated),
+                  )
+                : Container(color: _surfaceElevated),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(6, 12, 6, 6),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.75),
+                    ],
                   ),
-                  placeholder: (_, __) => Container(color: _surfaceElevated),
-                )
-              : Container(color: _surfaceElevated),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(6, 12, 6, 6),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.75),
-                  ],
                 ),
-              ),
-              child: Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -796,16 +816,21 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   Widget _buildHistoryItem(Map<String, dynamic> item) {
+    final content         = item['content']         as Content?;
     final completed       = item['completed']       as bool?   ?? false;
     final watchedDuration = item['watchedDuration'] as String? ?? '';
     final totalDuration   = item['duration']        as String? ?? '';
-    final thumbUrl        = item['thumbnail']       as String? ?? '';
-    final title           = item['title']           as String? ?? '';
-    final creator         = item['creator']         as String? ?? '';
-    final platform        = item['platform']        as String? ?? '';
-    final watchedAt       = item['watchedAt']       as String? ?? '';
+    final thumbUrl        = content?.thumbnailUrl   ?? (item['thumbnail'] as String? ?? '');
+    final title           = content?.title          ?? (item['title']     as String? ?? '');
+    final creator         = content?.creatorName    ?? (item['creator']   as String? ?? '');
+    final platform        = content?.platform.name  ?? (item['platform']  as String? ?? '');
+    final watchedAt       = item['watched_at']      as String? ?? (item['watchedAt'] as String? ?? '');
 
-    return Container(
+    return GestureDetector(
+      onTap: content != null
+          ? () => Navigator.pushNamed(context, AppRoutes.player, arguments: content)
+          : null,
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -821,12 +846,13 @@ class _ProfileScreenState extends State<ProfileScreen>
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: thumbUrl.isNotEmpty
-                    ? Image.network(
-                        thumbUrl,
+                    ? CachedNetworkImage(
+                        imageUrl: thumbUrl,
                         width: 96,
                         height: 64,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
+                        placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+                        errorWidget: (ctx, url, err) => Container(
                           width: 96,
                           height: 64,
                           color: _surfaceElevated,
@@ -967,6 +993,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -1089,8 +1116,12 @@ class _ProfileScreenState extends State<ProfileScreen>
     final isUnlocked = achievement['unlocked'] as bool? ?? false;
     final progress   = (achievement['progress'] as double?) ?? 0.0;
     final color      = achievement['color'] as Color;
+    final title      = achievement['title'] as String? ?? '';
+    final progressPct = (progress * 100).toInt();
 
-    return Container(
+    return Semantics(
+      label: 'Achievement: $title, ${isUnlocked ? 'completed' : '$progressPct% complete'}',
+      child: Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isUnlocked
@@ -1173,6 +1204,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             ),
           ],
         ],
+      ),
       ),
     );
   }
@@ -1259,38 +1291,4 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  void _showClearHistoryDialog() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Clear History',
-          style: TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        content: const Text(
-          'Are you sure you want to clear your viewing history? This action cannot be undone.',
-          style: TextStyle(color: Colors.white70, fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
-                style: TextStyle(color: Colors.white60)),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              setState(() => _viewingHistory.clear());
-            },
-            child: const Text('Clear',
-                style: TextStyle(color: Colors.redAccent)),
-          ),
-        ],
-      ),
-    );
-  }
 }

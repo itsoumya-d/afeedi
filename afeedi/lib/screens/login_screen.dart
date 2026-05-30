@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+import '../l10n/app_localizations.dart';
 import '../services/navigation_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -119,9 +120,9 @@ class _LoginScreenState extends State<LoginScreen>
         child: Stack(
           children: [
             // Background ambient glow — top-right cyan
-            Positioned(
+            PositionedDirectional(
               top: screenHeight * 0.1,
-              right: -screenWidth * 0.2,
+              end: -screenWidth * 0.2,
               child: Container(
                 width: screenWidth * 0.6,
                 height: screenWidth * 0.6,
@@ -138,9 +139,9 @@ class _LoginScreenState extends State<LoginScreen>
               ),
             ),
             // Background ambient glow — bottom-left pink
-            Positioned(
+            PositionedDirectional(
               bottom: screenHeight * 0.2,
-              left: -screenWidth * 0.3,
+              start: -screenWidth * 0.3,
               child: Container(
                 width: screenWidth * 0.8,
                 height: screenWidth * 0.8,
@@ -211,9 +212,9 @@ class _LoginScreenState extends State<LoginScreen>
                               ),
                             ),
                             const SizedBox(height: 24),
-                            const Text(
-                              'Welcome Back',
-                              style: TextStyle(
+                            Text(
+                              AppLocalizations.of(context)!.welcomeBack,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
@@ -255,7 +256,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   // Email Field
                                   _buildTextField(
                                     controller: _emailController,
-                                    label: 'Email',
+                                    label: AppLocalizations.of(context)!.email,
                                     hint: 'Enter your email address',
                                     keyboardType: TextInputType.emailAddress,
                                     externalError: _emailError,
@@ -275,7 +276,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   // Password Field
                                   _buildTextField(
                                     controller: _passwordController,
-                                    label: 'Password',
+                                    label: AppLocalizations.of(context)!.password,
                                     hint: 'Enter your password',
                                     obscureText: _obscurePassword,
                                     externalError: _passwordError,
@@ -375,9 +376,9 @@ class _LoginScreenState extends State<LoginScreen>
                                                 color: Color(0xFF0D0B1E),
                                               ),
                                             )
-                                          : const Text(
-                                              'Log In',
-                                              style: TextStyle(
+                                          : Text(
+                                              AppLocalizations.of(context)!.signIn,
+                                              style: const TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
                                               ),
@@ -413,69 +414,77 @@ class _LoginScreenState extends State<LoginScreen>
                                   ),
                                   const SizedBox(height: 24),
                                   // Google social button
-                                  SizedBox(
-                                    width: double.infinity,
-                                    height: 52,
-                                    child: OutlinedButton.icon(
-                                      onPressed: () {},
-                                      icon: const Icon(
-                                        Icons.g_mobiledata,
-                                        color: Colors.white,
-                                        size: 24,
-                                      ),
-                                      label: const Text(
-                                        'Continue with Google',
-                                        style: TextStyle(
+                                  Semantics(
+                                    button: true,
+                                    label: 'Sign in with Google',
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      height: 52,
+                                      child: OutlinedButton.icon(
+                                        onPressed: () {},
+                                        icon: const Icon(
+                                          Icons.g_mobiledata,
                                           color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
+                                          size: 24,
                                         ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      style: OutlinedButton.styleFrom(
-                                        side: const BorderSide(
-                                            color: Colors.white24, width: 1),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
+                                        label: Text(
+                                          AppLocalizations.of(context)!.continueWithGoogle,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        backgroundColor:
-                                            Colors.white.withOpacity(0.05),
+                                        style: OutlinedButton.styleFrom(
+                                          side: const BorderSide(
+                                              color: Colors.white24, width: 1),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          backgroundColor:
+                                              Colors.white.withOpacity(0.05),
+                                        ),
                                       ),
                                     ),
                                   ),
                                   const SizedBox(height: 16),
                                   // Apple social button
-                                  SizedBox(
-                                    width: double.infinity,
-                                    height: 52,
-                                    child: OutlinedButton.icon(
-                                      onPressed: () {},
-                                      icon: const Icon(
-                                        Icons.apple,
-                                        color: Colors.white,
-                                        size: 24,
-                                      ),
-                                      label: const Text(
-                                        'Continue with Apple',
-                                        style: TextStyle(
+                                  Semantics(
+                                    button: true,
+                                    label: 'Sign in with Apple',
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      height: 52,
+                                      child: OutlinedButton.icon(
+                                        onPressed: () {},
+                                        icon: const Icon(
+                                          Icons.apple,
                                           color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
+                                          size: 24,
                                         ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      style: OutlinedButton.styleFrom(
-                                        side: const BorderSide(
-                                            color: Colors.white24, width: 1),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
+                                        label: Text(
+                                          AppLocalizations.of(context)!.continueWithApple,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        backgroundColor:
-                                            Colors.white.withOpacity(0.05),
+                                        style: OutlinedButton.styleFrom(
+                                          side: const BorderSide(
+                                              color: Colors.white24, width: 1),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          backgroundColor:
+                                              Colors.white.withOpacity(0.05),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -487,9 +496,9 @@ class _LoginScreenState extends State<LoginScreen>
                                         Navigator.pushReplacementNamed(
                                             context, AppRoutes.createAccount);
                                       },
-                                      child: const Text(
-                                        "Don't have an account? Create one",
-                                        style: TextStyle(
+                                      child: Text(
+                                        AppLocalizations.of(context)!.alreadyHaveAccount,
+                                        style: const TextStyle(
                                           color: Colors.white70,
                                           fontSize: 16,
                                           fontWeight: FontWeight.w500,

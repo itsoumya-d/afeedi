@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/chat_message.dart';
 import '../models/genre.dart';
 import '../models/onboarding_step.dart';
@@ -259,6 +260,24 @@ class ChatController extends ChangeNotifier {
         await completeOnboarding();
       }
     });
+  }
+
+  Future<void> saveProgressDraft() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('onboarding_draft_step', _currentStep);
+      await prefs.setString('onboarding_draft_user_name', _userName);
+      await prefs.setStringList(
+        'onboarding_draft_genres',
+        _selectedGenres.map((g) => g.name).toList(),
+      );
+      await prefs.setString(
+        'onboarding_draft_saved_at',
+        DateTime.now().toIso8601String(),
+      );
+    } catch (e) {
+      debugPrint('saveProgressDraft error: $e');
+    }
   }
 
   Future<void> completeOnboarding() async {

@@ -46,7 +46,11 @@ void main() {
   group('App Routes', () {
     testWidgets('welcome screen renders (${AppRoutes.welcome})', (tester) async {
       SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(const MaterialApp(home: WelcomeScreen()));
+      await tester.pumpWidget(MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const WelcomeScreen(),
+      ));
       // Advance past the 300ms Future.delayed in WelcomeScreen.initState
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.byType(Scaffold), findsOneWidget);
@@ -54,7 +58,11 @@ void main() {
 
     testWidgets('login screen renders (${AppRoutes.login})', (tester) async {
       SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(const MaterialApp(home: LoginScreen()));
+      await tester.pumpWidget(MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const LoginScreen(),
+      ));
       // Advance past the 300ms Future.delayed used to start slide animation
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.byType(Scaffold), findsOneWidget);
@@ -63,7 +71,11 @@ void main() {
     testWidgets('create account screen renders (${AppRoutes.createAccount})',
         (tester) async {
       SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(const MaterialApp(home: CreateAccountScreen()));
+      await tester.pumpWidget(MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const CreateAccountScreen(),
+      ));
       // Advance past the 300ms Future.delayed used to start slide animation
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.byType(Scaffold), findsOneWidget);

@@ -130,7 +130,7 @@ class _ChatInterfaceState extends State<ChatInterface>
               Row(
                 children: [
                   IconButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => Navigator.maybePop(context),
                     icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                   ),
                   const Expanded(

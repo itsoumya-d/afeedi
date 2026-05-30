@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../services/local_auth_service.dart';
 import '../services/navigation_service.dart';
+import '../services/notification_service.dart';
 import '../services/locale_service.dart';
 import '../services/subscription_service.dart';
 import '../widgets/common/language_selector_sheet.dart';
@@ -175,9 +175,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               overflow: TextOverflow.ellipsis,
             ),
             value: _notificationsEnabled,
-            onChanged: (v) {
+            onChanged: (v) async {
               setState(() => _notificationsEnabled = v);
-              _saveBool('setting_notifications', v);
+              await _saveBool('setting_notifications', v);
+              if (v) {
+                await NotificationService.instance.schedulePersonalizedNotifications();
+              }
+              // cancelAllNotifications not yet exposed; preference saved above is enough to suppress future scheduling
             },
             activeColor: const Color(0xFF00D4FF),
             activeTrackColor:
@@ -567,14 +571,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: const Text('Cancel',
                   style: TextStyle(color: Colors.white54))),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Watch history cleared'),
-                  backgroundColor: Color(0xFF1A1A2E),
-                ),
-              );
+              final prefs = await SharedPreferences.getInstance();
+              final keys = prefs.getKeys().where((k) =>
+                  k.startsWith('watch_progress_') ||
+                  k.startsWith('watched_at_') ||
+                  k == 'watched_ids').toList();
+              for (final key in keys) await prefs.remove(key);
+              await prefs.remove('watched_ids');
+              await prefs.setInt('stat_videos_watched', 0);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Watch history cleared'),
+                    backgroundColor: Color(0xFF1A1A2E),
+                  ),
+                );
+              }
             },
             child: const Text('Clear',
                 style: TextStyle(color: Color(0xFFFF6B6B))),

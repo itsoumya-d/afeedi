@@ -138,16 +138,21 @@ class EnhancedRecommendationService {
         scoredContent.add(MapEntry(content, score));
       }
       
-      // Sort by score and take top results
+      // Sort by score, apply diversity cap, then take top results
       scoredContent.sort((a, b) => b.value.compareTo(a.value));
-      final topContent = scoredContent.take(limit).toList();
-      
+      final sortedContent = scoredContent.map((e) => e.key).toList();
+      final diverseContent = _applyDiversity(sortedContent, maxPerCategory: 4);
+      final topContent = diverseContent.take(limit).map((c) {
+        final entry = scoredContent.firstWhere((e) => e.key.id == c.id);
+        return entry;
+      }).toList();
+
       // Convert to recommendations
       final recommendations = <Recommendation>[];
       for (int i = 0; i < topContent.length; i++) {
         final content = topContent[i].key;
         final score = topContent[i].value;
-        
+
         final recommendation = Recommendation(
           id: 'time_${DateTime.now().millisecondsSinceEpoch}_$i',
           userId: user.id,
@@ -159,7 +164,7 @@ class EnhancedRecommendationService {
           createdAt: DateTime.now(),
           expiresAt: DateTime.now().add(const Duration(hours: 2)),
         );
-        
+
         recommendations.add(recommendation);
       }
       
@@ -170,6 +175,26 @@ class EnhancedRecommendationService {
     }
   }
   
+  /// Applies a per-category diversity cap so no single genre dominates
+  /// the recommendation list. [maxPerCategory] items are allowed per
+  /// category/genre key; the overall result is capped at 20 items.
+  List<Content> _applyDiversity(List<Content> sorted, {int maxPerCategory = 4}) {
+    final result = <Content>[];
+    final categoryCounts = <String, int>{};
+    for (final content in sorted) {
+      final category = content.categories.isNotEmpty
+          ? content.categories.first
+          : (content.tags.isNotEmpty ? content.tags.first : 'other');
+      final count = categoryCounts[category] ?? 0;
+      if (count < maxPerCategory) {
+        result.add(content);
+        categoryCounts[category] = count + 1;
+      }
+      if (result.length >= 20) break;
+    }
+    return result;
+  }
+
   String _getTimeContext(int hour) {
     if (hour >= 6 && hour < 12) return 'morning';
     if (hour >= 12 && hour < 17) return 'afternoon';

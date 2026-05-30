@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../models/content_model.dart';
@@ -542,13 +543,13 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: content.thumbnailUrl != null
-                    ? Image.network(
-                        content.thumbnailUrl!,
+                    ? CachedNetworkImage(
+                        imageUrl: content.thumbnailUrl!,
                         width: 100,
                         height: 64,
                         fit: BoxFit.cover,
-                        semanticLabel: content.title ?? 'Video thumbnail',
-                        errorBuilder: (_, __, ___) => _thumbnailFallback(),
+                        placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+                        errorWidget: (ctx, url, err) => _thumbnailFallback(),
                       )
                     : _thumbnailFallback(),
               ),
@@ -747,12 +748,13 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
               child: content.thumbnailUrl != null
-                  ? Image.network(
-                      content.thumbnailUrl!,
+                  ? CachedNetworkImage(
+                      imageUrl: content.thumbnailUrl!,
                       width: 140,
                       height: 80,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+                      errorWidget: (ctx, url, err) => Container(
                         width: 140,
                         height: 80,
                         color: const Color(0xFF1A1A2E),

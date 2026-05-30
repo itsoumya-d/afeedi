@@ -1,3 +1,4 @@
+import 'dart:math' show min;
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,6 +37,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   List<({Content content, double progress})> _continueWatching = [];
   List<String> _followedCreatorIds = [];
   List<String> _trendingTopics = ['#Trending', '#ForYou', '#New'];
+  int _newPostCount = 0;
 
   List<Content> get _filteredPosts {
     var posts = _posts;
@@ -185,6 +187,10 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           .take(6)
           .map((e) => '#${e.key}')
           .toList();
+      int newCount = feedContent.where((p) =>
+          p.publishedAt != null &&
+          DateTime.now().difference(p.publishedAt!).inHours < 24).length;
+      if (newCount == 0) newCount = min(feedContent.length, 9);
       setState(() {
         _allPosts = feedContent;
         _posts = List.from(_allPosts);
@@ -192,6 +198,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         _followedCreatorIds = followedIds;
         _showFollowSuggestion = followedIds.isEmpty;
         if (derivedTopics.isNotEmpty) _trendingTopics = derivedTopics;
+        _newPostCount = newCount;
       });
       // Preload the first 5 thumbnails immediately after load
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -252,10 +259,18 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         newPosts = await ContentService.instance.getFeedContent(limit: 8);
       }
       
+      final existingIds = _allPosts.map((p) => p.id).toSet();
+      final deduped = newPosts.where((p) => !existingIds.contains(p.id)).toList();
+      if (deduped.isEmpty) {
+        setState(() { _hasMore = false; _isLoading = false; });
+        return;
+      }
+      _allPosts.addAll(deduped);
+      int newCount = _allPosts.where((p) =>
+          p.publishedAt != null &&
+          DateTime.now().difference(p.publishedAt!).inHours < 24).length;
+      if (newCount == 0) newCount = min(_allPosts.length, 9);
       setState(() {
-        final existingIds = _allPosts.map((p) => p.id).toSet();
-        final deduped = newPosts.where((p) => !existingIds.contains(p.id)).toList();
-        _allPosts.addAll(deduped);
         // Apply current filter to new posts
         if (_selectedPlatform == null) {
           _posts.addAll(deduped);
@@ -263,7 +278,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           _posts.addAll(deduped.where((post) => post.platform == _selectedPlatform));
         }
         _isLoading = false;
-        _hasMore = _allPosts.length < 50;
+        _hasMore = _allPosts.length < 200;
+        _newPostCount = newCount;
       });
     } catch (e) {
       setState(() {
@@ -488,7 +504,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       child: Column(
         children: [
           Text(
-            '24',
+            '$_newPostCount',
             style: TextStyle(
               color: AppTheme.primaryCyan,
               fontSize: 16,

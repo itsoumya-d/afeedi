@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../models/content_model.dart';
 import '../services/content_service.dart';
-import '../services/navigation_service.dart';
+import '../services/user_interaction_service.dart';
 import '../widgets/streaming/enhanced_youtube_player.dart';
 import '../widgets/streaming/social_media_video_player.dart';
 
@@ -36,6 +35,10 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
     _incrementVideoCount();
     _loadRelatedContent();
     _progressTimer = Timer.periodic(const Duration(seconds: 30), (_) => _saveWatchTime());
+    setState(() {
+      _isLiked = UserInteractionService.instance.isLiked(widget.content.id);
+      _isSaved = UserInteractionService.instance.isSaved(widget.content.id);
+    });
   }
 
   @override
@@ -124,12 +127,10 @@ class _PlayerScreenState extends State<PlayerScreen> with WidgetsBindingObserver
   void _share() {
     final url = widget.content.videoUrl ?? widget.content.embedUrl;
     if (url != null && url.isNotEmpty) {
-      final uri = Uri.tryParse(url);
-      if (uri != null) {
-        launchUrl(uri, mode: LaunchMode.externalApplication).catchError((_) {
-          // silently fail - url_launcher handles its own errors
-        });
-      }
+      Clipboard.setData(ClipboardData(text: url));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Link copied to clipboard')),
+      );
     }
   }
 

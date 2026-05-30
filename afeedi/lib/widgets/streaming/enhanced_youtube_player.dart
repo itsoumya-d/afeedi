@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../src/stubs/html.dart' if (dart.library.html) 'dart:html' as html;
 import 'dart:math';
 import '../../models/content_model.dart';
@@ -162,12 +163,14 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
           // Thumbnail background
           if (widget.content.thumbnailUrl != null)
             Positioned.fill(
-              child: Image.network(
-                widget.content.thumbnailUrl!,
+              child: CachedNetworkImage(
+                imageUrl: widget.content.thumbnailUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return _buildThumbnailPlaceholder();
-                },
+                placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+                errorWidget: (ctx, url, err) => Container(
+                  color: Colors.grey[900],
+                  child: const Icon(Icons.broken_image, color: Colors.white38),
+                ),
               ),
             )
           else
@@ -210,12 +213,14 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
           // Thumbnail background
           if (widget.content.thumbnailUrl != null)
             Positioned.fill(
-              child: Image.network(
-                widget.content.thumbnailUrl!,
+              child: CachedNetworkImage(
+                imageUrl: widget.content.thumbnailUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return _buildThumbnailPlaceholder();
-                },
+                placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+                errorWidget: (ctx, url, err) => Container(
+                  color: Colors.grey[900],
+                  child: const Icon(Icons.broken_image, color: Colors.white38),
+                ),
               ),
             )
           else
@@ -354,12 +359,14 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
           // Thumbnail
           if (widget.content.thumbnailUrl != null)
             Positioned.fill(
-              child: Image.network(
-                widget.content.thumbnailUrl!,
+              child: CachedNetworkImage(
+                imageUrl: widget.content.thumbnailUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return _buildThumbnailPlaceholder();
-                },
+                placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+                errorWidget: (ctx, url, err) => Container(
+                  color: Colors.grey[900],
+                  child: const Icon(Icons.broken_image, color: Colors.white38),
+                ),
               ),
             )
           else

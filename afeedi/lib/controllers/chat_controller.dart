@@ -5,7 +5,7 @@ import '../models/genre.dart';
 import '../models/onboarding_step.dart';
 import '../services/onboarding_service.dart';
 import '../services/analytics_service.dart';
-import '../services/notification_service.dart';
+import '../services/navigation_service.dart';
 
 class ChatController extends ChangeNotifier {
   final OnboardingService _onboardingService = OnboardingService();
@@ -33,7 +33,9 @@ class ChatController extends ChangeNotifier {
   bool _showTextInput = false;
   bool _showGenreSelection = false;
   bool _showPlatformSelection = false;
+  bool _showLanguagePicker = false;
   bool _showFinalButton = false;
+  String? _selectedLanguage;
   String _userName = '';
   List<String> _currentSuggestions = [];
 
@@ -52,6 +54,8 @@ class ChatController extends ChangeNotifier {
   bool get showTextInput => _showTextInput;
   bool get showGenreSelection => _showGenreSelection;
   bool get showPlatformSelection => _showPlatformSelection;
+  bool get showLanguagePicker => _showLanguagePicker;
+  String? get selectedLanguage => _selectedLanguage;
   bool get showFinalButton => _showFinalButton;
   String get userName => _userName;
   List<String> get currentSuggestions => _currentSuggestions;
@@ -64,52 +68,15 @@ class ChatController extends ChangeNotifier {
     _filteredGenres = _allGenres;
 
     _initializeAnalytics();
-    _resumeOrStartOnboarding();
+    startOnboarding();
   }
 
-  Future<void> _resumeOrStartOnboarding() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final draftStep = prefs.getInt('onboarding_draft_step') ?? 0;
-      final draftName = prefs.getString('onboarding_draft_user_name') ?? '';
-      final draftGenreNames = prefs.getStringList('onboarding_draft_genres') ?? [];
-      final savedAt = prefs.getString('onboarding_draft_saved_at');
-
-      bool shouldResume = false;
-      if (draftStep > 0 && savedAt != null) {
-        final savedDate = DateTime.tryParse(savedAt);
-        if (savedDate != null && DateTime.now().difference(savedDate).inDays < 7) {
-          shouldResume = true;
-        }
-      }
-
-      if (shouldResume) {
-        _currentStep = draftStep;
-        _userName = draftName;
-        if (draftGenreNames.isNotEmpty) {
-          _selectedGenres = _allGenres
-              .where((g) => draftGenreNames.contains(g.name))
-              .toList();
-        }
-        Future.delayed(const Duration(milliseconds: 500), () {
-          _messages.add(ChatMessage(
-            text: 'Welcome back! Let\'s continue setting up your feed 👋',
-            isBot: true,
-            timestamp: DateTime.now(),
-          ));
-          notifyListeners();
-          Future.delayed(const Duration(milliseconds: 600), () {
-            if (_currentStep < _onboardingSteps.length) {
-              showBotMessage(_onboardingSteps[_currentStep].botMessage);
-            }
-          });
-        });
-      } else {
-        startOnboarding();
-      }
-    } catch (_) {
-      startOnboarding();
-    }
+  Future<void> saveProgressDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('onboarding_draft_step', _currentStep);
+    await prefs.setString('onboarding_draft_user_name', _userName);
+    await prefs.setStringList('onboarding_draft_genres', _selectedGenres.map((g) => g.name).toList());
+    await prefs.setString('onboarding_draft_saved_at', DateTime.now().toIso8601String());
   }
 
   void _initializeAnalytics() {
@@ -136,6 +103,7 @@ class ChatController extends ChangeNotifier {
     _showTextInput = false;
     _showGenreSelection = false;
     _showPlatformSelection = false;
+    _showLanguagePicker = false;
     notifyListeners();
 
     scrollToBottom();
@@ -154,7 +122,6 @@ class ChatController extends ChangeNotifier {
   }
 
   void showStepOptions() {
-    if (_currentStep >= _onboardingSteps.length) return;
     final currentStepData = _onboardingSteps[_currentStep];
     
     Future.delayed(const Duration(milliseconds: 500), () {
@@ -163,6 +130,9 @@ class ChatController extends ChangeNotifier {
         _showTextInput = false;
       } else if (currentStepData.isPlatformSelection) {
         _showPlatformSelection = true;
+        _showTextInput = false;
+      } else if (currentStepData.isLanguageSelection) {
+        _showLanguagePicker = true;
         _showTextInput = false;
       } else {
         _quickReplies = currentStepData.quickReplies;
@@ -197,20 +167,38 @@ class ChatController extends ChangeNotifier {
 
   void updateSuggestions() {
     if (_currentStep >= _onboardingSteps.length) return;
-    final key = _onboardingSteps[_currentStep].key;
-    switch (key) {
-      case 'welcome':
-        _currentSuggestions = ['Hi there!', 'Hello!', 'Let\'s go!', 'I\'m ready'];
-      case 'viewing_frequency':
-        _currentSuggestions = ['Watch daily', 'A few times a week', 'Mostly weekends', 'All the time!'];
-      case 'content_goals':
-        _currentSuggestions = ['Entertainment & fun', 'Learning new things', 'Stay on trends', 'Just to relax'];
-      case 'content_language':
-        _currentSuggestions = ['English', 'Hindi', 'Spanish', 'Mix of languages'];
-      case 'personal_info':
-        _currentSuggestions = ['Alex', 'Sam', 'Jordan', 'Casey'];
-      case 'completion':
-        _currentSuggestions = ['So excited!', 'Let\'s do this', 'Can\'t wait!'];
+    
+    switch (_currentStep) {
+      case 0:
+        _currentSuggestions = [
+          'Hi there!',
+          'Hello',
+          'Let\'s get started',
+          'I\'m ready'
+        ];
+        break;
+      case 1:
+        _currentSuggestions = [
+          'My name is Alex',
+          'Call me Sam',
+          'I\'m Jordan'
+        ];
+        break;
+      case 2:
+        _currentSuggestions = [
+          'I love comedy videos',
+          'I enjoy educational content',
+          'I like music and entertainment',
+          'I prefer short funny clips'
+        ];
+        break;
+      case 5:
+        _currentSuggestions = [
+          'Sounds great!',
+          'I\'m excited to start',
+          'Let\'s do this'
+        ];
+        break;
       default:
         _currentSuggestions = [];
     }
@@ -227,6 +215,7 @@ class ChatController extends ChangeNotifier {
     _showTextInput = false;
     _showGenreSelection = false;
     _showPlatformSelection = false;
+    _showLanguagePicker = false;
     notifyListeners();
     scrollToBottom();
   }
@@ -246,13 +235,31 @@ class ChatController extends ChangeNotifier {
   }
 
   void handleGenreContinue() {
-    if (_selectedGenres.length < 3) {
-      showBotMessage('Please pick at least 3 genres so I can build your perfect feed! You\'ve selected ${_selectedGenres.length} so far.');
-      return;
-    }
     final genreNames = _selectedGenres.map((g) => g.name).join(', ');
     addUserMessage('I\'m interested in: $genreNames');
     processUserInput('Selected ${_selectedGenres.length} genres');
+  }
+
+  Future<void> handleLanguageSelected(String name, String locale) async {
+    _showLanguagePicker = false;
+    _selectedLanguage = name;
+    addUserMessage(name);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('app_locale', locale);
+    await prefs.setString('onboarding_content_language', name);
+    notifyListeners();
+    Future.delayed(const Duration(milliseconds: 800), () {
+      _advanceStep();
+    });
+  }
+
+  void _advanceStep() {
+    _currentStep++;
+    if (_currentStep < _onboardingSteps.length) {
+      showBotMessage(_onboardingSteps[_currentStep].botMessage);
+    } else {
+      completeOnboarding();
+    }
   }
 
   void handlePlatformConnect(String platform) {
@@ -280,81 +287,8 @@ class ChatController extends ChangeNotifier {
   }
 
   void processUserInput(String input) {
-    if (_currentStep < _onboardingSteps.length &&
-        _onboardingSteps[_currentStep].key == 'content_language') {
-      // Map common language names to locale codes
-      final lowerInput = input.toLowerCase();
-      String? localeCode;
-      if (lowerInput.contains('hindi') || lowerInput.contains('हिंदी')) {
-        localeCode = 'hi';
-      } else if (lowerInput.contains('spanish') || lowerInput.contains('español')) {
-        localeCode = 'es';
-      } else if (lowerInput.contains('french') || lowerInput.contains('français')) {
-        localeCode = 'fr';
-      } else if (lowerInput.contains('german') || lowerInput.contains('deutsch')) {
-        localeCode = 'de';
-      } else if (lowerInput.contains('arabic') || lowerInput.contains('عربى')) {
-        localeCode = 'ar';
-      } else if (lowerInput.contains('portuguese') || lowerInput.contains('português')) {
-        localeCode = 'pt';
-      } else if (lowerInput.contains('japanese') || lowerInput.contains('日本語')) {
-        localeCode = 'ja';
-      } else if (lowerInput.contains('korean') || lowerInput.contains('한국어')) {
-        localeCode = 'ko';
-      } else if (lowerInput.contains('chinese') || lowerInput.contains('中文')) {
-        localeCode = 'zh';
-      } else if (lowerInput.contains('indonesian') || lowerInput.contains('bahasa')) {
-        localeCode = 'id';
-      } else if (lowerInput.contains('russian') || lowerInput.contains('русский')) {
-        localeCode = 'ru';
-      } else {
-        localeCode = 'en';
-      }
-      // Save locale preference and switch app language
-      SharedPreferences.getInstance().then((prefs) {
-        prefs.setString('app_locale', localeCode!);
-        prefs.setString('onboarding_content_language', input);
-      });
-    }
-
-    if (_currentStep < _onboardingSteps.length &&
-        _onboardingSteps[_currentStep].key == 'personal_info' &&
-        input.isNotEmpty &&
-        input != 'Skip for now') {
+    if (_currentStep == 1 && input.isNotEmpty) {
       _userName = input;
-    }
-
-    // Save responses for all collected steps
-    switch (_currentStep < _onboardingSteps.length
-        ? _onboardingSteps[_currentStep].key
-        : '') {
-      case 'viewing_frequency':
-        SharedPreferences.getInstance().then((prefs) {
-          prefs.setString('user_viewing_frequency', input);
-        });
-      case 'content_duration':
-        SharedPreferences.getInstance().then((prefs) {
-          prefs.setString('user_content_duration', input);
-        });
-      case 'content_goals':
-        SharedPreferences.getInstance().then((prefs) {
-          prefs.setString('user_content_goals', input);
-        });
-      case 'creator_style':
-        SharedPreferences.getInstance().then((prefs) {
-          prefs.setString('user_creator_style', input);
-        });
-      case 'viewing_time':
-        SharedPreferences.getInstance().then((prefs) {
-          prefs.setString('user_viewing_time', input);
-          // Also save as a scheduled notification time hint
-          final hour = _parseViewingTimeToHour(input);
-          if (hour != null) prefs.setInt('preferred_notification_hour', hour);
-        });
-      case 'notifications':
-        SharedPreferences.getInstance().then((prefs) {
-          prefs.setString('user_notification_preference', input);
-        });
     }
 
     AnalyticsService.instance.trackOnboardingEvent(
@@ -367,36 +301,17 @@ class ChatController extends ChangeNotifier {
       },
     );
     
-    Future.delayed(const Duration(milliseconds: 500), () async {
+    Future.delayed(const Duration(milliseconds: 500), () {
       _currentStep++;
       if (_currentStep < _onboardingSteps.length) {
         showBotMessage(_onboardingSteps[_currentStep].botMessage);
       } else {
-        await completeOnboarding();
+        completeOnboarding();
       }
     });
   }
 
-  Future<void> saveProgressDraft() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('onboarding_draft_step', _currentStep);
-      await prefs.setString('onboarding_draft_user_name', _userName);
-      await prefs.setStringList(
-        'onboarding_draft_genres',
-        _selectedGenres.map((g) => g.name).toList(),
-      );
-      await prefs.setString(
-        'onboarding_draft_saved_at',
-        DateTime.now().toIso8601String(),
-      );
-    } catch (e) {
-      debugPrint('saveProgressDraft error: $e');
-    }
-  }
-
-  Future<void> completeOnboarding() async {
-    final _completionPrefs = await SharedPreferences.getInstance();
+  void completeOnboarding() {
     AnalyticsService.instance.trackOnboardingEvent(
       eventName: AnalyticsEvents.onboardingCompleted,
       stepNumber: _currentStep,
@@ -407,28 +322,15 @@ class ChatController extends ChangeNotifier {
         'selected_genres': _selectedGenres.length,
         'completion_time': DateTime.now().toIso8601String(),
         'user_name': _userName,
-        'viewing_frequency': _completionPrefs.getString('user_viewing_frequency') ?? '',
-        'content_goals': _completionPrefs.getString('user_content_goals') ?? '',
-        'viewing_time': _completionPrefs.getString('user_viewing_time') ?? '',
       },
     );
 
-    try {
-      await _onboardingService.saveOnboardingData(
-        userName: _userName,
-        selectedGenres: _selectedGenres,
-        platformConnections: _platformConnections,
-        chatHistory: _messages,
-      );
-    } catch (e) {
-      debugPrint('Onboarding save error: $e');
-      // Don't block user - continue with partial data
-    }
-
-    // Schedule personalized notifications based on selected genres
-    NotificationService.instance
-        .schedulePersonalizedNotifications()
-        .catchError((e) => debugPrint('Notification schedule error: $e'));
+    _onboardingService.saveOnboardingData(
+      userName: _userName,
+      selectedGenres: _selectedGenres,
+      platformConnections: _platformConnections,
+      chatHistory: _messages,
+    );
 
     final welcomeMessage = _onboardingService.generateWelcomeMessage(
       userName: _userName,
@@ -440,15 +342,6 @@ class ChatController extends ChangeNotifier {
     
     _showFinalButton = true;
     notifyListeners();
-  }
-
-  int? _parseViewingTimeToHour(String input) {
-    final lower = input.toLowerCase();
-    if (lower.contains('morning') || lower.contains('☀️')) return 8;
-    if (lower.contains('afternoon') || lower.contains('🌤️')) return 14;
-    if (lower.contains('evening') || lower.contains('🌆')) return 19;
-    if (lower.contains('night') || lower.contains('🌙')) return 22;
-    return null;
   }
 
   void scrollToBottom() {

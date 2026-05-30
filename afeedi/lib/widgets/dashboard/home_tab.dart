@@ -1101,21 +1101,26 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
   }
 
   Widget _buildFilterChip(String label, bool isSelected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF00D4FF).withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: isSelected ? const Color(0xFF00D4FF) : Colors.white.withValues(alpha: 0.2)),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? const Color(0xFF00D4FF) : Colors.white70,
-            fontSize: 13,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+    return Semantics(
+      label: 'Filter: $label',
+      button: true,
+      selected: isSelected,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFF00D4FF).withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: isSelected ? const Color(0xFF00D4FF) : Colors.white.withValues(alpha: 0.2)),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? const Color(0xFF00D4FF) : Colors.white70,
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            ),
           ),
         ),
       ),
@@ -1124,21 +1129,26 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
 
   Widget _buildPlatformChip(String label, PlatformType platform, Color color) {
     final isSelected = _platform == platform;
-    return GestureDetector(
-      onTap: () => setState(() => _platform = platform),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: isSelected ? color : Colors.white.withValues(alpha: 0.2)),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? color : Colors.white70,
-            fontSize: 13,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+    return Semantics(
+      label: 'Filter by $label',
+      button: true,
+      selected: isSelected,
+      child: GestureDetector(
+        onTap: () => setState(() => _platform = platform),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? color.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: isSelected ? color : Colors.white.withValues(alpha: 0.2)),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? color : Colors.white70,
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            ),
           ),
         ),
       ),

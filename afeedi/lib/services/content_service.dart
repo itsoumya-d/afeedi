@@ -11,6 +11,7 @@ import 'api_content_service.dart';
 
 class ContentService {
   static final ContentService _instance = ContentService._internal();
+  static const String _feedCacheKey = 'cached_feed_ids';
   factory ContentService() => _instance;
   ContentService._internal();
   
@@ -2291,16 +2292,35 @@ class ContentService {
   }
 
   Future<List<Content>> getFeedContent({int limit = 10}) async {
-    final userLocale = await _getUserLocale();
+    try {
+      final userLocale = await _getUserLocale();
 
-    List<Content> feedContent = List.from(_allContent);
-    feedContent.shuffle(Random());
+      List<Content> feedContent = List.from(_allContent);
+      feedContent.shuffle(Random());
 
-    // Apply locale boost before taking the limit so that language-matching
-    // content surfaces even when pool is large.
-    feedContent = _applyLocaleBoost(feedContent, userLocale);
+      feedContent = _applyLocaleBoost(feedContent, userLocale);
+      final result = _withCreatorIds(feedContent.take(limit).toList());
 
-    return _withCreatorIds(feedContent.take(limit).toList());
+      // Persist IDs for offline fallback
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_feedCacheKey, result.map((c) => c.id).toList());
+      await prefs.setInt('${_feedCacheKey}_ts', DateTime.now().millisecondsSinceEpoch);
+
+      return result;
+    } catch (e) {
+      if (kDebugMode) debugPrint('getFeedContent error, loading cache: $e');
+      final prefs = await SharedPreferences.getInstance();
+      final cachedIds = prefs.getStringList(_feedCacheKey);
+      if (cachedIds != null && cachedIds.isNotEmpty) {
+        final cached = cachedIds
+            .map((id) => _allContent.firstWhere((c) => c.id == id,
+                orElse: () => _allContent.first))
+            .take(limit)
+            .toList();
+        if (cached.isNotEmpty) return _withCreatorIds(cached);
+      }
+      rethrow;
+    }
   }
 
   Future<List<Content>> loadMoreContent(int offset, {int limit = 10}) async {

@@ -42,125 +42,58 @@ class OnboardingService {
     },
   ];
 
-  Future<void> initialize() async {}
-
   // Onboarding steps configuration
   List<OnboardingStep> getOnboardingSteps() {
     return [
-      // Step 0 — Welcome
       OnboardingStep(
-        botMessage: "Hey there! 👋 Welcome to Afeedi — your ultimate video hub that unifies YouTube, TikTok, Instagram Reels and Facebook Watch into one perfectly curated feed. I'm your AI curator, and I'm about to build you a feed you'll actually want to watch. Let's go! 🚀",
-        quickReplies: ["Let's do this! 🚀", "I'm ready! ✨", "Tell me more 🤔"],
+        botMessage: "Hey there! 👋 Welcome to Afeedi! I'm here to help you discover amazing content that matches your vibe. Ready to get started?",
+        quickReplies: ["Let's do this! 🚀", "Tell me more 🤔", "I'm ready! ✨"],
         allowTextInput: true,
-        inputPlaceholder: "Type anything or pick a quick reply...",
+        inputPlaceholder: "Type your response or pick a quick reply...",
         key: 'welcome',
         stepTitle: 'Welcome to Afeedi',
-        stepDescription: 'Your personalized video feed across all platforms',
+        stepDescription: 'Let\'s get started on your personalized content journey!',
       ),
-      // Step 1 — Viewing Frequency
       OnboardingStep(
-        botMessage: "Amazing! First, let me understand your watching habits. How often do you typically watch videos online?",
-        quickReplies: ["Multiple times a day 📱", "Once or twice daily ⏰", "Few times a week 📅", "Whenever I have time 🎲"],
-        allowTextInput: true,
-        inputPlaceholder: "Tell me about your viewing habits...",
-        key: 'viewing_frequency',
-        stepTitle: 'Viewing Frequency',
-        stepDescription: 'How often do you watch videos?',
-      ),
-      // Step 2 — Content Duration
-      OnboardingStep(
-        botMessage: "Got it! Do you prefer quick short videos or longer in-depth content? This helps me balance your feed perfectly 🎯",
-        quickReplies: ["Quick clips under 60s 💨", "Mix of both! 🎭", "Long videos 10min+ 📺", "Depends on my mood"],
-        allowTextInput: false,
-        key: 'content_duration',
-        stepTitle: 'Content Duration',
-        stepDescription: 'Short clips or long form?',
-      ),
-      // Step 3 — Content Goals
-      OnboardingStep(
-        botMessage: "Nice! What's your main reason for watching videos? Knowing your goal helps me find content that actually adds value to your life 💡",
-        quickReplies: ["Entertainment & fun 🎉", "Learning something new 📚", "Stay updated on trends 📰", "Relax and unwind 😌"],
-        allowTextInput: true,
-        inputPlaceholder: "Tell me what you're looking for...",
-        key: 'content_goals',
-        stepTitle: 'Watching Goals',
-        stepDescription: 'What are you watching for?',
-      ),
-      // Step 4 — Genre Selection
-      OnboardingStep(
-        botMessage: "Now the fun part! 🎉 Pick the topics that excite you most — the more you pick, the better I can personalize your feed! Select at least 3 to continue.",
+        botMessage: "Awesome! First, let's talk about what you love. What kind of content gets you excited? Pick as many as you like! 🎯",
         quickReplies: [],
         allowTextInput: false,
         isGenreSelection: true,
         allowMultiSelect: true,
         key: 'content_interests',
         stepTitle: 'Your Interests',
-        stepDescription: 'Pick topics you love — minimum 3',
-        helpText: 'Select at least 3 genres to continue',
+        stepDescription: 'Tell us what kind of content you love!',
       ),
-      // Step 5 — Language Preference
       OnboardingStep(
-        botMessage: "Great taste! 🌟 What language do you prefer for most of your content?",
-        quickReplies: ["English 🇺🇸", "Hindi 🇮🇳", "Spanish 🇪🇸", "Mix of languages 🌍"],
-        allowTextInput: true,
-        inputPlaceholder: "Type a language...",
-        key: 'content_language',
-        stepTitle: 'Language Preference',
-        stepDescription: 'Content in your preferred language',
-      ),
-      // Step 6 — Platform Preferences
-      OnboardingStep(
-        botMessage: "Perfect! Which platforms do you want content from? All are selected by default — tap any to toggle. We NEVER post on your behalf — we only read! 🔒",
+        botMessage: "Perfect choices! 🎉 Now, let's connect your social accounts so I can find content that matches your vibe. Don't worry, we only read - never post!",
         quickReplies: [],
         allowTextInput: false,
         isPlatformSelection: true,
         showSkipOption: true,
         key: 'platform_preferences',
-        stepTitle: 'Your Platforms',
-        stepDescription: 'Choose where to pull content from',
-        helpText: 'We only read — never post!',
+        stepTitle: 'Connect Platforms',
+        stepDescription: 'Link your accounts for better recommendations',
       ),
-      // Step 7 — Creator Style
       OnboardingStep(
-        botMessage: "Almost set! What style of creators do you enjoy most? This helps me find the right voices for your feed 🎤",
-        quickReplies: ["Big YouTubers & influencers 🌟", "Independent creators 🎨", "Expert professionals 👔", "Mix of all types 🎭"],
+        botMessage: "Great taste! 🌟 What language do you prefer for most of your content?",
+        quickReplies: [],
         allowTextInput: false,
-        key: 'creator_style',
-        stepTitle: 'Creator Style',
-        stepDescription: 'Find the right voices for you',
+        isLanguageSelection: true,
+        key: 'content_language',
+        stepTitle: 'Language Preference',
+        stepDescription: 'Content in your preferred language',
       ),
-      // Step 8 — Personal Info (name capture)
       OnboardingStep(
-        botMessage: "Loving your taste so far! 😊 What should I call you? Just your first name is perfect!",
-        quickReplies: ["Alex", "Sam", "Jordan", "Skip for now"],
+        botMessage: "Amazing! 🌟 Tell me a bit about yourself - what's your name, and what kind of mood are you in for content today?",
+        quickReplies: ["I'm feeling adventurous! 🌍", "Something chill and relaxing 😌", "Surprise me! 🎲"],
         allowTextInput: true,
-        inputPlaceholder: "Type your first name...",
         key: 'personal_info',
-        stepTitle: 'What\'s Your Name?',
-        stepDescription: 'Personalizing your experience',
+        stepTitle: 'Personal Information',
+        stepDescription: 'Tell us a bit about yourself',
       ),
-      // Step 9 — Viewing Time
       OnboardingStep(
-        botMessage: "Nice to meet you! 🎊 When do you usually watch videos? I'll prioritize fresh content for your peak watching time!",
-        quickReplies: ["Morning ☀️", "Afternoon 🌤️", "Evening 🌆", "Night 🌙"],
-        allowTextInput: false,
-        key: 'viewing_time',
-        stepTitle: 'Best Viewing Time',
-        stepDescription: 'When do you watch most?',
-      ),
-      // Step 10 — Notification Preferences
-      OnboardingStep(
-        botMessage: "One last thing — how would you like me to notify you when amazing content drops?",
-        quickReplies: ["Daily digest 📰", "Only must-see content 🔥", "Weekly roundup 📅", "Just in the app 🔕"],
-        allowTextInput: false,
-        key: 'notifications',
-        stepTitle: 'Stay Updated',
-        stepDescription: 'Your notification preferences',
-      ),
-      // Step 11 — Completion
-      OnboardingStep(
-        botMessage: "You're all set! 🎊 I've built your personalized feed from your selected topics across all platforms. Your perfect content experience starts now! Let's discover something amazing together!",
-        quickReplies: ["Let's go! 🚀", "Show me my feed! 📱", "Can't wait! ✨"],
+        botMessage: "Perfect! 🎊 You're all set! I've curated a personalized feed just for you. Ready to dive into some amazing content?",
+        quickReplies: ["Let's go! 🚀", "Show me my feed! 📱"],
         allowTextInput: false,
         key: 'completion',
         stepTitle: 'All Set!',
@@ -282,7 +215,6 @@ class OnboardingService {
     return message;
   }
 
-  // Save onboarding data to SharedPreferences
   Future<void> saveOnboardingData({
     required String userName,
     required List<Genre> selectedGenres,
@@ -303,7 +235,6 @@ class OnboardingService {
     await prefs.setString('onboarding_completed_at', DateTime.now().toIso8601String());
   }
 
-  // Load saved onboarding data from SharedPreferences
   Future<Map<String, dynamic>?> loadOnboardingData() async {
     final prefs = await SharedPreferences.getInstance();
     final completed = prefs.getBool('onboarding_completed') ?? false;
@@ -319,13 +250,11 @@ class OnboardingService {
     };
   }
 
-  // Check if onboarding is completed
   Future<bool> isOnboardingCompleted() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('onboarding_completed') ?? false;
   }
 
-  // Get current user preferences
   Future<UserPreferences?> getCurrentPreferences() async {
     final data = await loadOnboardingData();
     if (data == null) return null;
@@ -335,25 +264,22 @@ class OnboardingService {
       contentInterests: List<String>.from(preferences['selectedGenres'] ?? []),
       platformPriorities: Map<String, double>.from(
         (preferences['platformConnections'] as Map<String, dynamic>? ?? {})
-          .map((k, v) => MapEntry(k, v == true ? 1.0 : 0.0)),
+            .map((k, v) => MapEntry(k, v == true ? 1.0 : 0.0)),
       ),
       name: preferences['userName'] ?? '',
     );
   }
 
-  // Get user preferences (alias for getCurrentPreferences)
   Future<UserPreferences?> getUserPreferences() async {
     return getCurrentPreferences();
   }
 
-  // Mark onboarding as complete
   Future<void> markOnboardingComplete() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_completed', true);
     await prefs.setString('onboarding_completed_at', DateTime.now().toIso8601String());
   }
 
-  // Save user preferences
   Future<void> savePreferences(UserPreferences preferences) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('onboarding_user_name', preferences.name ?? '');
@@ -367,11 +293,13 @@ class OnboardingService {
     );
   }
 
+  Future<void> initialize() async {}
+
+  List<bool> get completedSteps => _completedSteps;
+
   // Current step tracking
   int _currentStepIndex = 0;
   final List<bool> _completedSteps = [];
-
-  List<bool> get completedSteps => _completedSteps;
 
   // Get next onboarding step
   Map<String, dynamic>? getNextStep() {
@@ -397,7 +325,7 @@ class OnboardingService {
       _currentStepIndex = stepId + 1;
       
       // TODO: Save step data
-      debugPrint('step $stepId with data: $data');
+      print('Completed step $stepId with data: $data');
     }
   }
 
@@ -405,7 +333,7 @@ class OnboardingService {
   Future<void> skipStep(int stepId) async {
     if (stepId >= 0 && stepId < getOnboardingSteps().length) {
       _currentStepIndex = stepId + 1;
-      debugPrint('step $stepId');
+      print('Skipped step $stepId');
     }
   }
 

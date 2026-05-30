@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/content_model.dart';
 import '../../services/content_service.dart';
 import '../../screens/creator_profile_sheet.dart';
+import '../../services/navigation_service.dart';
 
 class FeedPostCard extends StatefulWidget {
   final Content content;
@@ -197,7 +198,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
           ),
           IconButton(
             icon: const Icon(Icons.more_vert),
-            onPressed: () {},
+            tooltip: 'More options',
+            onPressed: () => _showMoreOptions(context),
           ),
         ],
       ),
@@ -291,6 +293,9 @@ class _FeedPostCardState extends State<FeedPostCard> {
             contentId: widget.content.id,
             interactionType: InteractionType.view,
           );
+          if (context.mounted) {
+            Navigator.pushNamed(context, AppRoutes.player, arguments: widget.content);
+          }
         },
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
@@ -521,7 +526,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
             button: true,
             child: _buildActionButton(
             icon: Icons.share_outlined,
-            label: '0',
+            label: 'Share',
             onTap: () async {
               final messenger = ScaffoldMessenger.of(context);
               await ContentService.instance.trackContentInteraction(
@@ -571,6 +576,50 @@ class _FeedPostCardState extends State<FeedPostCard> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showMoreOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1A1A2E),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: 16),
+            _moreOption(Icons.share_outlined, 'Share', () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Link copied!'), duration: Duration(seconds: 2)),
+              );
+            }),
+            _moreOption(_isSaved ? Icons.bookmark : Icons.bookmark_border, _isSaved ? 'Remove bookmark' : 'Save to Watch Later', () async {
+              Navigator.pop(context);
+              setState(() => _isSaved = !_isSaved);
+              await ContentService.instance.trackContentInteraction(
+                contentId: widget.content.id,
+                interactionType: InteractionType.save,
+              );
+            }),
+            _moreOption(Icons.not_interested, 'Not interested', () => Navigator.pop(context)),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _moreOption(IconData icon, String label, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white70),
+      title: Text(label, style: const TextStyle(color: Colors.white, fontSize: 15)),
+      onTap: onTap,
     );
   }
 

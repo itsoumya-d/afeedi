@@ -1,0 +1,457 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Indonesian (`id`).
+class AppLocalizationsId extends AppLocalizations {
+  AppLocalizationsId([String locale = 'id']) : super(locale);
+
+  @override
+  String get appName => 'Afeedi';
+
+  @override
+  String get tagline => 'Semua video favorit Anda. Satu pengalaman premium.';
+
+  @override
+  String get skip => 'Lewati';
+
+  @override
+  String get continueBtn => 'Lanjutkan';
+
+  @override
+  String get getStarted => 'Mulai';
+
+  @override
+  String get signIn => 'Masuk';
+
+  @override
+  String get signOut => 'Keluar';
+
+  @override
+  String get continueWithGoogle => 'Lanjutkan dengan Google';
+
+  @override
+  String get continueWithApple => 'Lanjutkan dengan Apple';
+
+  @override
+  String get alreadyHaveAccount => 'Sudah punya akun? Masuk';
+
+  @override
+  String get createAccount => 'Buat akun';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get password => 'Kata sandi';
+
+  @override
+  String get name => 'Nama';
+
+  @override
+  String get terms => 'Syarat';
+
+  @override
+  String get privacyPolicy => 'Kebijakan privasi';
+
+  @override
+  String get home => 'Beranda';
+
+  @override
+  String get videos => 'Video';
+
+  @override
+  String get discover => 'Temukan';
+
+  @override
+  String get shorts => 'Pendek';
+
+  @override
+  String get calendar => 'Kalender';
+
+  @override
+  String get profile => 'Profil';
+
+  @override
+  String get search => 'Cari';
+
+  @override
+  String get notifications => 'Notifikasi';
+
+  @override
+  String get settings => 'Pengaturan';
+
+  @override
+  String get trending => 'Trending';
+
+  @override
+  String get forYou => 'Untuk Anda';
+
+  @override
+  String get following => 'Mengikuti';
+
+  @override
+  String get bookmarks => 'Penanda';
+
+  @override
+  String get history => 'Riwayat';
+
+  @override
+  String get saved => 'Disimpan';
+
+  @override
+  String get liked => 'Disukai';
+
+  @override
+  String get achievements => 'Pencapaian';
+
+  @override
+  String get watchHistory => 'Riwayat tontonan';
+
+  @override
+  String get continueWatching => 'Lanjutkan menonton';
+
+  @override
+  String get recommended => 'Direkomendasikan';
+
+  @override
+  String get popular => 'Populer';
+
+  @override
+  String get newest => 'Terbaru';
+
+  @override
+  String get categories => 'Kategori';
+
+  @override
+  String get allCategories => 'Semua kategori';
+
+  @override
+  String get filter => 'Filter';
+
+  @override
+  String get filters => 'Filter';
+
+  @override
+  String get clearFilters => 'Hapus filter';
+
+  @override
+  String get applyFilters => 'Terapkan filter';
+
+  @override
+  String get sortBy => 'Urutkan berdasarkan';
+
+  @override
+  String get platform => 'Platform';
+
+  @override
+  String get allPlatforms => 'Semua platform';
+
+  @override
+  String get timeRange => 'Rentang waktu';
+
+  @override
+  String get today => 'Hari ini';
+
+  @override
+  String get thisWeek => 'Minggu ini';
+
+  @override
+  String get thisMonth => 'Bulan ini';
+
+  @override
+  String get allTime => 'Sepanjang waktu';
+
+  @override
+  String get contentType => 'Jenis konten';
+
+  @override
+  String get video => 'Video';
+
+  @override
+  String get short => 'Pendek';
+
+  @override
+  String get reel => 'Reel';
+
+  @override
+  String get views => 'tayangan';
+
+  @override
+  String get likes => 'suka';
+
+  @override
+  String get comments => 'Komentar';
+
+  @override
+  String get share => 'Bagikan';
+
+  @override
+  String get save => 'Simpan';
+
+  @override
+  String get like => 'Suka';
+
+  @override
+  String get follow => 'Ikuti';
+
+  @override
+  String get unfollow => 'Berhenti mengikuti';
+
+  @override
+  String get subscribe => 'Berlangganan';
+
+  @override
+  String get creator => 'Kreator';
+
+  @override
+  String get creatorProfile => 'Profil kreator';
+
+  @override
+  String get noResults => 'Tidak ada hasil';
+
+  @override
+  String noResultsFor(String query) {
+    return 'Tidak ada hasil untuk \"$query\"';
+  }
+
+  @override
+  String get noContent => 'Tidak ada konten tersedia';
+
+  @override
+  String get loading => 'Memuat...';
+
+  @override
+  String get retry => 'Coba lagi';
+
+  @override
+  String get refresh => 'Segarkan';
+
+  @override
+  String get pullToRefresh => 'Tarik untuk menyegarkan';
+
+  @override
+  String get errorLoading => 'Kesalahan memuat konten';
+
+  @override
+  String get noInternetConnection => 'Tidak ada koneksi internet';
+
+  @override
+  String get tryAgain => 'Coba lagi';
+
+  @override
+  String get markAllRead => 'Tandai semua sudah dibaca';
+
+  @override
+  String get allNotifications => 'Semua';
+
+  @override
+  String get unread => 'Belum dibaca';
+
+  @override
+  String get achievement => 'Pencapaian';
+
+  @override
+  String get videosWatched => 'Video yang ditonton';
+
+  @override
+  String get watchTime => 'Waktu menonton';
+
+  @override
+  String get streak => 'Rangkaian';
+
+  @override
+  String get days => 'hari';
+
+  @override
+  String get hours => 'jam';
+
+  @override
+  String get minutes => 'menit';
+
+  @override
+  String get editProfile => 'Edit profil';
+
+  @override
+  String get language => 'Bahasa';
+
+  @override
+  String get selectLanguage => 'Pilih bahasa';
+
+  @override
+  String get darkMode => 'Mode gelap';
+
+  @override
+  String get notifications_setting => 'Notifikasi';
+
+  @override
+  String get pushNotifications => 'Notifikasi push';
+
+  @override
+  String get emailNotifications => 'Notifikasi email';
+
+  @override
+  String get privacy => 'Privasi';
+
+  @override
+  String get account => 'Akun';
+
+  @override
+  String get help => 'Bantuan';
+
+  @override
+  String get about => 'Tentang';
+
+  @override
+  String get version => 'Versi';
+
+  @override
+  String get deleteAccount => 'Hapus akun';
+
+  @override
+  String get logout => 'Keluar';
+
+  @override
+  String get premium => 'Premium';
+
+  @override
+  String get upgradeToPremium => 'Tingkatkan ke Premium';
+
+  @override
+  String get free => 'Gratis';
+
+  @override
+  String get month => 'bulan';
+
+  @override
+  String get year => 'tahun';
+
+  @override
+  String get subscribe_action => 'Berlangganan';
+
+  @override
+  String get currentPlan => 'Paket saat ini';
+
+  @override
+  String get addToCalendar => 'Tambah ke kalender';
+
+  @override
+  String get scheduledContent => 'Konten terjadwal';
+
+  @override
+  String get noContentScheduled =>
+      'Tidak ada konten yang dijadwalkan untuk hari ini';
+
+  @override
+  String contentForDate(String date) {
+    return 'Konten untuk $date';
+  }
+
+  @override
+  String get interests => 'Minat';
+
+  @override
+  String get selectInterests => 'Pilih minat Anda';
+
+  @override
+  String get selectAtLeast3 => 'Silakan pilih setidaknya 3';
+
+  @override
+  String get personalizingFeed => 'Mempersonalisasi feed Anda...';
+
+  @override
+  String get feedReady => 'Feed Anda siap!';
+
+  @override
+  String get welcomeBack => 'Selamat datang kembali!';
+
+  @override
+  String get hi => 'Halo';
+
+  @override
+  String get letsGetStarted => 'Mari kita mulai';
+
+  @override
+  String get onboardingWelcome =>
+      'Halo! Saya asisten Afeedi Anda. Saya akan membantu menyiapkan feed konten sempurna untuk Anda. Siapa nama Anda?';
+
+  @override
+  String get onboardingComplete =>
+      'Feed yang dipersonalisasi Anda siap! Ketuk di bawah untuk mulai menjelajah.';
+
+  @override
+  String get gaming => 'Gaming';
+
+  @override
+  String get music => 'Musik';
+
+  @override
+  String get technology => 'Teknologi';
+
+  @override
+  String get food => 'Makanan & Memasak';
+
+  @override
+  String get fitness => 'Kebugaran';
+
+  @override
+  String get travel => 'Perjalanan';
+
+  @override
+  String get art => 'Seni & Desain';
+
+  @override
+  String get nature => 'Alam';
+
+  @override
+  String get comedy => 'Komedi';
+
+  @override
+  String get fashion => 'Mode';
+
+  @override
+  String get education => 'Pendidikan';
+
+  @override
+  String get sports => 'Olahraga';
+
+  @override
+  String get news => 'Berita';
+
+  @override
+  String get science => 'Sains';
+
+  @override
+  String get youtube => 'YouTube';
+
+  @override
+  String get tiktok => 'TikTok';
+
+  @override
+  String get instagram => 'Instagram';
+
+  @override
+  String get facebook => 'Facebook';
+
+  @override
+  String get signingIn => 'Sedang masuk...';
+
+  @override
+  String get authenticationFailed => 'Autentikasi gagal';
+
+  @override
+  String get somethingWentWrong => 'Ada yang salah';
+
+  @override
+  String get noContentYet => 'Belum ada konten';
+
+  @override
+  String get startExploring => 'Mulai menjelajah untuk melihat konten di sini';
+
+  @override
+  String watchedVideos(int count) {
+    return 'Menonton $count video';
+  }
+}

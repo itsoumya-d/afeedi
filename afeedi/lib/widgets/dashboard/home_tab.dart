@@ -323,7 +323,12 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             ],
           ),
         ),
-        GestureDetector(
+        Semantics(
+          label: _activeFilterCount > 0
+              ? 'Open filters. $_activeFilterCount active'
+              : 'Open filters',
+          button: true,
+          child: GestureDetector(
           onTap: _showFilterSheet,
           child: Stack(
             clipBehavior: Clip.none,
@@ -369,6 +374,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             ],
           ),
         ),
+        ),
         const SizedBox(width: 8),
         _buildQuickStats(),
       ],
@@ -376,7 +382,11 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   }
 
   Widget _buildFeedTab(String label, bool isActive) {
-    return GestureDetector(
+    return Semantics(
+      label: '$label tab',
+      selected: isActive,
+      button: true,
+      child: GestureDetector(
       onTap: () {
         setState(() {
           _showFollowing = label == 'Following';
@@ -409,9 +419,10 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             const SizedBox(height: 3),
         ],
       ),
+      ),
     );
   }
-  
+
   Widget _buildQuickStats() {
     return Container(
       padding: const EdgeInsets.all(8),

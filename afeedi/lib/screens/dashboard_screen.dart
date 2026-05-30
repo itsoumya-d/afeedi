@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
 import '../services/navigation_service.dart';
 import '../widgets/dashboard/home_tab.dart';
-import '../widgets/dashboard/videos_tab.dart';
+import '../widgets/dashboard/discover_tab.dart';
 import '../screens/tabs/shorts_tab.dart';
 import '../widgets/dashboard/calendar_tab.dart';
 import '../screens/profile_screen.dart';
@@ -28,10 +28,10 @@ class _DashboardScreenState extends State<DashboardScreen>
       'widget': const HomeTab(),
     },
     {
-      'title': 'Videos',
-      'icon': Icons.play_circle_outline,
-      'activeIcon': Icons.play_circle,
-      'widget': const VideosTab(),
+      'title': 'Discover',
+      'icon': Icons.explore_outlined,
+      'activeIcon': Icons.explore,
+      'widget': const DiscoverTab(),
     },
     {
       'title': 'Calendar',

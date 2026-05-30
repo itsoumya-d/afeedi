@@ -53,7 +53,7 @@ void main() {
       // The SharedBottomNavigation displays the 5 tab labels
       expect(find.byType(SharedBottomNavigation), findsOneWidget);
       expect(find.text('Home'), findsWidgets);
-      expect(find.text('Videos'), findsWidgets);
+      expect(find.text('Discover'), findsWidgets);
       expect(find.text('Shorts'), findsWidgets);
       expect(find.text('Profile'), findsWidgets);
     });

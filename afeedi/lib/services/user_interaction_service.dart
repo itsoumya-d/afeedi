@@ -105,6 +105,9 @@ class UserInteractionService {
   List<String> getSavedContentIds() =>
       _saveCache.entries.where((e) => e.value).map((e) => e.key).toList();
 
+  List<String> getLikedContentIds() =>
+      _likeCache.entries.where((e) => e.value).map((e) => e.key).toList();
+
   List<String> getFollowedCreatorIds() =>
       _followCache.entries.where((e) => e.value).map((e) => e.key).toList();
 

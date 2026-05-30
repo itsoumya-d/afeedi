@@ -21,6 +21,8 @@ import '../screens/create_content_screen.dart';
 import '../screens/player_screen.dart';
 import '../screens/privacy_policy_screen.dart';
 import '../screens/premium_screen.dart';
+import '../screens/bookmarks_screen.dart';
+import '../screens/history_screen.dart';
 
 class NavigationService {
   static NavigationService? _instance;
@@ -100,6 +102,10 @@ class AppRoutes {
   static const String privacyPolicy = '/privacy-policy';
   static const String premium = '/premium';
 
+  // Library routes
+  static const String bookmarks = '/bookmarks';
+  static const String history = '/history';
+
   // Admin routes
   static const String adminPanel = '/admin';
   static const String adminUsers = '/admin/users';
@@ -139,5 +145,7 @@ class AppRoutes {
         '/onboarding': (_) => const PlaceholderScreen(title: 'Onboarding', icon: Icons.start),
         AppRoutes.privacyPolicy: (_) => const PrivacyPolicyScreen(),
         AppRoutes.premium: (_) => const PremiumScreen(),
+        AppRoutes.bookmarks: (_) => const BookmarksScreen(),
+        AppRoutes.history: (_) => const HistoryScreen(),
       };
 }

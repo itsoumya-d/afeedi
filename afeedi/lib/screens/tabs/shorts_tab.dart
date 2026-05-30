@@ -553,6 +553,7 @@ class _ShortsTabState extends State<ShortsTab> {
           label: _formatCount(likeCount),
           onTap: () => _handleLike(content),
           iconColor: isLiked ? Colors.red : Colors.white,
+          semanticLabel: isLiked ? 'Unlike' : 'Like',
         ),
         const SizedBox(height: 22),
 
@@ -561,6 +562,7 @@ class _ShortsTabState extends State<ShortsTab> {
           icon: Icons.chat_bubble_outline,
           label: _formatCount(commentCount),
           onTap: () => _handleComment(content),
+          semanticLabel: 'Comment',
         ),
         const SizedBox(height: 22),
 
@@ -569,6 +571,7 @@ class _ShortsTabState extends State<ShortsTab> {
           icon: Icons.reply_outlined,
           label: 'Share',
           onTap: () => _handleShare(content),
+          semanticLabel: 'Share',
         ),
         const SizedBox(height: 22),
 
@@ -578,6 +581,7 @@ class _ShortsTabState extends State<ShortsTab> {
           label: isSaved ? 'Saved' : 'Save',
           onTap: () => _handleSave(content),
           iconColor: isSaved ? AppTheme.primaryCyan : Colors.white,
+          semanticLabel: isSaved ? 'Remove bookmark' : 'Save to bookmarks',
         ),
       ],
     );
@@ -589,7 +593,10 @@ class _ShortsTabState extends State<ShortsTab> {
     final avatarUrl = content.creatorAvatarUrl;
     final initial = (content.creatorName ?? '?')[0].toUpperCase();
 
-    return GestureDetector(
+    return Semantics(
+      label: isFollowed ? 'Unfollow creator' : 'Follow creator',
+      button: true,
+      child: GestureDetector(
       onTap: () => _handleFollow(creatorId),
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
@@ -659,6 +666,7 @@ class _ShortsTabState extends State<ShortsTab> {
           ],
         ),
       ),
+      ),
     );
   }
 
@@ -668,8 +676,12 @@ class _ShortsTabState extends State<ShortsTab> {
     required String label,
     required VoidCallback onTap,
     Color iconColor = Colors.white,
+    String? semanticLabel,
   }) {
-    return GestureDetector(
+    return Semantics(
+      label: semanticLabel ?? label,
+      button: true,
+      child: GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
@@ -705,6 +717,7 @@ class _ShortsTabState extends State<ShortsTab> {
               ),
           ],
         ),
+      ),
       ),
     );
   }

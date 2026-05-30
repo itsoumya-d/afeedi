@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/navigation_service.dart';
+import '../services/locale_service.dart';
+import '../widgets/common/language_selector_sheet.dart';
 
 /// Settings screen — grouped sections with SwitchListTile, dropdown tiles,
 /// and navigation tiles (chevron_right).
@@ -209,22 +211,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
             inactiveTrackColor: Colors.white12,
             inactiveThumbColor: Colors.white38,
           ),
+          ListenableBuilder(
+            listenable: LocaleService.instance,
+            builder: (context, _) {
+              final currentCode = LocaleService.instance.locale.languageCode;
+              final lang = LocaleService.supportedLanguages.firstWhere(
+                (l) => l['code'] == currentCode,
+                orElse: () => LocaleService.supportedLanguages.first,
+              );
+              return _navTile(
+                icon: Icons.translate,
+                title: 'App Language',
+                subtitle: '${lang["flag"]} ${lang["nativeName"]}',
+                onTap: () => LanguageSelectorSheet.show(context),
+              );
+            },
+          ),
           _dropdownTile(
             icon: Icons.language,
             title: 'Content Language',
             value: _contentLanguage,
             options: [
               'English',
+              'Hindi',
               'Spanish',
+              'Portuguese',
               'French',
               'German',
+              'Arabic',
+              'Indonesian',
               'Japanese',
-              'Hindi'
+              'Korean',
+              'Chinese (Simplified)',
+              'Russian',
             ],
             onChanged: (v) {
               setState(() => _contentLanguage = v ?? 'English');
               _saveString('setting_language', v ?? 'English');
             },
+          ),
+          const Divider(color: Colors.white10, height: 1),
+
+          // ── LIBRARY ──────────────────────────────────────────────────
+          _sectionHeader('Library'),
+          _navTile(
+            icon: Icons.bookmark_outline,
+            title: 'Bookmarks',
+            subtitle: 'Saved videos',
+            onTap: () => Navigator.pushNamed(context, AppRoutes.bookmarks),
+          ),
+          _navTile(
+            icon: Icons.history,
+            title: 'Watch History',
+            subtitle: 'Previously watched videos',
+            onTap: () => Navigator.pushNamed(context, AppRoutes.history),
           ),
           const Divider(color: Colors.white10, height: 1),
 

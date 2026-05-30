@@ -487,7 +487,10 @@ class _FeedPostCardState extends State<FeedPostCard> {
       child: Row(
         children: [
           // Like
-          _buildActionButton(
+          Semantics(
+            label: _isLiked ? 'Unlike' : 'Like',
+            button: true,
+            child: _buildActionButton(
             icon: _isLiked ? Icons.favorite : Icons.favorite_border,
             iconColor: _isLiked ? Colors.red : null,
             label: _formatCount(
@@ -499,10 +502,14 @@ class _FeedPostCardState extends State<FeedPostCard> {
                 interactionType: InteractionType.like,
               );
             },
+            ),
           ),
           const SizedBox(width: 20),
           // Share
-          _buildActionButton(
+          Semantics(
+            label: 'Share',
+            button: true,
+            child: _buildActionButton(
             icon: Icons.share_outlined,
             label: '0',
             onTap: () async {
@@ -518,6 +525,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                 ),
               );
             },
+            ),
           ),
           const Spacer(),
           // Duration label
@@ -533,7 +541,10 @@ class _FeedPostCardState extends State<FeedPostCard> {
           ),
           const SizedBox(width: 8),
           // Save / bookmark
-          IconButton(
+          Semantics(
+            label: _isSaved ? 'Remove bookmark' : 'Save to bookmarks',
+            button: true,
+            child: IconButton(
             icon: Icon(
               _isSaved ? Icons.bookmark : Icons.bookmark_border,
               color: _isSaved ? Colors.cyan : null,
@@ -545,6 +556,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                 interactionType: InteractionType.save,
               );
             },
+            ),
           ),
         ],
       ),

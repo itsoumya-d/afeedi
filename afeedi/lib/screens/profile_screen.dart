@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../services/local_auth_service.dart';
+import '../services/user_interaction_service.dart';
+import '../services/content_service.dart';
+import '../models/content_model.dart';
 
 // ─── Color palette ───────────────────────────────────────────────────────────
 const Color _bgPrimary       = Color(0xFF0D0B1E);
@@ -77,8 +81,8 @@ class _ProfileScreenState extends State<ProfileScreen>
   ];
 
   final List<Map<String, dynamic>> _viewingHistory = [];
-  final List<Map<String, dynamic>> _likedItems     = [];
-  final List<Map<String, dynamic>> _savedItems     = [];
+  final List<Content> _likedItems     = [];
+  final List<Content> _savedItems     = [];
 
   bool _bioExpanded = false;
 
@@ -142,6 +146,23 @@ class _ProfileScreenState extends State<ProfileScreen>
       _achievements[3]['progress'] = streakDays / 7.0;
     }
 
+    // Load real saved and liked content
+    await UserInteractionService.instance.initialize();
+    final savedIds = UserInteractionService.instance.getSavedContentIds();
+    final likedIds = UserInteractionService.instance.getLikedContentIds();
+
+    final savedContent = <Content>[];
+    for (final id in savedIds.take(20)) {
+      final c = await ContentService.instance.getVideoById(id);
+      if (c != null) savedContent.add(c);
+    }
+
+    final likedContent = <Content>[];
+    for (final id in likedIds.take(20)) {
+      final c = await ContentService.instance.getVideoById(id);
+      if (c != null) likedContent.add(c);
+    }
+
     if (mounted) {
       setState(() {
         _userProfile['name']           = name;
@@ -151,9 +172,15 @@ class _ProfileScreenState extends State<ProfileScreen>
         _userProfile['streakDays']     = streakDays;
         _userProfile['totalWatchTime'] = watchTimeStr;
         _userProfile['level']          = (videosWatched ~/ 10) + 1;
-        _userProfile['savedCount']     = savedCount;
+        _userProfile['savedCount']     = savedContent.isEmpty ? savedCount : savedContent.length;
         _userProfile['followingCount'] = followingCount;
-        _userProfile['likedCount']     = likedCount;
+        _userProfile['likedCount']     = likedContent.isEmpty ? likedCount : likedContent.length;
+        _savedItems
+          ..clear()
+          ..addAll(savedContent);
+        _likedItems
+          ..clear()
+          ..addAll(likedContent);
       });
     }
   }
@@ -629,7 +656,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         childAspectRatio: 16 / 9,
       ),
       itemCount: _likedItems.length,
-      itemBuilder: (context, index) => _buildVideoTile(_likedItems[index]),
+      itemBuilder: (context, index) => _buildContentTile(_likedItems[index]),
     );
   }
 
@@ -652,26 +679,27 @@ class _ProfileScreenState extends State<ProfileScreen>
         childAspectRatio: 16 / 9,
       ),
       itemCount: _savedItems.length,
-      itemBuilder: (context, index) => _buildVideoTile(_savedItems[index]),
+      itemBuilder: (context, index) => _buildContentTile(_savedItems[index]),
     );
   }
 
-  Widget _buildVideoTile(Map<String, dynamic> item) {
-    final thumb = item['thumbnail'] as String? ?? '';
-    final title = item['title']     as String? ?? '';
+  Widget _buildContentTile(Content content) {
+    final thumb = content.thumbnailUrl ?? '';
+    final title = content.title ?? '';
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Stack(
         fit: StackFit.expand,
         children: [
           thumb.isNotEmpty
-              ? Image.network(
-                  thumb,
+              ? CachedNetworkImage(
+                  imageUrl: thumb,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorWidget: (_, __, ___) => Container(
                     color: _surfaceElevated,
-                    child: const Icon(Icons.person, color: Colors.white38),
+                    child: const Icon(Icons.play_circle_outline, color: Colors.white38),
                   ),
+                  placeholder: (_, __) => Container(color: _surfaceElevated),
                 )
               : Container(color: _surfaceElevated),
           Positioned(

@@ -29,9 +29,9 @@ class _SharedBottomNavigationState extends State<SharedBottomNavigation>
       'activeIcon': Icons.home,
     },
     {
-      'title': 'Videos',
-      'icon': Icons.play_circle_outline,
-      'activeIcon': Icons.play_circle,
+      'title': 'Discover',
+      'icon': Icons.explore_outlined,
+      'activeIcon': Icons.explore,
     },
     {
       'title': 'Calendar',

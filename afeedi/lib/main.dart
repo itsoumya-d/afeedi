@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,6 +9,7 @@ import 'services/analytics_service.dart';
 import 'services/content_service.dart';
 import 'services/error_reporting_service.dart';
 import 'services/local_auth_service.dart';
+import 'services/locale_service.dart';
 import 'services/navigation_service.dart';
 import 'services/onboarding_service.dart';
 import 'services/platform_view_registration_service.dart';
@@ -16,6 +18,7 @@ import 'services/user_interaction_service.dart';
 import 'services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/storage/local_storage_service.dart';
+import 'l10n/app_localizations.dart';
 
 /// Global theme mode notifier — updated by SettingsScreen, observed by AfeediApp.
 final themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
@@ -83,6 +86,9 @@ Future<void> _appMain() async {
 
     // Initialize notification service
     await NotificationService.instance.initialize();
+
+    // Initialize locale service for multilingual support
+    await LocaleService.instance.initialize();
 
   } catch (error) {
     // Handle initialization errors
@@ -171,17 +177,23 @@ class _AfeediAppState extends State<AfeediApp> {
         ),
       );
     }
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: themeModeNotifier,
-      builder: (_, themeMode, __) => MaterialApp(
-        title: 'Afeedi - Social Media Aggregation',
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: themeMode,
-        navigatorKey: NavigationService.navigatorKey,
-        initialRoute: _initialRoute,
-        routes: AppRoutes.routes,
-        debugShowCheckedModeBanner: false,
+    return ListenableBuilder(
+      listenable: LocaleService.instance,
+      builder: (_, __) => ValueListenableBuilder<ThemeMode>(
+        valueListenable: themeModeNotifier,
+        builder: (_, themeMode, __) => MaterialApp(
+          title: 'Afeedi - Social Media Aggregation',
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          locale: LocaleService.instance.locale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          navigatorKey: NavigationService.navigatorKey,
+          initialRoute: _initialRoute,
+          routes: AppRoutes.routes,
+          debugShowCheckedModeBanner: false,
+        ),
       ),
     );
   }

@@ -3262,7 +3262,24 @@ class ContentService {
       final userLocale = await _getUserLocale();
 
       List<Content> feedContent = List.from(_allContent);
+
+      // Prefer content from the last 90 days; fall back to all if not enough
+      final cutoff = DateTime.now().subtract(const Duration(days: 90));
+      final recent = feedContent
+          .where((c) => c.publishedAt == null || c.publishedAt!.isAfter(cutoff))
+          .toList();
+      if (recent.length >= limit) {
+        feedContent = recent;
+      }
+
       feedContent.shuffle(Random());
+      // Sort newest-first after shuffle so the first items are always fresh
+      feedContent.sort((a, b) {
+        if (a.publishedAt == null && b.publishedAt == null) return 0;
+        if (a.publishedAt == null) return 1;
+        if (b.publishedAt == null) return -1;
+        return b.publishedAt!.compareTo(a.publishedAt!);
+      });
 
       feedContent = _applyLocaleBoost(feedContent, userLocale);
       final result = _withCreatorIds(feedContent.take(limit).toList());

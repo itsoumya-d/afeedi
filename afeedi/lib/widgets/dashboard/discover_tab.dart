@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../services/content_service.dart';
 import '../../services/navigation_service.dart';
@@ -87,6 +88,27 @@ class _DiscoverTabState extends State<DiscoverTab> {
   @override
   void initState() {
     super.initState();
+    _loadContent();
+  }
+
+  Future<void> _loadContent() async {
+    // Pre-select the user's first onboarding genre if it matches a category
+    final prefs = await SharedPreferences.getInstance();
+    final genres = prefs.getStringList('onboarding_selected_genres') ?? [];
+    final categoryKeys = _categoryIcons.keys.toList();
+    if (genres.isNotEmpty && mounted) {
+      final match = genres.firstWhere(
+        (g) => categoryKeys.any((k) => k.toLowerCase() == g.toLowerCase()),
+        orElse: () => '',
+      );
+      if (match.isNotEmpty) {
+        final key = categoryKeys.firstWhere(
+          (k) => k.toLowerCase() == match.toLowerCase(),
+        );
+        if (mounted) setState(() => _selectedCategory = key);
+      }
+    }
+
     ContentService.instance
         .getTrendingVideos(limit: 20, timeWindow: _selectedTimeWindow)
         .then((data) {
@@ -96,6 +118,10 @@ class _DiscoverTabState extends State<DiscoverTab> {
               _content = _applySort(_applyTimeFilter(data));
               _isLoading = false;
             });
+            // Apply pre-selected category filter after data loads
+            if (_selectedCategory != 'All' && _selectedCategory != 'Trending') {
+              _onCategorySelected(_selectedCategory);
+            }
           }
         })
         .catchError((e) {

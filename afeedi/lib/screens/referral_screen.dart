@@ -209,13 +209,16 @@ class _ReferralScreenState extends State<ReferralScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                _referralCode,
-                style: const TextStyle(
-                  color: _cyan,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 4,
+              Flexible(
+                child: Text(
+                  _referralCode,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: _cyan,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 4,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -226,6 +229,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                   onTap: _copyCode,
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
                     // Minimum 44×44pt touch target (12px padding around 20px icon)
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(

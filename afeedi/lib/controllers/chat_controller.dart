@@ -27,6 +27,7 @@ class ChatController extends ChangeNotifier {
   };
 
   int _currentStep = 0;
+  bool _disposed = false;
   bool _showTyping = false;
   bool _showQuickReplies = false;
   bool _showTextInput = false;
@@ -143,6 +144,7 @@ class ChatController extends ChangeNotifier {
     scrollToBottom();
 
     Future.delayed(const Duration(milliseconds: 1500), () {
+      if (_disposed) return;
       _showTyping = false;
       _messages.add(
         ChatMessage(text: message, isBot: true, timestamp: DateTime.now()),
@@ -281,6 +283,7 @@ class ChatController extends ChangeNotifier {
     await prefs.setString('onboarding_content_language', name);
     notifyListeners();
     Future.delayed(const Duration(milliseconds: 800), () {
+      if (_disposed) return;
       _advanceStep();
     });
   }
@@ -319,7 +322,7 @@ class ChatController extends ChangeNotifier {
   }
 
   void processUserInput(String input) {
-    if (_currentStep == 1 && input.isNotEmpty) {
+    if (_currentStep == 4 && input.isNotEmpty) {
       _userName = input;
     }
 
@@ -396,6 +399,7 @@ class ChatController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     scrollController.dispose();
     textController.dispose();
     searchController.dispose();

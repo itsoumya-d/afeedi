@@ -33,7 +33,8 @@ class _FeedScreenState extends State<FeedScreen> {
     });
 
     try {
-      final feedContent = await ContentService.instance.getFeedContent();
+      final feedContent = await ContentService.instance
+          .getOnboardingBasedRecommendations(limit: 20);
       setState(() {
         _posts = feedContent;
         _isLoading = false;
@@ -48,7 +49,8 @@ class _FeedScreenState extends State<FeedScreen> {
 
   Future<void> _onRefresh() async {
     try {
-      final feedContent = await ContentService.instance.getFeedContent();
+      final feedContent = await ContentService.instance
+          .getOnboardingBasedRecommendations(limit: 20);
       setState(() {
         _posts = feedContent;
       });
@@ -61,7 +63,8 @@ class _FeedScreenState extends State<FeedScreen> {
 
   void _onLoading() async {
     try {
-      final morePosts = await ContentService.instance.getFeedContent(limit: 5);
+      final morePosts = await ContentService.instance
+          .getOnboardingBasedRecommendations(limit: 5);
       setState(() {
         _posts.addAll(morePosts);
       });

@@ -352,6 +352,8 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             color: Colors.white.withValues(alpha: 0.7),
             fontSize: 16,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 8),
         Container(
@@ -711,6 +713,12 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                   height: 60,
                   fit: BoxFit.cover,
                   semanticLabel: item['title'] ?? 'Video thumbnail',
+                  errorBuilder: (_, __, ___) => Container(
+                    width: 80,
+                    height: 60,
+                    color: const Color(0xFF252545),
+                    child: const Icon(Icons.play_circle_outline, color: Colors.white38, size: 24),
+                  ),
                 ),
               ),
               if (completed)

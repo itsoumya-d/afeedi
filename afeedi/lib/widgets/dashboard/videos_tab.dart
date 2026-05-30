@@ -252,10 +252,13 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                  image: DecorationImage(
-                    image: NetworkImage(video.thumbnailUrl ?? ''),
-                    fit: BoxFit.cover,
-                  ),
+                  color: const Color(0xFF1E1E3A),
+                  image: (video.thumbnailUrl != null && video.thumbnailUrl!.isNotEmpty)
+                      ? DecorationImage(
+                          image: NetworkImage(video.thumbnailUrl!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
                 child: Stack(
                   children: [

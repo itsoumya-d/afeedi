@@ -47,46 +47,82 @@ class OnboardingService {
   // Onboarding steps configuration
   List<OnboardingStep> getOnboardingSteps() {
     return [
+      // Step 0 — Welcome
       OnboardingStep(
-        botMessage: "Hey there! 👋 Welcome to Afeedi! I'm here to help you discover amazing content that matches your vibe. Ready to get started?",
-        quickReplies: ["Let's do this! 🚀", "Tell me more 🤔", "I'm ready! ✨"],
+        botMessage: "Hey there! 👋 Welcome to Afeedi — your one feed for YouTube, TikTok, Instagram and Facebook! I'm your AI guide to help you find content you'll actually love. Ready to build your perfect feed?",
+        quickReplies: ["Let's do this! 🚀", "I'm ready! ✨", "Tell me more 🤔"],
         allowTextInput: true,
-        inputPlaceholder: "Type your response or pick a quick reply...",
+        inputPlaceholder: "Type anything or pick a quick reply...",
         key: 'welcome',
         stepTitle: 'Welcome to Afeedi',
-        stepDescription: 'Let\'s get started on your personalized content journey!',
+        stepDescription: 'Your personalized video feed across all platforms',
       ),
+      // Step 1 — Viewing Habits
       OnboardingStep(
-        botMessage: "Awesome! First, let's talk about what you love. What kind of content gets you excited? Pick as many as you like! 🎯",
+        botMessage: "Awesome! Let me understand how you like to consume content. How often do you typically watch videos? 📱",
+        quickReplies: ["All the time 📱", "A few hours daily ⏰", "Casually on weekends 🌅", "Just getting started!"],
+        allowTextInput: true,
+        inputPlaceholder: "Tell me about your viewing habits...",
+        key: 'viewing_habits',
+        stepTitle: 'Your Viewing Habits',
+        stepDescription: 'Help us understand how you watch',
+      ),
+      // Step 2 — Content Format
+      OnboardingStep(
+        botMessage: "Got it! Do you prefer quick short videos or longer in-depth content? I'll balance your feed just right 🎯",
+        quickReplies: ["Short clips (&lt;60s) 💨", "Mix of both! 🎭", "Long-form content 📺", "Depends on my mood 🎲"],
+        allowTextInput: false,
+        key: 'content_format',
+        stepTitle: 'Content Format',
+        stepDescription: 'Short clips or long form?',
+      ),
+      // Step 3 — Genre Selection
+      OnboardingStep(
+        botMessage: "Now the fun part! 🎉 What topics excite you? Pick at least 3 categories — the more you pick, the better I can personalize your feed!",
         quickReplies: [],
         allowTextInput: false,
         isGenreSelection: true,
         allowMultiSelect: true,
         key: 'content_interests',
         stepTitle: 'Your Interests',
-        stepDescription: 'Tell us what kind of content you love!',
+        stepDescription: 'Pick topics you love — minimum 3',
+        helpText: 'Select at least 3 genres to continue',
       ),
+      // Step 4 — Platform Preferences
       OnboardingStep(
-        botMessage: "Perfect choices! 🎉 Now, let's connect your social accounts so I can find content that matches your vibe. Don't worry, we only read - never post!",
+        botMessage: "Great taste! 🌟 Which platforms do you want content from? All are selected by default — tap any to toggle them. We never post on your behalf!",
         quickReplies: [],
         allowTextInput: false,
         isPlatformSelection: true,
         showSkipOption: true,
         key: 'platform_preferences',
-        stepTitle: 'Connect Platforms',
-        stepDescription: 'Link your accounts for better recommendations',
+        stepTitle: 'Your Platforms',
+        stepDescription: 'Choose where to pull content from',
+        helpText: 'We only read — never post!',
       ),
+      // Step 5 — Personal Info (name capture)
       OnboardingStep(
-        botMessage: "Amazing! 🌟 Tell me a bit about yourself - what's your name, and what kind of mood are you in for content today?",
-        quickReplies: ["I'm feeling adventurous! 🌍", "Something chill and relaxing 😌", "Surprise me! 🎲"],
+        botMessage: "Almost there! 😊 What should I call you? Just your first name is perfect!",
+        quickReplies: ["Alex", "Sam", "Jordan", "Skip for now"],
         allowTextInput: true,
+        inputPlaceholder: "Type your first name...",
         key: 'personal_info',
-        stepTitle: 'Personal Information',
-        stepDescription: 'Tell us a bit about yourself',
+        stepTitle: 'What\'s Your Name?',
+        stepDescription: 'Personalizing your experience',
       ),
+      // Step 6 — Notification Preference
       OnboardingStep(
-        botMessage: "Perfect! 🎊 You're all set! I've curated a personalized feed just for you. Ready to dive into some amazing content?",
-        quickReplies: ["Let's go! 🚀", "Show me my feed! 📱"],
+        botMessage: "Nice to meet you! 🎊 How would you like to be notified when amazing content drops?",
+        quickReplies: ["Daily digest 📰", "Only the best picks 🔥", "Weekly roundup 📅", "Just in the app"],
+        allowTextInput: false,
+        key: 'notifications',
+        stepTitle: 'Stay Updated',
+        stepDescription: 'Your notification preferences',
+      ),
+      // Step 7 — Completion
+      OnboardingStep(
+        botMessage: "You're all set! 🎊 I've built your personalized feed from your favorite topics across all platforms. Let's discover something amazing!",
+        quickReplies: ["Let's go! 🚀", "Show me my feed! 📱", "Can't wait! ✨"],
         allowTextInput: false,
         key: 'completion',
         stepTitle: 'All Set!',
@@ -260,7 +296,7 @@ class OnboardingService {
     return UserPreferences(
       contentInterests: List<String>.from(preferences['selectedGenres'] ?? []),
       platformPriorities: Map<String, double>.from(
-        (jsonDecode(preferences['platformConnections'].toString()) as Map<String, dynamic>? ?? {})
+        (preferences['platformConnections'] as Map<String, dynamic>? ?? {})
           .map((k, v) => MapEntry(k, v == true ? 1.0 : 0.0)),
       ),
       name: preferences['userName'] ?? '',

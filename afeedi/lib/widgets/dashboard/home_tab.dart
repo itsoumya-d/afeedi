@@ -27,6 +27,39 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   PlatformType? _selectedPlatform;
   bool _showFollowing = false;
   bool _showFollowSuggestion = false;
+  String _dateFilter = 'all';
+  ContentType? _contentTypeFilter;
+
+  List<Content> get _filteredPosts {
+    var posts = _posts;
+    if (_contentTypeFilter != null) {
+      posts = posts.where((p) => p.contentType == _contentTypeFilter).toList();
+    }
+    if (_dateFilter != 'all') {
+      final now = DateTime.now();
+      final DateTime cutoff;
+      switch (_dateFilter) {
+        case 'today':
+          cutoff = DateTime(now.year, now.month, now.day);
+        case 'week':
+          cutoff = now.subtract(const Duration(days: 7));
+        case 'month':
+          cutoff = now.subtract(const Duration(days: 30));
+        default:
+          cutoff = DateTime(2000);
+      }
+      posts = posts.where((p) => p.publishedAt == null || p.publishedAt!.isAfter(cutoff)).toList();
+    }
+    return posts;
+  }
+
+  int get _activeFilterCount {
+    int count = 0;
+    if (_selectedPlatform != null) count++;
+    if (_contentTypeFilter != null) count++;
+    if (_dateFilter != 'all') count++;
+    return count;
+  }
   
   @override
   bool get wantKeepAlive => true;
@@ -216,23 +249,31 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         _posts = _allPosts.where((post) => post.platform == platform).toList();
       }
     });
-    
-    // Navigate to specific platform content if needed
-    if (platform == PlatformType.youtube) {
-      _navigateToYouTube();
-    } else if (platform == PlatformType.tiktok) {
-      _navigateToTikTok();
-    }
   }
-  
-  void _navigateToYouTube() {
-    // Navigate to YouTube-specific content or external YouTube
-    Navigator.of(context).pushNamed('/dashboard', arguments: {'initialTab': 1, 'filter': 'youtube'});
-  }
-  
-  void _navigateToTikTok() {
-    // Navigate to TikTok-specific content (Shorts tab)
-    Navigator.of(context).pushNamed('/dashboard', arguments: {'initialTab': 3, 'filter': 'tiktok'});
+
+  void _showFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _FilterBottomSheet(
+        selectedPlatform: _selectedPlatform,
+        dateFilter: _dateFilter,
+        contentTypeFilter: _contentTypeFilter,
+        onApply: (platform, dateFilter, contentType) {
+          setState(() {
+            _selectedPlatform = platform;
+            _dateFilter = dateFilter;
+            _contentTypeFilter = contentType;
+            if (platform == null) {
+              _posts = List.from(_allPosts);
+            } else {
+              _posts = _allPosts.where((p) => p.platform == platform).toList();
+            }
+          });
+        },
+      ),
+    );
   }
   
 
@@ -282,6 +323,53 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             ],
           ),
         ),
+        GestureDetector(
+          onTap: _showFilterSheet,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: _activeFilterCount > 0
+                      ? AppTheme.primaryCyan.withValues(alpha: 0.2)
+                      : Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: _activeFilterCount > 0
+                        ? AppTheme.primaryCyan
+                        : Colors.white.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Icon(
+                  Icons.tune,
+                  color: _activeFilterCount > 0 ? AppTheme.primaryCyan : Colors.white70,
+                  size: 20,
+                ),
+              ),
+              if (_activeFilterCount > 0)
+                Positioned(
+                  top: -4,
+                  right: -4,
+                  child: Container(
+                    width: 16,
+                    height: 16,
+                    decoration: const BoxDecoration(
+                      color: AppTheme.primaryCyan,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$_activeFilterCount',
+                        style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
         _buildQuickStats(),
       ],
     );
@@ -309,7 +397,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           if (isActive)
             Container(
               height: 3,
-              width: label.length * 10.0,
+              width: 32,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [AppTheme.primaryCyan, AppTheme.primaryPink],
@@ -460,6 +548,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   }
   
   Widget _buildFeed() {
+    final displayPosts = _filteredPosts;
+
     if (_isLoading && _posts.isEmpty) {
       return const Center(
         child: CircularProgressIndicator(
@@ -494,6 +584,39 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       );
     }
 
+    if (!_isLoading && _posts.isNotEmpty && displayPosts.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.filter_alt_off, size: 64, color: Colors.white24),
+            const SizedBox(height: 16),
+            const Text(
+              'No content matches your filters',
+              style: TextStyle(color: Colors.white54, fontSize: 18),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Try changing or clearing your filters',
+              style: TextStyle(color: Colors.white38, fontSize: 14),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _selectedPlatform = null;
+                  _dateFilter = 'all';
+                  _contentTypeFilter = null;
+                  _posts = List.from(_allPosts);
+                });
+              },
+              child: const Text('Clear Filters'),
+            ),
+          ],
+        ),
+      );
+    }
+
     return RefreshIndicator(
       onRefresh: _refreshPosts,
       color: AppTheme.primaryCyan,
@@ -501,7 +624,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       child: ListView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: _posts.length + (_isLoading ? 1 : 0) + (_showFollowSuggestion ? 1 : 0),
+        itemCount: displayPosts.length + (_isLoading ? 1 : 0) + (_showFollowSuggestion ? 1 : 0),
         addRepaintBoundaries: false, // we add our own RepaintBoundary per card
         addAutomaticKeepAlives: false,
         itemBuilder: (context, index) {
@@ -511,7 +634,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           }
           // Adjust index for the injected banner
           final postIndex = _showFollowSuggestion && index > 2 ? index - 1 : index;
-          if (postIndex >= _posts.length) {
+          if (postIndex >= displayPosts.length) {
             return const Padding(
               padding: EdgeInsets.all(20),
               child: Center(
@@ -522,7 +645,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             );
           }
 
-          final post = _posts[postIndex];
+          final post = displayPosts[postIndex];
           return RepaintBoundary(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 16),
@@ -590,6 +713,187 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FilterBottomSheet extends StatefulWidget {
+  final PlatformType? selectedPlatform;
+  final String dateFilter;
+  final ContentType? contentTypeFilter;
+  final void Function(PlatformType? platform, String dateFilter, ContentType? contentType) onApply;
+
+  const _FilterBottomSheet({
+    required this.selectedPlatform,
+    required this.dateFilter,
+    required this.contentTypeFilter,
+    required this.onApply,
+  });
+
+  @override
+  State<_FilterBottomSheet> createState() => _FilterBottomSheetState();
+}
+
+class _FilterBottomSheetState extends State<_FilterBottomSheet> {
+  late PlatformType? _platform;
+  late String _dateFilter;
+  late ContentType? _contentType;
+
+  @override
+  void initState() {
+    super.initState();
+    _platform = widget.selectedPlatform;
+    _dateFilter = widget.dateFilter;
+    _contentType = widget.contentTypeFilter;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFF1A1A2E),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Filters', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _platform = null;
+                        _dateFilter = 'all';
+                        _contentType = null;
+                      });
+                    },
+                    child: const Text('Reset All', style: TextStyle(color: Color(0xFF00D4FF))),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Text('Platform', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildFilterChip('All', _platform == null, () => setState(() => _platform = null)),
+                  _buildPlatformChip('YouTube', PlatformType.youtube, const Color(0xFFFF0000)),
+                  _buildPlatformChip('Instagram', PlatformType.instagram, const Color(0xFFE1306C)),
+                  _buildPlatformChip('TikTok', PlatformType.tiktok, const Color(0xFF69C9D0)),
+                  _buildPlatformChip('Facebook', PlatformType.facebook, const Color(0xFF1877F2)),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Text('Time Range', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildFilterChip('All Time', _dateFilter == 'all', () => setState(() => _dateFilter = 'all')),
+                  _buildFilterChip('Today', _dateFilter == 'today', () => setState(() => _dateFilter = 'today')),
+                  _buildFilterChip('This Week', _dateFilter == 'week', () => setState(() => _dateFilter = 'week')),
+                  _buildFilterChip('This Month', _dateFilter == 'month', () => setState(() => _dateFilter = 'month')),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Text('Content Type', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildFilterChip('All', _contentType == null, () => setState(() => _contentType = null)),
+                  _buildFilterChip('Videos', _contentType == ContentType.video, () => setState(() => _contentType = ContentType.video)),
+                  _buildFilterChip('Shorts', _contentType == ContentType.short, () => setState(() => _contentType = ContentType.short)),
+                  _buildFilterChip('Reels', _contentType == ContentType.reel, () => setState(() => _contentType = ContentType.reel)),
+                ],
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () {
+                    widget.onApply(_platform, _dateFilter, _contentType);
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF00D4FF),
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Apply Filters', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF00D4FF).withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: isSelected ? const Color(0xFF00D4FF) : Colors.white.withValues(alpha: 0.2)),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? const Color(0xFF00D4FF) : Colors.white70,
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlatformChip(String label, PlatformType platform, Color color) {
+    final isSelected = _platform == platform;
+    return GestureDetector(
+      onTap: () => setState(() => _platform = platform),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: isSelected ? color : Colors.white.withValues(alpha: 0.2)),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? color : Colors.white70,
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+          ),
+        ),
       ),
     );
   }

@@ -4,6 +4,7 @@ import '../models/platform_connection_model.dart';
 import '../models/user_model.dart';
 import 'auth_service.dart';
 import 'analytics_service.dart';
+import 'content_service.dart';
 
 class ContentAggregationService {
   static ContentAggregationService? _instance;
@@ -28,7 +29,7 @@ class ContentAggregationService {
       // Get user's platform connections
       final connections = await AuthService.instance.getPlatformConnections();
       if (connections.isEmpty) {
-        return [];
+        return await ContentService.instance.getFeedContent(limit: limit);
       }
       
       // Filter connections by requested platforms

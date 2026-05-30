@@ -422,12 +422,16 @@ class _ShortsTabState extends State<ShortsTab> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              '@${content.creatorName ?? 'Unknown'}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
+            Flexible(
+              child: Text(
+                '@${content.creatorName ?? 'Unknown'}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(width: 10),
@@ -463,9 +467,13 @@ class _ShortsTabState extends State<ShortsTab> {
           children: [
             const Icon(Icons.music_note, color: Colors.white70, size: 12),
             const SizedBox(width: 4),
-            Text(
-              '${content.creatorName ?? 'Original'} · Original Audio',
-              style: const TextStyle(color: Colors.white70, fontSize: 11),
+            Flexible(
+              child: Text(
+                '${content.creatorName ?? 'Original'} · Original Audio',
+                style: const TextStyle(color: Colors.white70, fontSize: 11),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),

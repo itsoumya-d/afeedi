@@ -190,8 +190,8 @@ void main() {
         expect(recommendations, isEmpty);
       });
 
-      test('returns empty list when authenticated', () async {
-        // Setting mock preferences to simulate an authenticated user
+      test('returns seed data when authenticated but no platform connections', () async {
+        // Setting mock preferences to simulate an authenticated user with no OAuth connections
         SharedPreferences.setMockInitialValues({
           'user_id': 'test_user',
           'user_email': 'test@test.com'
@@ -201,9 +201,8 @@ void main() {
         // Act
         final recommendations = await recommendationService.generateComprehensiveRecommendations();
 
-        // Assert
-        // In the current implementation it returns an empty list as a fallback or after behavior insights
-        expect(recommendations, isEmpty);
+        // Assert: now falls back to seed content instead of empty list
+        expect(recommendations, isNotEmpty);
       });
   });
 }

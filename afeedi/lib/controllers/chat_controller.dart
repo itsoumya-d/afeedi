@@ -150,48 +150,16 @@ class ChatController extends ChangeNotifier {
 
   void updateSuggestions() {
     if (_currentStep >= _onboardingSteps.length) return;
-    
-    switch (_currentStep) {
-      case 0:
-        _currentSuggestions = [
-          'Hi there!',
-          'Hello',
-          'Let\'s get started',
-          'I\'m ready'
-        ];
-        break;
-      case 1:
-        // Genre selection step — show genre category quick-picks
-        _currentSuggestions = [
-          'Comedy & Humor',
-          'Tech & Gaming',
-          'Fitness & Health',
-          'Music & Dance',
-        ];
-        break;
-      case 2:
-        _currentSuggestions = [
-          'I love comedy videos',
-          'I enjoy educational content',
-          'I like music and entertainment',
-          'I prefer short funny clips'
-        ];
-        break;
-      case 3:
-        // Personal info step — show name suggestions
-        _currentSuggestions = [
-          'My name is Alex',
-          'Call me Sam',
-          'I\'m Jordan',
-        ];
-        break;
-      case 5:
-        _currentSuggestions = [
-          'Sounds great!',
-          'I\'m excited to start',
-          'Let\'s do this'
-        ];
-        break;
+    final key = _onboardingSteps[_currentStep].key;
+    switch (key) {
+      case 'welcome':
+        _currentSuggestions = ['Hi there!', 'Hello!', 'Let\'s go!', 'I\'m ready'];
+      case 'viewing_habits':
+        _currentSuggestions = ['Watch daily', 'A few times a week', 'Mostly weekends', 'All the time!'];
+      case 'personal_info':
+        _currentSuggestions = ['Alex', 'Sam', 'Jordan', 'Casey'];
+      case 'completion':
+        _currentSuggestions = ['So excited!', 'Let\'s do this', 'Can\'t wait!'];
       default:
         _currentSuggestions = [];
     }
@@ -261,7 +229,10 @@ class ChatController extends ChangeNotifier {
   }
 
   void processUserInput(String input) {
-    if (_currentStep == 3 && input.isNotEmpty) {
+    if (_currentStep < _onboardingSteps.length &&
+        _onboardingSteps[_currentStep].key == 'personal_info' &&
+        input.isNotEmpty &&
+        input != 'Skip for now') {
       _userName = input;
     }
 
@@ -275,17 +246,17 @@ class ChatController extends ChangeNotifier {
       },
     );
     
-    Future.delayed(const Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(milliseconds: 500), () async {
       _currentStep++;
       if (_currentStep < _onboardingSteps.length) {
         showBotMessage(_onboardingSteps[_currentStep].botMessage);
       } else {
-        completeOnboarding();
+        await completeOnboarding();
       }
     });
   }
 
-  void completeOnboarding() {
+  Future<void> completeOnboarding() async {
     AnalyticsService.instance.trackOnboardingEvent(
       eventName: AnalyticsEvents.onboardingCompleted,
       stepNumber: _currentStep,
@@ -299,7 +270,7 @@ class ChatController extends ChangeNotifier {
       },
     );
 
-    _onboardingService.saveOnboardingData(
+    await _onboardingService.saveOnboardingData(
       userName: _userName,
       selectedGenres: _selectedGenres,
       platformConnections: _platformConnections,

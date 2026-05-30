@@ -98,13 +98,17 @@ class _FeedPostCardState extends State<FeedPostCard> {
               children: [
                 Row(
                   children: [
-                    GestureDetector(
-                      onTap: () => CreatorProfileSheet.show(context, widget.content),
-                      child: Text(
-                        widget.content.creatorName ?? 'Unknown Creator',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                    Flexible(
+                      child: GestureDetector(
+                        onTap: () => CreatorProfileSheet.show(context, widget.content),
+                        child: Text(
+                          widget.content.creatorName ?? 'Unknown Creator',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
@@ -237,6 +241,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
           height: 1.3,
           fontWeight: FontWeight.w500,
         ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }

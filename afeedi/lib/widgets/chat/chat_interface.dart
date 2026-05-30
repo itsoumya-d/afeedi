@@ -275,8 +275,7 @@ class _ChatInterfaceState extends State<ChatInterface>
         child: Container(
           margin: const EdgeInsets.all(16),
           child: ElevatedButton(
-            onPressed: () async {
-              await OnboardingService.instance.markOnboardingComplete();
+            onPressed: () {
               if (context.mounted) {
                 Navigator.pushNamedAndRemoveUntil(
                   context,

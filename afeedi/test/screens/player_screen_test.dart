@@ -178,7 +178,9 @@ void main() {
       expect(speedButton, findsOneWidget);
       await tester.ensureVisible(speedButton);
       await tester.tap(speedButton);
-      await tester.pumpAndSettle();
+      // Use pump(Duration) instead of pumpAndSettle — video player has
+      // continuous animations that would cause pumpAndSettle to timeout.
+      await tester.pump(const Duration(milliseconds: 500));
 
       // Speed selector bottom sheet shows 'Playback Speed' label
       expect(find.text('Playback Speed'), findsOneWidget);
@@ -196,7 +198,7 @@ void main() {
 
       await tester.ensureVisible(find.byIcon(Icons.speed));
       await tester.tap(find.byIcon(Icons.speed));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       // Default speed options: 0.5, 0.75, 1×, 1.25, 1.5, 2×
       expect(find.text('1×'), findsWidgets);
@@ -240,7 +242,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.textContaining('views'), findsOneWidget);
+      // findsWidgets because related content cards may also show view counts
+      expect(find.textContaining('views'), findsWidgets);
     });
   });
 }

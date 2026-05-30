@@ -700,6 +700,69 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
     }
   }
 
+  static const List<String> _trendingSearchTerms = [
+    'Flutter', 'AI Tutorial', 'Minecraft', 'Comedy',
+    'Cooking', 'Fitness', 'Music', 'Tech Review',
+  ];
+
+  Widget _buildTrendingChips() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'TRENDING SEARCHES',
+          style: TextStyle(
+            color: Colors.white60,
+            fontSize: 11,
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: _trendingSearchTerms.map((term) {
+            return GestureDetector(
+              onTap: () {
+                _searchController.text = term;
+                _search(term);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E1E3A),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: const Color(0xFFFF6B6B).withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.trending_up,
+                      size: 13,
+                      color: Color(0xFFFF6B6B),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      term,
+                      style: const TextStyle(
+                        color: Color(0xFFFF6B6B),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
   Widget _buildDiscover() {
     const popularTopics = ['Gaming', 'Tech', 'Comedy', 'Music', 'News', 'Sports', 'Food', 'Travel'];
     return SingleChildScrollView(
@@ -707,6 +770,10 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Trending Searches section
+          _buildTrendingChips(),
+          const SizedBox(height: 24),
+
           // Recent Searches section
           const Text(
             'Recent Searches',

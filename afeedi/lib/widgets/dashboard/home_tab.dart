@@ -385,21 +385,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         children: [
           _buildHeader(),
           if (_isOffline)
-            Container(
-              width: double.infinity,
-              color: Colors.orange.withValues(alpha: 0.15),
-              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
-              child: const Row(
-                children: [
-                  Icon(Icons.wifi_off, color: Colors.orange, size: 16),
-                  SizedBox(width: 8),
-                  Text(
-                    'No internet connection — showing cached content',
-                    style: TextStyle(color: Colors.orange, fontSize: 12),
-                  ),
-                ],
-              ),
-            ),
+            _OfflineBanner(onDismiss: () => setState(() => _isOffline = false)),
           Expanded(
             child: _buildFeed(),
           ),
@@ -1042,7 +1028,11 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           return RepaintBoundary(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 16),
-              child: FeedPostCard(content: feedItem.content!),
+              child: FeedPostCard(
+                content: feedItem.content!,
+                isHero: listIndex == 0,
+                index: listIndex,
+              ),
             ),
           );
         },
@@ -1341,6 +1331,38 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                 child: Text(AppLocalizations.of(context)?.dismiss ?? 'Dismiss', style: const TextStyle(color: Colors.white60, fontSize: 12)),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Dismissible amber banner shown when the device is offline.
+/// Content still loads from seed data so this is informational only.
+class _OfflineBanner extends StatelessWidget {
+  final VoidCallback onDismiss;
+  const _OfflineBanner({required this.onDismiss});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: Colors.amber.withValues(alpha: 0.15),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+      child: Row(
+        children: [
+          const Icon(Icons.wifi_off, color: Colors.amber, size: 16),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Text(
+              'Offline — content may not be up to date',
+              style: TextStyle(color: Colors.amber, fontSize: 12),
+            ),
+          ),
+          GestureDetector(
+            onTap: onDismiss,
+            child: const Icon(Icons.close, color: Colors.amber, size: 16),
           ),
         ],
       ),

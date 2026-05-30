@@ -34,6 +34,7 @@ class AppBarWithProfile extends StatelessWidget implements PreferredSizeWidget {
       leading: showBackButton
           ? IconButton(
               icon: Icon(Icons.arrow_back),
+              tooltip: 'Back',
               onPressed: () => Navigator.of(context).pop(),
             )
           : null,
@@ -49,6 +50,7 @@ class AppBarWithProfile extends StatelessWidget implements PreferredSizeWidget {
             ),
             radius: 16,
           ),
+          tooltip: 'Profile',
           onPressed: onProfileTap ?? () {
             // Default profile action if none provided
             ScaffoldMessenger.of(context).showSnackBar(

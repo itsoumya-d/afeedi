@@ -73,8 +73,10 @@ dependencies:
   webview_flutter: ^4.7.0
   
   # Video Content Extraction
-  youtube_explode_dart: ^2.5.2
-  
+  # youtube_explode_dart REMOVED: violates YouTube ToS (Section 5.1.H) by
+  # bypassing the official API to extract direct stream URLs. This causes
+  # App Store and Play Store rejection. Use YouTube IFrame API instead.
+
   # OAuth and Social Authentication
   google_sign_in: ^6.2.1
   flutter_facebook_auth: ^6.0.4
@@ -102,6 +104,12 @@ dependencies:
 
   # Security
   crypto: ^3.0.3
+
+  # Secure Storage (iOS Keychain / Android Keystore)
+  flutter_secure_storage: ^9.2.2
+
+  # App Tracking Transparency (required for iOS 14.5+)
+  app_tracking_transparency: ^2.0.4
 
 dev_dependencies:
   flutter_test:

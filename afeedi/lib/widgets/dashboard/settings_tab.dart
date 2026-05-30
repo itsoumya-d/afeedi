@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
+import '../../services/local_auth_service.dart';
+import '../../services/navigation_service.dart';
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
@@ -515,7 +518,8 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           style: TextStyle(color: Colors.red),
         ),
         content: Text(
-          'This action cannot be undone. All your data will be permanently deleted.',
+          'This action cannot be undone. All your data — including viewing history, '
+          'preferences, and connected accounts — will be permanently deleted.',
           style: TextStyle(color: Colors.white.withOpacity(0.8)),
         ),
         actions: [
@@ -527,18 +531,41 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Implement account deletion
+              await _deleteAccount();
             },
             child: const Text(
-              'Delete',
+              'Delete Permanently',
               style: TextStyle(color: Colors.red),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _deleteAccount() async {
+    final success = await LocalAuthService.instance.deleteAccount();
+    if (!mounted) return;
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Account deleted. We\'re sorry to see you go.')),
+      );
+      // Navigate back to welcome screen
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.welcome,
+        (route) => false,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to delete account. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
   
   void _showClearCacheDialog() {
@@ -712,9 +739,12 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Open terms URL
+              await launchUrl(
+                Uri.parse('https://afeedi.com/terms'),
+                mode: LaunchMode.externalApplication,
+              );
             },
             child: const Text(
               'Open',
@@ -748,9 +778,12 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Open privacy URL
+              await launchUrl(
+                Uri.parse('https://afeedi.com/privacy'),
+                mode: LaunchMode.externalApplication,
+              );
             },
             child: const Text(
               'Open',

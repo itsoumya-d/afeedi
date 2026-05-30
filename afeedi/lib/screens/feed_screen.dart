@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import '../core/theme/app_theme.dart';
 import '../widgets/feed/enhanced_feed_post_card.dart';
 import '../widgets/common/shared_bottom_navigation.dart';
 import '../services/content_service.dart';
@@ -75,15 +74,17 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Scaffold(
+      backgroundColor: const Color(0xFF0D0B1E),
       appBar: AppBar(
-        title: const Text('Content Feed'),
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.primaryGradient,
-          ),
+        backgroundColor: const Color(0xFF1A1A2E),
+        title: const Text(
+          'Content Feed',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
@@ -102,11 +103,11 @@ class _FeedScreenState extends State<FeedScreen> {
               onRefresh: _onRefresh,
               onLoading: _onLoading,
               child: ListView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding + 16),
                 itemCount: _posts.length,
                 itemBuilder: (context, index) {
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.only(bottom: 8),
                     child: EnhancedFeedPostCard(
                       content: _posts[index],
                       showPlatformLogo: true,
@@ -138,13 +139,21 @@ class _FeedScreenState extends State<FeedScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text('Filter Posts'),
+              backgroundColor: const Color(0xFF1A1A2E),
+              title: const Text('Filter Posts', style: TextStyle(color: Colors.white)),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: PlatformType.values.map((platform) {
                   return CheckboxListTile(
-                    title: Text(platform.name),
+                    title: Text(
+                      platform.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Colors.white),
+                    ),
                     value: _selectedPlatforms.contains(platform),
+                    activeColor: const Color(0xFF00D4FF),
+                    checkColor: Colors.black,
                     onChanged: (bool? value) {
                       setDialogState(() {
                         if (value == true) {
@@ -160,14 +169,14 @@ class _FeedScreenState extends State<FeedScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
                 ),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                     _loadPosts(); // Reload posts with new filters
                   },
-                  child: const Text('Apply'),
+                  child: const Text('Apply', style: TextStyle(color: Color(0xFF00D4FF))),
                 ),
               ],
             );

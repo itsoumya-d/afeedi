@@ -183,6 +183,8 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                         const SizedBox(height: 12),
                         Text(
                           widget.creatorName,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 22,
@@ -209,6 +211,8 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                               const SizedBox(width: 5),
                               Text(
                                 widget.platform?.name.toUpperCase() ?? 'UNKNOWN',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                     color: platformColor,
                                     fontSize: 11,
@@ -288,6 +292,7 @@ class _CreatorProfileSheetState extends State<CreatorProfileSheet> {
                     )
                   else
                     ..._recentContent.map((c) => _ContentRow(content: c)),
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
                 ],
               ),
             ),

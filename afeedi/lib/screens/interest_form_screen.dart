@@ -123,6 +123,7 @@ class _InterestFormScreenState extends State<InterestFormScreen>
                           const SizedBox(height: 32),
                           _buildLanguageSection(),
                           const SizedBox(height: 40),
+                          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
                         ],
                       ),
                     ),
@@ -200,6 +201,8 @@ class _InterestFormScreenState extends State<InterestFormScreen>
           const SizedBox(height: 8),
           Text(
             'Help us personalize your content experience',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.8),
               fontSize: 16,
@@ -323,6 +326,8 @@ class _InterestFormScreenState extends State<InterestFormScreen>
         const SizedBox(height: 8),
         Text(
           'Select at least 3 categories to get personalized content',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
@@ -362,6 +367,8 @@ class _InterestFormScreenState extends State<InterestFormScreen>
                     const SizedBox(width: 8),
                     Text(
                       category['name'],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: isSelected ? category['color'] : Colors.white,
                         fontSize: 14,
@@ -387,12 +394,16 @@ class _InterestFormScreenState extends State<InterestFormScreen>
               children: [
                 const Icon(Icons.check_circle, color: AppTheme.primaryCyan, size: 20),
                 const SizedBox(width: 8),
-                Text(
-                  '${_selectedInterests.length} interests selected',
-                  style: const TextStyle(
-                    color: AppTheme.primaryCyan,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                Flexible(
+                  child: Text(
+                    '${_selectedInterests.length} interests selected',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppTheme.primaryCyan,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ],
@@ -418,6 +429,8 @@ class _InterestFormScreenState extends State<InterestFormScreen>
         const SizedBox(height: 8),
         Text(
           'Choose your preferred language for content',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,

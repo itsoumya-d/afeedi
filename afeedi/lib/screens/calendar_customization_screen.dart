@@ -170,6 +170,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
                         const SizedBox(height: 32),
                         _buildAISection(),
                         const SizedBox(height: 40),
+                        SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
                       ],
                     ),
                   ),
@@ -246,6 +247,8 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
           const SizedBox(height: 8),
           Text(
             'Set up your personalized viewing schedule',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.8),
               fontSize: 16,
@@ -272,6 +275,8 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
         const SizedBox(height: 8),
         Text(
           'When do you typically watch content?',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
@@ -417,6 +422,8 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
         const SizedBox(height: 8),
         Text(
           'What type of content do you want scheduled?',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
@@ -468,6 +475,8 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
                     const SizedBox(height: 8),
                     Text(
                       option['name'],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: isSelected ? option['color'] : Colors.white,
                         fontSize: 14,
@@ -511,6 +520,8 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
         const SizedBox(height: 8),
         Text(
           'Get notified about your scheduled content',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
@@ -590,6 +601,8 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
         const SizedBox(height: 8),
         Text(
           'Let AI optimize your viewing experience',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
@@ -653,6 +666,8 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
               children: [
                 Text(
                   title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -661,6 +676,8 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
                 ),
                 Text(
                   subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,

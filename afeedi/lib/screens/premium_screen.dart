@@ -43,6 +43,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     _buildCTAButton(),
                     const SizedBox(height: 12),
                     _buildFooter(),
+                    SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
                   ],
                 ),
               ),
@@ -240,17 +241,23 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     ),
                     child: const Text('POPULAR', style: TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold)),
                   ),
-                Text(
-                  plan.name,
-                  style: TextStyle(
-                    color: isSelected ? plan.accentColor : Colors.white70,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                Flexible(
+                  child: Text(
+                    plan.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: isSelected ? plan.accentColor : Colors.white70,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const Spacer(),
                 Text(
                   price,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: isSelected ? Colors.white : Colors.white54,
                     fontSize: 16,
@@ -282,7 +289,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       children: [
                         Icon(Icons.check_circle, color: plan.accentColor, size: 16),
                         const SizedBox(width: 8),
-                        Text(f, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                        Expanded(child: Text(f, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white70, fontSize: 13))),
                       ],
                     ),
                   )),
@@ -331,6 +338,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
                 child: Text(
                   cell,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: cell == 'No' ? Colors.white24 : Colors.white60,
                     fontSize: 11,
@@ -379,6 +388,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
         ),
         child: Text(
           'Start $planName — $price',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),

@@ -90,6 +90,7 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF0D0B1E),
       body: SafeArea(
         child: Column(children: [
           // App bar with profile
@@ -97,7 +98,7 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
             title: 'For You',
             showBackButton: false,
           ),
-          
+
           // Main content
           Expanded(
             child: RefreshIndicator(
@@ -111,12 +112,12 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
       ),
     );
   }
-  
+
   Widget _buildContent() {
     if (!_isOnboardingCompleted) {
       return _buildOnboardingPrompt();
     }
-    
+
     return ListView(
       children: [
         // Contextual recommendations (time-aware and calendar-based)
@@ -126,9 +127,9 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
             showRecommendationReason: _personalizationSettings?['enableRecommendationReasoning'] ?? true,
             onItemTap: _handleContentItemTap,
           ),
-        
+
         SizedBox(height: UIScaling.spacing(context, 2)),
-        
+
         // Main personalized recommendations
         PersonalizedRecommendationsWidget(
           title: 'Recommended for You',
@@ -138,18 +139,18 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
           onItemTap: _handleContentItemTap,
           recommendationType: 'personalized',
         ),
-        
+
         SizedBox(height: UIScaling.spacing(context, 2)),
-        
+
         // Platform-specific recommendations
         PlatformRecommendationsWidget(
           itemsPerPlatform: 5,
           showRecommendationReason: _personalizationSettings?['enableRecommendationReasoning'] ?? true,
           onItemTap: _handleContentItemTap,
         ),
-        
+
         SizedBox(height: UIScaling.spacing(context, 2)),
-        
+
         // Viewing habits based recommendations
         PersonalizedRecommendationsWidget(
           title: 'Matches Your Viewing Style',
@@ -159,12 +160,12 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
           onItemTap: _handleContentItemTap,
           recommendationType: 'viewing_habits',
         ),
-        
-        SizedBox(height: UIScaling.spacing(context, 4)),
+
+        SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
       ],
     );
   }
-  
+
   Widget _buildOnboardingPrompt() {
     return Center(
       child: Padding(
@@ -172,15 +173,19 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.person_outline,
               size: 64,
-              color: Theme.of(context).colorScheme.primary,
+              color: Color(0xFF00D4FF),
             ),
             SizedBox(height: UIScaling.spacing(context)),
             Text(
               'Complete Your Profile',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
@@ -188,7 +193,12 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
             SizedBox(height: UIScaling.spacing(context)),
             Text(
               'Tell us about your preferences to get personalized recommendations tailored just for you.',
-              style: Theme.of(context).textTheme.bodyLarge,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 15,
+              ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: UIScaling.spacing(context, 2)),
@@ -202,17 +212,26 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
                     'timestamp': DateTime.now().toIso8601String(),
                   },
                 );
-                
+
                 // Navigate to onboarding
                 Navigator.of(context).pushNamed('/onboarding');
               },
               style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00D4FF),
+                foregroundColor: Colors.black,
                 padding: EdgeInsets.symmetric(
                   horizontal: UIScaling.padding(context),
                   vertical: UIScaling.padding(context),
                 ),
+                minimumSize: const Size(44, 44),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              child: Text('Start Personalization'),
+              child: const Text(
+                'Start Personalization',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
           ],
         ),

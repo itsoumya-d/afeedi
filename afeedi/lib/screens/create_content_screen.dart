@@ -76,6 +76,8 @@ class CreateContentScreen extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 24),
               child: Text(
                 'Connect Your Platforms',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -88,6 +90,8 @@ class CreateContentScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
                 'Link your accounts to personalize your feed',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.65),
                   fontSize: 14,
@@ -97,7 +101,12 @@ class CreateContentScreen extends StatelessWidget {
             const SizedBox(height: 32),
             Expanded(
               child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  0,
+                  20,
+                  MediaQuery.of(context).padding.bottom + 16,
+                ),
                 itemCount: _platforms.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
@@ -163,6 +172,8 @@ class _PlatformCard extends StatelessWidget {
               children: [
                 Text(
                   platform.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -172,6 +183,8 @@ class _PlatformCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   'Not connected',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.5),
                     fontSize: 12,

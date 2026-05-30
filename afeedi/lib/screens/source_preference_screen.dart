@@ -109,6 +109,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
                         const SizedBox(height: 32),
                         _buildPreviewSection(),
                         const SizedBox(height: 40),
+                        SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
                       ],
                     ),
                   ),
@@ -185,6 +186,8 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
           const SizedBox(height: 8),
           Text(
             'Customize your content mix from different platforms',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.8),
               fontSize: 16,
@@ -211,6 +214,8 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
         const SizedBox(height: 8),
         Text(
           'Adjust how much content you want from each platform',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
@@ -256,6 +261,8 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
                   children: [
                     Text(
                       platform['name'],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -264,6 +271,8 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
                     ),
                     Text(
                       platform['description'],
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 14,
@@ -331,6 +340,8 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
         const SizedBox(height: 8),
         Text(
           'Configure how creator information is displayed',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
@@ -394,6 +405,8 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
               children: [
                 Text(
                   title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -402,6 +415,8 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
                 ),
                 Text(
                   subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,
@@ -472,6 +487,8 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
         const SizedBox(height: 8),
         Text(
           'See how content will appear with your settings',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,

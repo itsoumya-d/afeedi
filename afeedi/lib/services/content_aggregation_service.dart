@@ -5,14 +5,14 @@ import '../models/user_model.dart';
 import 'auth_service.dart';
 import 'analytics_service.dart';
 import 'content_service.dart';
+import 'enhanced_recommendation_service.dart';
 
 class ContentAggregationService {
   static ContentAggregationService? _instance;
   static ContentAggregationService get instance => _instance ??= ContentAggregationService._();
-  
+
   ContentAggregationService._();
   
-
   // Aggregate content from all connected platforms
   Future<List<Content>> aggregateContent({
     int limit = 50,
@@ -29,7 +29,7 @@ class ContentAggregationService {
       // Get user's platform connections
       final connections = await AuthService.instance.getPlatformConnections();
       if (connections.isEmpty) {
-        return await ContentService.instance.getFeedContent(limit: limit);
+        return [];
       }
       
       // Filter connections by requested platforms
@@ -493,8 +493,8 @@ class ContentAggregationService {
   ) async {
     try {
       // TODO: Implement user preferences filtering when database is available
-      debugPrint('user filters for user: ${user.id}');
-      
+      debugPrint('Applying user filters for user: ${user.id}');
+
       // For now, just return the content as-is
       return content;
     } catch (error) {
@@ -502,25 +502,25 @@ class ContentAggregationService {
       return content;
     }
   }
-  
+
   // Cache content for performance
   Future<void> _cacheContent(List<Content> content) async {
     try {
       // TODO: Implement content caching when database is available
-      debugPrint('${content.length} content items for user: ${AuthService.instance.currentUser?.id}');
+      debugPrint('Caching ${content.length} content items for user: ${AuthService.instance.currentUser?.id}');
     } catch (error) {
       debugPrint('Error caching content: $error');
     }
   }
-  
+
   // Get cached content
   Future<List<Content>?> getCachedContent() async {
     try {
       final user = AuthService.instance.currentUser;
       if (user == null) return null;
-      
+
       // TODO: Implement cache retrieval when database is available
-      debugPrint('cached content for user: ${user.id}');
+      debugPrint('Getting cached content for user: ${user.id}');
       return null;
     } catch (error) {
       debugPrint('Error getting cached content: $error');
@@ -570,10 +570,102 @@ class ContentAggregationService {
       (c) => c.platform == platform,
       orElse: () => throw Exception('Platform not connected'),
     );
-    
+
     return await _fetchPlatformContent(
       connection: connection,
       limit: 50,
     );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Cold-start content
+  // ---------------------------------------------------------------------------
+
+  /// Returns content for a new user who has no watch history.
+  /// Fallback chain: cold-start recommendations → trending → seed feed data.
+  Future<List<Content>> getColdStartContent({int limit = 20}) async {
+    try {
+      // 1. Try enhanced cold-start recommendations (genre-diverse)
+      final coldStart = await EnhancedRecommendationService.instance
+          .getColdStartRecommendations();
+      if (coldStart.isNotEmpty) {
+        debugPrint('ContentAggregationService: cold-start from recommendation service (${coldStart.length} items)');
+        return coldStart.take(limit).toList();
+      }
+    } catch (e) {
+      debugPrint('ContentAggregationService: cold-start recommendations failed: $e');
+    }
+
+    try {
+      // 2. Fallback to trending content
+      final trending = await getTrendingContent(limit: limit);
+      if (trending.isNotEmpty) {
+        debugPrint('ContentAggregationService: cold-start fallback to trending (${trending.length} items)');
+        return trending;
+      }
+    } catch (e) {
+      debugPrint('ContentAggregationService: trending fallback failed: $e');
+    }
+
+    // 3. Final fallback: seed feed data from ContentService
+    try {
+      final seed = await ContentService.instance.getFeedContent(limit: limit);
+      debugPrint('ContentAggregationService: cold-start fallback to seed data (${seed.length} items)');
+      return seed;
+    } catch (e) {
+      debugPrint('ContentAggregationService: seed data fallback failed: $e');
+      return [];
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Discover page content
+  // ---------------------------------------------------------------------------
+
+  /// Returns a mixed content set for the Discover screen:
+  /// - top 5 trending items
+  /// - 3 items per category for a set of common categories
+  /// - the full mixed list deduplicated
+  Future<List<Content>> getContentForDiscover({int categoryLimit = 3}) async {
+    final results = <String, Content>{}; // deduplicate by id
+
+    // 1. Top 5 trending
+    try {
+      final trending = await getTrendingContent(limit: 5);
+      for (final item in trending) {
+        results[item.id] = item;
+      }
+    } catch (e) {
+      debugPrint('ContentAggregationService getContentForDiscover trending error: $e');
+    }
+
+    // 2. 3 items per category
+    const discoverCategories = [
+      'Gaming',
+      'Music',
+      'Technology',
+      'Comedy',
+      'Education',
+      'Sports',
+      'Lifestyle',
+      'News',
+    ];
+
+    for (final category in discoverCategories) {
+      try {
+        final catContent = await ContentService.instance
+            .getVideosByCategory(category, limit: categoryLimit);
+        for (final item in catContent) {
+          results[item.id] = item;
+        }
+      } catch (e) {
+        debugPrint('ContentAggregationService getContentForDiscover category "$category" error: $e');
+      }
+    }
+
+    // 3. Return deduplicated mixed list
+    final mixed = results.values.toList();
+    debugPrint('ContentAggregationService getContentForDiscover: ${mixed.length} items total');
+    return mixed;
   }
 }

@@ -207,7 +207,9 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
               ),
-              child: TextField(
+              child: Semantics(
+                label: 'Search videos, creators, topics',
+                child: TextField(
                 controller: _searchController,
                 autofocus: true,
                 style: const TextStyle(color: Colors.white, fontSize: 15),
@@ -229,6 +231,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                 ),
                 onChanged: _search,
                 onSubmitted: _search,
+              ),
               ),
             ),
           ),
@@ -478,7 +481,10 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   }
 
   Widget _buildResultCard(Content content) {
-    return Container(
+    return Semantics(
+      label: '${content.title ?? 'Untitled'}. ${content.creatorName ?? ''}. ${content.platform.name}',
+      button: true,
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: const Color(0xFF1A1A2E),
@@ -566,6 +572,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
             ],
           ),
         ),
+      ),
       ),
     );
   }

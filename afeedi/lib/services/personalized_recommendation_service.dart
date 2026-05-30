@@ -9,6 +9,7 @@ import '../models/recommendation.dart';
 import 'auth_service.dart';
 import 'analytics_service.dart';
 import 'content_aggregation_service.dart';
+import 'content_service.dart';
 import 'onboarding_service.dart';
 // import 'calendar_service.dart'; // Temporarily commented out due to compilation errors
 
@@ -371,11 +372,16 @@ class PersonalizedRecommendationService {
       return [];
     }
 
-    final availableContent = await ContentAggregationService.instance
+    var availableContent = await ContentAggregationService.instance
         .aggregateContent(
           limit: limit,
           platforms: platforms,
         );
+
+    // Fall back to seed content when no OAuth connections are configured
+    if (availableContent.isEmpty) {
+      availableContent = await ContentService.instance.getFeedContent(limit: limit);
+    }
 
     if (availableContent.isEmpty) {
       return [];

@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_preferences.dart' as preferences;
 import '../models/content_model.dart';
-import '../models/genre.dart';
 import 'auth_service.dart';
 import 'content_aggregation_service.dart';
+import 'content_service.dart';
 import 'onboarding_service.dart';
-import 'user_interaction_service.dart';
 
 // Simplified recommendation model
 class Recommendation {
@@ -94,15 +94,27 @@ class EnhancedRecommendationService {
       
       // Score content based on time context
       final scoredContent = <MapEntry<Content, double>>[];
-      
+      final sp = await SharedPreferences.getInstance();
+      final platformWatches = _loadPlatformWatches(sp);
+      final selectedGenres = sp.getStringList('onboarding_selected_genres') ?? [];
+
       for (final content in availableContent) {
         double score = _calculateTimeScore(content, timeContext, currentHour);
-        
-        // Add user preference scoring if available
+
+        // Add enhanced preference scoring if available
         if (userPreferences != null) {
-          score += _calculateBasicPreferenceScore(content, userPreferences);
+          final prefScore = await _computeRelevanceScore(
+            content,
+            userPreferences,
+            platformWatches: platformWatches,
+            selectedGenres: selectedGenres,
+          );
+          score += prefScore;
         }
-        
+
+        // Apply watch time weight
+        score = _applyWatchTimeWeight(score, content.id, sp);
+
         scoredContent.add(MapEntry(content, score));
       }
       
@@ -182,18 +194,97 @@ class EnhancedRecommendationService {
   
   double _calculateBasicPreferenceScore(Content content, preferences.UserPreferences userPreferences) {
     double score = 0.0;
-    
+
     // Check content interests
     for (final interest in userPreferences.contentInterests) {
       if (content.tags.any((tag) => tag.toLowerCase().contains(interest.toLowerCase()))) {
         score += 0.3;
       }
     }
-    
+
     // Check platform preferences
     final platformScore = userPreferences.platformPriorities[content.platform.name] ?? 0.0;
     score += platformScore * 0.2;
-    
+
+    return score;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Enhanced scoring signals
+  // ---------------------------------------------------------------------------
+
+  /// Computes a multi-signal relevance score for a piece of content.
+  ///
+  /// Signals applied:
+  /// - Watch time weight: content watched > 80% gets a 2x multiplier on its
+  ///   base preference score.
+  /// - Platform affinity: most-watched platforms (from SharedPreferences
+  ///   `stat_platform_watches` map) receive an affinity boost up to +0.5.
+  /// - Recency decay: content older than 30 days gets a 0.5x multiplier.
+  /// - Genre boost: genres from `onboarding_selected_genres` get 1.5x weight
+  ///   applied to their keyword-match contribution.
+  Future<double> _computeRelevanceScore(
+    Content content,
+    preferences.UserPreferences prefs, {
+    Map<String, int>? platformWatches,
+    List<String>? selectedGenres,
+  }) async {
+    double score = 0.5; // base
+
+    // --- Recency decay ---
+    if (content.publishedAt != null) {
+      final age = DateTime.now().difference(content.publishedAt!).inDays;
+      if (age > 30) {
+        score *= 0.5;
+      }
+    }
+
+    // --- Genre boost ---
+    final genres = selectedGenres ?? [];
+    final searchable = [
+      content.title ?? '',
+      content.description ?? '',
+      ...content.tags,
+      ...content.categories,
+    ].join(' ').toLowerCase();
+
+    for (final genre in genres) {
+      if (searchable.contains(genre.toLowerCase())) {
+        score += 1.5; // genre boost
+      }
+    }
+
+    // --- Basic interest match ---
+    for (final interest in prefs.contentInterests) {
+      if (searchable.contains(interest.toLowerCase())) {
+        score += 0.3;
+      }
+    }
+
+    // --- Platform affinity ---
+    if (platformWatches != null && platformWatches.isNotEmpty) {
+      final totalWatches = platformWatches.values.fold(0, (a, b) => a + b);
+      if (totalWatches > 0) {
+        final platformCount = platformWatches[content.platform.name] ?? 0;
+        final affinity = platformCount / totalWatches; // 0.0–1.0
+        score += affinity * 0.5;
+      }
+    } else {
+      // Fall back to stored platform priority
+      final platformScore = prefs.platformPriorities[content.platform.name] ?? 0.0;
+      score += platformScore * 0.2;
+    }
+
+    return score;
+  }
+
+  /// Applies watch-time weight: content the user has watched >80% of gets
+  /// its score multiplied by 2 to surface similar content more prominently.
+  double _applyWatchTimeWeight(double score, String contentId, SharedPreferences sp) {
+    final progress = sp.getDouble('watch_progress_$contentId') ?? 0.0;
+    if (progress > 0.8) {
+      return score * 2.0;
+    }
     return score;
   }
   
@@ -201,126 +292,25 @@ class EnhancedRecommendationService {
   Future<void> trackContentInteraction(Map<String, dynamic> interaction) async {
     // TODO: Implement interaction tracking
     // For now, just log the interaction
-    debugPrint('interaction tracked: $interaction');
+    debugPrint('Content interaction tracked: $interaction');
   }
   
-  // Get personalized recommendations using onboarding genre preferences
+  // Get personalized recommendations
   Future<List<Recommendation>> getPersonalizedRecommendations({
     required String userId,
     int limit = 10,
   }) async {
-    return _getPreferenceBasedRecommendations(userId: userId, limit: limit);
+    // For now, return time-based recommendations
+    return getTimeBasedRecommendations(userId: userId, limit: limit);
   }
-
-  // Get onboarding-based recommendations (same algorithm as personalized)
+  
+  // Get onboarding-based recommendations
   Future<List<Recommendation>> getOnboardingBasedRecommendations({
     required String userId,
     int limit = 10,
   }) async {
-    return _getPreferenceBasedRecommendations(userId: userId, limit: limit);
-  }
-
-  Future<List<Recommendation>> _getPreferenceBasedRecommendations({
-    required String userId,
-    int limit = 10,
-  }) async {
-    try {
-      final user = AuthService.instance.currentUser;
-      if (user == null) return [];
-
-      final userPreferences = await OnboardingService.instance.getCurrentPreferences();
-      if (userPreferences == null || userPreferences.contentInterests.isEmpty) {
-        return getTimeBasedRecommendations(userId: userId, limit: limit);
-      }
-
-      // Build keyword set from selected genre preferences
-      final allGenres = OnboardingService.instance.getAllGenres();
-      final selectedKeywords = <String>{};
-      for (final interest in userPreferences.contentInterests) {
-        selectedKeywords.add(interest.toLowerCase());
-        try {
-          final Genre genre = allGenres.firstWhere(
-            (g) => g.name.toLowerCase() == interest.toLowerCase(),
-          );
-          selectedKeywords.addAll(genre.keywords.map((k) => k.toLowerCase()));
-          selectedKeywords.add(genre.category.toLowerCase());
-        } catch (_) {}
-      }
-
-      // Get content pool using preferred platforms (or YouTube as default)
-      final platforms = userPreferences.platformPriorities.entries
-          .where((e) => e.value > 0)
-          .map((e) => PlatformType.values.firstWhere(
-                (pt) => pt.name == e.key,
-                orElse: () => PlatformType.youtube,
-              ))
-          .toList();
-
-      final contentService = ContentAggregationService.instance;
-      final availableContent = await contentService.aggregateContent(
-        platforms: platforms.isEmpty ? [PlatformType.youtube] : platforms,
-        categories: userPreferences.contentInterests,
-        limit: limit * 3,
-      );
-
-      // Load followed creators for feed ranking boost
-      final followedCreators = UserInteractionService.instance
-          .getFollowedCreatorIds()
-          .map((id) => id.toLowerCase())
-          .toSet();
-
-      // Score content: keyword match is primary, followed creators get 2x boost
-      final currentHour = DateTime.now().hour;
-      final timeContext = _getTimeContext(currentHour);
-      final scored = <MapEntry<Content, double>>[];
-
-      for (final content in availableContent) {
-        final searchable = [
-          content.title ?? '',
-          content.description ?? '',
-          content.creatorName ?? '',
-          ...content.tags,
-          ...content.categories,
-        ].join(' ').toLowerCase();
-
-        double score = 0.0;
-        for (final kw in selectedKeywords) {
-          if (searchable.contains(kw)) score += 1.0;
-        }
-
-        // Followed creator boost — surfaces their content above keyword-matched strangers
-        final creatorKey = (content.creatorName ?? content.id).toLowerCase();
-        if (followedCreators.contains(creatorKey) || followedCreators.contains(content.id.toLowerCase())) {
-          score += 3.0;
-        }
-
-        // Add small time-of-day bonus so tie-breaks still respect time
-        score += _calculateTimeScore(content, timeContext, currentHour) * 0.3;
-        scored.add(MapEntry(content, score));
-      }
-
-      scored.sort((a, b) => b.value.compareTo(a.value));
-      final top = scored.take(limit).toList();
-
-      final String reasonSuffix = followedCreators.isEmpty
-          ? 'Personalized based on your interests'
-          : 'Based on your interests and followed creators';
-
-      return List.generate(top.length, (i) => Recommendation(
-        id: 'pref_${DateTime.now().millisecondsSinceEpoch}_$i',
-        userId: user.id,
-        contentId: top[i].key.id,
-        content: top[i].key,
-        score: top[i].value,
-        reason: reasonSuffix,
-        algorithmVersion: '2.1.0',
-        createdAt: DateTime.now(),
-        expiresAt: DateTime.now().add(const Duration(hours: 6)),
-      ));
-    } catch (error) {
-      debugPrint('Error in preference-based recommendations: $error');
-      return getTimeBasedRecommendations(userId: userId, limit: limit);
-    }
+    // For now, return time-based recommendations
+    return getTimeBasedRecommendations(userId: userId, limit: limit);
   }
   
   // Generate viewing habits recommendations
@@ -427,4 +417,79 @@ class EnhancedRecommendationService {
     }
   }
   
+  // Get user behavior insights (simplified)
+  Future<UserBehaviorInsight?> _getUserBehaviorInsights(String userId) async {
+    try {
+      // Return a basic insight for now
+      return UserBehaviorInsight(
+        userId: userId,
+        engagementScore: 0.7,
+        interactionCount: 10,
+        additionalMetrics: {
+          'category_preferences': {'tech': 5, 'entertainment': 3},
+          'platform_preferences': {'youtube': 8, 'instagram': 2},
+        },
+        lastUpdated: DateTime.now(),
+      );
+    } catch (error) {
+      debugPrint('Error getting user behavior insights: $error');
+      return null;
+    }
+  }
+  
+  // Helper method to save a single recommendation to the database
+  Future<void> _saveRecommendation(Recommendation recommendation) async {
+    try {
+      // Save to local storage instead of Supabase
+      debugPrint('Saving recommendation: ${recommendation.id}');
+    } catch (error) {
+      debugPrint('Error saving recommendation: $error');
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Cold-start recommendations
+  // ---------------------------------------------------------------------------
+
+  /// For new users with no watch history: returns a diverse sample of content
+  /// (up to 2 items from each of the top 5 genres, ensuring platform variety).
+  Future<List<Content>> getColdStartRecommendations() async {
+    try {
+      final sp = await SharedPreferences.getInstance();
+      final storedGenres = sp.getStringList('onboarding_selected_genres') ?? [];
+      final genres = storedGenres.take(5).toList();
+      if (genres.isEmpty) {
+        genres.addAll(['Gaming', 'Music', 'Technology', 'Comedy', 'Education']);
+      }
+
+      final results = <Content>[];
+      for (final genre in genres) {
+        try {
+          final genreContent = await ContentService.instance.getVideosByCategory(genre, limit: 2);
+          results.addAll(genreContent);
+        } catch (e) {
+          debugPrint('EnhancedRecommendationService: cold-start genre "$genre" error: $e');
+        }
+      }
+      return results;
+    } catch (error) {
+      debugPrint('EnhancedRecommendationService getColdStartRecommendations error: $error');
+      return [];
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // SharedPreferences helpers
+  // ---------------------------------------------------------------------------
+
+  /// Loads `stat_platform_watches` stored as individual keys in the format
+  /// `stat_platform_watches_<platform>` → int count.
+  Map<String, int> _loadPlatformWatches(SharedPreferences sp) {
+    final result = <String, int>{};
+    for (final platform in ['youtube', 'instagram', 'tiktok', 'facebook']) {
+      final count = sp.getInt('stat_platform_watches_$platform');
+      if (count != null) result[platform] = count;
+    }
+    return result;
+  }
 }

@@ -11,7 +11,7 @@ class AnalyticsService {
   AnalyticsService._internal();
 
   SharedPreferences? _prefs;
-  List<Map<String, dynamic>> _eventQueue = [];
+  final List<Map<String, dynamic>> _eventQueue = [];
 
   // Initialize the analytics service
   Future<void> initialize() async {
@@ -388,7 +388,175 @@ class AnalyticsService {
     }
   }
 
-  // Record a daily app open for D1/D7/D30 retention tracking
+  // Generic event tracking method for all types of events
+  Future<void> trackEvent({
+    required String eventName,
+    required String eventType,
+    String? screen,
+    Map<String, dynamic>? additionalData,
+  }) async {
+    final event = {
+      'event_type': eventType,
+      'event_name': eventName,
+      'screen': screen,
+      'timestamp': DateTime.now().toIso8601String(),
+      'session_id': await _getSessionId(),
+      'user_id': await _getUserId(),
+      'platform': _getPlatform(),
+      'app_version': await _getAppVersion(),
+      ...?additionalData,
+    };
+
+    await _queueEvent(event);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Content tracking
+  // ---------------------------------------------------------------------------
+
+  /// Called when a user watches content.
+  Future<void> trackContentView({
+    required String contentId,
+    required String platform,
+    required int durationWatched,
+    required double percentWatched,
+  }) async {
+    final event = {
+      'event_type': 'content_view',
+      'event_name': 'content_viewed',
+      'content_id': contentId,
+      'platform': platform,
+      'duration_watched_seconds': durationWatched,
+      'percent_watched': percentWatched,
+      'timestamp': DateTime.now().toIso8601String(),
+      'session_id': await _getSessionId(),
+      'user_id': await _getUserId(),
+      'platform_os': _getPlatform(),
+      'app_version': await _getAppVersion(),
+    };
+    await _queueEvent(event);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Search tracking
+  // ---------------------------------------------------------------------------
+
+  /// Called when the user submits a search query.
+  Future<void> trackSearchQuery({
+    required String query,
+    required int resultCount,
+  }) async {
+    final event = {
+      'event_type': 'search',
+      'event_name': 'search_query',
+      'query': query,
+      'result_count': resultCount,
+      'timestamp': DateTime.now().toIso8601String(),
+      'session_id': await _getSessionId(),
+      'user_id': await _getUserId(),
+      'platform': _getPlatform(),
+      'app_version': await _getAppVersion(),
+    };
+    await _queueEvent(event);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Filter tracking
+  // ---------------------------------------------------------------------------
+
+  /// Called when the user applies a filter (e.g. genre, platform, language).
+  Future<void> trackFilterApplied({
+    required String filterType,
+    required String filterValue,
+  }) async {
+    final event = {
+      'event_type': 'filter',
+      'event_name': 'filter_applied',
+      'filter_type': filterType,
+      'filter_value': filterValue,
+      'timestamp': DateTime.now().toIso8601String(),
+      'session_id': await _getSessionId(),
+      'user_id': await _getUserId(),
+      'platform': _getPlatform(),
+      'app_version': await _getAppVersion(),
+    };
+    await _queueEvent(event);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Language tracking
+  // ---------------------------------------------------------------------------
+
+  /// Called when the user switches the app language.
+  Future<void> trackLanguageChanged({
+    required String languageCode,
+  }) async {
+    final event = {
+      'event_type': 'settings',
+      'event_name': 'language_changed',
+      'language_code': languageCode,
+      'timestamp': DateTime.now().toIso8601String(),
+      'session_id': await _getSessionId(),
+      'user_id': await _getUserId(),
+      'platform': _getPlatform(),
+      'app_version': await _getAppVersion(),
+    };
+    await _queueEvent(event);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Notification tracking
+  // ---------------------------------------------------------------------------
+
+  /// Called when the user taps a notification to open the app.
+  Future<void> trackNotificationTapped({
+    required String notificationId,
+    required String notificationType,
+  }) async {
+    final event = {
+      'event_type': 'notification',
+      'event_name': 'notification_tapped',
+      'notification_id': notificationId,
+      'notification_type': notificationType,
+      'timestamp': DateTime.now().toIso8601String(),
+      'session_id': await _getSessionId(),
+      'user_id': await _getUserId(),
+      'platform': _getPlatform(),
+      'app_version': await _getAppVersion(),
+    };
+    await _queueEvent(event);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Onboarding step tracking
+  // ---------------------------------------------------------------------------
+
+  /// Called at each individual onboarding step.
+  Future<void> trackOnboardingStep({
+    required String stepKey,
+    required int stepIndex,
+    required int totalSteps,
+  }) async {
+    final event = {
+      'event_type': 'onboarding',
+      'event_name': 'onboarding_step_viewed',
+      'step_key': stepKey,
+      'step_index': stepIndex,
+      'total_steps': totalSteps,
+      'timestamp': DateTime.now().toIso8601String(),
+      'session_id': await _getSessionId(),
+      'user_id': await _getUserId(),
+      'platform': _getPlatform(),
+      'app_version': await _getAppVersion(),
+    };
+    await _queueEvent(event);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Retention tracking
+  // ---------------------------------------------------------------------------
+
+  /// Record a daily app open for D1/D7/D30 retention tracking.
   Future<void> recordAppOpen() async {
     final prefs = await SharedPreferences.getInstance();
     if (!prefs.containsKey('install_date')) {
@@ -425,34 +593,5 @@ class AnalyticsService {
       'days_since_install': now.difference(installDate).inDays,
     };
   }
-
-  // Generic event tracking method for all types of events
-  Future<void> trackEvent({
-    required String eventName,
-    required String eventType,
-    String? screen,
-    Map<String, dynamic>? additionalData,
-  }) async {
-    final event = {
-      'event_type': eventType,
-      'event_name': eventName,
-      'screen': screen,
-      'timestamp': DateTime.now().toIso8601String(),
-      'session_id': await _getSessionId(),
-      'user_id': await _getUserId(),
-      'platform': _getPlatform(),
-      'app_version': await _getAppVersion(),
-      ...?additionalData,
-    };
-
-    await _queueEvent(event);
-  }
 }
 
-// Analytics screens for consistency
-class AnalyticsScreens {
-  static const String onboardingChatbot = 'onboarding_chatbot';
-  static const String dashboard = 'dashboard';
-  static const String settings = 'settings';
-  static const String profile = 'profile';
-}

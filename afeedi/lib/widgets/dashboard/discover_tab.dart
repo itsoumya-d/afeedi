@@ -4,6 +4,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../services/content_service.dart';
 import '../../models/content_model.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/responsive/responsive_layout.dart';
 
 class DiscoverTab extends StatefulWidget {
   const DiscoverTab({super.key});
@@ -241,8 +242,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
       highlightColor: const Color(0xFF2A2A3E),
       child: GridView.builder(
         padding: const EdgeInsets.all(12),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: ResponsiveLayout.gridColumns(context),
           childAspectRatio: 0.75,
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
@@ -442,8 +443,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 12),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: ResponsiveLayout.gridColumns(context),
         childAspectRatio: 0.75,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
@@ -461,8 +462,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 12),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: ResponsiveLayout.gridColumns(context),
         childAspectRatio: 2.0,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
@@ -519,8 +520,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
     }
     return GridView.builder(
       padding: const EdgeInsets.all(12),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: ResponsiveLayout.gridColumns(context),
         childAspectRatio: 0.72,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,

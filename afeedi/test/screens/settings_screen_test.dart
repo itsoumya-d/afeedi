@@ -6,6 +6,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
 import 'package:afeedi/screens/settings_screen.dart';
+import 'package:afeedi/l10n/app_localizations.dart';
+
+Widget _buildApp(Widget child) => MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: child,
+    );
 
 void main() {
   late Directory tempDir;
@@ -37,9 +44,7 @@ void main() {
 
   group('SettingsScreen', () {
     testWidgets('renders without errors', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: SettingsScreen()),
-      );
+      await tester.pumpWidget(_buildApp(const SettingsScreen()));
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.byType(SettingsScreen), findsOneWidget);
@@ -47,9 +52,7 @@ void main() {
     });
 
     testWidgets('has dark mode toggle', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: SettingsScreen()),
-      );
+      await tester.pumpWidget(_buildApp(const SettingsScreen()));
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.text('Dark Mode'), findsOneWidget);
@@ -61,9 +64,7 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(
-        const MaterialApp(home: SettingsScreen()),
-      );
+      await tester.pumpWidget(_buildApp(const SettingsScreen()));
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.text('Privacy Policy'), findsOneWidget);
@@ -74,9 +75,7 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(
-        const MaterialApp(home: SettingsScreen()),
-      );
+      await tester.pumpWidget(_buildApp(const SettingsScreen()));
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.text('Terms of Service'), findsOneWidget);
@@ -87,9 +86,7 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(
-        const MaterialApp(home: SettingsScreen()),
-      );
+      await tester.pumpWidget(_buildApp(const SettingsScreen()));
       await tester.pump(const Duration(seconds: 1));
 
       // _sectionHeader renders title.toUpperCase()

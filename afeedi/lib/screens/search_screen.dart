@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/app_localizations.dart';
 import '../models/content_model.dart';
 import '../services/content_service.dart';
 import '../services/navigation_service.dart';
@@ -230,7 +231,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
                 autofocus: true,
                 style: const TextStyle(color: Colors.white, fontSize: 15),
                 decoration: InputDecoration(
-                  hintText: 'Search videos, creators, topics...',
+                  hintText: '${AppLocalizations.of(context)!.search} videos, creators, topics...',
                   hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 15),
                   prefixIcon: const Icon(Icons.search, color: Color(0xFF00D4FF), size: 20),
                   suffixIcon: _query.isNotEmpty
@@ -466,7 +467,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
               const Icon(Icons.search_off, size: 56, color: Colors.white24),
               const SizedBox(height: 16),
               Text(
-                'No results for "$_query"',
+                AppLocalizations.of(context)!.noResultsFor(_query),
                 style: const TextStyle(color: Colors.white54, fontSize: 16),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -639,9 +640,9 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
         children: [
           // Trending section from ContentService
           if (_trendingContent.isNotEmpty) ...[
-            const Text(
-              'Trending Now',
-              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              AppLocalizations.of(context)!.trending,
+              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             SizedBox(
@@ -654,9 +655,9 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
             ),
             const SizedBox(height: 24),
           ],
-          const Text(
-            'Trending Topics',
-            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            '${AppLocalizations.of(context)!.trending} Topics',
+            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           Wrap(

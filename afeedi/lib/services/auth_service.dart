@@ -209,13 +209,10 @@ class AuthService {
       await prefs.setString('user_email', email);
       await prefs.setString('user_name', displayName);
       
-      // Store OAuth tokens securely
-      if (authData['accessToken'] != null) {
-        await prefs.setString('oauth_access_token_$provider', authData['accessToken']);
-      }
-      if (authData['idToken'] != null) {
-        await prefs.setString('oauth_id_token_$provider', authData['idToken']);
-      }
+      // OAuth tokens are intentionally NOT stored here.
+      // Each OAuth package (google_sign_in, sign_in_with_apple) manages its own
+      // token lifecycle and secure storage. Storing tokens in SharedPreferences
+      // would expose them in plaintext on non-rooted devices' app data.
       
       _currentUser = user;
       

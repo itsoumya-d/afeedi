@@ -34,6 +34,8 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
   bool _hasError = false;
   String? _containerId;
   bool _showFallbackOptions = false;
+  int _retryCount = 0;
+  static const _maxRetries = 3;
   
   @override
   void initState() {
@@ -265,8 +267,23 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
   }
   
   Widget _buildActionButtons() {
+    final bool exhausted = _retryCount >= _maxRetries;
+
     return Column(
       children: [
+        if (exhausted)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              'Video unavailable. Please try again later.',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.9),
+                fontSize: 13,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+
         // Primary action - Open in YouTube
         ElevatedButton.icon(
           onPressed: _openInYouTube,
@@ -280,15 +297,15 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           ),
         ),
-        
+
         const SizedBox(height: 12),
-        
-        // Secondary action - Retry embed
+
+        // Secondary action - Retry embed (always visible; resets count when exhausted)
         TextButton.icon(
-          onPressed: _retryPlayer,
+          onPressed: exhausted ? _resetAndRetry : _retryPlayer,
           icon: Icon(Icons.refresh, color: Colors.white.withValues(alpha: 0.8)),
           label: Text(
-            'Try Again',
+            exhausted ? 'Retry' : 'Try Again',
             style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
           ),
         ),
@@ -453,12 +470,21 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
   }
   
   Future<void> _retryPlayer() async {
+    if (_retryCount >= _maxRetries) return;
+
     setState(() {
       _isLoading = true;
       _hasError = false;
       _showFallbackOptions = false;
     });
-    
+
+    await Future.delayed(Duration(seconds: pow(2, _retryCount).toInt()));
+    _retryCount++;
     await _createPlayer();
+  }
+
+  void _resetAndRetry() {
+    _retryCount = 0;
+    _retryPlayer();
   }
 }

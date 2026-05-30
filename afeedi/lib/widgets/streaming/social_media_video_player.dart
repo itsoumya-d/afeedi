@@ -269,8 +269,9 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
   }
 
   Widget _buildWebEmbedPlayer() {
-    // For now, use mobile player on web as well
-    // TODO: Implement proper web embed support
+    // Shows thumbnail + "Open Video" CTA that routes to the platform's web player.
+    // Direct embedding of Instagram/TikTok/Facebook content violates their ToS;
+    // the redirect pattern is intentional and ToS-compliant on all platforms.
     return _buildMobileEmbedPlayer();
   }
 

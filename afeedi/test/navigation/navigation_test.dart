@@ -13,6 +13,7 @@ import 'package:afeedi/screens/settings_screen.dart';
 import 'package:afeedi/screens/profile_screen.dart';
 import 'package:afeedi/screens/notifications_screen.dart';
 import 'package:afeedi/services/navigation_service.dart';
+import 'package:afeedi/l10n/app_localizations.dart';
 
 void main() {
   late Directory tempDir;
@@ -70,7 +71,11 @@ void main() {
 
     testWidgets('search screen renders (${AppRoutes.search})', (tester) async {
       SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(const MaterialApp(home: SearchScreen()));
+      await tester.pumpWidget(MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const SearchScreen(),
+      ));
       await tester.pump();
       expect(find.byType(Scaffold), findsOneWidget);
     });
@@ -78,7 +83,11 @@ void main() {
     testWidgets('settings screen renders (${AppRoutes.settings})',
         (tester) async {
       SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
+      await tester.pumpWidget(MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const SettingsScreen(),
+      ));
       await tester.pump();
       expect(find.byType(Scaffold), findsOneWidget);
     });
@@ -93,7 +102,11 @@ void main() {
     testWidgets('notifications screen renders (${AppRoutes.notifications})',
         (tester) async {
       SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(const MaterialApp(home: NotificationsScreen()));
+      await tester.pumpWidget(MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const NotificationsScreen(),
+      ));
       await tester.pump();
       expect(find.byType(Scaffold), findsOneWidget);
     });

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../l10n/app_localizations.dart';
 import '../services/navigation_service.dart';
 import '../services/locale_service.dart';
 import '../services/subscription_service.dart';
@@ -76,9 +77,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: const Color(0xFF1A1A2E),
         foregroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Settings',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        title: Text(
+          AppLocalizations.of(context)!.settings,
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -156,7 +157,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(color: Colors.white10, height: 1),
 
           // ── NOTIFICATIONS ────────────────────────────────────────────
-          _sectionHeader('Notifications'),
+          _sectionHeader(AppLocalizations.of(context)!.notifications_setting),
           SwitchListTile(
             secondary: const Icon(Icons.notifications_outlined,
                 color: Colors.white70),
@@ -190,9 +191,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           SwitchListTile(
             secondary: const Icon(Icons.dark_mode_outlined,
                 color: Colors.white70),
-            title: const Text(
-              'Dark Mode',
-              style: TextStyle(color: Colors.white, fontSize: 15),
+            title: Text(
+              AppLocalizations.of(context)!.darkMode,
+              style: const TextStyle(color: Colors.white, fontSize: 15),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -347,7 +348,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           _navTile(
             icon: Icons.privacy_tip_outlined,
-            title: 'Privacy Policy',
+            title: AppLocalizations.of(context)!.privacyPolicy,
             onTap: () =>
                 Navigator.pushNamed(context, AppRoutes.privacyPolicy),
           ),

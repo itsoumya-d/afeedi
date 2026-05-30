@@ -361,16 +361,20 @@ class AnalyticsService {
     return newSessionId;
   }
 
-  Future<String> _getUserId() async {
-    final userId = _prefs?.getString('user_id');
-    if (userId != null) {
-      return userId;
+  /// Returns a stable, anonymous identifier for this install.
+  /// Never contains email or any other PII.
+  Future<String> _getAnonymousId() async {
+    final prefs = await SharedPreferences.getInstance();
+    var id = prefs.getString('analytics_anonymous_id');
+    if (id == null) {
+      id = DateTime.now().millisecondsSinceEpoch.toString();
+      await prefs.setString('analytics_anonymous_id', id);
     }
-
-    final newUserId = 'user_${DateTime.now().millisecondsSinceEpoch}';
-    await _prefs?.setString('user_id', newUserId);
-    return newUserId;
+    return id;
   }
+
+  /// Alias used by all event builders — routes to the anonymous ID.
+  Future<String> _getUserId() async => _getAnonymousId();
 
   Future<String> _getAppVersion() async {
     // In a real app, you would get this from package_info_plus

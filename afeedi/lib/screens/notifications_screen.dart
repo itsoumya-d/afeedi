@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/app_localizations.dart';
 import '../services/analytics_service.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -209,10 +210,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
         elevation: 0,
         title: Row(
           children: [
-            const Flexible(
+            Flexible(
               child: Text(
-                'Notifications',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                AppLocalizations.of(context)!.notifications,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
@@ -234,7 +235,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
           if (_unreadCount > 0)
             TextButton(
               onPressed: _markAllRead,
-              child: const Text('Mark all read', style: TextStyle(color: Color(0xFF00D4FF), fontSize: 12)),
+              child: Text(AppLocalizations.of(context)!.markAllRead, style: const TextStyle(color: Color(0xFF00D4FF), fontSize: 12)),
             ),
         ],
         bottom: TabBar(
@@ -244,10 +245,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
           indicatorColor: const Color(0xFF00D4FF),
           indicatorWeight: 2,
           onTap: (_) => setState(() {}),
-          tabs: const [
-            Tab(text: 'All'),
-            Tab(text: 'Unread'),
-            Tab(text: 'For You'),
+          tabs: [
+            Tab(text: AppLocalizations.of(context)!.allNotifications),
+            Tab(text: AppLocalizations.of(context)!.unread),
+            const Tab(text: 'For You'),
           ],
         ),
       ),

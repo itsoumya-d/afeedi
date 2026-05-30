@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../core/theme/app_theme.dart';
 import '../../models/content_model.dart';
 import '../../services/content_service.dart';
-import '../../services/user_interaction_service.dart';
-import 'comments_bottom_sheet.dart';
-import '../../screens/creator_profile_sheet.dart';
 
 class FeedPostCard extends StatefulWidget {
   final Content content;
@@ -17,20 +13,12 @@ class FeedPostCard extends StatefulWidget {
 }
 
 class _FeedPostCardState extends State<FeedPostCard> {
-  late bool _isLiked;
-  late bool _isSaved;
-  late bool _isFollowed;
+  bool _isLiked = false;
+  bool _isSaved = false;
 
-  @override
-  void initState() {
-    super.initState();
-    final svc = UserInteractionService.instance;
-    _isLiked = svc.isLiked(widget.content.id);
-    _isSaved = svc.isSaved(widget.content.id);
-    _isFollowed = widget.content.creatorId != null
-        ? svc.isFollowed(widget.content.creatorId!)
-        : false;
-  }
+  // ---------------------------------------------------------------------------
+  // Formatters
+  // ---------------------------------------------------------------------------
 
   String _formatCount(int count) {
     if (count >= 1000000000) return '${(count / 1000000000).toStringAsFixed(1)}B';
@@ -44,11 +32,9 @@ class _FeedPostCardState extends State<FeedPostCard> {
     final difference = now.difference(dateTime);
 
     if (difference.inDays >= 365) {
-      final years = (difference.inDays / 365).floor();
-      return '${years}y ago';
+      return '${(difference.inDays / 365).floor()}y ago';
     } else if (difference.inDays >= 30) {
-      final months = (difference.inDays / 30).floor();
-      return '${months}mo ago';
+      return '${(difference.inDays / 30).floor()}mo ago';
     } else if (difference.inDays > 0) {
       return '${difference.inDays}d ago';
     } else if (difference.inHours > 0) {
@@ -60,36 +46,112 @@ class _FeedPostCardState extends State<FeedPostCard> {
     }
   }
 
+  String _formatDuration(int seconds) {
+    final m = seconds ~/ 60;
+    final s = seconds % 60;
+    return '$m:${s.toString().padLeft(2, '0')}';
+  }
+
+  // ---------------------------------------------------------------------------
+  // Platform helpers
+  // ---------------------------------------------------------------------------
+
+  Color _platformColor(PlatformType platform) {
+    switch (platform) {
+      case PlatformType.youtube:
+        return const Color(0xFFFF0000);
+      case PlatformType.instagram:
+        return const Color(0xFFE1306C);
+      case PlatformType.tiktok:
+        return const Color(0xFF010101);
+      case PlatformType.facebook:
+        return const Color(0xFF1877F2);
+    }
+  }
+
+  String _platformLabel(PlatformType platform) {
+    switch (platform) {
+      case PlatformType.youtube:
+        return 'YouTube';
+      case PlatformType.instagram:
+        return 'Instagram';
+      case PlatformType.tiktok:
+        return 'TikTok';
+      case PlatformType.facebook:
+        return 'Facebook';
+    }
+  }
+
+  IconData _platformIcon(PlatformType platform) {
+    switch (platform) {
+      case PlatformType.youtube:
+        return Icons.play_circle_outline;
+      case PlatformType.instagram:
+        return Icons.camera_alt;
+      case PlatformType.tiktok:
+        return Icons.music_note;
+      case PlatformType.facebook:
+        return Icons.facebook;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Build
+  // ---------------------------------------------------------------------------
+
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(context),
-          _buildContent(),
-          _buildVideoPlayer(),
-          _buildActions(context),
+          _buildHeader(),
+          _buildTitleRow(),
+          _buildThumbnail(),
+          _buildEngagementRow(),
+          _buildActions(),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  // ---------------------------------------------------------------------------
+  // Header: creator avatar + name + platform badge + time
+  // ---------------------------------------------------------------------------
+
+  Widget _buildHeader() {
+    final platform = widget.content.platform;
+    final color = _platformColor(platform);
+    final initial = (widget.content.creatorName ?? 'U').isNotEmpty
+        ? (widget.content.creatorName ?? 'U')[0].toUpperCase()
+        : 'U';
+
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 16,
-            backgroundImage: widget.content.thumbnailUrl != null
-                ? CachedNetworkImageProvider(widget.content.thumbnailUrl!)
-                : null,
-            backgroundColor: AppTheme.primaryCyan.withValues(alpha: 0.1),
+          // Creator avatar (24 dp radius circle)
+          SizedBox(
+            width: 32,
+            height: 32,
+            child: CircleAvatar(
+              radius: 16,
+              backgroundColor: color.withValues(alpha: 0.15),
+              child: widget.content.creatorAvatarUrl != null
+                  ? ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: widget.content.creatorAvatarUrl!,
+                        width: 32,
+                        height: 32,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => _avatarInitial(initial, color),
+                        errorWidget: (_, __, ___) => _avatarInitial(initial, color),
+                      ),
+                    )
+                  : _avatarInitial(initial, color),
+            ),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -99,112 +161,58 @@ class _FeedPostCardState extends State<FeedPostCard> {
                 Row(
                   children: [
                     Flexible(
-                      child: GestureDetector(
-                        onTap: () => CreatorProfileSheet.show(context, widget.content),
-                        child: Text(
-                          widget.content.creatorName ?? 'Unknown Creator',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      child: Text(
+                        widget.content.creatorName ?? 'Unknown Creator',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 8),
-                    _buildPlatformBadge(widget.content.platform.name),
-                    // Follow chip — only shown when creatorId is present
-                    if (widget.content.creatorId != null) ...[
-                      const SizedBox(width: 8),
-                      _buildFollowChip(context),
-                    ],
+                    _buildHeaderPlatformBadge(platform),
                   ],
                 ),
                 Text(
                   widget.content.publishedAt != null
                       ? _formatTimeAgo(widget.content.publishedAt!)
                       : 'Unknown time',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 11,
-                  ),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
           IconButton(
             icon: const Icon(Icons.more_vert),
-            onPressed: () {
-              // Show more options
-            },
+            onPressed: () {},
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFollowChip(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        final creatorId = widget.content.creatorId!;
-        final next = await UserInteractionService.instance.toggleFollow(creatorId);
-        setState(() => _isFollowed = next);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-        decoration: BoxDecoration(
-          color: _isFollowed
-              ? AppTheme.primaryCyan.withValues(alpha: 0.15)
-              : AppTheme.primaryCyan,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.primaryCyan),
-        ),
-        child: Text(
-          _isFollowed ? 'Following' : 'Follow',
-          style: TextStyle(
-            color: _isFollowed ? AppTheme.primaryCyan : Colors.white,
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-          ),
+  Widget _avatarInitial(String initial, Color color) {
+    return Center(
+      child: Text(
+        initial,
+        style: TextStyle(
+          color: color,
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
   }
 
-  Widget _buildPlatformBadge(String platform) {
-    Color color;
-    IconData icon;
-
-    switch (platform.toLowerCase()) {
-      case 'youtube':
-        color = const Color(0xFFFF0000);
-        icon = Icons.play_circle_outline;
-        break;
-      case 'instagram':
-        color = const Color(0xFFE4405F);
-        icon = Icons.camera_alt;
-        break;
-      case 'tiktok':
-        color = const Color(0xFF69C9D0);
-        icon = Icons.music_note;
-        break;
-      case 'facebook':
-        color = const Color(0xFF1877F2);
-        icon = Icons.facebook;
-        break;
-      case 'twitter':
-        color = const Color(0xFF1DA1F2);
-        icon = Icons.alternate_email;
-        break;
-      case 'vimeo':
-        color = const Color(0xFF1AB7EA);
-        icon = Icons.videocam;
-        break;
-      default:
-        color = AppTheme.primaryCyan;
-        icon = Icons.play_arrow;
-    }
+  /// Small pill badge in the header row (icon + label, outline style).
+  Widget _buildHeaderPlatformBadge(PlatformType platform) {
+    final color = _platformColor(platform);
+    final label = _platformLabel(platform);
+    final icon = _platformIcon(platform);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
@@ -219,7 +227,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
           Icon(icon, size: 10, color: color),
           const SizedBox(width: 3),
           Text(
-            platform,
+            label,
             style: TextStyle(
               color: color,
               fontSize: 9,
@@ -231,7 +239,11 @@ class _FeedPostCardState extends State<FeedPostCard> {
     );
   }
 
-  Widget _buildContent() {
+  // ---------------------------------------------------------------------------
+  // Title
+  // ---------------------------------------------------------------------------
+
+  Widget _buildTitleRow() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Text(
@@ -247,14 +259,23 @@ class _FeedPostCardState extends State<FeedPostCard> {
     );
   }
 
-  Widget _buildVideoPlayer() {
-    final Color platformColor = _getPlatformColor(widget.content.platform);
-    final String durationText = widget.content.durationSeconds != null
+  // ---------------------------------------------------------------------------
+  // Thumbnail with platform pill (top-right) and duration chip (bottom-right)
+  // ---------------------------------------------------------------------------
+
+  Widget _buildThumbnail() {
+    final platform = widget.content.platform;
+    final platformColor = _platformColor(platform);
+    final durationText = widget.content.durationSeconds != null &&
+            widget.content.durationSeconds! > 0
         ? _formatDuration(widget.content.durationSeconds!)
         : '';
+    final initial = (widget.content.creatorName ?? 'U').isNotEmpty
+        ? (widget.content.creatorName ?? 'U')[0].toUpperCase()
+        : 'U';
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
       child: GestureDetector(
         onTap: () async {
           await ContentService.instance.trackContentInteraction(
@@ -266,7 +287,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
           borderRadius: BorderRadius.circular(10),
           child: Stack(
             children: [
-              // Thumbnail
+              // Base gradient + thumbnail image
               Container(
                 height: 200,
                 width: double.infinity,
@@ -289,12 +310,13 @@ class _FeedPostCardState extends State<FeedPostCard> {
                           width: double.infinity,
                           height: 200,
                           placeholder: (_, __) => const SizedBox.shrink(),
-                          errorWidget: (_, __, ___) => const SizedBox.shrink(),
+                          errorWidget: (_, __, ___) =>
+                              _buildThumbnailFallback(platformColor, initial),
                         ),
                       )
-                    : null,
+                    : _buildThumbnailFallback(platformColor, initial),
               ),
-              // Dark overlay for play button visibility
+              // Bottom gradient overlay for badge legibility
               Container(
                 height: 200,
                 decoration: BoxDecoration(
@@ -308,7 +330,13 @@ class _FeedPostCardState extends State<FeedPostCard> {
                   ),
                 ),
               ),
-              // Play button
+              // Platform pill — top-right corner
+              Positioned(
+                top: 8,
+                right: 8,
+                child: _buildThumbnailPlatformPill(platform),
+              ),
+              // Play button — centered
               Positioned.fill(
                 child: Center(
                   child: Container(
@@ -326,13 +354,14 @@ class _FeedPostCardState extends State<FeedPostCard> {
                   ),
                 ),
               ),
-              // Duration badge
+              // Duration chip — bottom-right corner
               if (durationText.isNotEmpty)
                 Positioned(
                   right: 8,
                   bottom: 8,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.75),
                       borderRadius: BorderRadius.circular(4),
@@ -354,74 +383,144 @@ class _FeedPostCardState extends State<FeedPostCard> {
     );
   }
 
-  Color _getPlatformColor(PlatformType platform) {
-    switch (platform) {
-      case PlatformType.youtube:
-        return const Color(0xFFFF0000);
-      case PlatformType.instagram:
-        return const Color(0xFFE1306C);
-      case PlatformType.tiktok:
-        return const Color(0xFF010101);
-      case PlatformType.facebook:
-        return const Color(0xFF1877F2);
-    }
-  }
-
-  String _formatDuration(int seconds) {
-    final m = seconds ~/ 60;
-    final s = seconds % 60;
-    return '$m:${s.toString().padLeft(2, '0')}';
-  }
-
-  Widget _buildActions(BuildContext context) {
-    final svc = UserInteractionService.instance;
-    final likeCount = svc.getLikeCount(
-      widget.content.id,
-      baseCount: widget.content.likeCount,
+  /// Platform-colored fallback shown when the thumbnail fails to load.
+  Widget _buildThumbnailFallback(Color platformColor, String initial) {
+    return Container(
+      color: platformColor.withValues(alpha: 0.2),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.play_circle_outline, color: platformColor, size: 48),
+            const SizedBox(height: 8),
+            Text(
+              initial,
+              style: TextStyle(
+                color: platformColor,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
+  }
 
+  /// Colored pill overlaid on the thumbnail — solid fill for YouTube/TikTok/Facebook,
+  /// gradient for Instagram.
+  Widget _buildThumbnailPlatformPill(PlatformType platform) {
+    final label = _platformLabel(platform);
+
+    if (platform == PlatformType.instagram) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF833AB4), Color(0xFFE1306C), Color(0xFFF77737)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: _platformColor(platform),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Engagement row: "1.2M views • 45K likes • 3d ago"
+  // ---------------------------------------------------------------------------
+
+  Widget _buildEngagementRow() {
+    final timeAgo = widget.content.publishedAt != null
+        ? _formatTimeAgo(widget.content.publishedAt!)
+        : null;
+
+    final parts = <String>[
+      '${_formatCount(widget.content.viewCount)} views',
+      '${_formatCount(widget.content.likeCount)} likes',
+      if (timeAgo != null) timeAgo,
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+      child: Text(
+        parts.join(' • '),
+        style: TextStyle(color: Colors.grey[600], fontSize: 11),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Action bar: like, bookmark, share, duration
+  // ---------------------------------------------------------------------------
+
+  Widget _buildActions() {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          // Like button
+          // Like
           _buildActionButton(
             icon: _isLiked ? Icons.favorite : Icons.favorite_border,
             iconColor: _isLiked ? Colors.red : null,
-            label: _formatCount(likeCount),
+            label: _formatCount(
+                widget.content.likeCount + (_isLiked ? 1 : 0)),
             onTap: () async {
-              final next = await svc.toggleLike(
-                widget.content.id,
-                baseCount: widget.content.likeCount,
+              setState(() => _isLiked = !_isLiked);
+              await ContentService.instance.trackContentInteraction(
+                contentId: widget.content.id,
+                interactionType: InteractionType.like,
               );
-              setState(() => _isLiked = next);
             },
           ),
           const SizedBox(width: 20),
-          // Comment button — opens the comments sheet
-          _buildActionButton(
-            icon: Icons.chat_bubble_outline,
-            label: _formatCount(widget.content.id.hashCode.abs() % 500 + 10),
-            onTap: () => CommentsBottomSheet.show(context, widget.content),
-          ),
-          const SizedBox(width: 20),
-          // Share button
+          // Share
           _buildActionButton(
             icon: Icons.share_outlined,
-            count: 0,
+            label: '0',
             onTap: () async {
-              await svc.trackShare(widget.content.id);
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Link copied!'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              }
+              final messenger = ScaffoldMessenger.of(context);
+              await ContentService.instance.trackContentInteraction(
+                contentId: widget.content.id,
+                interactionType: InteractionType.share,
+              );
+              messenger.showSnackBar(
+                const SnackBar(
+                  content: Text('Link copied!'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
             },
           ),
           const Spacer(),
+          // Duration label
           Text(
             widget.content.formattedDuration,
             style: TextStyle(
@@ -429,17 +528,22 @@ class _FeedPostCardState extends State<FeedPostCard> {
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(width: 8),
-          // Save / bookmark button
+          // Save / bookmark
           IconButton(
             icon: Icon(
               _isSaved ? Icons.bookmark : Icons.bookmark_border,
               color: _isSaved ? Colors.cyan : null,
             ),
             onPressed: () async {
-              final next = await svc.toggleSave(widget.content.id);
-              setState(() => _isSaved = next);
+              setState(() => _isSaved = !_isSaved);
+              await ContentService.instance.trackContentInteraction(
+                contentId: widget.content.id,
+                interactionType: InteractionType.save,
+              );
             },
           ),
         ],
@@ -450,11 +554,9 @@ class _FeedPostCardState extends State<FeedPostCard> {
   Widget _buildActionButton({
     required IconData icon,
     Color? iconColor,
-    String? label,
-    int count = 0,
+    required String label,
     required VoidCallback onTap,
   }) {
-    final displayLabel = label ?? (count > 0 ? _formatCount(count) : '0');
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -466,8 +568,10 @@ class _FeedPostCardState extends State<FeedPostCard> {
             Icon(icon, size: 18, color: iconColor),
             const SizedBox(width: 3),
             Text(
-              displayLabel,
+              label,
               style: const TextStyle(fontSize: 12),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

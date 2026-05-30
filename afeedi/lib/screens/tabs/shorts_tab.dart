@@ -418,6 +418,7 @@ class _ShortsTabState extends State<ShortsTab> {
       return _InlineYouTubeShort(
         videoId: content.platformContentId,
         overlay: overlay,
+        onTap: () => Navigator.pushNamed(context, AppRoutes.player, arguments: content),
         onDoubleTap: () {
           _showHeartAnimation(context);
           _handleLike(content);
@@ -1416,10 +1417,12 @@ class _InlineYouTubeShort extends StatefulWidget {
   final String videoId;
   final Widget overlay;
   final VoidCallback onDoubleTap;
+  final VoidCallback onTap;
   const _InlineYouTubeShort({
     required this.videoId,
     required this.overlay,
     required this.onDoubleTap,
+    required this.onTap,
   });
 
   @override
@@ -1464,6 +1467,7 @@ class _InlineYouTubeShortState extends State<_InlineYouTubeShort> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: widget.onTap,
       onDoubleTap: widget.onDoubleTap,
       child: Stack(
         fit: StackFit.expand,

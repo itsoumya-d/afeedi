@@ -76,10 +76,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     },
     {
       'id': '3',
-      'title': 'Relaxing Music',
+      'title': 'Relaxing Music Playlist',
       'time': '20:00',
       'duration': 60,
-      'platform': 'Spotify',
+      'platform': 'YouTube',
       'creator': 'ChillBeats',
       'thumbnail': 'https://picsum.photos/60/60?random=3',
       'type': 'scheduled',
@@ -87,14 +87,14 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       'keywords': ['music', 'relaxing', 'chill'],
       'educationValue': 5,
       'entertainmentValue': 95,
-      'date': DateTime.now(),
+      'date': DateTime.now().subtract(const Duration(days: 1)),
     },
     {
       'id': '4',
       'title': 'Mathematics Study Session',
       'time': '10:00',
       'duration': 90,
-      'platform': 'Khan Academy',
+      'platform': 'YouTube',
       'creator': 'Khan Academy',
       'thumbnail': 'https://picsum.photos/60/60?random=6',
       'type': 'scheduled',
@@ -103,6 +103,96 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       'educationValue': 95,
       'entertainmentValue': 5,
       'date': DateTime.now().add(const Duration(days: 2)),
+    },
+    {
+      'id': '5',
+      'title': 'Gaming Highlights: Best Plays',
+      'time': '16:00',
+      'duration': 20,
+      'platform': 'YouTube',
+      'creator': 'GamingPro',
+      'thumbnail': 'https://picsum.photos/60/60?random=7',
+      'type': 'scheduled',
+      'category': 'entertainment',
+      'keywords': ['gaming', 'highlights', 'esports'],
+      'educationValue': 10,
+      'entertainmentValue': 90,
+      'date': DateTime.now().add(const Duration(days: 3)),
+    },
+    {
+      'id': '6',
+      'title': 'Cooking Masterclass: Italian',
+      'time': '12:00',
+      'duration': 35,
+      'platform': 'YouTube',
+      'creator': 'ChefMario',
+      'thumbnail': 'https://picsum.photos/60/60?random=8',
+      'type': 'scheduled',
+      'category': 'lifestyle',
+      'keywords': ['cooking', 'italian', 'food'],
+      'educationValue': 60,
+      'entertainmentValue': 40,
+      'date': DateTime.now().add(const Duration(days: 5)),
+    },
+    {
+      'id': '7',
+      'title': 'Weekly Tech Roundup',
+      'time': '09:00',
+      'duration': 25,
+      'platform': 'YouTube',
+      'creator': 'TechWeekly',
+      'thumbnail': 'https://picsum.photos/60/60?random=9',
+      'type': 'scheduled',
+      'category': 'education',
+      'keywords': ['tech', 'weekly', 'roundup'],
+      'educationValue': 70,
+      'entertainmentValue': 30,
+      'date': DateTime.now().subtract(const Duration(days: 3)),
+    },
+    {
+      'id': '8',
+      'title': 'Fitness HIIT Workout',
+      'time': '07:00',
+      'duration': 30,
+      'platform': 'YouTube',
+      'creator': 'FitLife',
+      'thumbnail': 'https://picsum.photos/60/60?random=10',
+      'type': 'scheduled',
+      'category': 'health',
+      'keywords': ['fitness', 'workout', 'hiit'],
+      'educationValue': 40,
+      'entertainmentValue': 60,
+      'date': DateTime.now().subtract(const Duration(days: 5)),
+    },
+    {
+      'id': '9',
+      'title': 'Mindfulness Meditation',
+      'time': '19:00',
+      'duration': 20,
+      'platform': 'YouTube',
+      'creator': 'ZenMaster',
+      'thumbnail': 'https://picsum.photos/60/60?random=11',
+      'type': 'scheduled',
+      'category': 'health',
+      'keywords': ['meditation', 'mindfulness', 'wellness'],
+      'educationValue': 50,
+      'entertainmentValue': 50,
+      'date': DateTime.now().add(const Duration(days: 7)),
+    },
+    {
+      'id': '10',
+      'title': 'Documentary: Ocean Life',
+      'time': '21:00',
+      'duration': 50,
+      'platform': 'YouTube',
+      'creator': 'NatureFilms',
+      'thumbnail': 'https://picsum.photos/60/60?random=12',
+      'type': 'scheduled',
+      'category': 'education',
+      'keywords': ['documentary', 'nature', 'ocean'],
+      'educationValue': 80,
+      'entertainmentValue': 20,
+      'date': DateTime.now().add(const Duration(days: 10)),
     },
   ];
   
@@ -937,20 +1027,143 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                       ),
                     );
                   },
-                  child: _viewMode == 'month' 
+                  child: _viewMode == 'month'
                       ? _buildMonthView()
                       : _viewMode == 'week'
                           ? _buildWeekView()
                           : _buildDayView(),
                 ),
               ),
+              // Selected date content panel — shown below month grid
+              if (_viewMode == 'month') ...[
+                const SizedBox(height: 16),
+                _buildSelectedDatePanel(),
+              ],
             ],
           ),
         );
       },
     );
   }
-  
+
+  Widget _buildSelectedDatePanel() {
+    final items = _getContentForDate(_selectedDate);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final label = '${months[_selectedDate.month - 1]} ${_selectedDate.day}, ${_selectedDate.year}';
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.event_note, color: AppTheme.primaryCyan, size: 16),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: AppTheme.primaryCyan,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              if (items.isNotEmpty)
+                Text(
+                  '${items.length} item${items.length == 1 ? '' : 's'}',
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (items.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.calendar_today, color: Colors.white.withValues(alpha: 0.25), size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'No content scheduled for this day',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 13),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            ...items.map((item) => _buildSelectedDateItem(item)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectedDateItem(Map<String, dynamic> item) {
+    final thumbnail = item['thumbnail']?.toString() ?? '';
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Image.network(
+              thumbnail,
+              width: 40,
+              height: 40,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                width: 40,
+                height: 40,
+                color: Colors.white.withValues(alpha: 0.1),
+                child: Icon(Icons.play_circle_outline, color: Colors.white38, size: 18),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item['title']?.toString() ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${item['time'] ?? ''} · ${item['creator'] ?? ''} · ${item['duration'] ?? 0} min',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCalendarHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

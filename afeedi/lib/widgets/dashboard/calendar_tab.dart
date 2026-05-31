@@ -991,6 +991,17 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   }
   
   Widget _buildMonthView() {
+    if (_isLoadingContent) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00D9FF)),
+          ),
+        ),
+      );
+    }
+
     final firstDayOfMonth = DateTime(_selectedDate.year, _selectedDate.month, 1);
     final lastDayOfMonth = DateTime(_selectedDate.year, _selectedDate.month + 1, 0);
     final daysInMonth = lastDayOfMonth.day;
@@ -1763,7 +1774,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         return Icons.movie;
     }
   }
-  
+
   Widget _buildAIRecommendations() {
     return Container(
       margin: const EdgeInsets.all(20),

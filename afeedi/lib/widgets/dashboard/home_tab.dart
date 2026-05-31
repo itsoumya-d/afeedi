@@ -360,6 +360,15 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         _hasMore = _allPosts.length < 200;
         _newPostCount = newCount;
       });
+      // Fire "new content available" notification once per day when ≥5 fresh items land
+      final topGenres = _allPosts.isNotEmpty
+          ? _allPosts.first.tags
+          : <String>[];
+      final category = topGenres.isNotEmpty ? topGenres.first : 'Videos';
+      NotificationService.instance.notifyContentLoaded(
+        newItemCount: newCount,
+        category: category,
+      );
     } catch (e) {
       setState(() {
         _isLoading = false;

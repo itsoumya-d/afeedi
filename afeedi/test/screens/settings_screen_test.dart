@@ -92,5 +92,27 @@ void main() {
       // _sectionHeader renders title.toUpperCase()
       expect(find.text('ACCOUNT'), findsOneWidget);
     });
+
+    testWidgets('shows Reset Personalization tile', (tester) async {
+      tester.view.physicalSize = const Size(800, 4000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(_buildApp(const SettingsScreen()));
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.text('Reset Personalization'), findsOneWidget);
+    });
+
+    testWidgets('shows Personalized Ads toggle', (tester) async {
+      tester.view.physicalSize = const Size(800, 4000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(_buildApp(const SettingsScreen()));
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.text('Personalized Ads'), findsOneWidget);
+    });
   });
 }

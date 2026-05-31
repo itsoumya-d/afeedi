@@ -409,6 +409,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 'Free up storage space',
             onTap: _clearCache,
           ),
+          _navTile(
+            icon: Icons.tune_outlined,
+            title: 'Reset Personalization',
+            subtitle:
+                'Clear genre preferences and restart feed personalization',
+            iconColor: Colors.orange,
+            onTap: _confirmResetPersonalization,
+          ),
           const Divider(color: Colors.white10, height: 1),
 
           // ── ACCOUNT ──────────────────────────────────────────────────
@@ -762,6 +770,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       );
     }
+  }
+
+  void _confirmResetPersonalization() {
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A2E),
+        title: const Text(
+          'Reset Personalization?',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          'This clears your saved genre preferences and watch history so Afeedi can re-learn your tastes from scratch.',
+          style: TextStyle(color: Colors.white70, fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white54),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(
+              'Reset',
+              style: TextStyle(color: Color(0xFFFF6B6B)),
+            ),
+          ),
+        ],
+      ),
+    ).then((confirmed) async {
+      if (confirmed != true || !mounted) return;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('selected_genres');
+      await prefs.remove('onboarding_selected_genres');
+      await prefs.remove('onboarding_completed');
+      await prefs.remove('watched_ids');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Personalization reset. Restart the app to redo onboarding.',
+            ),
+            backgroundColor: Color(0xFF1A1A2E),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    });
   }
 
   void _showChangePasswordDialog() {

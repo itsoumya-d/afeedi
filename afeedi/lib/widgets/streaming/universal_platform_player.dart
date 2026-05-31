@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 // import 'dart:html' as html;
 import 'dart:math';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/content_model.dart';
 import '../../services/universal_platform_player_service.dart';
 import '../../services/social_media_streaming_service.dart';
@@ -384,7 +385,11 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       return _buildLoadingState();
     }
     
-    if (_hasError || _showFallbackOptions) {
+    if (_showFallbackOptions) {
+      return _buildFallbackPlayer();
+    }
+
+    if (_hasError) {
       return _buildErrorState();
     }
     
@@ -786,5 +791,126 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       case PlatformType.facebook:
         return 'Facebook';
     }
+  }
+
+  Widget _buildFallbackPlayer() {
+    final thumbnailUrl = widget.content.thumbnailUrl;
+    final title = widget.content.title ?? 'Watch Video';
+    final platformUrl = _getPlatformUrl();
+    final platformColor = _getPlatformColor();
+    final platformName = _getPlatformName();
+
+    return Container(
+      constraints: const BoxConstraints(
+        minHeight: 200,
+        maxWidth: double.infinity,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Stack(
+        children: [
+          // Thumbnail background
+          if (thumbnailUrl != null && thumbnailUrl.isNotEmpty)
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  thumbnailUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade900),
+                ),
+              ),
+            ),
+          // Dark gradient overlay
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.3),
+                    Colors.black.withOpacity(0.8),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Content
+          Positioned.fill(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Play button
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: platformColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.play_arrow,
+                    color: Colors.white,
+                    size: 36,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: platformUrl.isNotEmpty ? () => _launchUrl(platformUrl) : null,
+                  icon: const Icon(Icons.open_in_new, size: 16),
+                  label: Text('Watch on $platformName'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: platformColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _launchUrl(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    } catch (_) {}
+    try {
+      await AnalyticsService.instance.trackUserInteraction(
+        action: 'open_external_player',
+        screen: 'video_player',
+        additionalData: {
+          'platform': widget.content.platform.name,
+          'url': url,
+        },
+      );
+    } catch (_) {}
   }
 }

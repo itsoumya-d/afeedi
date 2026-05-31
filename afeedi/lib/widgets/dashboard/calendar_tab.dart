@@ -1127,9 +1127,20 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   
   List<Map<String, dynamic>> _getContentForDate(DateTime date) {
     try {
+      if (!_hasContentForDay(date)) return [];
       return _getFilteredContent().where((content) {
         try {
-          // Mock logic - in real app, this would check actual scheduled dates
+          if (_enhancedScheduledContent.isNotEmpty) {
+            // Match items whose scheduledTime falls on this date
+            final id = content['id']?.toString();
+            return _enhancedScheduledContent.any((item) =>
+              item.content.id == id &&
+              item.scheduledTime.year == date.year &&
+              item.scheduledTime.month == date.month &&
+              item.scheduledTime.day == date.day,
+            );
+          }
+          // Fallback mock logic
           final contentDay = date.day;
           return contentDay % 3 == 0 || contentDay % 5 == 0;
         } catch (e) {
@@ -1143,9 +1154,41 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     }
   }
   
+  Map<String, dynamic> _scheduledItemToMap(ScheduledContentItem item) {
+    return {
+      'id': item.content.id,
+      'title': item.content.title ?? 'Untitled',
+      'time': '${item.scheduledTime.hour.toString().padLeft(2, '0')}:${item.scheduledTime.minute.toString().padLeft(2, '0')}',
+      'duration': item.content.durationSeconds ?? 0,
+      'platform': item.content.platform.name,
+      'creator': item.content.creatorName ?? '',
+      'thumbnail': item.content.thumbnailUrl ?? '',
+      'type': 'scheduled',
+      'category': item.category,
+      'keywords': item.content.tags ?? <String>[],
+      'educationValue': 50,
+      'entertainmentValue': 50,
+    };
+  }
+
+  bool _hasContentForDay(DateTime day) {
+    if (_enhancedScheduledContent.isNotEmpty) {
+      return _enhancedScheduledContent.any((item) =>
+        item.scheduledTime.year == day.year &&
+        item.scheduledTime.month == day.month &&
+        item.scheduledTime.day == day.day,
+      );
+    }
+    // Fallback: use the existing hardcoded logic
+    return day.day % 3 == 0 || day.day % 5 == 0;
+  }
+
   List<Map<String, dynamic>> _getFilteredContent() {
     try {
-      var filtered = List<Map<String, dynamic>>.from(_scheduledContent);
+      final displayItems = _enhancedScheduledContent.isNotEmpty
+          ? _enhancedScheduledContent.map(_scheduledItemToMap).toList()
+          : _scheduledContent;
+      var filtered = List<Map<String, dynamic>>.from(displayItems);
       
       // Apply percentage-based filter if active
       if (_isPercentageFilterActive) {
@@ -1276,12 +1319,23 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   }
   
   Widget _buildWeekView() {
+    if (_isLoadingContent) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00D9FF)),
+          ),
+        ),
+      );
+    }
+
     final filteredContent = _getFilteredContent();
-    
+
     if (filteredContent.isEmpty) {
       return _buildEmptyState();
     }
-    
+
     return ListView.builder(
       key: ValueKey('week_${_selectedDate.millisecondsSinceEpoch}_$_selectedFilter'),
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1297,12 +1351,23 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   }
   
   Widget _buildDayView() {
+    if (_isLoadingContent) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00D9FF)),
+          ),
+        ),
+      );
+    }
+
     final filteredContent = _getFilteredContent();
-    
+
     if (filteredContent.isEmpty) {
       return _buildEmptyState();
     }
-    
+
     return Column(
       key: ValueKey('day_${_selectedDate.millisecondsSinceEpoch}_$_selectedFilter'),
       children: [

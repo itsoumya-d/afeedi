@@ -55,15 +55,45 @@ void main() {
       // Give time for the greeting message to be added synchronously in initState
       await tester.pump();
 
-      expect(find.textContaining('AI scheduler'), findsOneWidget);
+      // Greeting is time-aware: "Good morning", "Good afternoon", "Good evening", or "Still up"
+      expect(
+        find.byWidgetPredicate(
+          (w) =>
+              w is Text &&
+              ['Good morning', 'Good afternoon', 'Good evening', 'Still up']
+                  .any((phrase) => w.data?.contains(phrase) ?? false),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows quick-reply chips after greeting', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pump();
 
-      expect(find.text('Schedule for today'), findsOneWidget);
-      expect(find.text("What's this weekend?"), findsOneWidget);
+      // Chips are time-aware; verify at least one from any time period is shown
+      const allPossibleChips = [
+        'Fill my day',
+        "Show today's schedule",
+        'Schedule for this evening',
+        'Find morning content',
+        "What's on tonight?",
+        'Schedule something for today',
+        'Find trending now',
+        'Plan my weekend',
+        "Show tonight's schedule",
+        'Gaming content now',
+        'Schedule for tomorrow',
+        "What's trending?",
+        'Plan tomorrow',
+        'Schedule for the weekend',
+        'Find something relaxing',
+        'Show this week',
+      ];
+      final anyChipVisible = allPossibleChips.any(
+        (chip) => find.text(chip).evaluate().isNotEmpty,
+      );
+      expect(anyChipVisible, isTrue);
     });
 
     testWidgets('input bar is present', (tester) async {
@@ -78,13 +108,38 @@ void main() {
       await tester.pumpWidget(_wrap());
       await tester.pump();
 
-      // Tap the first chip: 'Schedule for today'
-      await tester.tap(find.text('Schedule for today'));
-      await tester.pump();
+      // Chips are time-aware; find whichever one is visible and tap it
+      const allPossibleChips = [
+        'Fill my day',
+        "Show today's schedule",
+        'Schedule for this evening',
+        'Find morning content',
+        "What's on tonight?",
+        'Schedule something for today',
+        'Find trending now',
+        'Plan my weekend',
+        "Show tonight's schedule",
+        'Gaming content now',
+        'Schedule for tomorrow',
+        "What's trending?",
+        'Plan tomorrow',
+        'Schedule for the weekend',
+        'Find something relaxing',
+        'Show this week',
+      ];
+      final visibleChip = allPossibleChips.firstWhere(
+        (chip) => find.text(chip).evaluate().isNotEmpty,
+        orElse: () => '',
+      );
+      expect(visibleChip, isNotEmpty, reason: 'At least one chip should be visible');
+
+      await tester.tap(find.text(visibleChip).first);
+      // _handleSend has a 700ms Future.delayed before responding; pump past it
+      await tester.pump(const Duration(milliseconds: 900));
       await tester.pump();
 
       // The chip text should now appear as a user bubble
-      expect(find.text('Schedule for today'), findsWidgets);
+      expect(find.text(visibleChip), findsWidgets);
     });
 
     testWidgets('refresh button clears chat and shows fresh start', (

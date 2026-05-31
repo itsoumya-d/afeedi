@@ -303,15 +303,8 @@ class _CalendarChatScreenState extends State<CalendarChatScreen>
     _loadScheduled();
     _loadContent();
     _addBot(
-      'Hi! I\'m your AI scheduler. Tell me what you want to watch and when — '
-      'like "Schedule gaming content for Friday evening" or '
-      '"Show me what\'s on this weekend."',
-      chips: [
-        'Schedule for today',
-        'What\'s this weekend?',
-        'Find gaming content',
-        'Show today\'s schedule',
-      ],
+      _timeAwareGreeting(),
+      chips: _timeAwareChips(),
     );
     AnalyticsService.instance.trackUserInteraction(
       action: 'calendar_chat_opened',
@@ -692,6 +685,73 @@ class _CalendarChatScreenState extends State<CalendarChatScreen>
       return days[d.weekday - 1];
     }
     return '${d.day}/${d.month}';
+  }
+
+  String _timeAwareGreeting() {
+    final hour = DateTime.now().hour;
+    final todayItems = _scheduled[_dateKey(DateTime.now())] ?? [];
+    final hasToday = todayItems.isNotEmpty;
+
+    if (hour < 12) {
+      return hasToday
+          ? 'Good morning! ☀️ You have ${todayItems.length} '
+              '${todayItems.length == 1 ? 'video' : 'videos'} scheduled today. '
+              'Tell me what else you\'d like to plan.'
+          : 'Good morning! ☀️ Your schedule is clear today — '
+              'want me to fill it with content you\'ll love?';
+    } else if (hour < 17) {
+      return hasToday
+          ? 'Good afternoon! 🌤 ${todayItems.length} '
+              '${todayItems.length == 1 ? 'item' : 'items'} on today\'s list. '
+              'Need to add or change anything?'
+          : 'Good afternoon! 🌤 Nothing scheduled yet today. '
+              'I can find fresh content for this evening — just ask.';
+    } else if (hour < 21) {
+      return hasToday
+          ? 'Good evening! 🌙 Time to unwind. You have '
+              '${todayItems.length} ${todayItems.length == 1 ? 'video' : 'videos'} '
+              'queued for tonight. Enjoy!'
+          : 'Good evening! 🌙 Relax time — want me to curate '
+              'your perfect evening watch list?';
+    } else {
+      return 'Still up? 🌙 Tell me what you\'d like to schedule for tomorrow '
+          'and I\'ll have it ready when you wake up.';
+    }
+  }
+
+  List<String> _timeAwareChips() {
+    final hour = DateTime.now().hour;
+    final todayItems = _scheduled[_dateKey(DateTime.now())] ?? [];
+
+    if (hour < 12) {
+      return [
+        'Fill my day',
+        'Show today\'s schedule',
+        'Schedule for this evening',
+        'Find morning content',
+      ];
+    } else if (hour < 17) {
+      return [
+        'What\'s on tonight?',
+        if (todayItems.isEmpty) 'Schedule something for today',
+        'Find trending now',
+        'Plan my weekend',
+      ];
+    } else if (hour < 21) {
+      return [
+        if (todayItems.isNotEmpty) 'Show tonight\'s schedule',
+        'Gaming content now',
+        'Schedule for tomorrow',
+        'What\'s trending?',
+      ];
+    } else {
+      return [
+        'Plan tomorrow',
+        'Schedule for the weekend',
+        'Find something relaxing',
+        'Show this week',
+      ];
+    }
   }
 
   String _formatTime(TimeOfDay t) {

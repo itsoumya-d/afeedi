@@ -3471,13 +3471,37 @@ class ContentService {
         return MapEntry(c, score);
       }).toList()..sort((a, b) => b.value.compareTo(a.value));
 
-      // Diversity: max 4 items per platform
+      // Diversity: max 4 items per platform; attach reason label for UI display
       final result = <Content>[];
       final platformCounts = <String, int>{};
       for (final entry in scored) {
-        final platform = entry.key.platform.name;
+        final c = entry.key;
+        final platform = c.platform.name;
         if ((platformCounts[platform] ?? 0) < 4) {
-          result.add(entry.key);
+          // Derive a human-readable reason
+          String reason = '';
+          final contentTags = [...c.tags, ...c.categories].join(' ').toLowerCase();
+          for (final genre in selectedGenres) {
+            if (contentTags.contains(genre.toLowerCase())) {
+              reason = 'Because you like $genre';
+              break;
+            }
+          }
+          if (reason.isEmpty && c.publishedAt != null) {
+            final ageHours = DateTime.now().difference(c.publishedAt!).inHours;
+            if (ageHours < 72) reason = 'New for you';
+          }
+          if (reason.isEmpty) reason = 'Recommended';
+
+          final tagged = reason.isNotEmpty
+              ? c.copyWith(
+                  metadata: {
+                    ...c.metadata,
+                    'recommendationReason': reason,
+                  },
+                )
+              : c;
+          result.add(tagged);
           platformCounts[platform] = (platformCounts[platform] ?? 0) + 1;
         }
         if (result.length >= limit) break;

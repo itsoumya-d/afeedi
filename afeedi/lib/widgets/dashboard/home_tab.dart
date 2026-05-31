@@ -14,6 +14,7 @@ import '../../services/connectivity_service.dart';
 import '../../services/user_interaction_service.dart';
 import '../../services/navigation_service.dart';
 import '../../services/subscription_service.dart';
+import '../../services/watch_streak_service.dart';
 import '../ads/in_feed_ad_card.dart';
 
 class HomeTab extends StatefulWidget {
@@ -98,6 +99,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     _scrollController.addListener(_onScroll);
     _checkConnectivity();
     _checkProactivePaywall();
+    WatchStreakService.instance.recordOpen().then((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   Future<void> _checkProactivePaywall() async {
@@ -445,6 +449,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   }
 
   Widget _buildFeedTabSwitch() {
+    final streakLabel = WatchStreakService.instance.streakLabel;
     return Row(
       children: [
         Expanded(
@@ -461,6 +466,30 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                 _showFollowing,
                 isForYou: false,
               ),
+              if (streakLabel.isNotEmpty) ...[
+                const SizedBox(width: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF6B00).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFFFF6B00).withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Text(
+                    streakLabel,
+                    style: const TextStyle(
+                      color: Color(0xFFFF6B00),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

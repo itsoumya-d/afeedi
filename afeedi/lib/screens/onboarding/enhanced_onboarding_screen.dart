@@ -68,8 +68,11 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
       screen: 'enhanced_onboarding_screen',
     );
 
-    // COPPA/GDPR Art. 8 age gate — show once per device, block under-13 users
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkAgeGate());
+    // Resume from draft if the user previously left mid-onboarding
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _resumeDraftIfAvailable();
+      _checkAgeGate();
+    });
   }
 
   Future<void> _checkAgeGate() async {
@@ -155,6 +158,35 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
     }
   }
 
+  static const _draftStepKey = 'enhanced_onboarding_draft_step';
+  static const _draftSavedAtKey = 'enhanced_onboarding_draft_saved_at';
+
+  Future<void> _saveDraft(int stepIndex) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_draftStepKey, stepIndex);
+    await prefs.setString(_draftSavedAtKey, DateTime.now().toIso8601String());
+  }
+
+  Future<void> _clearDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_draftStepKey);
+    await prefs.remove(_draftSavedAtKey);
+  }
+
+  Future<void> _resumeDraftIfAvailable() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedAt = prefs.getString(_draftSavedAtKey);
+    final draftStep = prefs.getInt(_draftStepKey);
+    if (savedAt == null || draftStep == null || draftStep <= 0) return;
+    final saved = DateTime.tryParse(savedAt);
+    if (saved == null || DateTime.now().difference(saved).inDays >= 7) return;
+    final target = draftStep.clamp(0, _flow.length - 1);
+    if (!mounted) return;
+    // Jump to the saved step
+    _pageController.jumpToPage(target);
+    setState(() => _currentPageIndex = target);
+  }
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -207,6 +239,7 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
         curve: Curves.easeInOut,
       );
       _slideController.reset();
+      _saveDraft(_currentPageIndex + 1);
     });
 
     AnalyticsService.instance.trackUserInteraction(
@@ -244,6 +277,7 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
 
       await OnboardingService.instance.savePreferences(_userPreferences);
       await OnboardingService.instance.markOnboardingComplete();
+      await _clearDraft();
 
       _confettiController.play();
 

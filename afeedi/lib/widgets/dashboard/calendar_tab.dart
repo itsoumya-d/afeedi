@@ -3,6 +3,7 @@ import '../../core/theme/app_theme.dart';
 import '../../models/content_model.dart';
 import '../../services/enhanced_calendar_service.dart';
 import '../../services/analytics_service.dart';
+import '../../services/content_service.dart';
 import '../../widgets/streaming/responsive_video_player.dart';
 
 class CalendarTab extends StatefulWidget {
@@ -108,6 +109,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   void initState() {
     super.initState();
     _loadContentForSelectedDate();
+    _loadAIRecommendations();
     _calendarAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -185,6 +187,31 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     }
   }
   
+  Future<void> _loadAIRecommendations() async {
+    try {
+      final videos = await ContentService.instance.getTrendingVideos(limit: 4);
+      if (!mounted || videos.isEmpty) return;
+      final now = DateTime.now();
+      final recs = videos.asMap().entries.map((e) {
+        final i = e.key;
+        final v = e.value;
+        final hour = 14 + i * 2;
+        final isEducation = (v.categories ?? []).any((c) => ['education', 'technology', 'science'].contains(c.toLowerCase()));
+        return {
+          'id': v.id,
+          'title': i == 0 ? 'Based on your interests' : 'Trending Now',
+          'subtitle': v.title ?? 'Recommended Video',
+          'time': '${hour.toString().padLeft(2, '0')}:00',
+          'confidence': 0.85 + (i * 0.03),
+          'thumbnail': v.thumbnailUrl,
+          'educationValue': isEducation ? 80 : 20,
+          'entertainmentValue': isEducation ? 20 : 80,
+        };
+      }).toList();
+      setState(() => _aiRecommendations = recs);
+    } catch (_) {}
+  }
+
   void _onDateSelected(DateTime selectedDate) {
     setState(() {
       _selectedDate = selectedDate;
@@ -307,28 +334,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     }
   }
   
-  final List<Map<String, dynamic>> _aiRecommendations = [
-    {
-      'id': 'ai1',
-      'title': 'Based on your interests',
-      'subtitle': 'New Flutter 3.0 Features',
-      'time': '16:00',
-      'confidence': 0.92,
-      'thumbnail': 'https://picsum.photos/60/60?random=4',
-      'educationValue': 85,
-      'entertainmentValue': 15,
-    },
-    {
-      'id': 'ai2',
-      'title': 'Trending in Tech',
-      'subtitle': 'AI Revolution 2024',
-      'time': '18:30',
-      'confidence': 0.87,
-      'thumbnail': 'https://picsum.photos/60/60?random=5',
-      'educationValue': 70,
-      'entertainmentValue': 30,
-    },
-  ];
+  List<Map<String, dynamic>> _aiRecommendations = [];
 
   @override
   Widget build(BuildContext context) {

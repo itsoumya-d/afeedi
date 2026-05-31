@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../models/content_item.dart';
 import '../services/recommendation_integration_service.dart';
 import '../services/analytics_service.dart';
 import '../services/onboarding_service.dart';
+import '../services/navigation_service.dart';
 import '../widgets/personalized_recommendations_widget.dart';
+import '../widgets/contextual_recommendations_widget.dart';
+import '../widgets/platform_recommendations_widget.dart';
 import '../widgets/app_bar_with_profile.dart';
 import '../utils/ui_scaling.dart';
 
@@ -66,7 +70,7 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
     );
   }
   
-  void _handleContentItemTap(ContentItem item) {
+  Future<void> _handleContentItemTap(ContentItem item) async {
     // Track content selection
     _analyticsService.trackEvent(
       eventName: 'content_selected',
@@ -79,11 +83,12 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
       },
     );
     
-    // Navigate to content player
-    Navigator.of(context).pushNamed(
-      '/player',
-      arguments: item,
-    );
+    // Open in the appropriate platform app / browser.
+    final url = item.url;
+    if (url != null && url.isNotEmpty) {
+      final uri = Uri.parse(url);
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
   
   @override
@@ -202,8 +207,7 @@ class _PersonalizedHomeScreenState extends State<PersonalizedHomeScreen> {
                   },
                 );
                 
-                // Navigate to onboarding
-                Navigator.of(context).pushNamed('/onboarding');
+                Navigator.of(context).pushReplacementNamed(AppRoutes.worldClassOnboarding);
               },
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(

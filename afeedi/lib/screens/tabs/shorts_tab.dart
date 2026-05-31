@@ -45,9 +45,9 @@ class _ShortsTabState extends State<ShortsTab> {
     try {
       final all = await YouTubeDataApiService.instance
           .fetchVideosByQuery(query: 'shorts', maxResults: 30);
-      // Keep only videos whose ISO 8601 duration parses to < 60 seconds.
+      // Keep only videos whose ISO 8601 duration parses to <= 180 seconds (3 min).
       final filtered =
-          all.where((v) => _durationSeconds(v.duration) < 60).toList();
+          all.where((v) => _durationSeconds(v.duration) <= 180).toList();
       // If the filter is too aggressive (e.g. all durations are missing),
       // fall back to the full result set so the tab is never blank.
       final result = filtered.isNotEmpty ? filtered : all;

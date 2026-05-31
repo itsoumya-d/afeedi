@@ -93,7 +93,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       if (authResult.success) {
         // Navigate to onboarding chatbot
         if (mounted) {
-          Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
+          Navigator.pushReplacementNamed(context, AppRoutes.worldClassOnboarding);
         }
       } else {
         _showErrorSnackBar('Authentication failed: ${authResult.error}');
@@ -133,7 +133,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       if (authResult.success) {
         // Navigate to onboarding chatbot
         if (mounted) {
-          Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
+          Navigator.pushReplacementNamed(context, AppRoutes.worldClassOnboarding);
         }
       } else {
         _showErrorSnackBar('Authentication failed: ${authResult.error}');
@@ -244,7 +244,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         opacity: _fadeAnimation,
                         child: TextButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, AppRoutes.onboardingChatbot);
+                            Navigator.pushNamed(context, AppRoutes.worldClassOnboarding);
                           },
                           child: const Text(
                             'Skip',

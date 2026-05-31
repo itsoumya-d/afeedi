@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'screens/welcome_screen.dart';
 import 'services/navigation_service.dart';
 import 'services/analytics_service.dart';
 import 'services/onboarding_service.dart';

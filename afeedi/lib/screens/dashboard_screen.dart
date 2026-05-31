@@ -196,26 +196,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                     builder: (_) => const NotificationsScreen()),
               );
             },
-            icon: Stack(
-              children: [
-                const Icon(
-                  Icons.notifications_outlined,
-                  color: Colors.white,
-                  size: 22,
-                ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: AppTheme.primaryPink,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-              ],
+            icon: const Icon(
+              Icons.notifications_outlined,
+              color: Colors.white,
+              size: 22,
             ),
           ),
         ],

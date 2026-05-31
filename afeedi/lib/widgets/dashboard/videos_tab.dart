@@ -67,12 +67,8 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
       setState(() {
         _isLoading = false;
       });
-      print('Error loading videos: $e');
+      debugPrint('Error loading videos: $e');
     }
-  }
-  
-  List<Content> get _filteredVideos {
-    return _videos;
   }
 
   @override
@@ -191,8 +187,8 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
       );
     }
     
-    final filteredVideos = _filteredVideos;
-    
+    final filteredVideos = _videos;
+
     if (filteredVideos.isEmpty) {
       return Center(
         child: Column(
@@ -487,7 +483,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
                       borderRadius: BorderRadius.circular(12),
                       child: ResponsiveVideoPlayer(
                         content: video,
-                        autoPlay: true,
+                        autoPlay: false,
                         showControls: true,
                         showBranding: true,
                       ),

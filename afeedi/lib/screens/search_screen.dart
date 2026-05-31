@@ -1293,7 +1293,28 @@ class _SearchScreenState extends State<SearchScreen>
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      trailing: const Icon(Icons.north_west, color: Colors.white24, size: 16),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.north_west, color: Colors.white24, size: 16),
+          const SizedBox(width: 4),
+          Semantics(
+            label: 'Remove $query from recent searches',
+            button: true,
+            child: GestureDetector(
+              onTap: () async {
+                setState(() => _recentSearches.remove(query));
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString(
+                  'recent_searches',
+                  jsonEncode(_recentSearches),
+                );
+              },
+              child: const Icon(Icons.close, color: Colors.white24, size: 16),
+            ),
+          ),
+        ],
+      ),
       onTap: () {
         _searchController.text = query;
         _search(query);

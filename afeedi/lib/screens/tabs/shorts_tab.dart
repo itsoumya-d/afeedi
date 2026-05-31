@@ -250,6 +250,7 @@ class _ShortsTabState extends State<ShortsTab> {
             PageView.builder(
               controller: _pageController,
               scrollDirection: Axis.vertical,
+              physics: const AlwaysScrollableScrollPhysics(),
               onPageChanged: (index) {
                 HapticFeedback.selectionClick();
                 setState(() {

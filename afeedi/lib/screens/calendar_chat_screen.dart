@@ -302,10 +302,7 @@ class _CalendarChatScreenState extends State<CalendarChatScreen>
     )..repeat(reverse: true);
     _loadScheduled();
     _loadContent();
-    _addBot(
-      _timeAwareGreeting(),
-      chips: _timeAwareChips(),
-    );
+    _addBot(_timeAwareGreeting(), chips: _timeAwareChips());
     AnalyticsService.instance.trackUserInteraction(
       action: 'calendar_chat_opened',
       screen: 'calendar_chat',
@@ -695,24 +692,24 @@ class _CalendarChatScreenState extends State<CalendarChatScreen>
     if (hour < 12) {
       return hasToday
           ? 'Good morning! ☀️ You have ${todayItems.length} '
-              '${todayItems.length == 1 ? 'video' : 'videos'} scheduled today. '
-              'Tell me what else you\'d like to plan.'
+                '${todayItems.length == 1 ? 'video' : 'videos'} scheduled today. '
+                'Tell me what else you\'d like to plan.'
           : 'Good morning! ☀️ Your schedule is clear today — '
-              'want me to fill it with content you\'ll love?';
+                'want me to fill it with content you\'ll love?';
     } else if (hour < 17) {
       return hasToday
           ? 'Good afternoon! 🌤 ${todayItems.length} '
-              '${todayItems.length == 1 ? 'item' : 'items'} on today\'s list. '
-              'Need to add or change anything?'
+                '${todayItems.length == 1 ? 'item' : 'items'} on today\'s list. '
+                'Need to add or change anything?'
           : 'Good afternoon! 🌤 Nothing scheduled yet today. '
-              'I can find fresh content for this evening — just ask.';
+                'I can find fresh content for this evening — just ask.';
     } else if (hour < 21) {
       return hasToday
           ? 'Good evening! 🌙 Time to unwind. You have '
-              '${todayItems.length} ${todayItems.length == 1 ? 'video' : 'videos'} '
-              'queued for tonight. Enjoy!'
+                '${todayItems.length} ${todayItems.length == 1 ? 'video' : 'videos'} '
+                'queued for tonight. Enjoy!'
           : 'Good evening! 🌙 Relax time — want me to curate '
-              'your perfect evening watch list?';
+                'your perfect evening watch list?';
     } else {
       return 'Still up? 🌙 Tell me what you\'d like to schedule for tomorrow '
           'and I\'ll have it ready when you wake up.';

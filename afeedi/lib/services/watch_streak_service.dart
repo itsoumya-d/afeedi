@@ -74,6 +74,5 @@ class WatchStreakService {
   }
 
   /// Whether today's streak milestone deserves a celebration (multiples of 7).
-  bool get isMilestone =>
-      _currentStreak >= 7 && _currentStreak % 7 == 0;
+  bool get isMilestone => _currentStreak >= 7 && _currentStreak % 7 == 0;
 }

@@ -3480,7 +3480,10 @@ class ContentService {
         if ((platformCounts[platform] ?? 0) < 4) {
           // Derive a human-readable reason
           String reason = '';
-          final contentTags = [...c.tags, ...c.categories].join(' ').toLowerCase();
+          final contentTags = [
+            ...c.tags,
+            ...c.categories,
+          ].join(' ').toLowerCase();
           for (final genre in selectedGenres) {
             if (contentTags.contains(genre.toLowerCase())) {
               reason = 'Because you like $genre';
@@ -3495,10 +3498,7 @@ class ContentService {
 
           final tagged = reason.isNotEmpty
               ? c.copyWith(
-                  metadata: {
-                    ...c.metadata,
-                    'recommendationReason': reason,
-                  },
+                  metadata: {...c.metadata, 'recommendationReason': reason},
                 )
               : c;
           result.add(tagged);

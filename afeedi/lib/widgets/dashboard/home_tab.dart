@@ -1103,7 +1103,10 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         if (contentCardCount > 0 && contentCardCount % 10 == 0) {
           feedItems.add(const _FeedItem.sectionHeader('Trending Now'));
         }
-        feedItems.add(_FeedItem.content(post));
+        // First 10 content cards are AI-personalised picks (Google Play labelling requirement)
+        feedItems.add(
+          _FeedItem.content(post, aiRecommended: contentCardCount < 10),
+        );
         contentCardCount++;
       } else {
         feedItems.add(const _FeedItem.ad());
@@ -1175,6 +1178,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                 content: feedItem.content!,
                 isHero: listIndex == 0,
                 index: listIndex,
+                isAiRecommended: feedItem.isAiRecommended,
               ),
             ),
           );
@@ -1566,24 +1570,28 @@ class _FeedItem {
   final Content? content;
   final bool isAd;
   final bool isSectionHeader;
+  final bool isAiRecommended;
   final String? sectionTitle;
 
-  const _FeedItem.content(Content c)
+  const _FeedItem.content(Content c, {bool aiRecommended = false})
     : content = c,
       isAd = false,
       isSectionHeader = false,
+      isAiRecommended = aiRecommended,
       sectionTitle = null;
 
   const _FeedItem.ad()
     : content = null,
       isAd = true,
       isSectionHeader = false,
+      isAiRecommended = false,
       sectionTitle = null;
 
   const _FeedItem.sectionHeader(String title)
     : content = null,
       isAd = false,
       isSectionHeader = true,
+      isAiRecommended = false,
       sectionTitle = title;
 }
 

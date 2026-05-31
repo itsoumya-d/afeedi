@@ -479,11 +479,18 @@ class EnhancedRecommendationService {
   }) async {
     double score = 0.5; // base
 
-    // --- Recency decay ---
+    // --- Recency scoring — fresh content boosted, stale penalised ---
     if (content.publishedAt != null) {
-      final age = DateTime.now().difference(content.publishedAt!).inDays;
-      if (age > 30) {
-        score *= 0.5;
+      final ageHours = DateTime.now().difference(content.publishedAt!).inHours;
+      if (ageHours < 1) {
+        score +=
+            2.0; // Velocity window: mirrors TikTok's 30-min early-burst boost
+      } else if (ageHours < 6) {
+        score += 1.0; // Very fresh
+      } else if (ageHours < 24) {
+        score += 0.5; // Fresh today
+      } else if (ageHours > 24 * 30) {
+        score *= 0.5; // Stale: >30 days old
       }
     }
 

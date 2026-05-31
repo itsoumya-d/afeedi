@@ -10,12 +10,14 @@ class FeedPostCard extends StatefulWidget {
   final Content content;
   final bool isHero;
   final int index;
+  final bool isAiRecommended;
 
   const FeedPostCard({
     super.key,
     required this.content,
     this.isHero = false,
     this.index = 0,
+    this.isAiRecommended = false,
   });
 
   @override
@@ -412,13 +414,46 @@ class _FeedPostCardState extends State<FeedPostCard> {
                     _buildHeaderPlatformBadge(platform),
                   ],
                 ),
-                Text(
-                  widget.content.publishedAt != null
-                      ? _formatTimeAgo(widget.content.publishedAt!)
-                      : 'Unknown time',
-                  style: const TextStyle(color: Colors.white54, fontSize: 11),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Row(
+                  children: [
+                    if (widget.isAiRecommended)
+                      Semantics(
+                        label: 'AI personalized pick',
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 5,
+                            vertical: 1,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF7B2FBE),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'AI Pick',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ),
+                      ),
+                    Flexible(
+                      child: Text(
+                        widget.content.publishedAt != null
+                            ? _formatTimeAgo(widget.content.publishedAt!)
+                            : 'Unknown time',
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 11,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -462,6 +462,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             showChevron: false,
           ),
           _navTile(
+            icon: Icons.auto_awesome_outlined,
+            title: 'How we personalize your feed',
+            subtitle: 'Learn what signals shape your recommendations',
+            onTap: () => _showPersonalizationDisclosure(context),
+          ),
+          _navTile(
             icon: Icons.privacy_tip_outlined,
             title: AppLocalizations.of(context)!.privacyPolicy,
             onTap: () => Navigator.pushNamed(context, AppRoutes.privacyPolicy),
@@ -770,6 +776,81 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       );
     }
+  }
+
+  void _showPersonalizationDisclosure(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A2E),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(
+              Icons.auto_awesome_outlined,
+              color: Color(0xFF00D4FF),
+              size: 20,
+            ),
+            SizedBox(width: 8),
+            Text(
+              'How we personalize your feed',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: const SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Afeedi uses an on-device recommendation engine (no data is sent to third-party AI services) that weighs the following signals to rank your feed:',
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+              SizedBox(height: 12),
+              _DisclosureBullet(
+                'Genre match',
+                'Content matching your selected genres ranks higher.',
+              ),
+              _DisclosureBullet(
+                'Watch history',
+                'Videos you watch longer or finish are used to refine future suggestions.',
+              ),
+              _DisclosureBullet(
+                'Freshness',
+                'Newly published content gets a temporary boost. Content older than 30 days is ranked lower.',
+              ),
+              _DisclosureBullet(
+                'Engagement signals',
+                'Content you like or save signals stronger interest.',
+              ),
+              _DisclosureBullet(
+                'Platform preference',
+                'Platforms you watch most often appear more frequently.',
+              ),
+              SizedBox(height: 12),
+              Text(
+                'Cards labelled "AI Pick" were ranked by this algorithm. You can disable AI recommendations or reset your personalization history in Privacy & Data settings.',
+                style: TextStyle(color: Colors.white54, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'Got it',
+              style: TextStyle(color: Color(0xFF00D4FF)),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _confirmResetPersonalization() {
@@ -1084,6 +1165,49 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Text(
               AppLocalizations.of(context)?.delete ?? 'Delete',
               style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DisclosureBullet extends StatelessWidget {
+  final String label;
+  final String description;
+
+  const _DisclosureBullet(this.label, this.description);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '• ',
+            style: TextStyle(color: Color(0xFF00D4FF), fontSize: 13),
+          ),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '$label — ',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  TextSpan(
+                    text: description,
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

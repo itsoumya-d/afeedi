@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:http/http.dart' as http;
 import '../models/content_model.dart';
 import '../models/analytics_model.dart';
 import 'enhanced_recommendation_service.dart';
@@ -12,6 +13,94 @@ class ContentService {
   ContentService._internal();
   
   static ContentService get instance => _instance;
+
+  // YouTube RSS feed channels for trending content (public, no API key needed)
+  static const List<String> _trendingChannelIds = [
+    'UCbmNph6atAoGfqLoCL_duAg', // Techquickie
+    'UCXuqSBlHAE6Xw-yeJA0Tunw', // Linus Tech Tips
+    'UCBcRF18a7Qf58cCRy5xuWwQ', // Mark Rober
+    'UC29ju8bIPH5as8OGnQzwJyA', // Traversy Media
+    'UCW5YeuERMmlnqo4oq8vwUpg', // The Game Theorists
+    'UCo8bcnLyZH8tBIH9V1mLgqQ', // ByteByteGo
+    'UCWX3yGbODI0KyQJgFMDCTnA', // ColdFusion
+  ];
+
+  Future<List<Content>> fetchYouTubeRssFeed(String channelId, {int limit = 5}) async {
+    try {
+      final url = 'https://www.youtube.com/feeds/videos.xml?channel_id=$channelId';
+      final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 8));
+      if (response.statusCode != 200) return [];
+      return _parseYouTubeRss(response.body, limit: limit);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  List<Content> _parseYouTubeRss(String xml, {int limit = 5}) {
+    final results = <Content>[];
+    final entryRegex = RegExp(r'<entry>([\s\S]*?)</entry>');
+    final videoIdRegex = RegExp(r'<yt:videoId>(.*?)</yt:videoId>');
+    final titleRegex = RegExp(r'<title>(.*?)</title>');
+    final authorRegex = RegExp(r'<name>(.*?)</name>');
+    final publishedRegex = RegExp(r'<published>(.*?)</published>');
+    final viewCountRegex = RegExp(r'<media:statistics views="(\d+)"');
+
+    for (final match in entryRegex.allMatches(xml).take(limit)) {
+      final entry = match.group(1) ?? '';
+      final videoId = videoIdRegex.firstMatch(entry)?.group(1) ?? '';
+      final titleMatch = titleRegex.allMatches(entry).skip(1).firstOrNull;
+      final title = titleMatch?.group(1) ?? '';
+      final author = authorRegex.firstMatch(entry)?.group(1) ?? '';
+      final published = publishedRegex.firstMatch(entry)?.group(1);
+      final viewCount = int.tryParse(viewCountRegex.firstMatch(entry)?.group(1) ?? '0') ?? 0;
+
+      if (videoId.isEmpty) continue;
+
+      results.add(Content(
+        id: 'yt_rss_$videoId',
+        platform: PlatformType.youtube,
+        platformContentId: videoId,
+        contentType: ContentType.video,
+        title: _unescapeXml(title),
+        thumbnailUrl: 'https://img.youtube.com/vi/$videoId/hqdefault.jpg',
+        videoUrl: 'https://www.youtube.com/watch?v=$videoId',
+        embedUrl: 'https://www.youtube.com/embed/$videoId',
+        creatorName: author,
+        viewCount: viewCount,
+        publishedAt: published != null ? DateTime.tryParse(published) : null,
+        tags: const [],
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ));
+    }
+    return results;
+  }
+
+  String _unescapeXml(String text) {
+    return text
+        .replaceAll('&amp;', '&')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#39;', "'");
+  }
+
+  Future<List<Content>> fetchTrendingContent({int limit = 20}) async {
+    final allContent = <Content>[];
+    final futures = _trendingChannelIds
+        .take(4)
+        .map((id) => fetchYouTubeRssFeed(id, limit: (limit / 4).ceil()));
+    final results = await Future.wait(futures, eagerError: false);
+    for (final batch in results) {
+      allContent.addAll(batch);
+    }
+    allContent.sort((a, b) {
+      final aDate = a.publishedAt ?? DateTime(2000);
+      final bDate = b.publishedAt ?? DateTime(2000);
+      return bDate.compareTo(aDate);
+    });
+    return allContent.take(limit).toList();
+  }
 
   // Sample real YouTube video data for testing
   static final List<Content> _sampleVideos = [
@@ -282,14 +371,14 @@ class ContentService {
   }
 
   // Get trending videos
-  Future<List<Content>> getTrendingVideos({int limit = 5}) async {
-    await Future.delayed(Duration(milliseconds: 300));
-    
-    // Sort by views and likes for trending
-    List<Content> trending = List.from(_sampleVideos);
-    trending.sort((a, b) => (b.viewCount + b.likeCount).compareTo(a.viewCount + a.likeCount));
-    
-    return trending.take(limit).toList();
+  Future<List<Content>> getTrendingVideos({int limit = 15}) async {
+    try {
+      final rssContent = await fetchTrendingContent(limit: limit);
+      if (rssContent.isNotEmpty) return rssContent;
+    } catch (_) {}
+    // fallback to sample data
+    final shuffled = List<Content>.from(_sampleVideos)..shuffle();
+    return shuffled.take(limit).toList();
   }
 
   // Get videos by category

@@ -5,7 +5,6 @@ import '../models/content_model.dart';
 import '../models/user_model.dart';
 import '../models/user_preferences.dart';
 import '../models/analytics_model.dart';
-// import '../models/calendar_event.dart'; // Temporarily commented out due to compilation errors
 import '../models/content_item.dart';
 import '../models/recommendation.dart';
 import 'auth_service.dart';
@@ -13,7 +12,6 @@ import 'analytics_service.dart';
 import 'content_aggregation_service.dart';
 import 'ai_recommendation_service.dart';
 import 'onboarding_service.dart';
-// import 'calendar_service.dart'; // Temporarily commented out due to compilation errors
 
 class PersonalizedRecommendationService {
   static PersonalizedRecommendationService? _instance;
@@ -44,16 +42,15 @@ class PersonalizedRecommendationService {
     Map<String, dynamic>? userPreferences,
   }) {
     final genres = [
-      'Action', 'Comedy', 'Drama', 'Sci-Fi', 'Horror', 'Documentary',
-      'Animation', 'Thriller', 'Romance', 'Fantasy'
+      'Technology', 'Entertainment', 'Education', 'Comedy',
+      'Music', 'Sports', 'Gaming', 'Lifestyle', 'News', 'Food'
     ];
-    
+
     final platforms = [
-      'Netflix', 'Hulu', 'Disney+', 'Prime Video', 'HBO Max',
-      'Apple TV+', 'Peacock', 'Paramount+', 'YouTube', 'Tubi'
+      'YouTube', 'TikTok', 'Instagram', 'Facebook',
     ];
-    
-    final contentTypes = ['Movie', 'TV Show', 'Documentary', 'Short Film'];
+
+    final contentTypes = ['Video', 'Short', 'Reel', 'Live'];
     
     final selectedGenre = genre ?? genres[_random.nextInt(genres.length)];
     final selectedPlatform = platform ?? platforms[_random.nextInt(platforms.length)];
@@ -172,8 +169,8 @@ class PersonalizedRecommendationService {
         title: 'Personalized Content ${index + 1}',
         description: 'Content tailored to your interests',
         imageUrl: 'https://picsum.photos/id/${300 + index}/300/450',
-        platform: _random.nextBool() ? 'Netflix' : 'YouTube',
-        category: _random.nextBool() ? 'video' : 'article',
+        platform: _random.nextBool() ? 'YouTube' : 'TikTok',
+        category: _random.nextBool() ? 'video' : 'short',
         durationSeconds: _random.nextInt(3600) + 300,
         relevanceScore: 0.8 + _random.nextDouble() * 0.2,
         recommendationReason: 'Based on your interest in ${userPreferences.interests[index % userPreferences.interests.length]}',
@@ -203,8 +200,8 @@ class PersonalizedRecommendationService {
         title: 'Content for $eventName',
         description: 'Content related to your $eventType: $eventName',
         imageUrl: 'https://picsum.photos/id/${200 + index}/300/450',
-        platform: _random.nextBool() ? 'Netflix' : 'YouTube',
-        category: _random.nextBool() ? 'video' : 'article',
+        platform: _random.nextBool() ? 'YouTube' : 'TikTok',
+        category: _random.nextBool() ? 'video' : 'short',
         durationSeconds: _random.nextInt(1800) + 300,
         relevanceScore: 0.7 + _random.nextDouble() * 0.3,
         recommendationReason: 'Based on your upcoming $eventType: $eventName',
@@ -233,7 +230,7 @@ class PersonalizedRecommendationService {
         description: 'A great content item from $platform',
         imageUrl: 'https://picsum.photos/id/${100 + index}/300/450',
         platform: platform,
-        category: _random.nextBool() ? 'video' : 'article',
+        category: _random.nextBool() ? 'video' : 'short',
         durationSeconds: _random.nextInt(3600) + 300,
         relevanceScore: 0.5 + _random.nextDouble() * 0.5,
         recommendationReason: 'Based on your platform preferences',

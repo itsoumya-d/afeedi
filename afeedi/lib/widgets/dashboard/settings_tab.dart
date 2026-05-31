@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
+import '../../services/local_auth_service.dart';
+import '../../core/storage/local_storage_service.dart';
+import '../../services/navigation_service.dart';
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
@@ -491,9 +494,27 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Implement data download
+              // Export user data and show it in a dialog
+              final data = await LocalStorageService.instance.exportAllData();
+              final dataString = data.keys.map((k) => '$k: ${data[k]?.toString().length ?? 0} records').join('\n');
+              if (context.mounted) {
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    backgroundColor: const Color(0xFF2D1B69),
+                    title: const Text('Your Data', style: TextStyle(color: Colors.white)),
+                    content: SingleChildScrollView(
+                      child: Text(
+                        'Your data export is ready:\n\n$dataString\n\nFor a full export, contact support@afeedi.com',
+                        style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12),
+                      ),
+                    ),
+                    actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close', style: TextStyle(color: AppTheme.primaryCyan)))],
+                  ),
+                );
+              }
             },
             child: const Text(
               'Request',
@@ -527,9 +548,15 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Implement account deletion
+              await LocalAuthService.instance.deleteAccount();
+              await LocalStorageService.instance.clearAllData();
+              if (mounted) {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  AppRoutes.welcome, (route) => false,
+                );
+              }
             },
             child: const Text(
               'Delete',
@@ -563,9 +590,14 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Implement cache clearing
+              await LocalStorageService.instance.clearCachedContent();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Cache cleared successfully')),
+                );
+              }
             },
             child: const Text(
               'Clear',

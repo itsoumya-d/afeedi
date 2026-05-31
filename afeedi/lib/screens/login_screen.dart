@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+import '../services/local_auth_service.dart';
+import '../services/auth_service.dart';
+import '../services/navigation_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -310,15 +313,22 @@ class _LoginScreenState extends State<LoginScreen>
                                     width: double.infinity,
                                     height: 52,
                                     child: ElevatedButton(
-                                      onPressed: () {
+                                      onPressed: () async {
                                         if (_formKey.currentState!.validate()) {
-                                          // TODO: Implement login
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Login successful!'),
-                                              backgroundColor: Color(0xFF00D4FF),
-                                            ),
+                                          final user = await LocalAuthService.instance.signIn(
+                                            email: _emailController.text.trim(),
+                                            password: _passwordController.text,
                                           );
+                                          if (user != null && mounted) {
+                                            Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+                                          } else if (mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text('Invalid email or password'),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
                                         }
                                       },
                                       style: ElevatedButton.styleFrom(
@@ -372,8 +382,15 @@ class _LoginScreenState extends State<LoginScreen>
                                     width: double.infinity,
                                     height: 52,
                                     child: OutlinedButton.icon(
-                                      onPressed: () {
-                                        // TODO: Implement Google Sign In
+                                      onPressed: () async {
+                                        final result = await AuthService.instance.signInWithOAuth('google');
+                                        if (result.success && mounted) {
+                                          Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+                                        } else if (mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text(result.error ?? 'Google sign-in failed'), backgroundColor: Colors.red),
+                                          );
+                                        }
                                       },
                                       icon: const Icon(
                                         Icons.g_mobiledata,
@@ -405,8 +422,15 @@ class _LoginScreenState extends State<LoginScreen>
                                     width: double.infinity,
                                     height: 52,
                                     child: OutlinedButton.icon(
-                                      onPressed: () {
-                                        // TODO: Implement Apple Sign In
+                                      onPressed: () async {
+                                        final result = await AuthService.instance.signInWithOAuth('apple');
+                                        if (result.success && mounted) {
+                                          Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+                                        } else if (mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text(result.error ?? 'Apple sign-in failed'), backgroundColor: Colors.red),
+                                          );
+                                        }
                                       },
                                       icon: const Icon(
                                         Icons.apple,

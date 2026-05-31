@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/onboarding_step.dart';
 import '../models/genre.dart';
 import '../models/chat_message.dart';
@@ -9,6 +11,11 @@ class OnboardingService {
   OnboardingService._internal();
   
   static OnboardingService get instance => _instance;
+
+  Future<void> initialize() async {
+    // Eagerly init SharedPreferences for faster subsequent calls
+    await SharedPreferences.getInstance();
+  }
 
   // Static onboarding flow data
   static final List<Map<String, dynamic>> onboardingFlow = [
@@ -227,27 +234,29 @@ class OnboardingService {
 
   // Check if onboarding is completed
   Future<bool> isOnboardingCompleted() async {
-    // TODO: Implement actual onboarding completion check
-    // For now, return false to indicate onboarding is not completed
-    final data = await loadOnboardingData();
-    return data != null && data['completed'] == true;
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('onboarding_completed') ?? false;
   }
 
   // Get current user preferences
   Future<UserPreferences?> getCurrentPreferences() async {
-    // TODO: Implement actual preferences loading
-    // For now, return default preferences
-    final data = await loadOnboardingData();
-    if (data == null) return null;
-    
-    final preferences = data['preferences'] as Map<String, dynamic>?;
-    if (preferences == null) return null;
-    
-    return UserPreferences(
-      contentInterests: List<String>.from(preferences['selectedGenres'] ?? []),
-      platformPriorities: Map<String, double>.from(preferences['platformConnections']?.map((k, v) => MapEntry(k, v == true ? 1.0 : 0.0)) ?? {}),
-      name: preferences['userName'] ?? '',
-    );
+    final prefs = await SharedPreferences.getInstance();
+    final jsonStr = prefs.getString('user_preferences');
+    if (jsonStr == null) return null;
+    try {
+      final data = jsonDecode(jsonStr) as Map<String, dynamic>;
+      return UserPreferences(
+        contentInterests: List<String>.from(data['contentInterests'] ?? []),
+        platformPriorities: Map<String, double>.from(
+          (data['platformPriorities'] as Map<String, dynamic>? ?? {})
+              .map((k, v) => MapEntry(k, (v as num).toDouble())),
+        ),
+        name: data['name'] as String?,
+        contentTypes: List<String>.from(data['contentTypes'] ?? []),
+      );
+    } catch (_) {
+      return null;
+    }
   }
 
   // Get user preferences (alias for getCurrentPreferences)
@@ -257,34 +266,20 @@ class OnboardingService {
 
   // Mark onboarding as complete
   Future<void> markOnboardingComplete() async {
-    // TODO: Implement actual completion marking
-    // For now, just save a completion flag
-    final data = await loadOnboardingData() ?? {};
-    data['completed'] = true;
-    data['completedAt'] = DateTime.now().toIso8601String();
-    await saveOnboardingData(
-      userName: data['preferences']?['userName'] ?? '',
-      selectedGenres: [],
-      platformConnections: {},
-      chatHistory: [],
-    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_completed', true);
+    await prefs.setString('onboarding_completed_at', DateTime.now().toIso8601String());
   }
 
   // Save user preferences
   Future<void> savePreferences(UserPreferences preferences) async {
-    final data = await loadOnboardingData() ?? {};
-    data['preferences'] = {
-      'selectedGenres': preferences.contentInterests,
-      'platformConnections': preferences.platformPriorities.map((k, v) => MapEntry(k, v > 0)),
-      'userName': preferences.name ?? '',
-    };
-    // Save the updated data
-    await saveOnboardingData(
-      userName: preferences.name ?? '',
-      selectedGenres: [],
-      platformConnections: preferences.platformPriorities.map((k, v) => MapEntry(k, v > 0)),
-      chatHistory: [],
-    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_preferences', jsonEncode({
+      'contentInterests': preferences.contentInterests ?? [],
+      'platformPriorities': preferences.platformPriorities ?? {},
+      'name': preferences.name ?? '',
+      'contentTypes': preferences.contentTypes ?? [],
+    }));
   }
 
   // Current step tracking

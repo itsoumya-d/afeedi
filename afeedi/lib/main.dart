@@ -50,11 +50,17 @@ void main() async {
     debugPrint('Initialization error: $error');
   }
   
-  runApp(const ProviderScope(child: AfeediApp()));
+  // Determine initial route based on onboarding completion
+  final bool isOnboardingDone = await OnboardingService.instance.isOnboardingCompleted();
+  final String initialRoute = isOnboardingDone ? AppRoutes.dashboard : AppRoutes.enhancedOnboarding;
+
+  runApp(ProviderScope(child: AfeediApp(initialRoute: initialRoute)));
 }
 
 class AfeediApp extends StatelessWidget {
-  const AfeediApp({super.key});
+  final String initialRoute;
+
+  const AfeediApp({super.key, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +70,7 @@ class AfeediApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       navigatorKey: NavigationService.navigatorKey,
-      initialRoute: AppRoutes.enhancedOnboarding,
+      initialRoute: initialRoute,
       routes: AppRoutes.routes,
       debugShowCheckedModeBanner: false,
     );

@@ -20,6 +20,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   List<Content> _allPosts = [];
   bool _isLoading = false;
   bool _hasMore = true;
+  bool _hasError = false;
+  String _errorMessage = '';
   PlatformType? _selectedPlatform;
   
   @override
@@ -89,6 +91,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         _allPosts = mixedContent;
         _posts = List.from(_allPosts);
         _isLoading = false;
+        _hasError = false;
+        _errorMessage = '';
       });
       
       // Track successful content load with personalization info
@@ -107,8 +111,10 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         _allPosts = [];
         _posts = [];
         _isLoading = false;
+        _hasError = true;
+        _errorMessage = e.toString();
       });
-      
+
       // Track error
       await AnalyticsService.instance.trackError(
         errorType: 'home_content_load_error',
@@ -168,6 +174,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   
   Future<void> _refreshPosts() async {
     setState(() {
+      _hasError = false;
+      _errorMessage = '';
       _posts.clear();
       _allPosts.clear();
       _hasMore = true;
@@ -274,7 +282,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       child: Column(
         children: [
           Text(
-            '24',
+            _posts.length.toString(),
             style: TextStyle(
               color: AppTheme.primaryCyan,
               fontSize: 16,
@@ -398,7 +406,15 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         ),
       );
     }
-    
+
+    if (!_isLoading && _hasError && _posts.isEmpty) {
+      return _buildErrorState();
+    }
+
+    if (!_isLoading && _posts.isEmpty) {
+      return _buildEmptyState();
+    }
+
     return RefreshIndicator(
       onRefresh: _refreshPosts,
       color: AppTheme.primaryCyan,
@@ -418,7 +434,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
               ),
             );
           }
-          
+
           final post = _posts[index];
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
@@ -427,6 +443,120 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return RefreshIndicator(
+      onRefresh: _refreshPosts,
+      color: AppTheme.primaryCyan,
+      backgroundColor: const Color(0xFF2D1B69),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.feed_outlined,
+                  size: 64,
+                  color: Colors.white.withOpacity(0.3),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No content yet',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Text(
+                    'Complete onboarding to get personalized content, or pull down to refresh.',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.5),
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: _refreshPosts,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Try Again'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryCyan,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return RefreshIndicator(
+      onRefresh: _refreshPosts,
+      color: AppTheme.primaryCyan,
+      backgroundColor: const Color(0xFF2D1B69),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: Colors.red.withOpacity(0.6),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Couldn\'t load feed',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Text(
+                    'Pull down to retry or tap the button below.',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.5),
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: _loadInitialPosts,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Retry'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade700,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

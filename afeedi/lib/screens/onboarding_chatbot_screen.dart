@@ -174,13 +174,14 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
       additionalData: data,
     );
 
-    // Save onboarding data
+    // Save onboarding data and mark complete
     _onboardingService.saveOnboardingData(
       userName: data['user_name'] ?? '',
       selectedGenres: data['selected_genres'] ?? [],
       platformConnections: data['platform_connections'] ?? {},
       chatHistory: data['chat_history'] ?? [],
     );
+    _onboardingService.markOnboardingComplete();
 
     // Navigate to dashboard
     Future.delayed(const Duration(milliseconds: 2000), () {
@@ -518,8 +519,11 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
         child: Container(
           margin: const EdgeInsets.all(16),
           child: ElevatedButton(
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+            onPressed: () async {
+              await _onboardingService.markOnboardingComplete();
+              if (mounted) {
+                Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF00D4FF),

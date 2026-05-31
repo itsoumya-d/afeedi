@@ -6,6 +6,7 @@ import '../screens/tabs/shorts_tab.dart';
 import '../widgets/dashboard/calendar_tab.dart';
 import '../screens/profile_screen.dart';
 import '../widgets/common/shared_bottom_navigation.dart';
+import '../widgets/dashboard/settings_tab.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -208,6 +209,12 @@ class _DashboardScreenState extends State<DashboardScreen>
               ],
             ),
           ),
+          IconButton(
+            onPressed: () {
+              _showSettingsModal(context);
+            },
+            icon: const Icon(Icons.settings_outlined, color: Colors.white, size: 22),
+          ),
         ],
       ),
     );
@@ -215,6 +222,45 @@ class _DashboardScreenState extends State<DashboardScreen>
   
 
   
+  void _showSettingsModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      useSafeArea: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFF0D0B1E),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: const SettingsTab(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   String _getGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) {

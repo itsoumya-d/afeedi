@@ -45,6 +45,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
   String _selectedCategory = 'trending';
   List<Content> _videos = [];
   bool _isLoading = false;
+  bool _hasError = false;
 
   @override
   void initState() {
@@ -66,6 +67,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
     } catch (e) {
       setState(() {
         _isLoading = false;
+        _hasError = true;
       });
       print('Error loading videos: $e');
     }
@@ -183,39 +185,81 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
   }
   
   Widget _buildVideoGrid() {
-    if (_isLoading) {
+    if (_isLoading && _videos.isEmpty) {
       return const Center(
         child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryCyan),
         ),
       );
     }
-    
-    final filteredVideos = _filteredVideos;
-    
-    if (filteredVideos.isEmpty) {
+
+    if (_hasError && _videos.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.video_library_outlined,
-              size: 64,
-              color: Colors.white.withOpacity(0.5),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No videos in this category',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 16,
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              const Text(
+                'Failed to load videos',
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                'Check your connection and try again',
+                style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() { _hasError = false; });
+                  _loadVideos();
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryCyan),
+                child: const Text('Try again'),
+              ),
+            ],
+          ),
         ),
       );
     }
-    
+
+    if (!_isLoading && _filteredVideos.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.video_library_outlined, size: 64, color: Colors.white24),
+              const SizedBox(height: 16),
+              const Text(
+                'No videos found',
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Try selecting a different category',
+                style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _loadVideos,
+                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryCyan),
+                child: const Text('Refresh'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final filteredVideos = _filteredVideos;
+
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

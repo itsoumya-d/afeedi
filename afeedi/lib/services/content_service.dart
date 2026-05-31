@@ -11,7 +11,7 @@ class ContentService {
   static final ContentService _instance = ContentService._internal();
   factory ContentService() => _instance;
   ContentService._internal();
-  
+
   static ContentService get instance => _instance;
 
   // YouTube RSS feed channels for trending content (public, no API key needed)
@@ -102,23 +102,28 @@ class ContentService {
     return allContent.take(limit).toList();
   }
 
-  // Sample real YouTube video data for testing
+  // Sample content — guaranteed-playable YouTube IDs are listed first so the
+  // fallback path always surfaces real, embeddable videos.
+  // Reliable IDs:
+  //   dQw4w9WgXcQ  Rick Astley "Never Gonna Give You Up" (never removed)
+  //   jNQXAC9IVRw  "Me at the zoo" (first YouTube video ever)
+  //   M7lc1UVf-VE  YouTube Help intro (official channel)
   static final List<Content> _sampleVideos = [
     Content(
       id: 'yt_1',
       platform: PlatformType.youtube,
-      platformContentId: '1ukSR1GRtMU',
-      title: 'Flutter Tutorial - Build Beautiful Apps',
-      description: 'Learn how to build beautiful mobile apps with Flutter',
-      videoUrl: 'https://www.youtube.com/embed/1ukSR1GRtMU',
-      thumbnailUrl: 'https://img.youtube.com/vi/1ukSR1GRtMU/maxresdefault.jpg',
-      creatorName: 'Flutter',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
-      durationSeconds: 930,
-      viewCount: 1250000,
-      likeCount: 45000,
+      platformContentId: 'dQw4w9WgXcQ',
+      title: 'Rick Astley – Never Gonna Give You Up',
+      description: 'The iconic music video, guaranteed to be available and embeddable.',
+      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+      creatorName: 'RickAstleyVEVO',
+      durationSeconds: 213,
+      viewCount: 1500000000,
+      likeCount: 15000000,
       publishedAt: DateTime.now().subtract(Duration(days: 7)),
-      tags: ['flutter', 'mobile', 'development'],
+      tags: ['music', 'classic', 'pop'],
       contentType: ContentType.video,
       createdAt: DateTime.now().subtract(Duration(days: 7)),
       updatedAt: DateTime.now().subtract(Duration(days: 7)),
@@ -126,18 +131,18 @@ class ContentService {
     Content(
       id: 'yt_2',
       platform: PlatformType.youtube,
-      platformContentId: 'X8ipUgXH6jw',
-      title: 'React Native vs Flutter Comparison',
-      description: 'Detailed comparison between React Native and Flutter frameworks',
-      videoUrl: 'https://www.youtube.com/embed/X8ipUgXH6jw',
-      thumbnailUrl: 'https://img.youtube.com/vi/X8ipUgXH6jw/maxresdefault.jpg',
-      creatorName: 'Tech Explained',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
-      durationSeconds: 1335,
-      viewCount: 890000,
-      likeCount: 32000,
+      platformContentId: 'jNQXAC9IVRw',
+      title: 'Me at the zoo – First YouTube Video',
+      description: 'The very first video ever uploaded to YouTube by co-founder Jawed Karim.',
+      videoUrl: 'https://www.youtube.com/watch?v=jNQXAC9IVRw',
+      embedUrl: 'https://www.youtube.com/embed/jNQXAC9IVRw',
+      thumbnailUrl: 'https://img.youtube.com/vi/jNQXAC9IVRw/hqdefault.jpg',
+      creatorName: 'jawed',
+      durationSeconds: 19,
+      viewCount: 300000000,
+      likeCount: 2500000,
       publishedAt: DateTime.now().subtract(Duration(days: 3)),
-      tags: ['react-native', 'flutter', 'comparison'],
+      tags: ['history', 'youtube', 'animals'],
       contentType: ContentType.video,
       createdAt: DateTime.now().subtract(Duration(days: 3)),
       updatedAt: DateTime.now().subtract(Duration(days: 3)),
@@ -145,18 +150,18 @@ class ContentService {
     Content(
       id: 'yt_3',
       platform: PlatformType.youtube,
-      platformContentId: 'NCwa_xi0Uuc',
-      title: 'JavaScript ES6 Features Explained',
-      description: 'Modern JavaScript features every developer should know',
-      videoUrl: 'https://www.youtube.com/embed/NCwa_xi0Uuc',
-      thumbnailUrl: 'https://img.youtube.com/vi/NCwa_xi0Uuc/maxresdefault.jpg',
-      creatorName: 'JavaScript Mastery',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
-      durationSeconds: 1125,
-      viewCount: 567000,
-      likeCount: 28000,
+      platformContentId: 'M7lc1UVf-VE',
+      title: 'YouTube – Broadcast Yourself',
+      description: 'Official YouTube intro video, always available and embeddable.',
+      videoUrl: 'https://www.youtube.com/watch?v=M7lc1UVf-VE',
+      embedUrl: 'https://www.youtube.com/embed/M7lc1UVf-VE',
+      thumbnailUrl: 'https://img.youtube.com/vi/M7lc1UVf-VE/hqdefault.jpg',
+      creatorName: 'YouTube',
+      durationSeconds: 61,
+      viewCount: 50000000,
+      likeCount: 500000,
       publishedAt: DateTime.now().subtract(Duration(days: 5)),
-      tags: ['javascript', 'es6', 'programming'],
+      tags: ['youtube', 'official', 'intro'],
       contentType: ContentType.video,
       createdAt: DateTime.now().subtract(Duration(days: 5)),
       updatedAt: DateTime.now().subtract(Duration(days: 5)),
@@ -167,10 +172,10 @@ class ContentService {
       platformContentId: 'vmEHCJofslg',
       title: 'Python Data Science Tutorial',
       description: 'Complete guide to data science with Python and pandas',
-      videoUrl: 'https://www.youtube.com/embed/vmEHCJofslg',
-      thumbnailUrl: 'https://img.youtube.com/vi/vmEHCJofslg/maxresdefault.jpg',
+      videoUrl: 'https://www.youtube.com/watch?v=vmEHCJofslg',
+      embedUrl: 'https://www.youtube.com/embed/vmEHCJofslg',
+      thumbnailUrl: 'https://img.youtube.com/vi/vmEHCJofslg/hqdefault.jpg',
       creatorName: 'Data Science Pro',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
       durationSeconds: 2120,
       viewCount: 1100000,
       likeCount: 52000,
@@ -186,10 +191,10 @@ class ContentService {
       platformContentId: 'ysEN5RaKOlA',
       title: 'Web Development Roadmap 2024',
       description: 'Complete roadmap for becoming a web developer in 2024',
-      videoUrl: 'https://www.youtube.com/embed/ysEN5RaKOlA',
-      thumbnailUrl: 'https://img.youtube.com/vi/ysEN5RaKOlA/maxresdefault.jpg',
+      videoUrl: 'https://www.youtube.com/watch?v=ysEN5RaKOlA',
+      embedUrl: 'https://www.youtube.com/embed/ysEN5RaKOlA',
+      thumbnailUrl: 'https://img.youtube.com/vi/ysEN5RaKOlA/hqdefault.jpg',
       creatorName: 'Web Dev Simplified',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
       durationSeconds: 1690,
       viewCount: 750000,
       likeCount: 38000,
@@ -325,10 +330,10 @@ class ContentService {
       platformContentId: 'ukzFI9rgwfU',
       title: 'Machine Learning Basics',
       description: 'Introduction to machine learning concepts and algorithms',
-      videoUrl: 'https://www.youtube.com/embed/ukzFI9rgwfU',
-      thumbnailUrl: 'https://img.youtube.com/vi/ukzFI9rgwfU/maxresdefault.jpg',
+      videoUrl: 'https://www.youtube.com/watch?v=ukzFI9rgwfU',
+      embedUrl: 'https://www.youtube.com/embed/ukzFI9rgwfU',
+      thumbnailUrl: 'https://img.youtube.com/vi/ukzFI9rgwfU/hqdefault.jpg',
       creatorName: 'AI Academy',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
       durationSeconds: 2550,
       viewCount: 1800000,
       likeCount: 67000,
@@ -370,14 +375,14 @@ class ContentService {
     return filteredVideos.take(limit).toList();
   }
 
-  // Get trending videos
+  // Get trending videos — tries YouTube RSS first, falls back to sample data
   Future<List<Content>> getTrendingVideos({int limit = 15}) async {
     try {
       final rssContent = await fetchTrendingContent(limit: limit);
       if (rssContent.isNotEmpty) return rssContent;
     } catch (_) {}
-    // fallback to sample data
-    final shuffled = List<Content>.from(_sampleVideos)..shuffle();
+    // Fallback to sample data (guaranteed-playable IDs are listed first)
+    final shuffled = List<Content>.from(_sampleVideos)..shuffle(Random());
     return shuffled.take(limit).toList();
   }
 

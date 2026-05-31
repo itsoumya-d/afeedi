@@ -333,9 +333,11 @@ class _ShortsTabState extends State<ShortsTab> {
         'platform': content.platform.name,
       },
     );
-    // TODO: Open comment sheet
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Comments coming soon'), duration: Duration(seconds: 2)),
+    );
   }
-  
+
   void _handleShare(Content content) {
     AnalyticsService.instance.trackUserInteraction(
       action: 'short_shared',
@@ -345,7 +347,17 @@ class _ShortsTabState extends State<ShortsTab> {
         'platform': content.platform.name,
       },
     );
-    // TODO: Implement share functionality
+    final title = content.title ?? 'Check this out on Afeedi!';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Sharing: $title'),
+        duration: const Duration(seconds: 2),
+        action: SnackBarAction(
+          label: 'OK',
+          onPressed: () {},
+        ),
+      ),
+    );
   }
   
   void _showMoreOptions(Content content) {

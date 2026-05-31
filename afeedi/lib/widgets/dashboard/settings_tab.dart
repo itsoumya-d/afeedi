@@ -261,6 +261,13 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       iconColor: const Color(0xFF4ECDC4),
       children: [
         _buildActionItem(
+          title: 'Sign Out',
+          subtitle: 'Sign out of your account',
+          icon: Icons.logout,
+          iconColor: const Color(0xFFFF6B6B),
+          onTap: () => _showSignOutDialog(),
+        ),
+        _buildActionItem(
           title: 'Edit Profile',
           subtitle: 'Update your personal information',
           icon: Icons.edit,
@@ -794,6 +801,38 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
     );
   }
   
+  void _showSignOutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2D1B69),
+        title: const Text('Sign Out', style: TextStyle(color: Colors.white)),
+        content: Text(
+          'Are you sure you want to sign out?',
+          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await LocalAuthService.instance.signOut();
+              if (mounted) {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  AppRoutes.welcome, (route) => false,
+                );
+              }
+            },
+            child: const Text('Sign Out', style: TextStyle(color: Color(0xFFFF6B6B))),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Navigation methods
   void _navigateToProfile() {
     // TODO: Navigate to profile screen

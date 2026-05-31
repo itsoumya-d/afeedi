@@ -279,7 +279,9 @@ class OnboardingService {
     // Save the updated data
     await saveOnboardingData(
       userName: preferences.name ?? '',
-      selectedGenres: [],
+      selectedGenres: preferences.contentInterests
+          .map((name) => Genre(name: name, emoji: '', category: '', keywords: []))
+          .toList(),
       platformConnections: preferences.platformPriorities.map((k, v) => MapEntry(k, v > 0)),
       chatHistory: [],
     );

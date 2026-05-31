@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
+import '../services/streak_service.dart';
+import '../services/local_auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -10,17 +12,18 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateMixin {
   late TabController _tabController;
-  
+  int _currentStreak = 0;
+
   final Map<String, dynamic> _userProfile = {
-    'name': 'Alex Johnson',
-    'email': 'alex.johnson@email.com',
-    'joinDate': 'January 2024',
+    'name': 'Afeedi User',
+    'email': 'user@afeedi.com',
+    'joinDate': 'Today',
     'avatar': 'https://picsum.photos/120/120?random=user',
-    'isPremium': true,
-    'level': 15,
-    'totalWatchTime': '127 hours',
-    'videosWatched': 342,
-    'streakDays': 28,
+    'isPremium': false,
+    'level': 1,
+    'totalWatchTime': '0 hours',
+    'videosWatched': 0,
+    'streakDays': 0,
   };
   
   final List<Map<String, dynamic>> _achievements = [
@@ -102,6 +105,24 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _loadRealData();
+  }
+
+  Future<void> _loadRealData() async {
+    final streak = StreakService.instance.getCurrentStreak();
+    final longest = await StreakService.instance.getLongestStreak();
+    final user = LocalAuthService.instance.currentUser;
+    if (mounted) {
+      setState(() {
+        _currentStreak = streak;
+        _userProfile['streakDays'] = streak;
+        if (user != null) {
+          final emailName = user.email?.split('@').first ?? 'User';
+          _userProfile['name'] = emailName[0].toUpperCase() + emailName.substring(1);
+          _userProfile['email'] = user.email ?? 'Not set';
+        }
+      });
+    }
   }
   
   @override
@@ -152,31 +173,15 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   
   Widget _buildAppBar() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.arrow_back,
-                color: Colors.white,
-                size: 24,
-              ),
-            ),
-          ),
-          const Spacer(),
           const Text(
             'Profile',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
             ),
           ),
           const Spacer(),
@@ -191,7 +196,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
               child: const Icon(
                 Icons.edit,
                 color: AppTheme.primaryCyan,
-                size: 24,
+                size: 22,
               ),
             ),
           ),
@@ -326,7 +331,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           _buildStatDivider(),
           _buildStatItem(
             'Streak',
-            '${_userProfile['streakDays']} days',
+            '$_currentStreak days',
             Icons.local_fire_department,
             const Color(0xFFFF8A65),
           ),

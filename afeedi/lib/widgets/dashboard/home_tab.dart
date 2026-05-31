@@ -1134,6 +1134,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         controller: _scrollController,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         itemCount: feedItems.length + extraItems,
+        cacheExtent:
+            800, // pre-build 800px ahead to prevent thumbnail blank flashes
         addRepaintBoundaries: false, // we add our own RepaintBoundary per card
         addAutomaticKeepAlives: false,
         itemBuilder: (context, index) {

@@ -176,19 +176,29 @@ class _PlayerScreenState extends State<PlayerScreen>
         if (parts.length == 2) weights[parts[0]] = int.tryParse(parts[1]) ?? 0;
       }
 
+      // Tiered completion scoring aligned with TikTok/YouTube research thresholds:
+      // <5s AND <5%: early swipe-away → -2 points (strong negative)
+      // <30%: abandoned early → -1 point
+      // 30–70%: watched but didn't finish → +1 point (weak positive)
+      // 70–85%: solid engagement → +3 points
+      // 85%+: completion cliff — strong positive signal → +5 points
+      // Rewatch: extra +2 points (loop/replay is the strongest short-form signal)
+      final int points;
       if (elapsed < 5 && progress < 0.05) {
-        // Early skip (< 5 s): negative signal — penalise genre by 1 point
-        for (final tag in widget.content.tags) {
-          if (tag.isNotEmpty) weights[tag] = (weights[tag] ?? 0) - 1;
-        }
-      } else if (progress > 0.2) {
-        // Weight increases proportionally to watch completion (0.2→1.0 mapped to 1→5 points)
-        int points = ((progress - 0.2) / 0.8 * 4 + 1).round().clamp(1, 5);
-        // Rewatch bonus: +1 extra point for re-watching content
-        if (_isRewatch && progress > 0.1) points += 1;
-        for (final tag in widget.content.tags) {
-          if (tag.isNotEmpty) weights[tag] = (weights[tag] ?? 0) + points;
-        }
+        points = -2;
+      } else if (progress < 0.30) {
+        points = -1;
+      } else if (progress < 0.70) {
+        points = 1;
+      } else if (progress < 0.85) {
+        points = 3;
+      } else {
+        points = 5;
+      }
+      final bonus = (_isRewatch && progress > 0.5) ? 2 : 0;
+      final total = points + bonus;
+      for (final tag in widget.content.tags) {
+        if (tag.isNotEmpty) weights[tag] = (weights[tag] ?? 0) + total;
       }
 
       final newWeightsRaw = weights.entries

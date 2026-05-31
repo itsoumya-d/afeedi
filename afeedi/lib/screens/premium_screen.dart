@@ -102,19 +102,51 @@ class _PremiumScreenState extends State<PremiumScreen> {
         ),
         const SizedBox(height: 16),
         const Text(
-          'Unlock Afeedi Premium',
+          'Watch everything.\nNo ads. Cancel anytime.',
           style: TextStyle(
             color: Colors.white,
             fontSize: 24,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w800,
+            height: 1.2,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         const Text(
-          'Your entire social media world,\ncurated and ad-free.',
-          style: TextStyle(color: Colors.white60, fontSize: 15, height: 1.5),
+          'One feed. All your platforms. Fully personalized.',
+          style: TextStyle(color: Colors.white60, fontSize: 14, height: 1.5),
           textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 10),
+        // Social proof
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: const Color(0xFF00D4FF).withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: const Color(0xFF00D4FF).withValues(alpha: 0.25),
+            ),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.people_alt_outlined,
+                color: Color(0xFF00D4FF),
+                size: 14,
+              ),
+              SizedBox(width: 6),
+              Text(
+                'Join 50,000+ viewers watching ad-free',
+                style: TextStyle(
+                  color: Color(0xFF00D4FF),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -241,6 +273,10 @@ class _PremiumScreenState extends State<PremiumScreen> {
         : _isAnnual
         ? '\$${plan.annualPrice.toStringAsFixed(2)}/yr'
         : '\$${plan.monthlyPrice.toStringAsFixed(2)}/mo';
+    final monthlyEquivalent =
+        plan.index != 0 && _isAnnual && plan.annualPrice > 0
+        ? 'Only \$${(plan.annualPrice / 12).toStringAsFixed(2)}/mo'
+        : null;
 
     return GestureDetector(
       onTap: () => setState(() => _selectedPlan = plan.index),
@@ -294,15 +330,29 @@ class _PremiumScreenState extends State<PremiumScreen> {
                   ),
                 ),
                 const Spacer(),
-                Text(
-                  price,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white54,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      price,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : Colors.white54,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (monthlyEquivalent != null)
+                      Text(
+                        monthlyEquivalent,
+                        style: const TextStyle(
+                          color: Color(0xFF00D4FF),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(width: 8),
                 Container(
@@ -361,11 +411,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
 
   Widget _buildFeatureComparison() {
     final features = [
-      ('Feed personalization', 'Basic', 'AI-powered', 'AI + Creator signals'),
-      ('Saves', '20', 'Unlimited', 'Unlimited'),
-      ('Ads', 'Yes', 'No', 'No'),
-      ('Google Calendar', 'No', 'Yes', 'Yes'),
-      ('Creator insights', 'No', 'Basic', 'Advanced'),
+      ('Feed personalization', 'Basic', 'AI-powered'),
+      ('Saves', '20', 'Unlimited'),
+      ('Ads', 'Yes', 'No'),
+      ('Google Calendar sync', 'No', 'Yes'),
+      ('Creator insights', 'No', 'Yes'),
+      ('Offline access', 'No', 'Yes'),
     ];
 
     return Column(
@@ -382,17 +433,16 @@ class _PremiumScreenState extends State<PremiumScreen> {
         const SizedBox(height: 12),
         Table(
           columnWidths: const {
-            0: FlexColumnWidth(2),
+            0: FlexColumnWidth(2.4),
             1: FlexColumnWidth(1.2),
             2: FlexColumnWidth(1.2),
-            3: FlexColumnWidth(1.4),
           },
           children: [
             TableRow(
               decoration: const BoxDecoration(
                 border: Border(bottom: BorderSide(color: Colors.white10)),
               ),
-              children: ['Feature', 'Free', 'Pro', 'Creator']
+              children: ['Feature', 'Free', 'Pro']
                   .map(
                     (h) => Padding(
                       padding: const EdgeInsets.symmetric(
@@ -418,7 +468,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     bottom: BorderSide(color: Colors.white10, width: 0.5),
                   ),
                 ),
-                children: [row.$1, row.$2, row.$3, row.$4]
+                children: [row.$1, row.$2, row.$3]
                     .map(
                       (cell) => Padding(
                         padding: const EdgeInsets.symmetric(
@@ -574,7 +624,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                   elevation: 0,
                 ),
                 child: Text(
-                  'Start 7-Day Free Trial — $price after',
+                  'Start My Free 7 Days — $price after',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(

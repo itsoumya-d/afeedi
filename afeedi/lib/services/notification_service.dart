@@ -152,11 +152,13 @@ class NotificationService {
     try {
       final details = _buildDetails(category: NotificationCategory.system);
       final message = streakDays > 1
-          ? "Don't break your $streakDays-day streak! Watch a video today."
-          : "Start your first streak — watch a video today!";
+          ? "Your $streakDays-day streak ends tonight — watch one video to keep it alive"
+          : "Start your first streak — watch a video today and keep the momentum going";
       await _plugin.show(
         _streakReminderId,
-        'Keep your streak going',
+        streakDays > 1
+            ? '🔥 $streakDays-day streak at risk'
+            : '🎬 Start your streak today',
         message,
         details,
       );
@@ -269,14 +271,18 @@ class NotificationService {
       final genres = prefs.getStringList('onboarding_selected_genres') ?? [];
       final watched = prefs.getInt('stat_videos_watched') ?? 0;
 
-      // 1. Daily trending notification at 10am
+      // 1. Daily trending notification at 8 PM — research: entertainment video
+      // apps peak at 8–10 PM (3x CTR vs morning sends for on-demand video)
+      final genre = genres.isNotEmpty ? genres.first : null;
       await scheduleDailyNotification(
         id: _dailyTrendingId,
-        title: 'Trending now',
-        body: genres.isNotEmpty
-            ? 'New ${genres.first} content is trending today'
-            : "Check out what's trending today",
-        hour: 10,
+        title: genre != null
+            ? '🔥 Top $genre picks tonight'
+            : '🔥 Trending tonight',
+        body: genre != null
+            ? 'New $genre videos are blowing up right now'
+            : "Can't stop watching: tonight's top picks are ready",
+        hour: 20,
         minute: 0,
         category: NotificationCategory.recommendation,
       );
@@ -358,14 +364,23 @@ class NotificationService {
       for (final key in progressKeys) {
         final progress = prefs.getDouble(key) ?? 0.0;
         if (progress > 0.0 && progress < 0.8) {
-          await scheduleDailyNotification(
-            id: _continueWatchingId,
-            title: 'Continue watching...',
-            body: "You left off mid-way — pick up where you left off",
-            hour: 18,
-            minute: 0,
-            category: NotificationCategory.recommendation,
-          );
+          // Fire every other day (Mon/Wed/Fri) to stay under the 5/week
+          // frequency cap — above that, opt-out rates jump to 46% (Airship data)
+          final weekday = DateTime.now().weekday;
+          final isFireDay =
+              weekday == DateTime.monday ||
+              weekday == DateTime.wednesday ||
+              weekday == DateTime.friday;
+          if (isFireDay) {
+            await scheduleDailyNotification(
+              id: _continueWatchingId,
+              title: 'You left off mid-way ⏩',
+              body: "Find out how it ends — pick up where you left off",
+              hour: 19,
+              minute: 30,
+              category: NotificationCategory.recommendation,
+            );
+          }
           break; // Only schedule one reminder
         }
       }
@@ -441,6 +456,121 @@ class NotificationService {
         return '👥';
       default:
         return '🎬';
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Trial lifecycle re-engagement sequence
+  // ---------------------------------------------------------------------------
+
+  /// Schedules the T-7, T-2, T+0, and T+3 trial notification sequence.
+  /// Call this once when a trial is activated.
+  Future<void> scheduleTrialEndingReminders(DateTime trialEndDate) async {
+    if (!_initialized || kIsWeb) return;
+    try {
+      _initTimezone();
+      final location = tz.local;
+      final now = tz.TZDateTime.now(location);
+
+      // T-7: Feature highlight (fires 7 days before trial ends)
+      final t7 = tz.TZDateTime.from(
+        trialEndDate.subtract(const Duration(days: 7)),
+        location,
+      );
+      if (t7.isAfter(now)) {
+        final details = _buildDetails(
+          category: NotificationCategory.recommendation,
+        );
+        await _plugin.zonedSchedule(
+          200,
+          'You still have a week to explore ✨',
+          'Try ad-free scrolling before your trial ends',
+          t7,
+          details,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.wallClockTime,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        );
+      }
+
+      // T-2: Urgency + value
+      final t2 = tz.TZDateTime.from(
+        trialEndDate.subtract(const Duration(days: 2)),
+        location,
+      );
+      if (t2.isAfter(now)) {
+        final details = _buildDetails(category: NotificationCategory.system);
+        await _plugin.zonedSchedule(
+          201,
+          'Your free access ends in 2 days',
+          'Don\'t lose your ad-free personalized feed',
+          t2,
+          details,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.wallClockTime,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        );
+      }
+
+      // T+0: Trial expired — value recap
+      final t0 = tz.TZDateTime.from(trialEndDate, location);
+      if (t0.isAfter(now)) {
+        final details = _buildDetails(category: NotificationCategory.system);
+        await _plugin.zonedSchedule(
+          202,
+          'Your trial has ended',
+          'Subscribe to keep your personalized feed & no ads',
+          t0,
+          details,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.wallClockTime,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        );
+      }
+
+      // T+3: Winback — what's new
+      final t3 = tz.TZDateTime.from(
+        trialEndDate.add(const Duration(days: 3)),
+        location,
+      );
+      if (t3.isAfter(now)) {
+        final details = _buildDetails(
+          category: NotificationCategory.recommendation,
+        );
+        await _plugin.zonedSchedule(
+          203,
+          'Come back — 3 new videos match your taste 🎬',
+          'Your personalized feed has been updated',
+          t3,
+          details,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.wallClockTime,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        );
+      }
+
+      debugPrint(
+        'NotificationService: trial re-engagement sequence scheduled '
+        '(end: $trialEndDate)',
+      );
+    } catch (e) {
+      debugPrint('NotificationService scheduleTrialEndingReminders error: $e');
+    }
+  }
+
+  /// Cancels the trial re-engagement sequence (call when user subscribes).
+  Future<void> cancelTrialReminders() async {
+    if (!_initialized) return;
+    try {
+      await Future.wait([
+        _plugin.cancel(200),
+        _plugin.cancel(201),
+        _plugin.cancel(202),
+        _plugin.cancel(203),
+      ]);
+      debugPrint('NotificationService: trial reminders cancelled');
+    } catch (e) {
+      debugPrint('NotificationService cancelTrialReminders error: $e');
     }
   }
 

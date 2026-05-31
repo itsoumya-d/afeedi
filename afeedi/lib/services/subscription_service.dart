@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'analytics_service.dart';
+import 'notification_service.dart';
 
 /// Product IDs — must match exactly what's configured in App Store Connect & Google Play Console
 class SubscriptionIds {
@@ -164,6 +165,22 @@ class SubscriptionService extends ChangeNotifier {
 
     await prefs.setBool(_prefKey, true);
     await prefs.setString(_expiryKey, expiry.toIso8601String());
+
+    // Mark trial as used and schedule re-engagement reminders around the trial
+    // window (7 days from now). If this is a renewal, cancel prior reminders.
+    final trialAlreadyUsed = prefs.getBool(_trialKey) ?? false;
+    if (!trialAlreadyUsed) {
+      await markTrialUsed();
+      final trialEndDate = DateTime.now().add(
+        Duration(days: SubscriptionIds.trialDays),
+      );
+      NotificationService.instance
+          .scheduleTrialEndingReminders(trialEndDate)
+          .catchError((_) {});
+    } else {
+      // Renewing subscriber — clear trial re-engagement notifications
+      NotificationService.instance.cancelTrialReminders().catchError((_) {});
+    }
 
     _tier = SubscriptionTier.pro;
     _purchaseState = PurchaseState.success;

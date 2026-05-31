@@ -39,6 +39,11 @@ Future<void> appMain() => _appMain();
 Future<void> _appMain() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Cap image cache to 100 images / 50MB to prevent OOM on image-heavy feeds.
+  // Default Flutter cache is 1000 images / 100MB — too high for long scroll sessions.
+  PaintingBinding.instance.imageCache.maximumSize = 100;
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 50 << 20; // 50MB
+
   // Initialize error reporting first so all subsequent errors are captured
   ErrorReportingService.instance.initialize();
 
@@ -146,15 +151,29 @@ class AfeediApp extends StatefulWidget {
   State<AfeediApp> createState() => _AfeediAppState();
 }
 
-class _AfeediAppState extends State<AfeediApp> {
+class _AfeediAppState extends State<AfeediApp> with WidgetsBindingObserver {
   String _initialRoute = AppRoutes.welcome;
   bool _ready = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _determineInitialRoute();
     _loadThemeSetting();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didHaveMemoryPressure() {
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
+    super.didHaveMemoryPressure();
   }
 
   Future<void> _determineInitialRoute() async {

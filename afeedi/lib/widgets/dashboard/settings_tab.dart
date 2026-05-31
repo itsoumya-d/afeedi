@@ -3,6 +3,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/local_auth_service.dart';
 import '../../services/navigation_service.dart';
+import '../../services/privacy_consent_service.dart';
+import '../../services/analytics_service.dart';
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
@@ -14,7 +16,18 @@ class SettingsTab extends StatefulWidget {
 class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-  
+
+  @override
+  void initState() {
+    super.initState();
+    _loadConsent();
+  }
+
+  Future<void> _loadConsent() async {
+    final granted = await PrivacyConsentService.instance.hasAnalyticsConsent();
+    if (mounted) setState(() => _analyticsSharing = granted);
+  }
+
   // Privacy settings
   bool _dataCollection = true;
   bool _personalizedAds = false;
@@ -155,7 +168,11 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           title: 'Analytics Sharing',
           subtitle: 'Share anonymous analytics to improve the platform',
           value: _analyticsSharing,
-          onChanged: (value) => setState(() => _analyticsSharing = value),
+          onChanged: (value) {
+            setState(() => _analyticsSharing = value);
+            PrivacyConsentService.instance.setAnalyticsConsent(value);
+            AnalyticsService.instance.setConsentGranted(value);
+          },
         ),
         _buildToggleItem(
           title: 'Location Tracking',

@@ -82,6 +82,15 @@ class _WorldClassOnboardingState extends State<WorldClassOnboarding>
 
   Future<void> _restoreProgress() async {
     final prefs = await SharedPreferences.getInstance();
+    // Already completed — skip straight to the dashboard.
+    if (prefs.getBool('onboarding_completed') == true) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/dashboard');
+        }
+      });
+      return;
+    }
     final saved = prefs.getInt('onboarding_step') ?? 0;
     if (saved > 0 && saved < _totalSteps && mounted) {
       setState(() => _currentStep = saved);

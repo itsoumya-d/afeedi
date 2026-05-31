@@ -70,10 +70,14 @@ void main() {
     expect(find.text('Your referral code'), findsOneWidget);
   });
 
-  testWidgets('ReferralScreen shows Share Invite button', (tester) async {
+  testWidgets('ReferralScreen shows share channel buttons', (tester) async {
     await tester.pumpWidget(_buildApp(const ReferralScreen()));
     await tester.pumpAndSettle();
-    expect(find.text('Share Invite'), findsOneWidget);
+    // Share row has WhatsApp, Twitter/X, Email, and a copy-link fallback
+    expect(find.text('WhatsApp'), findsOneWidget);
+    expect(find.text('Twitter / X'), findsOneWidget);
+    expect(find.text('Email'), findsOneWidget);
+    expect(find.text('Copy invite message'), findsOneWidget);
   });
 
   testWidgets('ReferralScreen shows Invites Sent stat', (tester) async {

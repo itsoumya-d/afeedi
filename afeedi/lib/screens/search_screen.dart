@@ -427,34 +427,39 @@ class _SearchScreenState extends State<SearchScreen>
               : _selectedPlatform == platform;
           return Padding(
             padding: const EdgeInsetsDirectional.only(end: 8),
-            child: GestureDetector(
-              onTap: () => setState(() => _selectedPlatform = platform),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? color.withValues(alpha: 0.25)
-                      : const Color(0xFF1E1E3A),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isSelected
-                        ? color
-                        : Colors.white.withValues(alpha: 0.15),
-                    width: isSelected ? 1.5 : 1,
+            child: Semantics(
+              label: isSelected ? '$label filter selected' : '$label filter',
+              button: true,
+              selected: isSelected,
+              child: GestureDetector(
+                onTap: () => setState(() => _selectedPlatform = platform),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 4,
                   ),
-                ),
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: isSelected ? color : Colors.white54,
-                    fontSize: 12,
-                    fontWeight: isSelected
-                        ? FontWeight.w700
-                        : FontWeight.normal,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? color.withValues(alpha: 0.25)
+                        : const Color(0xFF1E1E3A),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected
+                          ? color
+                          : Colors.white.withValues(alpha: 0.15),
+                      width: isSelected ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: isSelected ? color : Colors.white54,
+                      fontSize: 12,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.normal,
+                    ),
                   ),
                 ),
               ),
@@ -477,52 +482,59 @@ class _SearchScreenState extends State<SearchScreen>
           final isSelected = _selectedCategory == label;
           return Padding(
             padding: const EdgeInsetsDirectional.only(end: 8),
-            child: GestureDetector(
-              onTap: () => setState(() {
-                _selectedCategory = isSelected ? null : label;
-              }),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? const Color(0xFF00D4FF).withValues(alpha: 0.2)
-                      : const Color(0xFF1E1E3A),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isSelected
-                        ? const Color(0xFF00D4FF)
-                        : Colors.white.withValues(alpha: 0.1),
-                    width: isSelected ? 1.5 : 1,
+            child: Semantics(
+              label: isSelected
+                  ? '$label genre selected'
+                  : '$label genre filter',
+              button: true,
+              selected: isSelected,
+              child: GestureDetector(
+                onTap: () => setState(() {
+                  _selectedCategory = isSelected ? null : label;
+                }),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
                   ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      icon,
-                      size: 13,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? const Color(0xFF00D4FF).withValues(alpha: 0.2)
+                        : const Color(0xFF1E1E3A),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
                       color: isSelected
                           ? const Color(0xFF00D4FF)
-                          : Colors.white54,
+                          : Colors.white.withValues(alpha: 0.1),
+                      width: isSelected ? 1.5 : 1,
                     ),
-                    const SizedBox(width: 5),
-                    Text(
-                      label,
-                      style: TextStyle(
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        icon,
+                        size: 13,
                         color: isSelected
                             ? const Color(0xFF00D4FF)
                             : Colors.white54,
-                        fontSize: 12,
-                        fontWeight: isSelected
-                            ? FontWeight.w700
-                            : FontWeight.normal,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 5),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          color: isSelected
+                              ? const Color(0xFF00D4FF)
+                              : Colors.white54,
+                          fontSize: 12,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/local_auth_service.dart';
 import '../services/analytics_service.dart';
 
@@ -61,7 +62,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
     });
   }
 
-  Future<void> _shareInvite() async {
+  Future<void> _shareInvite({String via = 'default'}) async {
     final now = DateTime.now();
     if (_lastShareTime != null &&
         now.difference(_lastShareTime!) < const Duration(seconds: 5))
@@ -69,10 +70,9 @@ class _ReferralScreenState extends State<ReferralScreen> {
     _lastShareTime = now;
 
     final message =
-        'I\'ve been using Afeedi to watch all my favorite content from YouTube, TikTok, Instagram, and more in one place — personalized just for me. '
-        'Join me and get 7 days of Pro free! Use my code: $_referralCode\n'
+        'I\'ve been using Afeedi to watch YouTube, TikTok, Instagram and more in one place — all personalized for me. '
+        'Get 7 days of Pro free! Code: $_referralCode\n'
         'Download: https://afeedi.com/download';
-    await Clipboard.setData(ClipboardData(text: message));
 
     final prefs = await SharedPreferences.getInstance();
     final newCount = _invitesSent + 1;
@@ -82,14 +82,38 @@ class _ReferralScreenState extends State<ReferralScreen> {
     await AnalyticsService.instance.trackUserInteraction(
       action: 'referral_invite_shared',
       screen: 'referral',
-      additionalData: {'invites_sent': newCount},
+      additionalData: {'invites_sent': newCount, 'via': via},
     );
+
+    bool launched = false;
+    if (via == 'whatsapp') {
+      final url = Uri.parse(
+        'https://wa.me/?text=${Uri.encodeComponent(message)}',
+      );
+      launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else if (via == 'twitter') {
+      final url = Uri.parse(
+        'https://twitter.com/intent/tweet?text=${Uri.encodeComponent(message)}',
+      );
+      launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else if (via == 'email') {
+      final subject = Uri.encodeComponent('Join me on Afeedi!');
+      final body = Uri.encodeComponent(message);
+      final url = Uri.parse('mailto:?subject=$subject&body=$body');
+      launched = await launchUrl(url);
+    }
+
+    if (!launched) {
+      await Clipboard.setData(ClipboardData(text: message));
+    }
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text(
-          'Invite message copied! Paste it anywhere to share.',
+        content: Text(
+          launched
+              ? 'Opening share screen...'
+              : 'Invite copied! Paste it anywhere to share.',
         ),
         behavior: SnackBarBehavior.floating,
         backgroundColor: _cyan.withValues(alpha: 0.9),
@@ -254,19 +278,99 @@ class _ReferralScreenState extends State<ReferralScreen> {
   }
 
   Widget _buildShareButton() {
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: _cyan,
-        foregroundColor: Colors.black,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        elevation: 0,
-      ),
-      onPressed: _shareInvite,
-      icon: const Icon(Icons.share, size: 20),
-      label: const Text(
-        'Share Invite',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _buildShareOptionButton(
+                label: 'WhatsApp',
+                icon: Icons.chat_bubble_outline,
+                color: const Color(0xFF25D366),
+                via: 'whatsapp',
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildShareOptionButton(
+                label: 'Twitter / X',
+                icon: Icons.alternate_email,
+                color: const Color(0xFF1DA1F2),
+                via: 'twitter',
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildShareOptionButton(
+                label: 'Email',
+                icon: Icons.mail_outline,
+                color: const Color(0xFFFF6B35),
+                via: 'email',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Color(0xFF00D4FF), width: 1.5),
+              foregroundColor: _cyan,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            onPressed: () => _shareInvite(via: 'copy'),
+            icon: const Icon(Icons.copy_outlined, size: 18),
+            label: const Text(
+              'Copy invite message',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildShareOptionButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required String via,
+  }) {
+    return Semantics(
+      label: 'Share via $label',
+      button: true,
+      child: InkWell(
+        onTap: () => _shareInvite(via: via),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withValues(alpha: 0.4)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: color, size: 22),
+              const SizedBox(height: 5),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

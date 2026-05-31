@@ -35,6 +35,8 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
   late AnimationController _backgroundAnimationController;
   late Animation<Color?> _backgroundColorAnimation;
   
+  late final List<OnboardingStep> _steps;
+
   int _currentStep = 0;
   bool _isLastStep = false;
   UserPreferences _userPreferences = UserPreferences();
@@ -56,6 +58,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
   @override
   void initState() {
     super.initState();
+    _steps = _onboardingService.getOnboardingSteps();
     _pageController = PageController(initialPage: 0);
     _confettiController = ConfettiController(duration: const Duration(seconds: 3));
     _backgroundAnimationController = AnimationController(
@@ -110,10 +113,10 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
   }
 
   void _nextStep() {
-    if (_currentStep < OnboardingService.onboardingFlow.length - 1) {
+    if (_currentStep < _steps.length - 1) {
       setState(() {
         _currentStep++;
-        _isLastStep = _currentStep == OnboardingService.onboardingFlow.length - 1;
+        _isLastStep = _currentStep == _steps.length - 1;
       });
       _pageController.nextPage(
         duration: const Duration(milliseconds: 500),
@@ -141,7 +144,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
   }
 
   void _trackStepCompleted(int stepIndex) {
-    final stepKey = OnboardingService.onboardingFlow[stepIndex]['id'];
+    final stepKey = _steps[stepIndex].key ?? 'step_$stepIndex';
     _analyticsService.trackEvent(eventName: 'onboarding_step_completed', eventType: 'onboarding', additionalData: {
       'step_key': stepKey,
       'step_index': stepIndex,
@@ -162,7 +165,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
       // Track completion
       _analyticsService.trackEvent(eventName: 'onboarding_completed', eventType: 'onboarding', additionalData: {
         'timestamp': DateTime.now().toIso8601String(),
-        'total_steps': OnboardingService.onboardingFlow.length,
+        'total_steps': _steps.length,
       });
       
       // Celebrate completion
@@ -311,7 +314,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                         ),
                         Expanded(
                           child: LinearProgressIndicator(
-                            value: (_currentStep + 1) / OnboardingService.onboardingFlow.length,
+                            value: (_currentStep + 1) / _steps.length,
                             backgroundColor: Colors.grey.withOpacity(0.3),
                             valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                             minHeight: 8,
@@ -320,7 +323,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                         ),
                         const SizedBox(width: 16),
                         Text(
-                          '${_currentStep + 1}/${OnboardingService.onboardingFlow.length}',
+                          '${_currentStep + 1}/${_steps.length}',
                           style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -332,9 +335,9 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                     child: PageView.builder(
                       controller: _pageController,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: OnboardingService.onboardingFlow.length,
+                      itemCount: _steps.length,
                       itemBuilder: (context, index) {
-                        final step = OnboardingService.onboardingFlow[index];
+                        final step = _steps[index];
                         return SingleChildScrollView(
                           child: Padding(
                             padding: const EdgeInsets.all(24.0),
@@ -438,8 +441,8 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
         );
       case 'calendar_integration':
         return _buildCalendarIntegrationStep();
-      case 'welcome':
-        return _buildWelcomeStep();
+      case 'completion':
+        return _buildCompletionStep();
       default:
         return const Center(child: Text('Step content not implemented'));
     }
@@ -978,6 +981,64 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                 style: TextStyle(color: Colors.blue[800], fontStyle: FontStyle.italic),
               ),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCompletionStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const SizedBox(height: 20),
+        Icon(
+          Icons.check_circle_outline,
+          size: 80,
+          color: AppColors.primary,
+        ).animate().scale(duration: 600.ms, curve: Curves.elasticOut),
+        const SizedBox(height: 32),
+        Text(
+          'You\'re all set!',
+          style: AppTextStyles.heading2.copyWith(fontSize: 28),
+          textAlign: TextAlign.center,
+        ).animate().fadeIn(duration: 400.ms, delay: 200.ms),
+        const SizedBox(height: 16),
+        Text(
+          'Your personalized feed is ready. Tap Complete to start discovering amazing content!',
+          style: AppTextStyles.bodyMedium.copyWith(fontSize: 16),
+          textAlign: TextAlign.center,
+        ).animate().fadeIn(duration: 400.ms, delay: 300.ms),
+        const SizedBox(height: 32),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.7),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              _buildCompletionFeature(Icons.recommend, 'Personalized recommendations based on your interests'),
+              const SizedBox(height: 12),
+              _buildCompletionFeature(Icons.calendar_today, 'Smart scheduling for your viewing time'),
+              const SizedBox(height: 12),
+              _buildCompletionFeature(Icons.devices, 'Content from all your favorite platforms'),
+            ],
+          ),
+        ).animate().fadeIn(duration: 400.ms, delay: 400.ms),
+      ],
+    );
+  }
+
+  Widget _buildCompletionFeature(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, color: AppColors.primary, size: 20),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: AppTextStyles.bodySmall,
           ),
         ),
       ],

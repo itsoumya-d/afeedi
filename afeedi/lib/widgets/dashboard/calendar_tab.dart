@@ -769,6 +769,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   }
   
   Widget _buildQuickCalendarStats() {
+    final todayCount = _getContentForDate(DateTime.now()).length;
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
@@ -778,7 +779,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       child: Column(
         children: [
           Text(
-            '12',
+            todayCount.toString(),
             style: TextStyle(
               color: AppTheme.primaryPink,
               fontSize: 14,
@@ -928,15 +929,37 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
         ),
         Expanded(
           child: Center(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: Text(
-                _getHeaderText(),
-                key: ValueKey(_getHeaderText()),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedDate = DateTime.now();
+                });
+                _loadContentForSelectedDate();
+              },
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: Column(
+                  key: ValueKey(_getHeaderText()),
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _getHeaderText(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (_selectedDate.month != DateTime.now().month ||
+                        _selectedDate.year != DateTime.now().year)
+                      Text(
+                        'Tap to go to today',
+                        style: TextStyle(
+                          color: AppTheme.primaryCyan,
+                          fontSize: 10,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
@@ -1127,16 +1150,21 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   
   List<Map<String, dynamic>> _getContentForDate(DateTime date) {
     try {
-      return _getFilteredContent().where((content) {
-        try {
-          // Mock logic - in real app, this would check actual scheduled dates
-          final contentDay = date.day;
-          return contentDay % 3 == 0 || contentDay % 5 == 0;
-        } catch (e) {
-          debugPrint('Error checking content for date: $e');
-          return false;
-        }
-      }).toList();
+      final now = DateTime.now();
+      final isToday = date.year == now.year && date.month == now.month && date.day == now.day;
+      final dayDiff = date.difference(DateTime(now.year, now.month, now.day)).inDays;
+      final isTomorrow = dayDiff == 1;
+      final isDayAfterTomorrow = dayDiff == 2;
+
+      if (isToday) {
+        return _getFilteredContent(); // Show all scheduled content today
+      }
+      if (isTomorrow || isDayAfterTomorrow) {
+        // Show first 2 items as "upcoming"
+        return _getFilteredContent().take(2).toList();
+      }
+      // For past/future dates, only show explicitly scheduled content
+      return [];
     } catch (e) {
       debugPrint('Error in _getContentForDate: $e');
       return [];
@@ -1573,10 +1601,56 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                   ],
                 ),
               ),
-              Icon(
-                Icons.more_vert,
-                color: Colors.white.withOpacity(0.5),
-                size: 20,
+              PopupMenuButton<String>(
+                icon: Icon(Icons.more_vert, color: Colors.white.withOpacity(0.5), size: 20),
+                color: const Color(0xFF2D1B69),
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'watch',
+                    child: Row(
+                      children: [
+                        Icon(Icons.play_circle, color: Colors.white, size: 18),
+                        SizedBox(width: 8),
+                        Text('Watch Now', style: TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'reschedule',
+                    child: Row(
+                      children: [
+                        Icon(Icons.schedule, color: Colors.white, size: 18),
+                        SizedBox(width: 8),
+                        Text('Reschedule', style: TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'remove',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                        SizedBox(width: 8),
+                        Text('Remove', style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
+                  ),
+                ],
+                onSelected: (value) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        value == 'watch'
+                            ? 'Opening "${content['title']}"...'
+                            : value == 'reschedule'
+                                ? 'Reschedule feature coming soon'
+                                : '"${content['title']}" removed from schedule',
+                      ),
+                      backgroundColor: const Color(0xFF2D1B69),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -1805,6 +1879,31 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
                 color: AppTheme.primaryPink,
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Added "${recommendation['subtitle']}" to your schedule'),
+                  backgroundColor: AppTheme.primaryPink.withOpacity(0.9),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryPink.withOpacity(0.2),
+                shape: BoxShape.circle,
+                border: Border.all(color: AppTheme.primaryPink.withOpacity(0.5)),
+              ),
+              child: Icon(
+                Icons.add,
+                color: AppTheme.primaryPink,
+                size: 14,
               ),
             ),
           ),

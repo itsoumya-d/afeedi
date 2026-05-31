@@ -39,6 +39,12 @@ class ContentService {
       _memCache.remove(key);
     } else {
       _memCache.clear();
+      // Also evict the SharedPreferences disk cache so getOfflineFeedContent()
+      // returns empty on the next call and forces a fresh network fetch.
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.remove(_feedCacheKey);
+        prefs.remove('${_feedCacheKey}_ts');
+      });
     }
   }
 

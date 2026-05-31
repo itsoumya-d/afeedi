@@ -182,6 +182,11 @@ class _PlayerScreenState extends State<PlayerScreen>
     return count.toString();
   }
 
+  bool _hasPlayableUrl() {
+    final url = widget.content.videoUrl ?? widget.content.embedUrl;
+    return url != null && url.isNotEmpty;
+  }
+
   void _share() {
     final url = widget.content.videoUrl ?? widget.content.embedUrl;
     if (url != null && url.isNotEmpty) {
@@ -314,15 +319,36 @@ class _PlayerScreenState extends State<PlayerScreen>
             // ── Video player ─────────────────────────────────────────────────
             AspectRatio(
               aspectRatio: 16 / 9,
-              child: widget.content.platform == PlatformType.youtube
-                  ? EnhancedYouTubePlayer(
-                      content: widget.content,
-                      autoPlay: !_dataSaverMode,
-                    )
-                  : SocialMediaVideoPlayer(
-                      content: widget.content,
-                      autoPlay: !_dataSaverMode,
-                      onFullscreen: _toggleFullscreen,
+              child: _hasPlayableUrl()
+                  ? (widget.content.platform == PlatformType.youtube
+                        ? EnhancedYouTubePlayer(
+                            content: widget.content,
+                            autoPlay: !_dataSaverMode,
+                          )
+                        : SocialMediaVideoPlayer(
+                            content: widget.content,
+                            autoPlay: !_dataSaverMode,
+                            onFullscreen: _toggleFullscreen,
+                          ))
+                  : const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.videocam_off_outlined,
+                            color: Colors.white38,
+                            size: 48,
+                          ),
+                          SizedBox(height: 12),
+                          Text(
+                            'Video unavailable',
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
             ),
 

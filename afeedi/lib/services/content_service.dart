@@ -21,6 +21,10 @@ class ContentService {
   final Map<String, ({List<Content> data, DateTime at})> _memCache = {};
   static const Duration _memCacheTtl = Duration(minutes: 5);
 
+  // Trending-specific cache: 30-minute TTL (trending is slower-moving than personalised feed)
+  final Map<String, ({List<Content> data, DateTime at})> _trendingCache = {};
+  static const Duration _trendingCacheTtl = Duration(minutes: 30);
+
   List<Content>? _memGet(String key) {
     final entry = _memCache[key];
     if (entry == null) return null;
@@ -3113,6 +3117,13 @@ class ContentService {
     int limit = 20,
     String timeWindow = '7d',
   }) async {
+    final cacheKey = 'trending_$timeWindow';
+    final cached = _trendingCache[cacheKey];
+    if (cached != null &&
+        DateTime.now().difference(cached.at) < _trendingCacheTtl) {
+      return cached.data.take(limit).toList();
+    }
+
     final now = DateTime.now();
     final cutoff = _trendingCutoff(now, timeWindow);
 
@@ -3128,7 +3139,9 @@ class ContentService {
     candidates.sort(
       (a, b) => _velocityScore(b, now).compareTo(_velocityScore(a, now)),
     );
-    return _withCreatorIds(candidates.take(limit).toList());
+    final result = _withCreatorIds(candidates.take(limit).toList());
+    _trendingCache[cacheKey] = (data: result, at: now);
+    return result;
   }
 
   DateTime? _trendingCutoff(DateTime now, String window) {

@@ -1104,8 +1104,15 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
           feedItems.add(const _FeedItem.sectionHeader('Trending Now'));
         }
         // First 10 content cards are AI-personalised picks (Google Play labelling requirement)
+        final isAiPick = contentCardCount < 10;
         feedItems.add(
-          _FeedItem.content(post, aiRecommended: contentCardCount < 10),
+          _FeedItem.content(
+            post,
+            aiRecommended: isAiPick,
+            reasonTag: isAiPick && post.tags.isNotEmpty
+                ? post.tags.first
+                : null,
+          ),
         );
         contentCardCount++;
       } else {
@@ -1179,6 +1186,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
                 isHero: listIndex == 0,
                 index: listIndex,
                 isAiRecommended: feedItem.isAiRecommended,
+                aiReasonTag: feedItem.aiReasonTag,
               ),
             ),
           );
@@ -1572,27 +1580,34 @@ class _FeedItem {
   final bool isSectionHeader;
   final bool isAiRecommended;
   final String? sectionTitle;
+  final String? aiReasonTag;
 
-  const _FeedItem.content(Content c, {bool aiRecommended = false})
-    : content = c,
-      isAd = false,
-      isSectionHeader = false,
-      isAiRecommended = aiRecommended,
-      sectionTitle = null;
+  const _FeedItem.content(
+    Content c, {
+    bool aiRecommended = false,
+    String? reasonTag,
+  }) : content = c,
+       isAd = false,
+       isSectionHeader = false,
+       isAiRecommended = aiRecommended,
+       sectionTitle = null,
+       aiReasonTag = reasonTag;
 
   const _FeedItem.ad()
     : content = null,
       isAd = true,
       isSectionHeader = false,
       isAiRecommended = false,
-      sectionTitle = null;
+      sectionTitle = null,
+      aiReasonTag = null;
 
   const _FeedItem.sectionHeader(String title)
     : content = null,
       isAd = false,
       isSectionHeader = true,
       isAiRecommended = false,
-      sectionTitle = title;
+      sectionTitle = title,
+      aiReasonTag = null;
 }
 
 class _FilterBottomSheet extends StatefulWidget {

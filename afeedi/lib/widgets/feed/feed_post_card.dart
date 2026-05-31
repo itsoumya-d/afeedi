@@ -11,6 +11,7 @@ class FeedPostCard extends StatefulWidget {
   final bool isHero;
   final int index;
   final bool isAiRecommended;
+  final String? aiReasonTag;
 
   const FeedPostCard({
     super.key,
@@ -18,6 +19,7 @@ class FeedPostCard extends StatefulWidget {
     this.isHero = false,
     this.index = 0,
     this.isAiRecommended = false,
+    this.aiReasonTag,
   });
 
   @override
@@ -440,22 +442,48 @@ class _FeedPostCardState extends State<FeedPostCard> {
                           ),
                         ),
                       ),
-                    Flexible(
-                      child: Text(
-                        widget.content.publishedAt != null
-                            ? _formatTimeAgo(widget.content.publishedAt!)
-                            : 'Unknown time',
-                        style: const TextStyle(
-                          color: Colors.white54,
-                          fontSize: 11,
+                    if (widget.isAiRecommended &&
+                        widget.aiReasonTag != null &&
+                        widget.aiReasonTag!.isNotEmpty)
+                      Flexible(
+                        child: Text(
+                          'Because you liked ${widget.aiReasonTag}',
+                          style: const TextStyle(
+                            color: Color(0xFF9B6FDE),
+                            fontSize: 9,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      )
+                    else
+                      Flexible(
+                        child: Text(
+                          widget.content.publishedAt != null
+                              ? _formatTimeAgo(widget.content.publishedAt!)
+                              : 'Unknown time',
+                          style: const TextStyle(
+                            color: Colors.white54,
+                            fontSize: 11,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ],
+            ),
+          ),
+          Semantics(
+            label: 'Not interested',
+            button: true,
+            child: IconButton(
+              icon: const Icon(Icons.close, size: 18),
+              tooltip: 'Not interested',
+              visualDensity: VisualDensity.compact,
+              color: Colors.white38,
+              onPressed: () => _markNotInterested(context),
             ),
           ),
           IconButton(
@@ -591,6 +619,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
                           fit: BoxFit.cover,
                           width: double.infinity,
                           height: 200,
+                          memCacheWidth: 640,
+                          memCacheHeight: 360,
                           placeholder: (_, __) => const SizedBox.shrink(),
                           errorWidget: (_, __, ___) =>
                               _buildThumbnailFallback(platformColor, initial),
@@ -859,6 +889,19 @@ class _FeedPostCardState extends State<FeedPostCard> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _markNotInterested(BuildContext context) {
+    ContentService.instance.trackContentInteraction(
+      contentId: widget.content.id,
+      interactionType: InteractionType.notInterested,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Got it — we\'ll show less like this'),
+        duration: Duration(seconds: 2),
       ),
     );
   }

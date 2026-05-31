@@ -355,7 +355,7 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
   void _openInBrowser(String url) {
     // For mobile platforms, use url_launcher
     // This would require adding url_launcher dependency
-    print('Opening URL: $url');
+    debugPrint('Opening URL: $url');
     Logger.info('Would open URL in browser: $url');
   }
 

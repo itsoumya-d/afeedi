@@ -41,7 +41,7 @@ class _FeedScreenState extends State<FeedScreen> {
       setState(() {
         _isLoading = false;
       });
-      print('Error loading feed: $e');
+      debugPrint('Error loading feed: $e');
     }
   }
 
@@ -56,7 +56,7 @@ class _FeedScreenState extends State<FeedScreen> {
       _refreshController.refreshCompleted();
     } catch (e) {
       _refreshController.refreshFailed();
-      print('Error refreshing feed: $e');
+      debugPrint('Error refreshing feed: $e');
     }
   }
 
@@ -69,7 +69,7 @@ class _FeedScreenState extends State<FeedScreen> {
       _refreshController.loadComplete();
     } catch (e) {
       _refreshController.loadFailed();
-      print('Error loading more posts: $e');
+      debugPrint('Error loading more posts: $e');
     }
   }
 

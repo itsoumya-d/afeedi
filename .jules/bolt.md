@@ -1,0 +1,3 @@
+## 2024-06-01 - [Concurrent Content Fetching Optimization]
+**Learning:** Sequential `await` statements in loops (like the `for` loop in `ContentAggregationService.aggregateContent`) block subsequent iterations, leading to high network latency that scales linearly with the number of connections. In Dart, this can be heavily optimized using `Future.wait()` to run asynchronous operations concurrently.
+**Action:** When aggregating or fetching from multiple sources over network/database, always map items to a list of `Future`s, append a `.catchError()` handler returning an empty result (so that one failure doesn't crash `Future.wait()`), and then use `await Future.wait(futures)` instead of a `for` loop with `await`.

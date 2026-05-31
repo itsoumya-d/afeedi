@@ -2096,6 +2096,8 @@ class _CalendarTabState extends State<CalendarTab>
                       content['creator']?.toString() ??
                           (AppLocalizations.of(context)?.unknownCreator ??
                               'Unknown Creator'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 12,
@@ -2347,6 +2349,8 @@ class _CalendarTabState extends State<CalendarTab>
                   recommendation['platform']?.toString() ??
                       recommendation['category']?.toString() ??
                       'Recommended',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: AppTheme.primaryPink,
                     fontSize: 12,

@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../services/analytics_service.dart';
+import '../services/att_service.dart';
 import '../services/local_auth_service.dart';
 import '../services/navigation_service.dart';
 import '../services/notification_service.dart';
@@ -25,6 +27,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _dataSaverMode = false;
   bool _darkMode = true;
   bool _analyticsEnabled = true;
+  bool _personalizedAdsEnabled = true;
   String _videoQuality = 'Auto';
   String _contentLanguage = 'English';
   bool _isLoading = true;
@@ -48,6 +51,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _dataSaverMode = prefs.getBool('setting_data_saver') ?? false;
         _darkMode = prefs.getBool('setting_dark_mode') ?? true;
         _analyticsEnabled = prefs.getBool('setting_analytics') ?? true;
+        _personalizedAdsEnabled =
+            prefs.getBool('setting_personalized_ads') ?? true;
         _videoQuality = prefs.getString('setting_video_quality') ?? 'Auto';
         _contentLanguage = prefs.getString('setting_language') ?? 'English';
         _isLoading = false;
@@ -341,6 +346,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
             inactiveTrackColor: Colors.white12,
             inactiveThumbColor: Colors.white38,
           ),
+          SwitchListTile(
+            secondary: const Icon(
+              Icons.ads_click_outlined,
+              color: Colors.white70,
+            ),
+            title: const Text(
+              'Personalized Ads',
+              style: TextStyle(color: Colors.white, fontSize: 15),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: const Text(
+              'Show ads relevant to your interests (GDPR/CCPA)',
+              style: TextStyle(color: Colors.white60, fontSize: 12),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            value: _personalizedAdsEnabled,
+            onChanged: (v) {
+              setState(() => _personalizedAdsEnabled = v);
+              _saveBool('setting_personalized_ads', v);
+            },
+            activeColor: const Color(0xFF00D4FF),
+            activeTrackColor: const Color(0xFF00D4FF).withValues(alpha: 0.3),
+            inactiveTrackColor: Colors.white12,
+            inactiveThumbColor: Colors.white38,
+          ),
+          if (Platform.isIOS)
+            _navTile(
+              icon: Icons.track_changes_outlined,
+              title: 'Ad Tracking Permission',
+              subtitle: 'Manage iOS App Tracking Transparency',
+              onTap: () async {
+                await AttService.requestTrackingIfNeeded();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Tracking permission updated'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
+              },
+            ),
           _navTile(
             icon: Icons.delete_outline,
             title:

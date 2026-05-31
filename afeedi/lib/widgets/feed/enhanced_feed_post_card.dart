@@ -244,6 +244,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
 
           // More options
           IconButton(
+            tooltip: 'More options',
             onPressed: _showMoreOptions,
             icon: Icon(
               Icons.more_vert,

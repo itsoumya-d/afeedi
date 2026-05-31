@@ -612,6 +612,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         const SizedBox(height: 3),
                         Text(
                           _relativeTime(content.publishedAt),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.35),
                             fontSize: 10,

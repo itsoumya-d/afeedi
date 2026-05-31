@@ -39,7 +39,6 @@ dependencies:
   # supabase_flutter: ^2.5.6  # Removed - replaced with local storage
   
   # State Management
-  provider: ^6.1.2
   riverpod: ^2.5.1
   flutter_riverpod: ^2.5.1
   

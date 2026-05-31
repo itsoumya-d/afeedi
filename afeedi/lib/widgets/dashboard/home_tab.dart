@@ -21,6 +21,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   bool _isLoading = false;
   bool _hasMore = true;
   PlatformType? _selectedPlatform;
+  String? _errorMessage;
   
   @override
   bool get wantKeepAlive => true;
@@ -107,8 +108,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         _allPosts = [];
         _posts = [];
         _isLoading = false;
+        _errorMessage = e.toString();
       });
-      
+
       // Track error
       await AnalyticsService.instance.trackError(
         errorType: 'home_content_load_error',
@@ -274,7 +276,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       child: Column(
         children: [
           Text(
-            '24',
+            _posts.length.toString(),
             style: TextStyle(
               color: AppTheme.primaryCyan,
               fontSize: 16,
@@ -398,7 +400,15 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         ),
       );
     }
-    
+
+    if (_errorMessage != null && _posts.isEmpty) {
+      return _buildErrorState();
+    }
+
+    if (!_isLoading && _posts.isEmpty) {
+      return _buildEmptyState();
+    }
+
     return RefreshIndicator(
       onRefresh: _refreshPosts,
       color: AppTheme.primaryCyan,
@@ -427,6 +437,69 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.video_library_outlined, size: 72, color: Colors.white24),
+            const SizedBox(height: 16),
+            const Text(
+              'No content yet',
+              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Connect your platforms to start seeing personalized content',
+              style: TextStyle(color: Colors.white54, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _loadInitialPosts,
+              child: const Text('Refresh'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 72, color: Colors.red),
+            const SizedBox(height: 16),
+            const Text(
+              'Something went wrong',
+              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Could not load your feed. Check your connection and try again.',
+              style: TextStyle(color: Colors.white54, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                setState(() { _errorMessage = null; });
+                _loadInitialPosts();
+              },
+              child: const Text('Try again'),
+            ),
+          ],
+        ),
       ),
     );
   }

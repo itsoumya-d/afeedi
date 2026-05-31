@@ -1,3 +1,5 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../models/onboarding_step.dart';
 import '../models/genre.dart';
 import '../models/chat_message.dart';
@@ -203,50 +205,57 @@ class OnboardingService {
     return message;
   }
 
-  // Save onboarding data (placeholder for actual implementation)
+  static const String _onboardingDataKey = 'onboarding_data';
+
+  // Save onboarding data to SharedPreferences
   Future<void> saveOnboardingData({
     required String userName,
     required List<Genre> selectedGenres,
     required Map<String, bool> platformConnections,
     required List<ChatMessage> chatHistory,
   }) async {
-    // TODO: Implement actual data persistence
-    // This could save to local storage, database, or API
-    print('Saving onboarding data for $userName');
-    print('Selected genres: ${selectedGenres.map((g) => g.name).join(', ')}');
-    print('Platform connections: $platformConnections');
-    print('Chat history: ${chatHistory.length} messages');
+    final prefs = await SharedPreferences.getInstance();
+    final data = {
+      'userName': userName,
+      'selectedGenres': selectedGenres.map((g) => g.name).toList(),
+      'platformConnections': platformConnections,
+      'chatHistoryLength': chatHistory.length,
+      'savedAt': DateTime.now().toIso8601String(),
+    };
+    await prefs.setString(_onboardingDataKey, jsonEncode(data));
   }
 
-  // Load saved onboarding data (placeholder for actual implementation)
+  // Load saved onboarding data from SharedPreferences
   Future<Map<String, dynamic>?> loadOnboardingData() async {
-    // TODO: Implement actual data loading
-    // This could load from local storage, database, or API
-    return null;
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_onboardingDataKey);
+    if (raw == null) return null;
+    return Map<String, dynamic>.from(jsonDecode(raw));
   }
 
   // Check if onboarding is completed
   Future<bool> isOnboardingCompleted() async {
-    // TODO: Implement actual onboarding completion check
-    // For now, return false to indicate onboarding is not completed
-    final data = await loadOnboardingData();
-    return data != null && data['completed'] == true;
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('onboarding_completed') ?? false;
   }
 
   // Get current user preferences
   Future<UserPreferences?> getCurrentPreferences() async {
-    // TODO: Implement actual preferences loading
-    // For now, return default preferences
     final data = await loadOnboardingData();
     if (data == null) return null;
-    
-    final preferences = data['preferences'] as Map<String, dynamic>?;
-    if (preferences == null) return null;
-    
+
+    // Support both top-level keys (from saveOnboardingData) and nested preferences key (from savePreferences)
+    final preferences = data['preferences'] as Map<String, dynamic>? ?? data;
+
+    final rawGenres = preferences['selectedGenres'];
+    final rawPlatforms = preferences['platformConnections'];
+
     return UserPreferences(
-      contentInterests: List<String>.from(preferences['selectedGenres'] ?? []),
-      platformPriorities: Map<String, double>.from(preferences['platformConnections']?.map((k, v) => MapEntry(k, v == true ? 1.0 : 0.0)) ?? {}),
-      name: preferences['userName'] ?? '',
+      contentInterests: rawGenres is List ? List<String>.from(rawGenres) : [],
+      platformPriorities: rawPlatforms is Map
+          ? Map<String, double>.from(rawPlatforms.map((k, v) => MapEntry(k.toString(), v == true ? 1.0 : 0.0)))
+          : {},
+      name: (preferences['userName'] ?? '').toString(),
     );
   }
 
@@ -257,17 +266,9 @@ class OnboardingService {
 
   // Mark onboarding as complete
   Future<void> markOnboardingComplete() async {
-    // TODO: Implement actual completion marking
-    // For now, just save a completion flag
-    final data = await loadOnboardingData() ?? {};
-    data['completed'] = true;
-    data['completedAt'] = DateTime.now().toIso8601String();
-    await saveOnboardingData(
-      userName: data['preferences']?['userName'] ?? '',
-      selectedGenres: [],
-      platformConnections: {},
-      chatHistory: [],
-    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_completed', true);
+    await prefs.setString('onboarding_completed_at', DateTime.now().toIso8601String());
   }
 
   // Save user preferences
@@ -281,7 +282,9 @@ class OnboardingService {
     // Save the updated data
     await saveOnboardingData(
       userName: preferences.name ?? '',
-      selectedGenres: [],
+      selectedGenres: preferences.contentInterests
+          .map((name) => Genre(name: name, emoji: '', category: '', keywords: []))
+          .toList(),
       platformConnections: preferences.platformPriorities.map((k, v) => MapEntry(k, v > 0)),
       chatHistory: [],
     );
@@ -314,8 +317,8 @@ class OnboardingService {
       _completedSteps[stepId] = true;
       _currentStepIndex = stepId + 1;
       
-      // TODO: Save step data
-      print('Completed step $stepId with data: $data');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('onboarding_step_${stepId}_data', jsonEncode(data));
     }
   }
 
@@ -323,7 +326,7 @@ class OnboardingService {
   Future<void> skipStep(int stepId) async {
     if (stepId >= 0 && stepId < getOnboardingSteps().length) {
       _currentStepIndex = stepId + 1;
-      print('Skipped step $stepId');
+      debugPrint('Skipped step $stepId');
     }
   }
 
@@ -338,5 +341,11 @@ class OnboardingService {
   void resetOnboarding() {
     _currentStepIndex = 0;
     _completedSteps.clear();
+  }
+
+  Future<void> initialize() async {
+    // Restore step index from SharedPreferences if onboarding was in progress
+    final prefs = await SharedPreferences.getInstance();
+    _currentStepIndex = prefs.getInt('onboarding_step_index') ?? 0;
   }
 }

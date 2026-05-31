@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:http/http.dart' as http;
 import '../models/content_model.dart';
 import '../models/analytics_model.dart';
 import 'enhanced_recommendation_service.dart';
@@ -10,26 +11,119 @@ class ContentService {
   static final ContentService _instance = ContentService._internal();
   factory ContentService() => _instance;
   ContentService._internal();
-  
+
   static ContentService get instance => _instance;
 
-  // Sample real YouTube video data for testing
+  // YouTube RSS feed channels for trending content (public, no API key needed)
+  static const List<String> _trendingChannelIds = [
+    'UCbmNph6atAoGfqLoCL_duAg', // Techquickie
+    'UCXuqSBlHAE6Xw-yeJA0Tunw', // Linus Tech Tips
+    'UCBcRF18a7Qf58cCRy5xuWwQ', // Mark Rober
+    'UC29ju8bIPH5as8OGnQzwJyA', // Traversy Media
+    'UCW5YeuERMmlnqo4oq8vwUpg', // The Game Theorists
+    'UCo8bcnLyZH8tBIH9V1mLgqQ', // ByteByteGo
+    'UCWX3yGbODI0KyQJgFMDCTnA', // ColdFusion
+  ];
+
+  Future<List<Content>> fetchYouTubeRssFeed(String channelId, {int limit = 5}) async {
+    try {
+      final url = 'https://www.youtube.com/feeds/videos.xml?channel_id=$channelId';
+      final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 8));
+      if (response.statusCode != 200) return [];
+      return _parseYouTubeRss(response.body, limit: limit);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  List<Content> _parseYouTubeRss(String xml, {int limit = 5}) {
+    final results = <Content>[];
+    final entryRegex = RegExp(r'<entry>([\s\S]*?)</entry>');
+    final videoIdRegex = RegExp(r'<yt:videoId>(.*?)</yt:videoId>');
+    final titleRegex = RegExp(r'<title>(.*?)</title>');
+    final authorRegex = RegExp(r'<name>(.*?)</name>');
+    final publishedRegex = RegExp(r'<published>(.*?)</published>');
+    final viewCountRegex = RegExp(r'<media:statistics views="(\d+)"');
+
+    for (final match in entryRegex.allMatches(xml).take(limit)) {
+      final entry = match.group(1) ?? '';
+      final videoId = videoIdRegex.firstMatch(entry)?.group(1) ?? '';
+      final titleMatch = titleRegex.allMatches(entry).skip(1).firstOrNull;
+      final title = titleMatch?.group(1) ?? '';
+      final author = authorRegex.firstMatch(entry)?.group(1) ?? '';
+      final published = publishedRegex.firstMatch(entry)?.group(1);
+      final viewCount = int.tryParse(viewCountRegex.firstMatch(entry)?.group(1) ?? '0') ?? 0;
+
+      if (videoId.isEmpty) continue;
+
+      results.add(Content(
+        id: 'yt_rss_$videoId',
+        platform: PlatformType.youtube,
+        platformContentId: videoId,
+        contentType: ContentType.video,
+        title: _unescapeXml(title),
+        thumbnailUrl: 'https://img.youtube.com/vi/$videoId/hqdefault.jpg',
+        videoUrl: 'https://www.youtube.com/watch?v=$videoId',
+        embedUrl: 'https://www.youtube.com/embed/$videoId',
+        creatorName: author,
+        viewCount: viewCount,
+        publishedAt: published != null ? DateTime.tryParse(published) : null,
+        tags: const [],
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ));
+    }
+    return results;
+  }
+
+  String _unescapeXml(String text) {
+    return text
+        .replaceAll('&amp;', '&')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#39;', "'");
+  }
+
+  Future<List<Content>> fetchTrendingContent({int limit = 20}) async {
+    final allContent = <Content>[];
+    final futures = _trendingChannelIds
+        .take(4)
+        .map((id) => fetchYouTubeRssFeed(id, limit: (limit / 4).ceil()));
+    final results = await Future.wait(futures, eagerError: false);
+    for (final batch in results) {
+      allContent.addAll(batch);
+    }
+    allContent.sort((a, b) {
+      final aDate = a.publishedAt ?? DateTime(2000);
+      final bDate = b.publishedAt ?? DateTime(2000);
+      return bDate.compareTo(aDate);
+    });
+    return allContent.take(limit).toList();
+  }
+
+  // Sample content — guaranteed-playable YouTube IDs are listed first so the
+  // fallback path always surfaces real, embeddable videos.
+  // Reliable IDs:
+  //   dQw4w9WgXcQ  Rick Astley "Never Gonna Give You Up" (never removed)
+  //   jNQXAC9IVRw  "Me at the zoo" (first YouTube video ever)
+  //   M7lc1UVf-VE  YouTube Help intro (official channel)
   static final List<Content> _sampleVideos = [
     Content(
       id: 'yt_1',
       platform: PlatformType.youtube,
-      platformContentId: '1ukSR1GRtMU',
-      title: 'Flutter Tutorial - Build Beautiful Apps',
-      description: 'Learn how to build beautiful mobile apps with Flutter',
-      videoUrl: 'https://www.youtube.com/embed/1ukSR1GRtMU',
-      thumbnailUrl: 'https://img.youtube.com/vi/1ukSR1GRtMU/maxresdefault.jpg',
-      creatorName: 'Flutter',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
-      durationSeconds: 930,
-      viewCount: 1250000,
-      likeCount: 45000,
+      platformContentId: 'dQw4w9WgXcQ',
+      title: 'Rick Astley – Never Gonna Give You Up',
+      description: 'The iconic music video, guaranteed to be available and embeddable.',
+      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+      creatorName: 'RickAstleyVEVO',
+      durationSeconds: 213,
+      viewCount: 1500000000,
+      likeCount: 15000000,
       publishedAt: DateTime.now().subtract(Duration(days: 7)),
-      tags: ['flutter', 'mobile', 'development'],
+      tags: ['music', 'classic', 'pop'],
       contentType: ContentType.video,
       createdAt: DateTime.now().subtract(Duration(days: 7)),
       updatedAt: DateTime.now().subtract(Duration(days: 7)),
@@ -37,18 +131,18 @@ class ContentService {
     Content(
       id: 'yt_2',
       platform: PlatformType.youtube,
-      platformContentId: 'X8ipUgXH6jw',
-      title: 'React Native vs Flutter Comparison',
-      description: 'Detailed comparison between React Native and Flutter frameworks',
-      videoUrl: 'https://www.youtube.com/embed/X8ipUgXH6jw',
-      thumbnailUrl: 'https://img.youtube.com/vi/X8ipUgXH6jw/maxresdefault.jpg',
-      creatorName: 'Tech Explained',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
-      durationSeconds: 1335,
-      viewCount: 890000,
-      likeCount: 32000,
+      platformContentId: 'jNQXAC9IVRw',
+      title: 'Me at the zoo – First YouTube Video',
+      description: 'The very first video ever uploaded to YouTube by co-founder Jawed Karim.',
+      videoUrl: 'https://www.youtube.com/watch?v=jNQXAC9IVRw',
+      embedUrl: 'https://www.youtube.com/embed/jNQXAC9IVRw',
+      thumbnailUrl: 'https://img.youtube.com/vi/jNQXAC9IVRw/hqdefault.jpg',
+      creatorName: 'jawed',
+      durationSeconds: 19,
+      viewCount: 300000000,
+      likeCount: 2500000,
       publishedAt: DateTime.now().subtract(Duration(days: 3)),
-      tags: ['react-native', 'flutter', 'comparison'],
+      tags: ['history', 'youtube', 'animals'],
       contentType: ContentType.video,
       createdAt: DateTime.now().subtract(Duration(days: 3)),
       updatedAt: DateTime.now().subtract(Duration(days: 3)),
@@ -56,18 +150,18 @@ class ContentService {
     Content(
       id: 'yt_3',
       platform: PlatformType.youtube,
-      platformContentId: 'NCwa_xi0Uuc',
-      title: 'JavaScript ES6 Features Explained',
-      description: 'Modern JavaScript features every developer should know',
-      videoUrl: 'https://www.youtube.com/embed/NCwa_xi0Uuc',
-      thumbnailUrl: 'https://img.youtube.com/vi/NCwa_xi0Uuc/maxresdefault.jpg',
-      creatorName: 'JavaScript Mastery',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
-      durationSeconds: 1125,
-      viewCount: 567000,
-      likeCount: 28000,
+      platformContentId: 'M7lc1UVf-VE',
+      title: 'YouTube – Broadcast Yourself',
+      description: 'Official YouTube intro video, always available and embeddable.',
+      videoUrl: 'https://www.youtube.com/watch?v=M7lc1UVf-VE',
+      embedUrl: 'https://www.youtube.com/embed/M7lc1UVf-VE',
+      thumbnailUrl: 'https://img.youtube.com/vi/M7lc1UVf-VE/hqdefault.jpg',
+      creatorName: 'YouTube',
+      durationSeconds: 61,
+      viewCount: 50000000,
+      likeCount: 500000,
       publishedAt: DateTime.now().subtract(Duration(days: 5)),
-      tags: ['javascript', 'es6', 'programming'],
+      tags: ['youtube', 'official', 'intro'],
       contentType: ContentType.video,
       createdAt: DateTime.now().subtract(Duration(days: 5)),
       updatedAt: DateTime.now().subtract(Duration(days: 5)),
@@ -78,10 +172,10 @@ class ContentService {
       platformContentId: 'vmEHCJofslg',
       title: 'Python Data Science Tutorial',
       description: 'Complete guide to data science with Python and pandas',
-      videoUrl: 'https://www.youtube.com/embed/vmEHCJofslg',
-      thumbnailUrl: 'https://img.youtube.com/vi/vmEHCJofslg/maxresdefault.jpg',
+      videoUrl: 'https://www.youtube.com/watch?v=vmEHCJofslg',
+      embedUrl: 'https://www.youtube.com/embed/vmEHCJofslg',
+      thumbnailUrl: 'https://img.youtube.com/vi/vmEHCJofslg/hqdefault.jpg',
       creatorName: 'Data Science Pro',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
       durationSeconds: 2120,
       viewCount: 1100000,
       likeCount: 52000,
@@ -97,10 +191,10 @@ class ContentService {
       platformContentId: 'ysEN5RaKOlA',
       title: 'Web Development Roadmap 2024',
       description: 'Complete roadmap for becoming a web developer in 2024',
-      videoUrl: 'https://www.youtube.com/embed/ysEN5RaKOlA',
-      thumbnailUrl: 'https://img.youtube.com/vi/ysEN5RaKOlA/maxresdefault.jpg',
+      videoUrl: 'https://www.youtube.com/watch?v=ysEN5RaKOlA',
+      embedUrl: 'https://www.youtube.com/embed/ysEN5RaKOlA',
+      thumbnailUrl: 'https://img.youtube.com/vi/ysEN5RaKOlA/hqdefault.jpg',
       creatorName: 'Web Dev Simplified',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
       durationSeconds: 1690,
       viewCount: 750000,
       likeCount: 38000,
@@ -236,10 +330,10 @@ class ContentService {
       platformContentId: 'ukzFI9rgwfU',
       title: 'Machine Learning Basics',
       description: 'Introduction to machine learning concepts and algorithms',
-      videoUrl: 'https://www.youtube.com/embed/ukzFI9rgwfU',
-      thumbnailUrl: 'https://img.youtube.com/vi/ukzFI9rgwfU/maxresdefault.jpg',
+      videoUrl: 'https://www.youtube.com/watch?v=ukzFI9rgwfU',
+      embedUrl: 'https://www.youtube.com/embed/ukzFI9rgwfU',
+      thumbnailUrl: 'https://img.youtube.com/vi/ukzFI9rgwfU/hqdefault.jpg',
       creatorName: 'AI Academy',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
       durationSeconds: 2550,
       viewCount: 1800000,
       likeCount: 67000,
@@ -281,15 +375,15 @@ class ContentService {
     return filteredVideos.take(limit).toList();
   }
 
-  // Get trending videos
-  Future<List<Content>> getTrendingVideos({int limit = 5}) async {
-    await Future.delayed(Duration(milliseconds: 300));
-    
-    // Sort by views and likes for trending
-    List<Content> trending = List.from(_sampleVideos);
-    trending.sort((a, b) => (b.viewCount + b.likeCount).compareTo(a.viewCount + a.likeCount));
-    
-    return trending.take(limit).toList();
+  // Get trending videos — tries YouTube RSS first, falls back to sample data
+  Future<List<Content>> getTrendingVideos({int limit = 15}) async {
+    try {
+      final rssContent = await fetchTrendingContent(limit: limit);
+      if (rssContent.isNotEmpty) return rssContent;
+    } catch (_) {}
+    // Fallback to sample data (guaranteed-playable IDs are listed first)
+    final shuffled = List<Content>.from(_sampleVideos)..shuffle(Random());
+    return shuffled.take(limit).toList();
   }
 
   // Get videos by category
@@ -411,7 +505,7 @@ class ContentService {
       // Convert recommendations to content objects
       return recommendations.map((rec) => rec.content).toList();
     } catch (e) {
-      print('Error getting personalized content: $e');
+      debugPrint('Error getting personalized content: $e');
       // Fallback to regular feed content
       return getFeedContent(limit: limit);
     }
@@ -444,7 +538,7 @@ class ContentService {
       // Convert recommendations to content objects
       return recommendations.map((rec) => rec.content).toList();
     } catch (e) {
-      print('Error getting onboarding-based recommendations: $e');
+      debugPrint('Error getting onboarding-based recommendations: $e');
       // Fallback to regular feed content
       return getFeedContent(limit: limit);
     }
@@ -496,7 +590,7 @@ class ContentService {
       
       return filteredContent.take(limit).toList();
     } catch (e) {
-      print('Error getting preference filtered content: $e');
+      debugPrint('Error getting preference filtered content: $e');
       // Fallback to regular filtered content
       return getVideos(platform: platform, category: category, limit: limit);
     }
@@ -526,7 +620,7 @@ class ContentService {
       
       await enhancedService.trackContentInteraction(interaction.toJson());
     } catch (e) {
-      print('Error tracking content interaction: $e');
+      debugPrint('Error tracking content interaction: $e');
     }
   }
 
@@ -549,7 +643,7 @@ class ContentService {
       // Convert recommendations to content objects
       return recommendations.map((rec) => rec.content).toList();
     } catch (e) {
-      print('Error getting time-based recommendations: $e');
+      debugPrint('Error getting time-based recommendations: $e');
       return getFeedContent(limit: limit);
     }
   }

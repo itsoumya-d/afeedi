@@ -6,6 +6,7 @@ import '../screens/tabs/shorts_tab.dart';
 import '../widgets/dashboard/calendar_tab.dart';
 import '../screens/profile_screen.dart';
 import '../widgets/common/shared_bottom_navigation.dart';
+import '../widgets/dashboard/settings_tab.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -174,7 +175,9 @@ class _DashboardScreenState extends State<DashboardScreen>
           // Action buttons
           IconButton(
             onPressed: () {
-              // Navigate to search
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Search coming soon'), duration: Duration(seconds: 2)),
+              );
             },
             icon: const Icon(
               Icons.search,
@@ -184,29 +187,21 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
           IconButton(
             onPressed: () {
-              // Navigate to notifications
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Notifications coming soon'), duration: Duration(seconds: 2)),
+              );
             },
-            icon: Stack(
-              children: [
-                const Icon(
-                  Icons.notifications_outlined,
-                  color: Colors.white,
-                  size: 22,
-                ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: AppTheme.primaryPink,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-              ],
+            icon: const Icon(
+              Icons.notifications_outlined,
+              color: Colors.white,
+              size: 22,
             ),
+          ),
+          IconButton(
+            onPressed: () {
+              _showSettingsModal(context);
+            },
+            icon: const Icon(Icons.settings_outlined, color: Colors.white, size: 22),
           ),
         ],
       ),
@@ -215,6 +210,45 @@ class _DashboardScreenState extends State<DashboardScreen>
   
 
   
+  void _showSettingsModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      useSafeArea: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFF0D0B1E),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: const SettingsTab(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   String _getGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) {

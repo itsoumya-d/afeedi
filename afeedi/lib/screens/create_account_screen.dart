@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+import '../services/local_auth_service.dart';
+import '../services/navigation_service.dart';
 
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({super.key});
@@ -361,15 +363,23 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                     width: double.infinity,
                                     height: 52,
                                     child: ElevatedButton(
-                                      onPressed: _agreeToTerms ? () {
+                                      onPressed: _agreeToTerms ? () async {
                                         if (_formKey.currentState!.validate()) {
-                                          // TODO: Implement account creation
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Account created successfully!'),
-                                              backgroundColor: Color(0xFF00D4FF),
-                                            ),
+                                          final user = await LocalAuthService.instance.signUp(
+                                            email: _emailController.text.trim(),
+                                            password: _passwordController.text,
+                                            fullName: _nameController.text.trim(),
                                           );
+                                          if (user != null && mounted) {
+                                            Navigator.pushReplacementNamed(context, AppRoutes.onboardingChatbot);
+                                          } else if (mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text('Account creation failed. Try a different email.'),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
                                         }
                                       } : null,
                                       style: ElevatedButton.styleFrom(

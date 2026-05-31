@@ -7,6 +7,7 @@ import '../../widgets/onboarding/genre_selection.dart';
 import '../../widgets/onboarding/platform_connection.dart';
 import '../../widgets/onboarding/text_input_widget.dart';
 import '../../services/navigation_service.dart';
+import '../../services/onboarding_service.dart';
 
 class ChatInterface extends StatefulWidget {
   final ChatController controller;
@@ -231,8 +232,11 @@ class _ChatInterfaceState extends State<ChatInterface>
         child: Container(
           margin: const EdgeInsets.all(16),
           child: ElevatedButton(
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+            onPressed: () async {
+              await OnboardingService().markOnboardingComplete();
+              if (mounted) {
+                Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF00D4FF),

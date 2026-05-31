@@ -3,6 +3,7 @@ import '../../core/theme/app_theme.dart';
 import '../../models/content_model.dart';
 import '../../services/enhanced_calendar_service.dart';
 import '../../services/analytics_service.dart';
+import '../../services/content_service.dart';
 import '../../widgets/streaming/responsive_video_player.dart';
 
 class CalendarTab extends StatefulWidget {
@@ -53,7 +54,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       'duration': 15,
       'platform': 'YouTube',
       'creator': 'TechDaily',
-      'thumbnail': 'https://picsum.photos/60/60?random=1',
+      'thumbnail': 'https://img.youtube.com/vi/dQw4w9WgXcQ/default.jpg',
       'type': 'scheduled',
       'category': 'entertainment',
       'keywords': ['tech', 'news', 'daily'],
@@ -67,7 +68,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       'duration': 45,
       'platform': 'YouTube',
       'creator': 'CodeMaster',
-      'thumbnail': 'https://picsum.photos/60/60?random=2',
+      'thumbnail': 'https://img.youtube.com/vi/vmEHCJofslg/default.jpg',
       'type': 'scheduled',
       'category': 'education',
       'keywords': ['flutter', 'programming', 'tutorial'],
@@ -79,9 +80,9 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
       'title': 'Relaxing Music',
       'time': '20:00',
       'duration': 60,
-      'platform': 'Spotify',
+      'platform': 'YouTube',
       'creator': 'ChillBeats',
-      'thumbnail': 'https://picsum.photos/60/60?random=3',
+      'thumbnail': 'https://img.youtube.com/vi/M7lc1UVf-VE/default.jpg',
       'type': 'scheduled',
       'category': 'entertainment',
       'keywords': ['music', 'relaxing', 'chill'],
@@ -90,15 +91,15 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     },
     {
       'id': '4',
-      'title': 'Mathematics Study Session',
+      'title': 'Educational Content',
       'time': '10:00',
       'duration': 90,
-      'platform': 'Khan Academy',
-      'creator': 'Khan Academy',
-      'thumbnail': 'https://picsum.photos/60/60?random=6',
+      'platform': 'YouTube',
+      'creator': 'Education Channel',
+      'thumbnail': 'https://img.youtube.com/vi/jNQXAC9IVRw/default.jpg',
       'type': 'scheduled',
       'category': 'study',
-      'keywords': ['mathematics', 'calculus', 'study'],
+      'keywords': ['education', 'learning', 'study'],
       'educationValue': 95,
       'entertainmentValue': 5,
     },
@@ -108,6 +109,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   void initState() {
     super.initState();
     _loadContentForSelectedDate();
+    _loadAIRecommendations();
     _calendarAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -185,6 +187,31 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     }
   }
   
+  Future<void> _loadAIRecommendations() async {
+    try {
+      final videos = await ContentService.instance.getTrendingVideos(limit: 4);
+      if (!mounted || videos.isEmpty) return;
+      final now = DateTime.now();
+      final recs = videos.asMap().entries.map((e) {
+        final i = e.key;
+        final v = e.value;
+        final hour = 14 + i * 2;
+        final isEducation = (v.categories ?? []).any((c) => ['education', 'technology', 'science'].contains(c.toLowerCase()));
+        return {
+          'id': v.id,
+          'title': i == 0 ? 'Based on your interests' : 'Trending Now',
+          'subtitle': v.title ?? 'Recommended Video',
+          'time': '${hour.toString().padLeft(2, '0')}:00',
+          'confidence': 0.85 + (i * 0.03),
+          'thumbnail': v.thumbnailUrl,
+          'educationValue': isEducation ? 80 : 20,
+          'entertainmentValue': isEducation ? 20 : 80,
+        };
+      }).toList();
+      setState(() => _aiRecommendations = recs);
+    } catch (_) {}
+  }
+
   void _onDateSelected(DateTime selectedDate) {
     setState(() {
       _selectedDate = selectedDate;
@@ -307,28 +334,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     }
   }
   
-  final List<Map<String, dynamic>> _aiRecommendations = [
-    {
-      'id': 'ai1',
-      'title': 'Based on your interests',
-      'subtitle': 'New Flutter 3.0 Features',
-      'time': '16:00',
-      'confidence': 0.92,
-      'thumbnail': 'https://picsum.photos/60/60?random=4',
-      'educationValue': 85,
-      'entertainmentValue': 15,
-    },
-    {
-      'id': 'ai2',
-      'title': 'Trending in Tech',
-      'subtitle': 'AI Revolution 2024',
-      'time': '18:30',
-      'confidence': 0.87,
-      'thumbnail': 'https://picsum.photos/60/60?random=5',
-      'educationValue': 70,
-      'entertainmentValue': 30,
-    },
-  ];
+  List<Map<String, dynamic>> _aiRecommendations = [];
 
   @override
   Widget build(BuildContext context) {
@@ -1127,16 +1133,13 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   
   List<Map<String, dynamic>> _getContentForDate(DateTime date) {
     try {
-      return _getFilteredContent().where((content) {
-        try {
-          // Mock logic - in real app, this would check actual scheduled dates
-          final contentDay = date.day;
-          return contentDay % 3 == 0 || contentDay % 5 == 0;
-        } catch (e) {
-          debugPrint('Error checking content for date: $e');
-          return false;
-        }
-      }).toList();
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final tomorrow = DateTime(now.year, now.month, now.day + 1);
+      final bool isToday = date.year == today.year && date.month == today.month && date.day == today.day;
+      final bool isTomorrow = date.year == tomorrow.year && date.month == tomorrow.month && date.day == tomorrow.day;
+      if (!isToday && !isTomorrow) return [];
+      return _getFilteredContent();
     } catch (e) {
       debugPrint('Error in _getContentForDate: $e');
       return [];

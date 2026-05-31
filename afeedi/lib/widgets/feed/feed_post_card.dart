@@ -5,10 +5,17 @@ import '../../models/content_model.dart';
 import '../../widgets/streaming/responsive_video_player.dart';
 import '../../services/content_service.dart';
 
-class FeedPostCard extends StatelessWidget {
+class FeedPostCard extends StatefulWidget {
   final Content content;
 
   const FeedPostCard({super.key, required this.content});
+
+  @override
+  State<FeedPostCard> createState() => _FeedPostCardState();
+}
+
+class _FeedPostCardState extends State<FeedPostCard> {
+  Content get content => widget.content;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +30,7 @@ class FeedPostCard extends StatelessWidget {
           _buildHeader(),
           _buildContent(),
           _buildVideoPlayer(),
-          _buildActions(),
+          _buildActions(context),
         ],
       ),
     );
@@ -195,7 +202,7 @@ class FeedPostCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActions() {
+  Widget _buildActions(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Row(
@@ -230,6 +237,14 @@ class FeedPostCard extends StatelessWidget {
                 contentId: content.id,
                 interactionType: InteractionType.share,
               );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Sharing: ${content.title ?? 'this video'}'),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
             },
           ),
           const Spacer(),

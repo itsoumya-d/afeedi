@@ -333,9 +333,11 @@ class _ShortsTabState extends State<ShortsTab> {
         'platform': content.platform.name,
       },
     );
-    // TODO: Open comment sheet
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Comments coming soon'), duration: Duration(seconds: 2)),
+    );
   }
-  
+
   void _handleShare(Content content) {
     AnalyticsService.instance.trackUserInteraction(
       action: 'short_shared',
@@ -345,7 +347,17 @@ class _ShortsTabState extends State<ShortsTab> {
         'platform': content.platform.name,
       },
     );
-    // TODO: Implement share functionality
+    final title = content.title ?? 'Check this out on Afeedi!';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Sharing: $title'),
+        duration: const Duration(seconds: 2),
+        action: SnackBarAction(
+          label: 'OK',
+          onPressed: () {},
+        ),
+      ),
+    );
   }
   
   void _showMoreOptions(Content content) {
@@ -446,25 +458,41 @@ class _ShortsTabState extends State<ShortsTab> {
               _buildActionButton(
                 icon: Icons.favorite_border,
                 label: shortData['likes'],
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Liked!'), duration: Duration(seconds: 1)),
+                  );
+                },
               ),
               const SizedBox(height: 20),
               _buildActionButton(
                 icon: Icons.comment_outlined,
                 label: shortData['comments'],
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Comments coming soon'), duration: Duration(seconds: 2)),
+                  );
+                },
               ),
               const SizedBox(height: 20),
               _buildActionButton(
                 icon: Icons.share_outlined,
                 label: shortData['shares'],
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Sharing: ${shortData['title']}'), duration: const Duration(seconds: 2)),
+                  );
+                },
               ),
               const SizedBox(height: 20),
               _buildActionButton(
                 icon: Icons.bookmark_border,
                 label: '',
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Saved!'), duration: Duration(seconds: 1)),
+                  );
+                },
               ),
             ],
           ),

@@ -422,3 +422,87 @@ class Recommendation {
     return 'Recommendation(id: $id, userId: $userId, contentId: $contentId, score: $recommendationScore)';
   }
 }
+
+class ScheduledContent {
+  final String id;
+  final String userId;
+  final String contentId;
+  final DateTime scheduledFor;
+  final String? notes;
+  final bool isRecurring;
+  final Map<String, dynamic>? recurrencePattern;
+  final bool notificationSent;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  const ScheduledContent({
+    required this.id,
+    required this.userId,
+    required this.contentId,
+    required this.scheduledFor,
+    this.notes,
+    this.isRecurring = false,
+    this.recurrencePattern,
+    this.notificationSent = false,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory ScheduledContent.fromJson(Map<String, dynamic> json) {
+    return ScheduledContent(
+      id: json['id'] as String,
+      userId: json['user_id'] as String,
+      contentId: json['content_id'] as String,
+      scheduledFor: DateTime.parse(json['scheduled_for'] as String),
+      notes: json['notes'] as String?,
+      isRecurring: json['is_recurring'] as bool? ?? false,
+      recurrencePattern: json['recurrence_pattern'] != null
+          ? Map<String, dynamic>.from(json['recurrence_pattern'])
+          : null,
+      notificationSent: json['notification_sent'] as bool? ?? false,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'content_id': contentId,
+      'scheduled_for': scheduledFor.toIso8601String(),
+      'notes': notes,
+      'is_recurring': isRecurring,
+      'recurrence_pattern': recurrencePattern,
+      'notification_sent': notificationSent,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+    };
+  }
+
+  ScheduledContent copyWith({
+    String? id,
+    String? userId,
+    String? contentId,
+    DateTime? scheduledFor,
+    String? notes,
+    bool? isRecurring,
+    Map<String, dynamic>? recurrencePattern,
+    bool? notificationSent,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return ScheduledContent(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      contentId: contentId ?? this.contentId,
+      scheduledFor: scheduledFor ?? this.scheduledFor,
+      notes: notes ?? this.notes,
+      isRecurring: isRecurring ?? this.isRecurring,
+      recurrencePattern: recurrencePattern ?? this.recurrencePattern,
+      notificationSent: notificationSent ?? this.notificationSent,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+}

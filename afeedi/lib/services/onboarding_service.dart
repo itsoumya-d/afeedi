@@ -323,7 +323,7 @@ class OnboardingService {
   Future<void> skipStep(int stepId) async {
     if (stepId >= 0 && stepId < getOnboardingSteps().length) {
       _currentStepIndex = stepId + 1;
-      print('Skipped step $stepId');
+      debugPrint('Skipped step $stepId');
     }
   }
 

@@ -276,7 +276,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       child: Column(
         children: [
           Text(
-            '24',
+            _posts.length.toString(),
             style: TextStyle(
               color: AppTheme.primaryCyan,
               fontSize: 16,

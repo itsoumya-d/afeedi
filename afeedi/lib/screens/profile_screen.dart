@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme/app_theme.dart';
 import '../services/streak_service.dart';
 import '../services/local_auth_service.dart';
@@ -110,12 +111,22 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
 
   Future<void> _loadRealData() async {
     final streak = StreakService.instance.getCurrentStreak();
-    final longest = await StreakService.instance.getLongestStreak();
+    await StreakService.instance.getLongestStreak();
     final user = LocalAuthService.instance.currentUser;
+    final prefs = await SharedPreferences.getInstance();
+    final completedAt = prefs.getString('onboarding_completed_at');
+    String joinDate = 'Today';
+    if (completedAt != null) {
+      final dt = DateTime.tryParse(completedAt);
+      if (dt != null) {
+        joinDate = '${_monthName(dt.month)} ${dt.day}, ${dt.year}';
+      }
+    }
     if (mounted) {
       setState(() {
         _currentStreak = streak;
         _userProfile['streakDays'] = streak;
+        _userProfile['joinDate'] = joinDate;
         if (user != null) {
           final emailName = user.email?.split('@').first ?? 'User';
           _userProfile['name'] = emailName[0].toUpperCase() + emailName.substring(1);
@@ -123,6 +134,11 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         }
       });
     }
+  }
+
+  String _monthName(int month) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[month - 1];
   }
   
   @override

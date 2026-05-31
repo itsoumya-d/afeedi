@@ -1127,16 +1127,13 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   
   List<Map<String, dynamic>> _getContentForDate(DateTime date) {
     try {
-      return _getFilteredContent().where((content) {
-        try {
-          // Mock logic - in real app, this would check actual scheduled dates
-          final contentDay = date.day;
-          return contentDay % 3 == 0 || contentDay % 5 == 0;
-        } catch (e) {
-          debugPrint('Error checking content for date: $e');
-          return false;
-        }
-      }).toList();
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final tomorrow = DateTime(now.year, now.month, now.day + 1);
+      final bool isToday = date.year == today.year && date.month == today.month && date.day == today.day;
+      final bool isTomorrow = date.year == tomorrow.year && date.month == tomorrow.month && date.day == tomorrow.day;
+      if (!isToday && !isTomorrow) return [];
+      return _getFilteredContent();
     } catch (e) {
       debugPrint('Error in _getContentForDate: $e');
       return [];

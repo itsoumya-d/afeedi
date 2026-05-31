@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/local_auth_service.dart';
 import '../../core/storage/local_storage_service.dart';
@@ -751,9 +752,10 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Open terms URL
+              final uri = Uri.parse('https://afeedi.com/terms');
+              if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
             },
             child: const Text(
               'Open',
@@ -787,9 +789,10 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Open privacy URL
+              final uri = Uri.parse('https://afeedi.com/privacy');
+              if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
             },
             child: const Text(
               'Open',
@@ -835,10 +838,13 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
 
   // Navigation methods
   void _navigateToProfile() {
-    // TODO: Navigate to profile screen
+    Navigator.pop(context);
+    Navigator.pushNamed(context, AppRoutes.profile);
   }
-  
+
   void _navigateToSubscription() {
-    // TODO: Navigate to subscription screen
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Premium plans coming soon'), duration: Duration(seconds: 2)),
+    );
   }
 }

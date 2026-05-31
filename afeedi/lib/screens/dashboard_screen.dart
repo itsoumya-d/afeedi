@@ -175,7 +175,9 @@ class _DashboardScreenState extends State<DashboardScreen>
           // Action buttons
           IconButton(
             onPressed: () {
-              // Navigate to search
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Search coming soon'), duration: Duration(seconds: 2)),
+              );
             },
             icon: const Icon(
               Icons.search,
@@ -185,28 +187,14 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
           IconButton(
             onPressed: () {
-              // Navigate to notifications
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Notifications coming soon'), duration: Duration(seconds: 2)),
+              );
             },
-            icon: Stack(
-              children: [
-                const Icon(
-                  Icons.notifications_outlined,
-                  color: Colors.white,
-                  size: 22,
-                ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: AppTheme.primaryPink,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-              ],
+            icon: const Icon(
+              Icons.notifications_outlined,
+              color: Colors.white,
+              size: 22,
             ),
           ),
           IconButton(

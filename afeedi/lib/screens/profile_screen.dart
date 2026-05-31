@@ -38,7 +38,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   }
 
   Future<void> _loadRealData() async {
-    final streak = StreakService.instance.getCurrentStreak();
+    final streak = await StreakService.instance.getCurrentStreak();
     final longest = await StreakService.instance.getLongestStreak();
     final user = LocalAuthService.instance.currentUser;
     final prefs = await SharedPreferences.getInstance();

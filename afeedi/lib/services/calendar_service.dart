@@ -55,7 +55,7 @@ class CalendarService {
       return scheduledContent;
     } catch (error) {
       if (kDebugMode) {
-        print('Error scheduling content: $error');
+        debugPrint('Error scheduling content: $error');
       }
       return null;
     }
@@ -92,7 +92,7 @@ class CalendarService {
       }).toList();
     } catch (error) {
       if (kDebugMode) {
-        print('Error getting scheduled content: $error');
+        debugPrint('Error getting scheduled content: $error');
       }
       return [];
     }
@@ -162,7 +162,7 @@ class CalendarService {
       return updated;
     } catch (error) {
       if (kDebugMode) {
-        print('Error updating scheduled content: $error');
+        debugPrint('Error updating scheduled content: $error');
       }
       return null;
     }
@@ -189,7 +189,7 @@ class CalendarService {
       return true;
     } catch (error) {
       if (kDebugMode) {
-        print('Error canceling scheduled content: $error');
+        debugPrint('Error canceling scheduled content: $error');
       }
       return false;
     }
@@ -289,7 +289,7 @@ class CalendarService {
       return scheduledContentList;
     } catch (error) {
       if (kDebugMode) {
-        print('Error creating recurring schedule: $error');
+        debugPrint('Error creating recurring schedule: $error');
       }
       return [];
     }
@@ -367,7 +367,7 @@ class CalendarService {
       };
     } catch (error) {
       if (kDebugMode) {
-        print('Error getting calendar stats: $error');
+        debugPrint('Error getting calendar stats: $error');
       }
       return {};
     }

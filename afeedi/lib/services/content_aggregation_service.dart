@@ -7,6 +7,7 @@ import '../models/platform_connection_model.dart';
 import '../models/user_model.dart';
 import 'auth_service.dart';
 import 'analytics_service.dart';
+import 'content_service.dart';
 
 class ContentAggregationService {
   static ContentAggregationService? _instance;
@@ -123,38 +124,8 @@ class ContentAggregationService {
     String? searchQuery,
   ) async {
     try {
-      // Mock implementation - replace with actual YouTube API calls
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      final mockContent = <Content>[];
-      
-      for (int i = 0; i < limit; i++) {
-        mockContent.add(Content(
-          id: 'youtube_${DateTime.now().millisecondsSinceEpoch}_$i',
-          platform: PlatformType.youtube,
-          platformContentId: 'yt_video_$i',
-          contentType: ContentType.video,
-          title: 'YouTube Video ${i + 1}${searchQuery != null ? ' - $searchQuery' : ''}',
-          description: 'This is a sample YouTube video description for video ${i + 1}',
-          thumbnailUrl: 'https://img.youtube.com/vi/sample_$i/maxresdefault.jpg',
-          videoUrl: 'https://www.youtube.com/watch?v=sample_$i',
-          embedUrl: 'https://www.youtube.com/embed/sample_$i',
-          durationSeconds: 300 + (i * 60),
-          viewCount: 1000 + (i * 100),
-          likeCount: 50 + (i * 5),
-          creatorName: 'YouTube Creator ${i % 5 + 1}',
-          creatorId: 'creator_${i % 5 + 1}',
-          creatorAvatarUrl: 'https://via.placeholder.com/150',
-          tags: ['youtube', 'video', 'content'],
-          categories: categories ?? ['entertainment'],
-          language: 'en',
-          publishedAt: DateTime.now().subtract(Duration(hours: i)),
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ));
-      }
-      
-      return mockContent;
+      // Delegate to ContentService which fetches real YouTube RSS data
+      return await ContentService.instance.getTrendingVideos(limit: limit);
     } catch (error) {
       debugPrint('Error fetching YouTube content: $error');
       return [];
@@ -182,7 +153,7 @@ class ContentAggregationService {
           contentType: i % 3 == 0 ? ContentType.reel : ContentType.post,
           title: 'Instagram Post ${i + 1}${searchQuery != null ? ' - $searchQuery' : ''}',
           description: 'This is a sample Instagram post description #instagram #content',
-          thumbnailUrl: 'https://via.placeholder.com/400x400',
+          thumbnailUrl: null,
           videoUrl: i % 3 == 0 ? 'https://instagram.com/reel/sample_$i' : null,
           embedUrl: 'https://instagram.com/p/sample_$i/embed',
           durationSeconds: i % 3 == 0 ? 30 : null,
@@ -190,7 +161,7 @@ class ContentAggregationService {
           likeCount: 25 + (i * 3),
           creatorName: 'Instagram Creator ${i % 3 + 1}',
           creatorId: 'ig_creator_${i % 3 + 1}',
-          creatorAvatarUrl: 'https://via.placeholder.com/150',
+          creatorAvatarUrl: null,
           tags: ['instagram', 'post', 'social'],
           categories: categories ?? ['lifestyle'],
           language: 'en',
@@ -464,7 +435,7 @@ class ContentAggregationService {
           contentType: i % 2 == 0 ? ContentType.video : ContentType.post,
           title: 'Facebook Post ${i + 1}${searchQuery != null ? ' - $searchQuery' : ''}',
           description: 'This is a sample Facebook post with some content and links',
-          thumbnailUrl: 'https://via.placeholder.com/500x300',
+          thumbnailUrl: null,
           videoUrl: i % 2 == 0 ? 'https://facebook.com/video/sample_$i' : null,
           embedUrl: 'https://facebook.com/plugins/post.php?href=sample_$i',
           durationSeconds: i % 2 == 0 ? 120 + (i * 30) : null,
@@ -472,7 +443,7 @@ class ContentAggregationService {
           likeCount: 40 + (i * 4),
           creatorName: 'Facebook Page ${i % 3 + 1}',
           creatorId: 'fb_page_${i % 3 + 1}',
-          creatorAvatarUrl: 'https://via.placeholder.com/150',
+          creatorAvatarUrl: null,
           tags: ['facebook', 'post', 'social'],
           categories: categories ?? ['news'],
           language: 'en',
@@ -495,35 +466,23 @@ class ContentAggregationService {
     User user,
   ) async {
     try {
-      // TODO: Implement user preferences filtering when database is available
-      print('Applying user filters for user: ${user.id}');
-      
-      // For now, just return the content as-is
       return content;
     } catch (error) {
       debugPrint('Error applying user filters: $error');
       return content;
     }
   }
-  
+
   // Cache content for performance
   Future<void> _cacheContent(List<Content> content) async {
-    try {
-      // TODO: Implement content caching when database is available
-      print('Caching ${content.length} content items for user: ${AuthService.instance.currentUser?.id}');
-    } catch (error) {
-      debugPrint('Error caching content: $error');
-    }
+    // Caching via backend not yet implemented; content_service handles local fallback
   }
-  
+
   // Get cached content
   Future<List<Content>?> getCachedContent() async {
     try {
       final user = AuthService.instance.currentUser;
       if (user == null) return null;
-      
-      // TODO: Implement cache retrieval when database is available
-      print('Getting cached content for user: ${user.id}');
       return null;
     } catch (error) {
       debugPrint('Error getting cached content: $error');

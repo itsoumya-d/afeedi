@@ -201,9 +201,7 @@ class EnhancedRecommendationService {
   
   // Track content interaction for future recommendations
   Future<void> trackContentInteraction(Map<String, dynamic> interaction) async {
-    // TODO: Implement interaction tracking
-    // For now, just log the interaction
-    print('Content interaction tracked: $interaction');
+    debugPrint('Content interaction tracked: $interaction');
   }
   
   // Get personalized recommendations

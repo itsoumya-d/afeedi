@@ -241,18 +241,21 @@ class OnboardingService {
 
   // Get current user preferences
   Future<UserPreferences?> getCurrentPreferences() async {
-    // TODO: Implement actual preferences loading
-    // For now, return default preferences
     final data = await loadOnboardingData();
     if (data == null) return null;
-    
-    final preferences = data['preferences'] as Map<String, dynamic>?;
-    if (preferences == null) return null;
-    
+
+    // Support both top-level keys (from saveOnboardingData) and nested preferences key (from savePreferences)
+    final preferences = data['preferences'] as Map<String, dynamic>? ?? data;
+
+    final rawGenres = preferences['selectedGenres'];
+    final rawPlatforms = preferences['platformConnections'];
+
     return UserPreferences(
-      contentInterests: List<String>.from(preferences['selectedGenres'] ?? []),
-      platformPriorities: Map<String, double>.from(preferences['platformConnections']?.map((k, v) => MapEntry(k, v == true ? 1.0 : 0.0)) ?? {}),
-      name: preferences['userName'] ?? '',
+      contentInterests: rawGenres is List ? List<String>.from(rawGenres) : [],
+      platformPriorities: rawPlatforms is Map
+          ? Map<String, double>.from(rawPlatforms.map((k, v) => MapEntry(k.toString(), v == true ? 1.0 : 0.0)))
+          : {},
+      name: (preferences['userName'] ?? '').toString(),
     );
   }
 

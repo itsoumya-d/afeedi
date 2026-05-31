@@ -51,6 +51,21 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
   }
 
   Future<void> _initializePlayer() async {
+    // Instagram & Facebook: enforce link-out immediately (ToS compliance —
+    // oEmbed requires Meta App Review; until approved, redirect to native app)
+    if (widget.content.platform == PlatformType.instagram ||
+        widget.content.platform == PlatformType.facebook) {
+      if (mounted) setState(() => _isLoading = false);
+      Future.delayed(const Duration(milliseconds: 800), () {
+        if (!mounted) return;
+        final url = widget.content.videoUrl ?? widget.content.embedUrl;
+        if (url != null && url.isNotEmpty) {
+          _openInBrowser(url);
+        }
+      });
+      return;
+    }
+
     try {
       setState(() {
         _isLoading = true;

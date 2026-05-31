@@ -17,6 +17,31 @@ class ContentService {
 
   static ContentService get instance => _instance;
 
+  // Tier-1 in-memory cache: key → (data, createdAt). TTL = 5 minutes.
+  final Map<String, ({List<Content> data, DateTime at})> _memCache = {};
+  static const Duration _memCacheTtl = Duration(minutes: 5);
+
+  List<Content>? _memGet(String key) {
+    final entry = _memCache[key];
+    if (entry == null) return null;
+    if (DateTime.now().difference(entry.at) > _memCacheTtl) {
+      _memCache.remove(key);
+      return null;
+    }
+    return entry.data;
+  }
+
+  void _memPut(String key, List<Content> data) =>
+      _memCache[key] = (data: data, at: DateTime.now());
+
+  void invalidateCache([String? key]) {
+    if (key != null) {
+      _memCache.remove(key);
+    } else {
+      _memCache.clear();
+    }
+  }
+
   // Sample real YouTube video data for testing
   static final List<Content> _sampleVideos = [
     Content(
@@ -3258,6 +3283,10 @@ class ContentService {
   }
 
   Future<List<Content>> getFeedContent({int limit = 10}) async {
+    final cacheKey = 'feed_$limit';
+    final cached = _memGet(cacheKey);
+    if (cached != null) return cached;
+
     try {
       final userLocale = await _getUserLocale();
 
@@ -3283,6 +3312,8 @@ class ContentService {
 
       feedContent = _applyLocaleBoost(feedContent, userLocale);
       final result = _withCreatorIds(feedContent.take(limit).toList());
+
+      _memPut(cacheKey, result);
 
       // Persist IDs for offline fallback
       final prefs = await SharedPreferences.getInstance();
@@ -3381,6 +3412,10 @@ class ContentService {
   Future<List<Content>> getOnboardingBasedRecommendations({
     int limit = 20,
   }) async {
+    final cacheKey = 'onboarding_recs_$limit';
+    final cached = _memGet(cacheKey);
+    if (cached != null) return cached;
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final selectedGenres =
@@ -3447,7 +3482,11 @@ class ContentService {
         if (result.length >= limit) break;
       }
 
-      return result.isEmpty ? getFeedContent(limit: limit) : result;
+      final final_result = result.isEmpty
+          ? await getFeedContent(limit: limit)
+          : result;
+      _memPut(cacheKey, final_result);
+      return final_result;
     } catch (e) {
       debugPrint('getOnboardingBasedRecommendations error: $e');
       return getFeedContent(limit: limit);

@@ -36,7 +36,9 @@ class NotificationService {
   static const int _dailyTrendingId = 100;
   static const int _weeklyNewContentId = 101;
   static const int _continueWatchingId = 102;
-  // Achievement IDs start at 200
+  // Calendar reminder IDs: 1000–1999 (derived from item id hashCode % 1000)
+  static const int _calendarReminderBase = 1000;
+  // Achievement IDs start at 2000
 
   // ---------------------------------------------------------------------------
   // Initialization
@@ -373,6 +375,74 @@ class NotificationService {
       debugPrint(
         'NotificationService _scheduleIfContinueWatchingPending error: $e',
       );
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Calendar Chat reminders
+  // ---------------------------------------------------------------------------
+
+  /// Schedule a one-shot notification for a user-created calendar item.
+  /// Fires 5 minutes before [scheduledAt]. Silently no-ops if already past.
+  Future<void> scheduleCalendarReminder({
+    required String id,
+    required String title,
+    required String platform,
+    required DateTime scheduledAt,
+  }) async {
+    if (!_initialized || kIsWeb) return;
+    try {
+      _initTimezone();
+      final location = tz.local;
+      final notifTime = tz.TZDateTime.from(
+        scheduledAt.subtract(const Duration(minutes: 5)),
+        location,
+      );
+      if (notifTime.isBefore(tz.TZDateTime.now(location))) return;
+      final notifId = _calendarReminderBase + id.hashCode.abs() % 1000;
+      final details = _buildDetails(
+        category: NotificationCategory.recommendation,
+      );
+      await _plugin.zonedSchedule(
+        notifId,
+        '${_platformEmoji(platform)} $title starts in 5 min',
+        'Your scheduled $platform video is ready to watch 🎬',
+        notifTime,
+        details,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.wallClockTime,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+      debugPrint(
+        'NotificationService: calendar reminder set for $title at $notifTime',
+      );
+    } catch (e) {
+      debugPrint('NotificationService scheduleCalendarReminder error: $e');
+    }
+  }
+
+  /// Cancel the reminder for an item that was deleted or rescheduled.
+  Future<void> cancelCalendarReminder(String id) async {
+    if (!_initialized) return;
+    try {
+      await _plugin.cancel(_calendarReminderBase + id.hashCode.abs() % 1000);
+    } catch (e) {
+      debugPrint('NotificationService cancelCalendarReminder error: $e');
+    }
+  }
+
+  String _platformEmoji(String platform) {
+    switch (platform.toLowerCase()) {
+      case 'youtube':
+        return '▶️';
+      case 'tiktok':
+        return '🎵';
+      case 'instagram':
+        return '📸';
+      case 'facebook':
+        return '👥';
+      default:
+        return '🎬';
     }
   }
 

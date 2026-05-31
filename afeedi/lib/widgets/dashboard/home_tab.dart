@@ -14,6 +14,7 @@ import '../../services/connectivity_service.dart';
 import '../../services/user_interaction_service.dart';
 import '../../services/navigation_service.dart';
 import '../../services/subscription_service.dart';
+import '../../services/notification_service.dart';
 import '../../services/watch_streak_service.dart';
 import '../ads/in_feed_ad_card.dart';
 
@@ -100,7 +101,17 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     _checkConnectivity();
     _checkProactivePaywall();
     WatchStreakService.instance.recordOpen().then((_) {
-      if (mounted) setState(() {});
+      if (mounted) {
+        setState(() {});
+        // After streak update, check for milestone and trigger any new
+        // personalized notifications (daily trending, weekly digest, etc.)
+        NotificationService.instance.schedulePersonalizedNotifications();
+        if (WatchStreakService.instance.isMilestone) {
+          NotificationService.instance.showStreakReminderNotification(
+            streakDays: WatchStreakService.instance.currentStreak,
+          );
+        }
+      }
     });
   }
 

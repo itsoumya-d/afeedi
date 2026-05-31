@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/content_model.dart';
-import '../services/content_service.dart';
 import '../services/analytics_service.dart';
+import '../services/content_service.dart';
+import '../services/notification_service.dart';
 
 // ─── Data models ─────────────────────────────────────────────────────────────
 
@@ -517,6 +518,16 @@ class _CalendarChatScreenState extends State<CalendarChatScreen>
     });
     await _saveScheduled();
 
+    // Schedule a local notification 5 min before each item fires
+    for (final item in newItems) {
+      NotificationService.instance.scheduleCalendarReminder(
+        id: item.id,
+        title: item.title,
+        platform: item.platform,
+        scheduledAt: item.scheduledAt,
+      );
+    }
+
     HapticFeedback.lightImpact();
 
     _addBot(
@@ -617,8 +628,15 @@ class _CalendarChatScreenState extends State<CalendarChatScreen>
       return;
     }
 
+    final cancelledItems = _scheduled[key] ?? [];
     setState(() => _scheduled.remove(key));
     await _saveScheduled();
+
+    // Cancel any pending notifications for the removed items
+    for (final item in cancelledItems) {
+      NotificationService.instance.cancelCalendarReminder(item.id);
+    }
+
     HapticFeedback.lightImpact();
 
     _addBot(

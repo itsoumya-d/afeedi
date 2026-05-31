@@ -6,7 +6,7 @@ import '../services/navigation_service.dart';
 import '../widgets/dashboard/home_tab.dart';
 import '../widgets/dashboard/discover_tab.dart';
 import '../screens/tabs/shorts_tab.dart';
-import '../widgets/dashboard/calendar_tab.dart';
+import '../screens/calendar_chat_screen.dart';
 import '../screens/profile_screen.dart';
 import '../widgets/common/shared_bottom_navigation.dart';
 
@@ -40,7 +40,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       'title': 'Calendar',
       'icon': Icons.calendar_today_outlined,
       'activeIcon': Icons.calendar_today,
-      'widget': const CalendarTab(),
+      'widget': const CalendarChatScreen(),
     },
     {
       'title': 'Shorts',

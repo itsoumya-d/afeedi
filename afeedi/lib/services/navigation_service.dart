@@ -27,6 +27,7 @@ import '../screens/bookmarks_screen.dart';
 import '../screens/history_screen.dart';
 import '../screens/referral_screen.dart';
 import '../screens/weekly_digest_screen.dart';
+import '../screens/calendar_chat_screen.dart';
 
 class NavigationService {
   static NavigationService? _instance;
@@ -113,6 +114,7 @@ class AppRoutes {
   static const String history = '/history';
   static const String referral = '/referral';
   static const String weeklyDigest = '/weekly-digest';
+  static const String calendarChat = '/calendar-chat';
 
   // Admin routes
   static const String adminPanel = '/admin';
@@ -166,6 +168,7 @@ class AppRoutes {
     AppRoutes.history: (_) => const HistoryScreen(),
     AppRoutes.referral: (_) => const ReferralScreen(),
     AppRoutes.weeklyDigest: (_) => const WeeklyDigestScreen(),
+    AppRoutes.calendarChat: (_) => const CalendarChatScreen(),
 
     // Admin routes — protected by isAdmin guard
     AppRoutes.adminPanel: (context) {

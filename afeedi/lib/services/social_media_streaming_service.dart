@@ -8,13 +8,14 @@ import '../utils/logger.dart';
 
 /// Service for handling social media video streaming from Instagram, TikTok, and Facebook
 class SocialMediaStreamingService {
-  static final SocialMediaStreamingService _instance = SocialMediaStreamingService._internal();
+  static final SocialMediaStreamingService _instance =
+      SocialMediaStreamingService._internal();
   static SocialMediaStreamingService get instance => _instance;
   SocialMediaStreamingService._internal();
 
   bool _isInitialized = false;
   Map<String, String> _accessTokens = {};
-  
+
   // Platform-specific configurations
   static const Map<PlatformType, Map<String, dynamic>> _platformConfigs = {
     PlatformType.instagram: {
@@ -42,28 +43,32 @@ class SocialMediaStreamingService {
   /// Initialize the social media streaming service
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     try {
       Logger.info('Initializing Social Media Streaming Service');
-      
+
       // Load any stored access tokens
       await _loadStoredTokens();
-      
+
       // Initialize platform-specific configurations
       await _initializePlatformConfigs();
-      
+
       _isInitialized = true;
       Logger.info('Social Media Streaming Service initialized successfully');
-      
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'social_media_streaming_initialized',
         screen: 'streaming',
         additionalData: {
-          'platforms_configured': _platformConfigs.keys.map((p) => p.name).toList(),
+          'platforms_configured': _platformConfigs.keys
+              .map((p) => p.name)
+              .toList(),
         },
       );
     } catch (error) {
-      Logger.error('Failed to initialize Social Media Streaming Service: $error');
+      Logger.error(
+        'Failed to initialize Social Media Streaming Service: $error',
+      );
       await AnalyticsService.instance.trackError(
         errorType: 'social_media_streaming_init_error',
         errorMessage: error.toString(),
@@ -92,7 +97,7 @@ class SocialMediaStreamingService {
 
     try {
       Logger.info('Getting embed data for $platform: $url');
-      
+
       switch (platform) {
         case PlatformType.instagram:
           return await _getInstagramEmbed(url, maxWidth, maxHeight);
@@ -109,12 +114,9 @@ class SocialMediaStreamingService {
         errorType: 'social_media_embed_error',
         errorMessage: error.toString(),
         screen: 'streaming',
-        additionalData: {
-          'platform': platform.name,
-          'url': url,
-        },
+        additionalData: {'platform': platform.name, 'url': url},
       );
-      
+
       return SocialMediaEmbedResult(
         success: false,
         platform: platform,
@@ -131,9 +133,11 @@ class SocialMediaStreamingService {
     int? maxHeight,
   ) async {
     final config = _platformConfigs[PlatformType.instagram]!;
-    
+
     if (config['requiresAuth'] && !_accessTokens.containsKey('instagram')) {
-      throw Exception('Instagram access token required. Please set access token first.');
+      throw Exception(
+        'Instagram access token required. Please set access token first.',
+      );
     }
 
     final queryParams = {
@@ -143,15 +147,15 @@ class SocialMediaStreamingService {
       if (maxHeight != null) 'maxheight': maxHeight.toString(),
     };
 
-    final uri = Uri.parse(config['oembedEndpoint']).replace(
-      queryParameters: queryParams,
-    );
+    final uri = Uri.parse(
+      config['oembedEndpoint'],
+    ).replace(queryParameters: queryParams);
 
     final response = await http.get(uri);
-    
+
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'instagram_embed_success',
         screen: 'streaming',
@@ -161,7 +165,7 @@ class SocialMediaStreamingService {
           'author': data['author_name'],
         },
       );
-      
+
       return SocialMediaEmbedResult(
         success: true,
         platform: PlatformType.instagram,
@@ -180,7 +184,9 @@ class SocialMediaStreamingService {
         version: data['version'],
       );
     } else {
-      throw Exception('Instagram oEmbed API error: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Instagram oEmbed API error: ${response.statusCode} - ${response.body}',
+      );
     }
   }
 
@@ -202,9 +208,9 @@ class SocialMediaStreamingService {
           return cached['result'] as SocialMediaEmbedResult;
         }
       }
-      
+
       final config = _platformConfigs[PlatformType.tiktok]!;
-      
+
       // Enhanced query parameters with better defaults
       final queryParams = {
         'url': url,
@@ -213,26 +219,29 @@ class SocialMediaStreamingService {
         'omit_script': 'true',
       };
 
-      final uri = Uri.parse(config['oembedEndpoint']).replace(
-        queryParameters: queryParams,
-      );
+      final uri = Uri.parse(
+        config['oembedEndpoint'],
+      ).replace(queryParameters: queryParams);
 
-      final response = await http.get(
-        uri,
-        headers: {
-          'User-Agent': 'Afeedi/1.0 (+https://afeedi.com)',
-          'Accept': 'application/json',
-        },
-      ).timeout(const Duration(seconds: 10));
-      
+      final response = await http
+          .get(
+            uri,
+            headers: {
+              'User-Agent': 'Afeedi/1.0 (+https://afeedi.com)',
+              'Accept': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        
+
         // Enhanced embed HTML with better responsive design
         String embedHtml = data['html'] ?? '';
-        
+
         // Add responsive wrapper and enhanced styling
-        embedHtml = '''
+        embedHtml =
+            '''
           <div class="tiktok-embed-wrapper" style="
             position: relative;
             width: 100%;
@@ -258,7 +267,7 @@ class SocialMediaStreamingService {
             </style>
           </div>
         ''';
-        
+
         final result = SocialMediaEmbedResult(
           success: true,
           platform: PlatformType.tiktok,
@@ -276,13 +285,10 @@ class SocialMediaStreamingService {
           type: data['type'] ?? 'video',
           version: data['version'] ?? '1.0',
         );
-        
+
         // Cache the result
-        _embedCache[cacheKey] = {
-          'result': result,
-          'timestamp': DateTime.now(),
-        };
-        
+        _embedCache[cacheKey] = {'result': result, 'timestamp': DateTime.now()};
+
         await AnalyticsService.instance.trackUserInteraction(
           action: 'tiktok_embed_success',
           screen: 'streaming',
@@ -295,28 +301,31 @@ class SocialMediaStreamingService {
             'cached': false,
           },
         );
-        
+
         return result;
       } else if (response.statusCode == 404) {
         throw Exception('TikTok video not found or private');
       } else if (response.statusCode == 429) {
         throw Exception('Rate limit exceeded. Please try again later.');
       } else {
-        throw Exception('TikTok oEmbed API error: ${response.statusCode} - ${response.body}');
+        throw Exception(
+          'TikTok oEmbed API error: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (error) {
       Logger.error('Error getting TikTok embed: $error');
-      
+
       // Provide fallback embed for better user experience
       return _createFallbackTikTokEmbed(url, error.toString());
     }
   }
-  
+
   SocialMediaEmbedResult _createFallbackTikTokEmbed(String url, String error) {
     // Extract video ID from URL for fallback
     final videoId = _extractTikTokVideoId(url);
-    
-    final fallbackHtml = '''
+
+    final fallbackHtml =
+        '''
       <div class="tiktok-fallback" style="
         width: 100%;
         max-width: 325px;
@@ -351,7 +360,7 @@ class SocialMediaStreamingService {
         <p style="margin: 20px 0 0 0; font-size: 12px; opacity: 0.7;">Video ID: $videoId</p>
       </div>
     ''';
-    
+
     return SocialMediaEmbedResult(
       success: true, // Mark as success since we provide fallback
       platform: PlatformType.tiktok,
@@ -365,7 +374,7 @@ class SocialMediaStreamingService {
       version: '1.0',
     );
   }
-  
+
   String _extractTikTokVideoId(String url) {
     // Extract video ID from various TikTok URL formats
     final patterns = [
@@ -374,14 +383,14 @@ class SocialMediaStreamingService {
       RegExp(r'tiktok\.com/@[^/]+/video/(\d+)'),
       RegExp(r'vm\.tiktok\.com/([A-Za-z0-9]+)'),
     ];
-    
+
     for (final pattern in patterns) {
       final match = pattern.firstMatch(url);
       if (match != null) {
         return match.group(1) ?? 'unknown';
       }
     }
-    
+
     return url.split('/').last.split('?').first;
   }
 
@@ -392,10 +401,12 @@ class SocialMediaStreamingService {
     int? maxHeight,
   ) async {
     // Facebook uses a different approach - we create the embed URL directly
-    final embedUrl = 'https://www.facebook.com/plugins/video.php?href=${Uri.encodeComponent(url)}&width=${maxWidth ?? 500}&show_text=false';
-    
+    final embedUrl =
+        'https://www.facebook.com/plugins/video.php?href=${Uri.encodeComponent(url)}&width=${maxWidth ?? 500}&show_text=false';
+
     // Create basic embed HTML for Facebook
-    final embedHtml = '''
+    final embedHtml =
+        '''
 <iframe src="$embedUrl" 
         width="${maxWidth ?? 500}" 
         height="${maxHeight ?? 280}" 
@@ -406,16 +417,13 @@ class SocialMediaStreamingService {
         allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share">
 </iframe>
 ''';
-    
+
     await AnalyticsService.instance.trackUserInteraction(
       action: 'facebook_embed_success',
       screen: 'streaming',
-      additionalData: {
-        'url': url,
-        'embed_url': embedUrl,
-      },
+      additionalData: {'url': url, 'embed_url': embedUrl},
     );
-    
+
     return SocialMediaEmbedResult(
       success: true,
       platform: PlatformType.facebook,
@@ -434,26 +442,10 @@ class SocialMediaStreamingService {
   // TODO: Implement proper web embed support
   dynamic createWebEmbedElement(SocialMediaEmbedResult embedResult) {
     if (!kIsWeb || !embedResult.success) return null;
-    
-    Logger.info('Web embed creation not implemented yet for ${embedResult.platform}');
-    return null;
-  }
 
-  /// Create Instagram web embed element (disabled)
-  dynamic _createInstagramWebElement(SocialMediaEmbedResult embedResult) {
-    Logger.info('Instagram web embed not implemented');
-    return null;
-  }
-
-  /// Create TikTok web embed element (disabled)
-  dynamic _createTikTokWebElement(SocialMediaEmbedResult embedResult) {
-    Logger.info('TikTok web embed not implemented');
-    return null;
-  }
-
-  /// Create Facebook web embed element (disabled)
-  dynamic _createFacebookWebElement(SocialMediaEmbedResult embedResult) {
-    Logger.info('Facebook web embed not implemented');
+    Logger.info(
+      'Web embed creation not implemented yet for ${embedResult.platform}',
+    );
     return null;
   }
 
@@ -461,7 +453,7 @@ class SocialMediaStreamingService {
   SocialMediaUrlInfo? parseUrl(String url) {
     try {
       final uri = Uri.parse(url);
-      
+
       // Instagram URL patterns
       if (uri.host.contains('instagram.com')) {
         final pathSegments = uri.pathSegments;
@@ -482,7 +474,7 @@ class SocialMediaStreamingService {
           );
         }
       }
-      
+
       // TikTok URL patterns
       if (uri.host.contains('tiktok.com')) {
         final pathSegments = uri.pathSegments;
@@ -495,12 +487,14 @@ class SocialMediaStreamingService {
           );
         }
       }
-      
+
       // Facebook URL patterns
       if (uri.host.contains('facebook.com')) {
         if (url.contains('/video/') || url.contains('/videos/')) {
           // Extract video ID from various Facebook URL formats
-          final videoIdMatch = RegExp(r'(?:video|videos)[/=]([0-9]+)').firstMatch(url);
+          final videoIdMatch = RegExp(
+            r'(?:video|videos)[/=]([0-9]+)',
+          ).firstMatch(url);
           if (videoIdMatch != null) {
             return SocialMediaUrlInfo(
               platform: PlatformType.facebook,
@@ -511,7 +505,7 @@ class SocialMediaStreamingService {
           }
         }
       }
-      
+
       return null;
     } catch (error) {
       Logger.error('Failed to parse social media URL: $error');
@@ -531,7 +525,7 @@ class SocialMediaStreamingService {
   }
 
   /// Private helper methods
-  
+
   Future<void> _loadStoredTokens() async {
     // TODO: Implement secure token storage/retrieval
     // For now, tokens need to be set manually via setAccessToken

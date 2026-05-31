@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/chat_message.dart';
 import '../models/genre.dart';
 import '../models/onboarding_step.dart';
 import '../services/onboarding_service.dart';
 import '../services/analytics_service.dart';
-import '../services/navigation_service.dart';
 
 class ChatController extends ChangeNotifier {
   final OnboardingService _onboardingService = OnboardingService();
@@ -25,14 +25,17 @@ class ChatController extends ChangeNotifier {
     'Facebook': false,
     'Twitter': false,
   };
-  
+
   int _currentStep = 0;
+  bool _disposed = false;
   bool _showTyping = false;
   bool _showQuickReplies = false;
   bool _showTextInput = false;
   bool _showGenreSelection = false;
   bool _showPlatformSelection = false;
+  bool _showLanguagePicker = false;
   bool _showFinalButton = false;
+  String? _selectedLanguage;
   String _userName = '';
   List<String> _currentSuggestions = [];
 
@@ -51,6 +54,8 @@ class ChatController extends ChangeNotifier {
   bool get showTextInput => _showTextInput;
   bool get showGenreSelection => _showGenreSelection;
   bool get showPlatformSelection => _showPlatformSelection;
+  bool get showLanguagePicker => _showLanguagePicker;
+  String? get selectedLanguage => _selectedLanguage;
   bool get showFinalButton => _showFinalButton;
   String get userName => _userName;
   List<String> get currentSuggestions => _currentSuggestions;
@@ -61,8 +66,51 @@ class ChatController extends ChangeNotifier {
     _onboardingSteps = _onboardingService.getOnboardingSteps();
     _allGenres = _onboardingService.getAllGenres();
     _filteredGenres = _allGenres;
-    
     _initializeAnalytics();
+    _resumeOrStartOnboarding();
+  }
+
+  Future<void> saveProgressDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('onboarding_draft_step', _currentStep);
+    await prefs.setString('onboarding_draft_user_name', _userName);
+    await prefs.setStringList(
+      'onboarding_draft_genres',
+      _selectedGenres.map((g) => g.name).toList(),
+    );
+    await prefs.setString(
+      'onboarding_draft_saved_at',
+      DateTime.now().toIso8601String(),
+    );
+  }
+
+  Future<void> _resumeOrStartOnboarding() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedAt = prefs.getString('onboarding_draft_saved_at');
+      final draftStep = prefs.getInt('onboarding_draft_step');
+      if (savedAt != null && draftStep != null && draftStep > 0) {
+        final savedDate = DateTime.tryParse(savedAt);
+        if (savedDate != null &&
+            DateTime.now().difference(savedDate).inDays < 7) {
+          _currentStep = draftStep.clamp(0, _onboardingSteps.length - 1);
+          _userName = prefs.getString('onboarding_draft_user_name') ?? '';
+          final genreNames =
+              prefs.getStringList('onboarding_draft_genres') ?? [];
+          _selectedGenres = _allGenres
+              .where((g) => genreNames.contains(g.name))
+              .toList();
+          Future.delayed(const Duration(milliseconds: 300), () {
+            showBotMessage(
+              'Welcome back! Let\'s pick up where you left off. 👋',
+            );
+            showStepOptions();
+            notifyListeners();
+          });
+          return;
+        }
+      }
+    } catch (_) {}
     startOnboarding();
   }
 
@@ -90,17 +138,17 @@ class ChatController extends ChangeNotifier {
     _showTextInput = false;
     _showGenreSelection = false;
     _showPlatformSelection = false;
+    _showLanguagePicker = false;
     notifyListeners();
 
     scrollToBottom();
 
     Future.delayed(const Duration(milliseconds: 1500), () {
+      if (_disposed) return;
       _showTyping = false;
-      _messages.add(ChatMessage(
-        text: message,
-        isBot: true,
-        timestamp: DateTime.now(),
-      ));
+      _messages.add(
+        ChatMessage(text: message, isBot: true, timestamp: DateTime.now()),
+      );
       notifyListeners();
       showStepOptions();
       scrollToBottom();
@@ -108,14 +156,18 @@ class ChatController extends ChangeNotifier {
   }
 
   void showStepOptions() {
+    if (_currentStep >= _onboardingSteps.length) return;
     final currentStepData = _onboardingSteps[_currentStep];
-    
+
     Future.delayed(const Duration(milliseconds: 500), () {
       if (currentStepData.isGenreSelection) {
         _showGenreSelection = true;
         _showTextInput = false;
       } else if (currentStepData.isPlatformSelection) {
         _showPlatformSelection = true;
+        _showTextInput = false;
+      } else if (currentStepData.isLanguageSelection) {
+        _showLanguagePicker = true;
         _showTextInput = false;
       } else {
         _quickReplies = currentStepData.quickReplies;
@@ -150,36 +202,32 @@ class ChatController extends ChangeNotifier {
 
   void updateSuggestions() {
     if (_currentStep >= _onboardingSteps.length) return;
-    
+
     switch (_currentStep) {
       case 0:
         _currentSuggestions = [
           'Hi there!',
           'Hello',
           'Let\'s get started',
-          'I\'m ready'
+          'I\'m ready',
         ];
         break;
-      case 1:
+      case 1: // content_interests (genre selection)
         _currentSuggestions = [
-          'My name is Alex',
-          'Call me Sam',
-          'I\'m Jordan'
+          'Comedy & Humor',
+          'Tech & Gaming',
+          'Fitness & Health',
+          'Music & Entertainment',
         ];
         break;
-      case 2:
-        _currentSuggestions = [
-          'I love comedy videos',
-          'I enjoy educational content',
-          'I like music and entertainment',
-          'I prefer short funny clips'
-        ];
+      case 4: // personal_info (name)
+        _currentSuggestions = ['My name is Alex', 'Call me Sam', 'I\'m Jordan'];
         break;
-      case 5:
+      case 5: // completion
         _currentSuggestions = [
-          'Sounds great!',
+          'Let\'s go! 🚀',
+          'Show me my feed!',
           'I\'m excited to start',
-          'Let\'s do this'
         ];
         break;
       default:
@@ -189,15 +237,14 @@ class ChatController extends ChangeNotifier {
   }
 
   void addUserMessage(String text) {
-    _messages.add(ChatMessage(
-      text: text,
-      isBot: false,
-      timestamp: DateTime.now(),
-    ));
+    _messages.add(
+      ChatMessage(text: text, isBot: false, timestamp: DateTime.now()),
+    );
     _showQuickReplies = false;
     _showTextInput = false;
     _showGenreSelection = false;
     _showPlatformSelection = false;
+    _showLanguagePicker = false;
     notifyListeners();
     scrollToBottom();
   }
@@ -217,9 +264,38 @@ class ChatController extends ChangeNotifier {
   }
 
   void handleGenreContinue() {
+    if (_selectedGenres.length < 3) {
+      showBotMessage(
+        'Please pick at least 3 genres so I can build your perfect feed! Try adding a few more categories you enjoy.',
+      );
+      return;
+    }
     final genreNames = _selectedGenres.map((g) => g.name).join(', ');
     addUserMessage('I\'m interested in: $genreNames');
     processUserInput('Selected ${_selectedGenres.length} genres');
+  }
+
+  Future<void> handleLanguageSelected(String name, String locale) async {
+    _showLanguagePicker = false;
+    _selectedLanguage = name;
+    addUserMessage(name);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('app_locale', locale);
+    await prefs.setString('onboarding_content_language', name);
+    notifyListeners();
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (_disposed) return;
+      _advanceStep();
+    });
+  }
+
+  void _advanceStep() {
+    _currentStep++;
+    if (_currentStep < _onboardingSteps.length) {
+      showBotMessage(_onboardingSteps[_currentStep].botMessage);
+    } else {
+      completeOnboarding();
+    }
   }
 
   void handlePlatformConnect(String platform) {
@@ -237,30 +313,34 @@ class ChatController extends ChangeNotifier {
         .where((entry) => entry.value)
         .map((entry) => entry.key)
         .toList();
-    
+
     final message = connectedPlatforms.isNotEmpty
         ? 'Connected: ${connectedPlatforms.join(', ')}'
         : 'I\'ll connect platforms later';
-    
+
     addUserMessage(message);
     processUserInput('Platform selection completed');
   }
 
   void processUserInput(String input) {
-    if (_currentStep == 1 && input.isNotEmpty) {
+    if (_currentStep == 4 && input.isNotEmpty) {
       _userName = input;
     }
 
     AnalyticsService.instance.trackOnboardingEvent(
       eventName: AnalyticsEvents.onboardingStepCompleted,
       stepNumber: _currentStep,
-      stepName: _currentStep < _onboardingSteps.length ? 'step_${_currentStep + 1}' : 'final_step',
+      stepName: _currentStep < _onboardingSteps.length
+          ? 'step_${_currentStep + 1}'
+          : 'final_step',
       additionalData: {
-        'user_input': input.length > 50 ? '${input.substring(0, 50)}...' : input,
+        'user_input': input.length > 50
+            ? '${input.substring(0, 50)}...'
+            : input,
         'input_length': input.length,
       },
     );
-    
+
     Future.delayed(const Duration(milliseconds: 500), () {
       _currentStep++;
       if (_currentStep < _onboardingSteps.length) {
@@ -278,7 +358,9 @@ class ChatController extends ChangeNotifier {
       stepName: 'completed',
       additionalData: {
         'total_steps': _onboardingSteps.length,
-        'connected_platforms': _platformConnections.values.where((v) => v).length,
+        'connected_platforms': _platformConnections.values
+            .where((v) => v)
+            .length,
         'selected_genres': _selectedGenres.length,
         'completion_time': DateTime.now().toIso8601String(),
         'user_name': _userName,
@@ -299,7 +381,7 @@ class ChatController extends ChangeNotifier {
     );
 
     showBotMessage(welcomeMessage);
-    
+
     _showFinalButton = true;
     notifyListeners();
   }
@@ -318,6 +400,7 @@ class ChatController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     scrollController.dispose();
     textController.dispose();
     searchController.dispose();

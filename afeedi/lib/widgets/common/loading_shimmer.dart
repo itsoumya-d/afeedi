@@ -4,22 +4,23 @@ import 'package:shimmer/shimmer.dart';
 class LoadingShimmer extends StatelessWidget {
   final int itemCount;
 
-  const LoadingShimmer({
-    super.key,
-    this.itemCount = 5,
-  });
+  const LoadingShimmer({super.key, this.itemCount = 5});
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: itemCount,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: _buildShimmerCard(),
-        );
-      },
+    return Semantics(
+      label: 'Loading content',
+      liveRegion: true,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: itemCount,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: _buildShimmerCard(),
+          );
+        },
+      ),
     );
   }
 

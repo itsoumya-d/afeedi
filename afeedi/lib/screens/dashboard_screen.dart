@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
+import '../services/navigation_service.dart';
 import '../widgets/dashboard/home_tab.dart';
-import '../widgets/dashboard/videos_tab.dart';
+import '../widgets/dashboard/discover_tab.dart';
 import '../screens/tabs/shorts_tab.dart';
-import '../widgets/dashboard/calendar_tab.dart';
+import '../screens/calendar_chat_screen.dart';
 import '../screens/profile_screen.dart';
 import '../widgets/common/shared_bottom_navigation.dart';
 
@@ -18,7 +21,8 @@ class _DashboardScreenState extends State<DashboardScreen>
     with TickerProviderStateMixin {
   int _currentIndex = 0;
   late PageController _pageController;
-  
+  bool _hasUnreadNotifications = false;
+
   final List<Map<String, dynamic>> _tabs = [
     {
       'title': 'Home',
@@ -27,16 +31,16 @@ class _DashboardScreenState extends State<DashboardScreen>
       'widget': const HomeTab(),
     },
     {
-      'title': 'Videos',
-      'icon': Icons.play_circle_outline,
-      'activeIcon': Icons.play_circle,
-      'widget': const VideosTab(),
+      'title': 'Discover',
+      'icon': Icons.explore_outlined,
+      'activeIcon': Icons.explore,
+      'widget': const DiscoverTab(),
     },
     {
       'title': 'Calendar',
       'icon': Icons.calendar_today_outlined,
       'activeIcon': Icons.calendar_today,
-      'widget': const CalendarTab(),
+      'widget': const CalendarChatScreen(),
     },
     {
       'title': 'Shorts',
@@ -56,10 +60,12 @@ class _DashboardScreenState extends State<DashboardScreen>
   void initState() {
     super.initState();
     _pageController = PageController();
-    
+    _loadUnreadState();
+
     // Handle initial tab from navigation arguments
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       if (args != null && args['initialTab'] != null) {
         final initialTab = args['initialTab'] as int;
         _onTabTapped(initialTab);
@@ -67,12 +73,24 @@ class _DashboardScreenState extends State<DashboardScreen>
     });
   }
 
+  Future<void> _loadUnreadState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasUnread = prefs.getBool('has_unread_notifications') ?? true;
+    if (mounted) setState(() => _hasUnreadNotifications = hasUnread);
+  }
+
+  Future<void> _clearUnreadState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('has_unread_notifications', false);
+    if (mounted) setState(() => _hasUnreadNotifications = false);
+  }
+
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
   }
-  
+
   void _onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
@@ -83,7 +101,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       curve: Curves.easeInOut,
     );
   }
-  
+
   void _onPageChanged(int index) {
     setState(() {
       _currentIndex = index;
@@ -109,7 +127,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                 child: PageView(
                   controller: _pageController,
                   onPageChanged: _onPageChanged,
-                  children: _tabs.map((tab) => tab['widget'] as Widget).toList(),
+                  children: _tabs
+                      .map((tab) => tab['widget'] as Widget)
+                      .toList(),
                 ),
               ),
             ],
@@ -123,28 +143,48 @@ class _DashboardScreenState extends State<DashboardScreen>
       ),
     );
   }
-  
+
   Widget _buildAppBar() {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
           // Logo/Brand
           Container(
-            padding: const EdgeInsets.all(6),
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [AppTheme.primaryCyan, AppTheme.primaryPink],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: const Text(
-              'A',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Stack(
+              children: [
+                Positioned(
+                  bottom: 4,
+                  right: 4,
+                  child: Icon(
+                    Icons.play_arrow,
+                    color: Colors.white.withValues(alpha: 0.4),
+                    size: 16,
+                  ),
+                ),
+                const Center(
+                  child: Text(
+                    'Af',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 10),
@@ -162,9 +202,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                   ),
                 ),
                 Text(
-                  _getGreeting(),
+                  _getGreeting(l10n),
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
                   ),
                 ),
@@ -172,57 +212,65 @@ class _DashboardScreenState extends State<DashboardScreen>
             ),
           ),
           // Action buttons
-          IconButton(
-            onPressed: () {
-              // Navigate to search
-            },
-            icon: const Icon(
-              Icons.search,
-              color: Colors.white,
-              size: 22,
+          Semantics(
+            label: 'Search',
+            button: true,
+            child: IconButton(
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.search);
+              },
+              tooltip: 'Search',
+              icon: const Icon(Icons.search, color: Colors.white, size: 22),
             ),
           ),
-          IconButton(
-            onPressed: () {
-              // Navigate to notifications
-            },
-            icon: Stack(
-              children: [
-                const Icon(
-                  Icons.notifications_outlined,
-                  color: Colors.white,
-                  size: 22,
-                ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: AppTheme.primaryPink,
-                      shape: BoxShape.circle,
-                    ),
+          Semantics(
+            label: _hasUnreadNotifications
+                ? 'Notifications, unread'
+                : 'Notifications',
+            button: true,
+            child: IconButton(
+              onPressed: () {
+                _clearUnreadState();
+                Navigator.pushNamed(context, AppRoutes.notifications);
+              },
+              tooltip: 'Notifications',
+              icon: Stack(
+                children: [
+                  const Icon(
+                    Icons.notifications_outlined,
+                    color: Colors.white,
+                    size: 22,
                   ),
-                ),
-              ],
+                  if (_hasUnreadNotifications)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.primaryPink,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ],
       ),
     );
   }
-  
 
-  
-  String _getGreeting() {
+  String _getGreeting(AppLocalizations? l10n) {
     final hour = DateTime.now().hour;
     if (hour < 12) {
-      return 'Good morning!';
+      return l10n?.goodMorning ?? 'Good morning!';
     } else if (hour < 17) {
-      return 'Good afternoon!';
+      return l10n?.goodAfternoon ?? 'Good afternoon!';
     } else {
-      return 'Good evening!';
+      return l10n?.goodEvening ?? 'Good evening!';
     }
   }
 }

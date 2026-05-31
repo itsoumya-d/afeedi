@@ -1,0 +1,354 @@
+{
+  "@@locale": "pt",
+  "appName": "Afeedi",
+  "tagline": "Todos os seus vídeos favoritos. Uma experiência premium.",
+  "skip": "Pular",
+  "continueBtn": "Continuar",
+  "getStarted": "Começar",
+  "signIn": "Entrar",
+  "signOut": "Sair",
+  "continueWithGoogle": "Continuar com o Google",
+  "continueWithApple": "Continuar com a Apple",
+  "alreadyHaveAccount": "Já tem uma conta? Entre",
+  "createAccount": "Criar conta",
+  "email": "E-mail",
+  "password": "Senha",
+  "name": "Nome",
+  "terms": "Termos",
+  "privacyPolicy": "Política de privacidade",
+  "home": "Início",
+  "videos": "Vídeos",
+  "discover": "Descobrir",
+  "shorts": "Shorts",
+  "calendar": "Calendário",
+  "profile": "Perfil",
+  "search": "Pesquisar",
+  "notifications": "Notificações",
+  "settings": "Configurações",
+  "trending": "Em alta",
+  "forYou": "Para você",
+  "following": "Seguindo",
+  "bookmarks": "Favoritos",
+  "history": "Histórico",
+  "saved": "Salvos",
+  "liked": "Curtidos",
+  "achievements": "Conquistas",
+  "watchHistory": "Histórico de assistidos",
+  "continueWatching": "Continuar assistindo",
+  "recommended": "Recomendados",
+  "popular": "Popular",
+  "newest": "Mais recente",
+  "categories": "Categorias",
+  "allCategories": "Todas as categorias",
+  "filter": "Filtro",
+  "filters": "Filtros",
+  "clearFilters": "Limpar filtros",
+  "applyFilters": "Aplicar filtros",
+  "sortBy": "Ordenar por",
+  "platform": "Plataforma",
+  "allPlatforms": "Todas as plataformas",
+  "timeRange": "Período",
+  "today": "Hoje",
+  "thisWeek": "Esta semana",
+  "thisMonth": "Este mês",
+  "allTime": "Sempre",
+  "contentType": "Tipo de conteúdo",
+  "video": "Vídeo",
+  "short": "Short",
+  "reel": "Reel",
+  "views": "visualizações",
+  "likes": "curtidas",
+  "comments": "Comentários",
+  "share": "Compartilhar",
+  "save": "Salvar",
+  "like": "Curtir",
+  "follow": "Seguir",
+  "unfollow": "Deixar de seguir",
+  "subscribe": "Inscrever-se",
+  "creator": "Criador",
+  "creatorProfile": "Perfil do criador",
+  "noResults": "Sem resultados",
+  "noResultsFor": "Sem resultados para \"{query}\"",
+  "@noResultsFor": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "noContent": "Nenhum conteúdo disponível",
+  "loading": "Carregando...",
+  "retry": "Tentar novamente",
+  "refresh": "Atualizar",
+  "pullToRefresh": "Puxe para atualizar",
+  "errorLoading": "Erro ao carregar conteúdo",
+  "noInternetConnection": "Sem conexão com a internet",
+  "tryAgain": "Tente novamente",
+  "markAllRead": "Marcar tudo como lido",
+  "allNotifications": "Todas",
+  "unread": "Não lido",
+  "achievement": "Conquista",
+  "videosWatched": "Vídeos assistidos",
+  "watchTime": "Tempo de exibição",
+  "streak": "Sequência",
+  "days": "dias",
+  "hours": "horas",
+  "minutes": "minutos",
+  "editProfile": "Editar perfil",
+  "language": "Idioma",
+  "selectLanguage": "Selecionar idioma",
+  "darkMode": "Modo escuro",
+  "notifications_setting": "Notificações",
+  "pushNotifications": "Notificações push",
+  "emailNotifications": "Notificações por e-mail",
+  "privacy": "Privacidade",
+  "account": "Conta",
+  "help": "Ajuda",
+  "about": "Sobre",
+  "version": "Versão",
+  "deleteAccount": "Excluir conta",
+  "logout": "Sair",
+  "premium": "Premium",
+  "upgradeToPremium": "Atualizar para Premium",
+  "free": "Grátis",
+  "month": "mês",
+  "year": "ano",
+  "subscribe_action": "Inscrever-se",
+  "currentPlan": "Plano atual",
+  "addToCalendar": "Adicionar ao calendário",
+  "scheduledContent": "Conteúdo agendado",
+  "noContentScheduled": "Nenhum conteúdo agendado para este dia",
+  "contentForDate": "Conteúdo para {date}",
+  "@contentForDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "interests": "Interesses",
+  "selectInterests": "Selecione seus interesses",
+  "selectAtLeast3": "Por favor, selecione pelo menos 3",
+  "personalizingFeed": "Personalizando seu feed...",
+  "feedReady": "Seu feed está pronto!",
+  "welcomeBack": "Bem-vindo de volta!",
+  "hi": "Olá",
+  "letsGetStarted": "Vamos começar",
+  "onboardingWelcome": "Olá! Sou seu assistente Afeedi. Vou ajudá-lo a configurar seu feed de conteúdo perfeito. Qual é o seu nome?",
+  "onboardingComplete": "Seu feed personalizado está pronto! Toque abaixo para começar a explorar.",
+  "gaming": "Games",
+  "music": "Música",
+  "technology": "Tecnologia",
+  "food": "Comida e culinária",
+  "fitness": "Fitness",
+  "travel": "Viagens",
+  "art": "Arte e design",
+  "nature": "Natureza",
+  "comedy": "Comédia",
+  "fashion": "Moda",
+  "education": "Educação",
+  "sports": "Esportes",
+  "news": "Notícias",
+  "science": "Ciência",
+  "youtube": "YouTube",
+  "tiktok": "TikTok",
+  "instagram": "Instagram",
+  "facebook": "Facebook",
+  "signingIn": "Entrando...",
+  "authenticationFailed": "Falha na autenticação",
+  "somethingWentWrong": "Algo deu errado",
+  "noContentYet": "Ainda sem conteúdo",
+  "startExploring": "Comece a explorar para ver conteúdo aqui",
+  "watchedVideos": "Assistiu {count} vídeos",
+  "@watchedVideos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newLabel": "Novo",
+  "discoverCreators": "Descubra criadores para seguir",
+  "followCreatorsHint": "Siga criadores para ver seu conteúdo",
+  "findCreators": "Encontrar criadores",
+  "dismiss": "Descartar",
+  "resetAll": "Redefinir tudo",
+  "back": "Voltar",
+  "cancel": "Cancelar",
+  "delete": "Excluir",
+  "clear": "Limpar",
+  "update": "Atualizar",
+  "play": "Reproduzir",
+  "manage": "Gerenciar",
+  "seePlans": "Ver planos",
+  "disconnect": "Desconectar",
+  "viewAll": "Ver tudo",
+  "showMore": "Mostrar mais",
+  "showLess": "Mostrar menos",
+  "memberSince": "Membro desde {date}",
+  "@memberSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noLikedContent": "Nenhum conteúdo curtido",
+  "noLikedContentHint": "Vídeos que você curtir aparecerão aqui",
+  "nothingSavedYet": "Nada salvo ainda",
+  "bookmarkContentHint": "Marque conteúdo para ver aqui",
+  "noHistoryYet": "Sem histórico ainda",
+  "noHistoryHint": "Vídeos que você assistir aparecerão aqui",
+  "watchedOf": "Assistiu {watched} de {total}",
+  "@watchedOf": {
+    "placeholders": {
+      "watched": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFromHistory": "Remover do histórico",
+  "engagementScore": "Pontuação de engajamento",
+  "ofMaxKeepWatching": "{pct}% do máximo — continue assistindo!",
+  "@ofMaxKeepWatching": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "watchedLabel": "Assistido",
+  "displayName": "Nome de exibição",
+  "nameCannotBeEmpty": "O nome não pode estar vazio",
+  "nameTooLong": "Nome muito longo (máx. 50 caracteres)",
+  "bio": "Bio",
+  "defaultBio": "Mente curiosa. Explorador de conteúdo. Vendo o mundo um feed de cada vez.",
+  "editProfileTooltip": "Editar perfil",
+  "googleCalendar": "Google Agenda",
+  "readOnlyAccess": "Acesso somente leitura",
+  "readOnlyAccessHint": "Apenas lemos eventos, nunca modificamos",
+  "seeEventsInApp": "Ver eventos no app",
+  "seeEventsInAppHint": "Sua agenda aparece ao lado do cronograma de conteúdo",
+  "privateAndLocal": "Privado e local",
+  "privateAndLocalHint": "Os dados ficam no dispositivo; nunca os compartilhamos",
+  "connecting": "Conectando...",
+  "connectWithGoogle": "Conectar com Google",
+  "couldNotConnect": "Não foi possível conectar — verifique as permissões e tente novamente.",
+  "noUpcomingEvents": "Nenhum evento próximo",
+  "allDay": "Dia inteiro",
+  "personalizedContentSchedule": "Seu cronograma de conteúdo personalizado",
+  "contentCategories": "Categorias de conteúdo",
+  "categoryFilter": "Filtro de categoria",
+  "percentageFilter": "Filtro por porcentagem",
+  "educationPct": "Educação: {pct}%",
+  "@educationPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainmentPct": "Entretenimento: {pct}%",
+  "@entertainmentPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "searchContent": "Pesquisar conteúdo...",
+  "monthView": "Mês",
+  "weekView": "Semana",
+  "dayView": "Dia",
+  "noFilterContent": "Sem conteúdo de {filter}",
+  "@noFilterContent": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
+  "tryDifferentFilter": "Tente um filtro ou data diferente",
+  "itemsScheduled": "{count} itens agendados",
+  "@itemsScheduled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainment": "Entretenimento",
+  "aiRecommendations": "Recomendações de IA",
+  "suggestedFor": "Sugerido para {time}",
+  "@suggestedFor": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "movedNear": "\"{item}\" movido perto de \"{target}\"",
+  "@movedNear": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownTitle": "Título desconhecido",
+  "unknownCreator": "Criador desconhecido",
+  "playback": "Reprodução",
+  "autoplay": "Reprodução automática",
+  "autoplayHint": "Reproduzir automaticamente o próximo vídeo",
+  "videoQuality": "Qualidade do vídeo",
+  "dataSaver": "Economia de dados",
+  "dataSaverHint": "Reduzir o uso de dados durante o streaming",
+  "pushNotificationsHint": "Novo conteúdo de criadores seguidos",
+  "appearance": "Aparência",
+  "darkModeHint": "Usar tema escuro em todo o app",
+  "appLanguage": "Idioma do app",
+  "contentLanguage": "Idioma do conteúdo",
+  "library": "Biblioteca",
+  "savedVideos": "Vídeos salvos",
+  "previouslyWatchedVideos": "Vídeos assistidos anteriormente",
+  "privacyAndData": "Privacidade e dados",
+  "usageAnalytics": "Análise de uso",
+  "usageAnalyticsHint": "Ajude a melhorar o app com dados anônimos",
+  "clearWatchHistory": "Limpar histórico de exibição",
+  "clearWatchHistoryHint": "Remover todos os vídeos do histórico",
+  "clearCache": "Limpar cache",
+  "clearCacheHint": "Liberar espaço de armazenamento",
+  "changePassword": "Alterar senha",
+  "appVersion": "Versão do app",
+  "termsOfService": "Termos de serviço",
+  "afeediProActive": "Afeedi Pro — Ativo",
+  "upgradeToPro": "Atualizar para Pro",
+  "proFeatures": "Sem anúncios · Saves ilimitados · Feed de IA",
+  "freeFeatures": "Sem anúncios, feed de IA, saves ilimitados",
+  "clearHistoryConfirm": "Isso removerá todos os vídeos do seu histórico. Esta ação não pode ser desfeita.",
+  "watchHistoryClearedSnackbar": "Histórico de exibição limpo",
+  "cacheClearedSnackbar": "Cache limpo com sucesso",
+  "currentPassword": "Senha atual",
+  "newPassword": "Nova senha",
+  "confirmNewPassword": "Confirmar nova senha",
+  "minEightChars": "Mín. 8 caracteres",
+  "passwordsDoNotMatch": "As senhas não coincidem",
+  "required": "Obrigatório",
+  "passwordChangedSuccessfully": "Senha alterada com sucesso",
+  "currentPasswordIncorrect": "A senha atual está incorreta",
+  "signOutConfirm": "Tem certeza de que deseja sair?",
+  "deleteAccountConfirm": "Tem certeza? Isso não pode ser desfeito.",
+  "videosWatchedLabel": "Vídeos\nAssistidos",
+  "watchTimeLabel": "Tempo\nAssistido",
+  "goodMorning": "Bom dia!",
+  "goodAfternoon": "Boa tarde!",
+  "goodEvening": "Boa noite!",
+  "noNotifications": "Sem notificações",
+  "allCaughtUp": "Você está em dia!"
+}

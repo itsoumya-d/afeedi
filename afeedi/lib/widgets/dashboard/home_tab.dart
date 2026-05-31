@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_theme.dart';
+import '../common/loading_shimmer.dart';
 import '../feed/feed_post_card.dart';
 import '../../models/content_model.dart';
 import '../../services/content_service.dart';
 import '../../services/analytics_service.dart';
 import '../../services/onboarding_service.dart';
 import '../../services/auth_service.dart';
+import '../../services/connectivity_service.dart';
+import '../../services/user_interaction_service.dart';
+import '../../services/navigation_service.dart';
+import '../../services/subscription_service.dart';
+import '../../services/notification_service.dart';
+import '../../services/watch_streak_service.dart';
+import '../ads/in_feed_ad_card.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -20,8 +31,64 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   List<Content> _allPosts = [];
   bool _isLoading = false;
   bool _hasMore = true;
+  bool _loadError = false;
+  bool _isOffline = false;
   PlatformType? _selectedPlatform;
-  
+  bool _showFollowing = false;
+  bool _showFollowSuggestion = false;
+  String _dateFilter = 'all';
+  ContentType? _contentTypeFilter;
+  List<({Content content, double progress})> _continueWatching = [];
+  List<Content> _becauseYouWatched = [];
+  List<String> _followedCreatorIds = [];
+  List<String> _trendingTopics = ['#Trending', '#ForYou', '#New'];
+  int _newPostCount = 0;
+
+  List<Content> get _filteredPosts {
+    var posts = _posts;
+    if (_showFollowing) {
+      if (_followedCreatorIds.isEmpty) {
+        return [];
+      }
+      posts = posts.where((p) {
+        final creatorId =
+            p.creatorId ??
+            p.creatorName?.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+        return _followedCreatorIds.contains(creatorId) ||
+            _followedCreatorIds.contains(p.creatorName);
+      }).toList();
+    }
+    if (_contentTypeFilter != null) {
+      posts = posts.where((p) => p.contentType == _contentTypeFilter).toList();
+    }
+    if (_dateFilter != 'all') {
+      final now = DateTime.now();
+      final DateTime cutoff;
+      switch (_dateFilter) {
+        case 'today':
+          cutoff = DateTime(now.year, now.month, now.day);
+        case 'week':
+          cutoff = now.subtract(const Duration(days: 7));
+        case 'month':
+          cutoff = now.subtract(const Duration(days: 30));
+        default:
+          cutoff = DateTime(2000);
+      }
+      posts = posts
+          .where((p) => p.publishedAt == null || p.publishedAt!.isAfter(cutoff))
+          .toList();
+    }
+    return posts;
+  }
+
+  int get _activeFilterCount {
+    int count = 0;
+    if (_selectedPlatform != null) count++;
+    if (_contentTypeFilter != null) count++;
+    if (_dateFilter != 'all') count++;
+    return count;
+  }
+
   @override
   bool get wantKeepAlive => true;
 
@@ -29,7 +96,79 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   void initState() {
     super.initState();
     _loadInitialPosts();
+    _loadContinueWatching();
     _scrollController.addListener(_onScroll);
+    _checkConnectivity();
+    _checkProactivePaywall();
+    WatchStreakService.instance.recordOpen().then((_) {
+      if (mounted) {
+        setState(() {});
+        // After streak update, check for milestone and trigger any new
+        // personalized notifications (daily trending, weekly digest, etc.)
+        NotificationService.instance.schedulePersonalizedNotifications();
+        if (WatchStreakService.instance.isMilestone) {
+          NotificationService.instance.showStreakReminderNotification(
+            streakDays: WatchStreakService.instance.currentStreak,
+          );
+        }
+      }
+    });
+  }
+
+  Future<void> _checkProactivePaywall() async {
+    final shouldShow = await SubscriptionService.instance
+        .shouldShowProactivePaywall();
+    if (shouldShow && mounted) {
+      // Wait until content has loaded before showing paywall to avoid racing with _isLoading
+      await Future.delayed(const Duration(milliseconds: 3000));
+      if (mounted && !_isLoading) {
+        Navigator.of(context).pushNamed(AppRoutes.premium);
+      }
+    }
+  }
+
+  Future<void> _loadContinueWatching() async {
+    final prefs = await SharedPreferences.getInstance();
+    final keys = prefs.getKeys().where((k) => k.startsWith('watch_progress_'));
+    final items = <({Content content, double progress})>[];
+    for (final key in keys.take(10)) {
+      final progress = prefs.getDouble(key) ?? 0.0;
+      if (progress > 0.05 && progress < 0.9) {
+        final id = key.replaceFirst('watch_progress_', '');
+        final content = await ContentService.instance.getVideoById(id);
+        if (content != null) items.add((content: content, progress: progress));
+      }
+    }
+    if (mounted && items.isNotEmpty) {
+      setState(() => _continueWatching = items);
+      // Load "Because you watched X" recommendations based on most recently watched
+      try {
+        final lastWatched = items.first.content;
+        final recs = await ContentService.instance.getVideos(limit: 50);
+        final becauseRecs = recs
+            .where(
+              (c) =>
+                  c.id != lastWatched.id &&
+                  c.tags.any((t) => lastWatched.tags.contains(t)),
+            )
+            .take(3)
+            .toList();
+        if (mounted && becauseRecs.isNotEmpty) {
+          setState(() => _becauseYouWatched = becauseRecs);
+        }
+      } catch (_) {
+        // Non-critical — silently skip if recommendations fail
+      }
+    }
+  }
+
+  Future<void> _checkConnectivity() async {
+    final connected = await ConnectivityService.instance.isConnected();
+    if (mounted) {
+      setState(() {
+        _isOffline = !connected;
+      });
+    }
   }
 
   @override
@@ -37,68 +176,105 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     _scrollController.dispose();
     super.dispose();
   }
-  
+
   void _onScroll() {
-    if (_scrollController.position.pixels >= 
-        _scrollController.position.maxScrollExtent - 200) {
+    final pos = _scrollController.position;
+    // Preload thumbnails for the items roughly 2 screen-heights ahead
+    if (_posts.isNotEmpty) {
+      final approxItemHeight = 320.0;
+      final currentIndex = (pos.pixels / approxItemHeight).floor();
+      _preloadThumbnails(currentIndex + 3);
+    }
+    if (pos.pixels >= pos.maxScrollExtent - 200) {
       _loadMorePosts();
     }
   }
-  
+
   Future<void> _loadInitialPosts() async {
     setState(() {
       _isLoading = true;
+      _loadError = false;
     });
-    
+
     try {
       // Check if user is authenticated and onboarding is completed
       final authService = AuthService.instance;
       final onboardingService = OnboardingService();
       final user = authService.currentUser;
-      
+
       List<Content> feedContent;
-      
+
+      final isOnboardingCompleted = await onboardingService
+          .isOnboardingCompleted();
       if (user != null) {
-        final isOnboardingCompleted = await onboardingService.isOnboardingCompleted();
-        
         if (isOnboardingCompleted) {
-          // Use personalized content for completed onboarding users
-          feedContent = await ContentService.instance.getPersonalizedContent(limit: 15);
+          feedContent = await ContentService.instance.getPersonalizedContent(
+            limit: 15,
+          );
         } else {
-          // Use onboarding-based recommendations for users in progress
-          feedContent = await ContentService.instance.getOnboardingBasedRecommendations(limit: 15);
+          feedContent = await ContentService.instance
+              .getOnboardingBasedRecommendations(limit: 15);
         }
+      } else if (isOnboardingCompleted) {
+        // User completed chatbot onboarding without creating account — show genre-personalized feed
+        feedContent = await ContentService.instance
+            .getOnboardingBasedRecommendations(limit: 15);
       } else {
-        // Use general trending content for unauthenticated users
-        feedContent = await ContentService.instance.getTrendingVideos(limit: 15);
+        feedContent = await ContentService.instance.getTrendingVideos(
+          limit: 15,
+        );
       }
-      
-      // Ensure we have YouTube content for proper video playback
-      final youtubeContent = feedContent.where((content) => 
-        content.platform == PlatformType.youtube
-      ).toList();
-      
-      // Mix YouTube content with other platforms for better variety
-      final mixedContent = <Content>[];
-      mixedContent.addAll(youtubeContent.take(8)); // Prioritize YouTube for video playback
-      mixedContent.addAll(feedContent.where((content) => 
-        content.platform != PlatformType.youtube
-      ).take(7));
-      
+
+      final followedIds = UserInteractionService.instance
+          .getFollowedCreatorIds();
+
+      // Cold-start diversity: shuffle for new users with no watch history and no follows
+      if (_continueWatching.isEmpty && followedIds.isEmpty) {
+        feedContent.shuffle();
+      }
+
+      // Derive trending topics from actual feed content
+      final tagCounts = feedContent
+          .expand((p) => p.tags)
+          .fold<Map<String, int>>({}, (m, t) {
+            m[t] = (m[t] ?? 0) + 1;
+            return m;
+          });
+      final derivedTopics =
+          (tagCounts.entries.toList()
+                ..sort((a, b) => b.value.compareTo(a.value)))
+              .take(6)
+              .map((e) => '#${e.key}')
+              .toList();
+      final newCount = feedContent
+          .where(
+            (p) =>
+                p.publishedAt != null &&
+                DateTime.now().difference(p.publishedAt!).inHours < 24,
+          )
+          .length;
       setState(() {
-        _allPosts = mixedContent;
+        _allPosts = feedContent;
         _posts = List.from(_allPosts);
         _isLoading = false;
+        _followedCreatorIds = followedIds;
+        _showFollowSuggestion = followedIds.isEmpty;
+        if (derivedTopics.isNotEmpty) _trendingTopics = derivedTopics;
+        _newPostCount = newCount;
       });
-      
+      // Preload the first 5 thumbnails immediately after load
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _preloadThumbnails(0, count: 5);
+      });
+
       // Track successful content load with personalization info
       await AnalyticsService.instance.trackUserInteraction(
         action: 'home_content_loaded',
         screen: 'home',
         additionalData: {
-          'total_content': mixedContent.length,
-          'youtube_content': youtubeContent.length,
-          'is_personalized': user != null && await onboardingService.isOnboardingCompleted(),
+          'total_content': feedContent.length,
+          'is_personalized':
+              user != null && await onboardingService.isOnboardingCompleted(),
           'user_authenticated': user != null,
         },
       );
@@ -107,8 +283,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         _allPosts = [];
         _posts = [];
         _isLoading = false;
+        _loadError = true;
       });
-      
+
       // Track error
       await AnalyticsService.instance.trackError(
         errorType: 'home_content_load_error',
@@ -117,64 +294,111 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       );
     }
   }
-  
+
   Future<void> _loadMorePosts() async {
     if (_isLoading || !_hasMore) return;
-    
+
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       // Use the same personalization logic as initial load
       final authService = AuthService.instance;
       final onboardingService = OnboardingService();
       final user = authService.currentUser;
-      
+
       List<Content> newPosts;
-      
+
+      final isOnboardingCompleted = await onboardingService
+          .isOnboardingCompleted();
       if (user != null) {
-        final isOnboardingCompleted = await onboardingService.isOnboardingCompleted();
-        
         if (isOnboardingCompleted) {
-          // Use personalized content for completed onboarding users
-          newPosts = await ContentService.instance.getPersonalizedContent(limit: 8);
+          newPosts = await ContentService.instance.getPersonalizedContent(
+            limit: 8,
+          );
         } else {
-          // Use onboarding-based recommendations for users in progress
-          newPosts = await ContentService.instance.getOnboardingBasedRecommendations(limit: 8);
+          newPosts = await ContentService.instance
+              .getOnboardingBasedRecommendations(limit: 8);
         }
+      } else if (isOnboardingCompleted) {
+        newPosts = await ContentService.instance
+            .getOnboardingBasedRecommendations(limit: 8);
       } else {
-        // Use general content for unauthenticated users
         newPosts = await ContentService.instance.getFeedContent(limit: 8);
       }
-      
+
+      final existingIds = _allPosts.map((p) => p.id).toSet();
+      final deduped = newPosts
+          .where((p) => !existingIds.contains(p.id))
+          .toList();
+      if (deduped.isEmpty) {
+        setState(() {
+          _hasMore = false;
+          _isLoading = false;
+        });
+        return;
+      }
+      _allPosts.addAll(deduped);
+      final newCount = _allPosts
+          .where(
+            (p) =>
+                p.publishedAt != null &&
+                DateTime.now().difference(p.publishedAt!).inHours < 24,
+          )
+          .length;
       setState(() {
-        _allPosts.addAll(newPosts);
         // Apply current filter to new posts
         if (_selectedPlatform == null) {
-          _posts.addAll(newPosts);
+          _posts.addAll(deduped);
         } else {
-          _posts.addAll(newPosts.where((post) => post.platform == _selectedPlatform));
+          _posts.addAll(
+            deduped.where((post) => post.platform == _selectedPlatform),
+          );
         }
         _isLoading = false;
-        _hasMore = _allPosts.length < 50;
+        _hasMore = _allPosts.length < 200;
+        _newPostCount = newCount;
       });
+      // Fire "new content available" notification once per day when ≥5 fresh items land
+      final topGenres = _allPosts.isNotEmpty
+          ? _allPosts.first.tags
+          : <String>[];
+      final category = topGenres.isNotEmpty ? topGenres.first : 'Videos';
+      NotificationService.instance.notifyContentLoaded(
+        newItemCount: newCount,
+        category: category,
+      );
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
     }
   }
-  
+
   Future<void> _refreshPosts() async {
     setState(() {
       _posts.clear();
       _allPosts.clear();
       _hasMore = true;
     });
+    // Trigger a live refresh from YouTube so pull-to-refresh fetches new data
+    await ContentService.instance.refreshContent();
     await _loadInitialPosts();
   }
-  
+
+  /// Preload thumbnails for the next [count] posts beyond [startIndex].
+  /// Runs in the background — no await needed at call site.
+  void _preloadThumbnails(int startIndex, {int count = 5}) {
+    final end = (startIndex + count).clamp(0, _posts.length);
+    for (int i = startIndex; i < end; i++) {
+      final url = _posts[i].thumbnailUrl;
+      if (url != null && url.isNotEmpty) {
+        precacheImage(CachedNetworkImageProvider(url), context);
+      }
+    }
+  }
+
   void _handlePlatformFilter(PlatformType? platform) {
     setState(() {
       _selectedPlatform = platform;
@@ -184,77 +408,57 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         _posts = _allPosts.where((post) => post.platform == platform).toList();
       }
     });
-    
-    // Navigate to specific platform content if needed
-    if (platform == PlatformType.youtube) {
-      _navigateToYouTube();
-    } else if (platform == PlatformType.tiktok) {
-      _navigateToTikTok();
-    }
   }
-  
-  void _navigateToYouTube() {
-    // Navigate to YouTube-specific content or external YouTube
-    Navigator.of(context).pushNamed('/dashboard', arguments: {'initialTab': 1, 'filter': 'youtube'});
-  }
-  
-  void _navigateToTikTok() {
-    // Navigate to TikTok-specific content (Shorts tab)
-    Navigator.of(context).pushNamed('/dashboard', arguments: {'initialTab': 3, 'filter': 'tiktok'});
-  }
-  
 
+  void _showFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _FilterBottomSheet(
+        selectedPlatform: _selectedPlatform,
+        dateFilter: _dateFilter,
+        contentTypeFilter: _contentTypeFilter,
+        onApply: (platform, dateFilter, contentType) {
+          setState(() {
+            _selectedPlatform = platform;
+            _dateFilter = dateFilter;
+            _contentTypeFilter = contentType;
+            if (platform == null) {
+              _posts = List.from(_allPosts);
+            } else {
+              _posts = _allPosts.where((p) => p.platform == platform).toList();
+            }
+          });
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return Container(
       child: Column(
         children: [
           _buildHeader(),
-          Expanded(
-            child: _buildFeed(),
-          ),
+          if (_isOffline)
+            _OfflineBanner(onDismiss: () => setState(() => _isOffline = false)),
+          Expanded(child: _buildFeed()),
         ],
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Your Feed',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Personalized content from your favorite platforms',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              _buildQuickStats(),
-            ],
-          ),
+          // For You / Following tab switch (YouTube/TikTok/Twitter pattern)
+          _buildFeedTabSwitch(),
           const SizedBox(height: 12),
           _buildTrendingTopics(),
           const SizedBox(height: 12),
@@ -263,18 +467,171 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       ),
     );
   }
-  
+
+  Widget _buildFeedTabSwitch() {
+    final streakLabel = WatchStreakService.instance.streakLabel;
+    return Row(
+      children: [
+        Expanded(
+          child: Row(
+            children: [
+              _buildFeedTab(
+                AppLocalizations.of(context)!.forYou,
+                !_showFollowing,
+                isForYou: true,
+              ),
+              const SizedBox(width: 24),
+              _buildFeedTab(
+                AppLocalizations.of(context)!.following,
+                _showFollowing,
+                isForYou: false,
+              ),
+              if (streakLabel.isNotEmpty) ...[
+                const SizedBox(width: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF6B00).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFFFF6B00).withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Text(
+                    streakLabel,
+                    style: const TextStyle(
+                      color: Color(0xFFFF6B00),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        Semantics(
+          label: _activeFilterCount > 0
+              ? 'Open filters. $_activeFilterCount active'
+              : 'Open filters',
+          button: true,
+          child: GestureDetector(
+            onTap: _showFilterSheet,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _activeFilterCount > 0
+                        ? AppTheme.primaryCyan.withValues(alpha: 0.2)
+                        : Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: _activeFilterCount > 0
+                          ? AppTheme.primaryCyan
+                          : Colors.white.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.tune,
+                    color: _activeFilterCount > 0
+                        ? AppTheme.primaryCyan
+                        : Colors.white70,
+                    size: 20,
+                  ),
+                ),
+                if (_activeFilterCount > 0)
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: Container(
+                      width: 16,
+                      height: 16,
+                      decoration: const BoxDecoration(
+                        color: AppTheme.primaryCyan,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '$_activeFilterCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        _buildQuickStats(),
+      ],
+    );
+  }
+
+  Widget _buildFeedTab(String label, bool isActive, {bool isForYou = true}) {
+    return Semantics(
+      label: '$label tab',
+      selected: isActive,
+      button: true,
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _showFollowing = !isForYou;
+          });
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: isActive
+                    ? Colors.white
+                    : Colors.white.withValues(alpha: 0.45),
+                fontSize: 18,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.w400,
+              ),
+            ),
+            const SizedBox(height: 4),
+            if (isActive)
+              Container(
+                height: 3,
+                width: 32,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppTheme.primaryCyan, AppTheme.primaryPink],
+                  ),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              )
+            else
+              const SizedBox(height: 3),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildQuickStats() {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         children: [
           Text(
-            '24',
+            '$_newPostCount',
             style: TextStyle(
               color: AppTheme.primaryCyan,
               fontSize: 16,
@@ -282,9 +639,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
             ),
           ),
           Text(
-            'New',
+            AppLocalizations.of(context)?.newLabel ?? 'New',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 10,
             ),
           ),
@@ -294,39 +651,75 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   }
 
   Widget _buildTrendingTopics() {
-    final topics = ['#Flutter', '#AI', '#Tech', '#Design'];
-    
+    final topics = _trendingTopics;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Trending',
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.9),
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
+        Row(
+          children: [
+            const Icon(
+              Icons.local_fire_department_rounded,
+              color: AppTheme.primaryPink,
+              size: 14,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              AppLocalizations.of(context)?.trending ?? 'Trending',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         SizedBox(
-          height: 24,
+          height: 30,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.zero,
             itemCount: topics.length,
             itemBuilder: (context, index) {
-              return Container(
-                margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryPink.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  topics[index],
-                  style: TextStyle(
-                    color: AppTheme.primaryPink,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
+              return Semantics(
+                label: 'Trending topic ${topics[index]}',
+                button: true,
+                child: GestureDetector(
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    AppRoutes.search,
+                    arguments: {'query': topics[index].replaceAll('#', '')},
+                  ),
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppTheme.primaryPink.withValues(alpha: 0.25),
+                          AppTheme.primaryPink.withValues(alpha: 0.1),
+                        ],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        color: AppTheme.primaryPink.withValues(alpha: 0.35),
+                      ),
+                    ),
+                    child: Text(
+                      topics[index],
+                      style: const TextStyle(
+                        color: AppTheme.primaryPink,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
               );
@@ -338,67 +731,401 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   }
 
   Widget _buildQuickFilters() {
-    final filters = [
-      {'name': 'All', 'platform': null, 'icon': Icons.apps},
-      {'name': 'YouTube', 'platform': PlatformType.youtube, 'icon': Icons.play_circle},
-      {'name': 'Instagram', 'platform': PlatformType.instagram, 'icon': Icons.camera_alt},
-      {'name': 'TikTok', 'platform': PlatformType.tiktok, 'icon': Icons.music_video},
-      {'name': 'Facebook', 'platform': PlatformType.facebook, 'icon': Icons.facebook},
+    const filters = [
+      (name: 'All', platform: null, icon: Icons.auto_awesome_rounded),
+      (
+        name: 'YouTube',
+        platform: PlatformType.youtube,
+        icon: Icons.play_circle_rounded,
+      ),
+      (
+        name: 'Instagram',
+        platform: PlatformType.instagram,
+        icon: Icons.camera_alt_rounded,
+      ),
+      (
+        name: 'TikTok',
+        platform: PlatformType.tiktok,
+        icon: Icons.music_video_rounded,
+      ),
+      (
+        name: 'Facebook',
+        platform: PlatformType.facebook,
+        icon: Icons.facebook_rounded,
+      ),
     ];
-    
+
     return SizedBox(
-      height: 32,
+      height: 36,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.zero,
         itemCount: filters.length,
         itemBuilder: (context, index) {
           final filter = filters[index];
-          final isSelected = _selectedPlatform == filter['platform'];
-          
-          return Container(
-            margin: const EdgeInsets.only(right: 8),
-            child: FilterChip(
-              avatar: Icon(
-                filter['icon'] as IconData,
-                size: 16,
-                color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
-              ),
-              label: Text(
-                filter['name'] as String,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
-                  fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+          final isSelected = _selectedPlatform == filter.platform;
+
+          return Semantics(
+            label: 'Filter by ${filter.name}',
+            button: true,
+            selected: isSelected,
+            child: GestureDetector(
+              onTap: () => _handlePlatformFilter(filter.platform),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color(0xFF00D4FF)
+                      : Colors.white.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: isSelected
+                        ? const Color(0xFF00D4FF)
+                        : Colors.white.withValues(alpha: 0.18),
+                    width: 1,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: const Color(
+                              0xFF00D4FF,
+                            ).withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      filter.icon,
+                      size: 13,
+                      color: isSelected
+                          ? Colors.black87
+                          : Colors.white.withValues(alpha: 0.75),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      filter.name,
+                      style: TextStyle(
+                        color: isSelected
+                            ? Colors.black87
+                            : Colors.white.withValues(alpha: 0.75),
+                        fontSize: 12,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w400,
+                        letterSpacing: isSelected ? 0.1 : 0,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              selected: isSelected,
-              onSelected: (selected) {
-                _handlePlatformFilter(filter['platform'] as PlatformType?);
-              },
-              backgroundColor: Colors.white.withOpacity(0.1),
-              selectedColor: AppTheme.primaryCyan.withOpacity(0.3),
-              side: BorderSide(
-                color: isSelected 
-                    ? AppTheme.primaryCyan
-                    : Colors.white.withOpacity(0.3),
-              ),
-              showCheckmark: false,
             ),
           );
         },
       ),
     );
   }
-  
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.3,
+            ),
+          ),
+          Semantics(
+            label: 'See all $title content',
+            button: true,
+            child: GestureDetector(
+              onTap: () => Navigator.pushNamed(context, AppRoutes.search),
+              child: Text(
+                'See all',
+                style: TextStyle(
+                  color: AppTheme.primaryCyan,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFeed() {
+    final displayPosts = _filteredPosts;
+
     if (_isLoading && _posts.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryCyan),
+      return const LoadingShimmer(itemCount: 4);
+    }
+
+    if (_loadError && _posts.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 88,
+                height: 88,
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.wifi_off_rounded,
+                  size: 44,
+                  color: Colors.redAccent,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Couldn't load content",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.3,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Check your connection and try again',
+                style: TextStyle(
+                  color: Colors.white54,
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                width: 160,
+                height: 44,
+                child: ElevatedButton.icon(
+                  onPressed: _loadInitialPosts,
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: const Text('Try Again'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryCyan,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
-    
+
+    if (!_isLoading && _posts.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 88,
+                height: 88,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryCyan.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.video_library_rounded,
+                  size: 44,
+                  color: AppTheme.primaryCyan,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'No content yet',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.3,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Pull down to refresh or adjust your filters',
+                style: TextStyle(
+                  color: Colors.white54,
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                width: 160,
+                height: 44,
+                child: ElevatedButton.icon(
+                  onPressed: _loadInitialPosts,
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: const Text('Refresh'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryCyan,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (!_isLoading && _posts.isNotEmpty && displayPosts.isEmpty) {
+      if (_showFollowing && _followedCreatorIds.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.people_outline, size: 64, color: Colors.white24),
+              const SizedBox(height: 16),
+              const Text(
+                'No followed creators yet',
+                style: TextStyle(color: Colors.white54, fontSize: 18),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Follow creators to see their content here',
+                style: TextStyle(color: Colors.white60, fontSize: 14),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.pushNamed(context, AppRoutes.search),
+                child: const Text('Find Creators'),
+              ),
+            ],
+          ),
+        );
+      }
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.filter_alt_off, size: 64, color: Colors.white24),
+            const SizedBox(height: 16),
+            const Text(
+              'No content matches your filters',
+              style: TextStyle(color: Colors.white54, fontSize: 18),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Try changing or clearing your filters',
+              style: TextStyle(color: Colors.white60, fontSize: 14),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _selectedPlatform = null;
+                  _dateFilter = 'all';
+                  _contentTypeFilter = null;
+                  _posts = List.from(_allPosts);
+                });
+              },
+              child: const Text('Clear Filters'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final continueSection = _continueWatching.isNotEmpty
+        ? _buildContinueWatchingSection()
+        : null;
+
+    final becauseYouWatchedSection =
+        _becauseYouWatched.isNotEmpty && _continueWatching.isNotEmpty
+        ? _buildBecauseYouWatchedSection()
+        : null;
+
+    // Build mixed list: inject ad slot (null) every 6 content cards for free users
+    final isPremium = SubscriptionService.instance.isPremium;
+    final List<Content?> mixedList = [];
+    for (int i = 0; i < displayPosts.length; i++) {
+      mixedList.add(displayPosts[i]);
+      if (!isPremium && (i + 1) % 6 == 0) {
+        mixedList.add(null); // null = ad slot
+      }
+    }
+
+    // Build the interleaved list with section headers every 10 content cards.
+    // A null entry in _feedItems means it's a section header, a Content? null
+    // means an ad slot. We use a separate parallel list to track types.
+    final List<_FeedItem> feedItems = [];
+    int contentCardCount = 0;
+    for (int i = 0; i < mixedList.length; i++) {
+      final post = mixedList[i];
+      if (post != null) {
+        // Insert a section header before every 10th content card (but not the very first)
+        if (contentCardCount > 0 && contentCardCount % 10 == 0) {
+          feedItems.add(const _FeedItem.sectionHeader('Trending Now'));
+        }
+        // First 10 content cards are AI-personalised picks (Google Play labelling requirement)
+        final isAiPick = contentCardCount < 10;
+        feedItems.add(
+          _FeedItem.content(
+            post,
+            aiRecommended: isAiPick,
+            reasonTag: isAiPick && post.tags.isNotEmpty
+                ? post.tags.first
+                : null,
+          ),
+        );
+        contentCardCount++;
+      } else {
+        feedItems.add(const _FeedItem.ad());
+      }
+    }
+
+    final extraItems =
+        (continueSection != null ? 1 : 0) +
+        (becauseYouWatchedSection != null ? 1 : 0) +
+        (_isLoading ? 1 : 0) +
+        (_showFollowSuggestion ? 1 : 0);
+
     return RefreshIndicator(
       onRefresh: _refreshPosts,
       color: AppTheme.primaryCyan,
@@ -406,27 +1133,774 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       child: ListView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: _posts.length + (_isLoading ? 1 : 0),
+        itemCount: feedItems.length + extraItems,
+        cacheExtent:
+            800, // pre-build 800px ahead to prevent thumbnail blank flashes
+        addRepaintBoundaries: false, // we add our own RepaintBoundary per card
+        addAutomaticKeepAlives: false,
         itemBuilder: (context, index) {
-          if (index >= _posts.length) {
+          // First item: continue watching
+          if (continueSection != null && index == 0) return continueSection;
+          int offset0 = continueSection != null ? index - 1 : index;
+          // Second item: because you watched
+          if (becauseYouWatchedSection != null && offset0 == 0)
+            return becauseYouWatchedSection;
+          final offsetIndex = becauseYouWatchedSection != null
+              ? offset0 - 1
+              : offset0;
+
+          // Insert follow suggestion banner after the 2nd post (YouTube/TikTok pattern)
+          if (_showFollowSuggestion && offsetIndex == 2) {
+            return _buildFollowSuggestionBanner(context);
+          }
+          // Adjust index for the injected banner
+          final listIndex = _showFollowSuggestion && offsetIndex > 2
+              ? offsetIndex - 1
+              : offsetIndex;
+
+          if (listIndex >= feedItems.length) {
             return const Padding(
               padding: EdgeInsets.all(20),
               child: Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryCyan),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppTheme.primaryCyan,
+                  ),
                 ),
               ),
             );
           }
-          
-          final post = _posts[index];
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: FeedPostCard(
-              content: post,
+
+          final feedItem = feedItems[listIndex];
+          if (feedItem.isSectionHeader) {
+            return _buildSectionHeader(feedItem.sectionTitle!);
+          }
+          if (feedItem.isAd) {
+            // Ad slot — render native in-feed ad
+            return const InFeedAdCard();
+          }
+
+          return RepaintBoundary(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: FeedPostCard(
+                content: feedItem.content!,
+                isHero: listIndex == 0,
+                index: listIndex,
+                isAiRecommended: feedItem.isAiRecommended,
+                aiReasonTag: feedItem.aiReasonTag,
+              ),
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildContinueWatchingSection() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.continueWatching,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.history),
+                  child: const Text(
+                    'See all',
+                    style: TextStyle(
+                      color: AppTheme.primaryCyan,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 130,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _continueWatching.length,
+              itemBuilder: (context, i) {
+                final item = _continueWatching[i];
+                return Semantics(
+                  label: 'Continue watching ${item.content.title ?? ""}',
+                  button: true,
+                  child: GestureDetector(
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      AppRoutes.player,
+                      arguments: item.content,
+                    ),
+                    child: Container(
+                      width: 180,
+                      margin: const EdgeInsets.only(right: 12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: const Color(0xFF1A1A2E),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Stack(
+                        children: [
+                          if (item.content.thumbnailUrl != null)
+                            CachedNetworkImage(
+                              imageUrl: item.content.thumbnailUrl!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              errorWidget: (_, __, ___) =>
+                                  Container(color: const Color(0xFF252545)),
+                            ),
+                          // Gradient overlay for title readability
+                          Positioned.fill(
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.black.withValues(alpha: 0.7),
+                                  ],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  stops: const [0.4, 1.0],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    8,
+                                    0,
+                                    8,
+                                    4,
+                                  ),
+                                  child: Text(
+                                    item.content.title ?? '',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black54,
+                                          blurRadius: 4,
+                                        ),
+                                      ],
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                LinearProgressIndicator(
+                                  value: item.progress,
+                                  backgroundColor: Colors.white24,
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                        AppTheme.primaryCyan,
+                                      ),
+                                  minHeight: 3,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Positioned(
+                            top: 6,
+                            right: 6,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.6),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.play_arrow_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBecauseYouWatchedSection() {
+    final lastWatched = _continueWatching.first.content;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text(
+              'Because you watched "${lastWatched.title ?? "this video"}"',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.3,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          SizedBox(
+            height: 130,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _becauseYouWatched.length,
+              itemBuilder: (context, i) {
+                final item = _becauseYouWatched[i];
+                return GestureDetector(
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    AppRoutes.player,
+                    arguments: item,
+                  ),
+                  child: Container(
+                    width: 180,
+                    margin: const EdgeInsets.only(right: 12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: const Color(0xFF1A1A2E),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Stack(
+                      children: [
+                        if (item.thumbnailUrl != null)
+                          CachedNetworkImage(
+                            imageUrl: item.thumbnailUrl!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            errorWidget: (_, __, ___) =>
+                                Container(color: const Color(0xFF252545)),
+                          ),
+                        Positioned.fill(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withValues(alpha: 0.7),
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                stops: const [0.4, 1.0],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 8,
+                          left: 8,
+                          right: 8,
+                          child: Text(
+                            item.title ?? '',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              shadows: [
+                                Shadow(color: Colors.black54, blurRadius: 4),
+                              ],
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFollowSuggestionBanner(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF001A2E), Color(0xFF1A0A2E)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: const Color(0xFF00D4FF).withValues(alpha: 0.25),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.people_outline,
+                color: Color(0xFF00D4FF),
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                AppLocalizations.of(context)?.discoverCreators ??
+                    'Discover creators to follow',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            AppLocalizations.of(context)?.followCreatorsHint ??
+                'Follow creators to surface their content first in your feed. Tap Follow on any video.',
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 12,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  setState(() => _showFollowSuggestion = false);
+                  Navigator.pushNamed(context, AppRoutes.search);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 7,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00D4FF),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context)?.findCreators ??
+                        'Find creators',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: () => setState(() => _showFollowSuggestion = false),
+                child: Text(
+                  AppLocalizations.of(context)?.dismiss ?? 'Dismiss',
+                  style: const TextStyle(color: Colors.white60, fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Dismissible amber banner shown when the device is offline.
+/// Content still loads from seed data so this is informational only.
+class _OfflineBanner extends StatelessWidget {
+  final VoidCallback onDismiss;
+  const _OfflineBanner({required this.onDismiss});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: Colors.amber.withValues(alpha: 0.15),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+      child: Row(
+        children: [
+          const Icon(Icons.wifi_off, color: Colors.amber, size: 16),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Text(
+              'Offline — content may not be up to date',
+              style: TextStyle(color: Colors.amber, fontSize: 12),
+            ),
+          ),
+          GestureDetector(
+            onTap: onDismiss,
+            child: const Icon(Icons.close, color: Colors.amber, size: 16),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A discriminated-union item used to build the feed list.
+class _FeedItem {
+  final Content? content;
+  final bool isAd;
+  final bool isSectionHeader;
+  final bool isAiRecommended;
+  final String? sectionTitle;
+  final String? aiReasonTag;
+
+  const _FeedItem.content(
+    Content c, {
+    bool aiRecommended = false,
+    String? reasonTag,
+  }) : content = c,
+       isAd = false,
+       isSectionHeader = false,
+       isAiRecommended = aiRecommended,
+       sectionTitle = null,
+       aiReasonTag = reasonTag;
+
+  const _FeedItem.ad()
+    : content = null,
+      isAd = true,
+      isSectionHeader = false,
+      isAiRecommended = false,
+      sectionTitle = null,
+      aiReasonTag = null;
+
+  const _FeedItem.sectionHeader(String title)
+    : content = null,
+      isAd = false,
+      isSectionHeader = true,
+      isAiRecommended = false,
+      sectionTitle = title,
+      aiReasonTag = null;
+}
+
+class _FilterBottomSheet extends StatefulWidget {
+  final PlatformType? selectedPlatform;
+  final String dateFilter;
+  final ContentType? contentTypeFilter;
+  final void Function(
+    PlatformType? platform,
+    String dateFilter,
+    ContentType? contentType,
+  )
+  onApply;
+
+  const _FilterBottomSheet({
+    required this.selectedPlatform,
+    required this.dateFilter,
+    required this.contentTypeFilter,
+    required this.onApply,
+  });
+
+  @override
+  State<_FilterBottomSheet> createState() => _FilterBottomSheetState();
+}
+
+class _FilterBottomSheetState extends State<_FilterBottomSheet> {
+  late PlatformType? _platform;
+  late String _dateFilter;
+  late ContentType? _contentType;
+
+  @override
+  void initState() {
+    super.initState();
+    _platform = widget.selectedPlatform;
+    _dateFilter = widget.dateFilter;
+    _contentType = widget.contentTypeFilter;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFF1A1A2E),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)?.filters ?? 'Filters',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _platform = null;
+                        _dateFilter = 'all';
+                        _contentType = null;
+                      });
+                    },
+                    child: Text(
+                      AppLocalizations.of(context)?.resetAll ?? 'Reset All',
+                      style: const TextStyle(color: Color(0xFF00D4FF)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Platform',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildFilterChip(
+                    'All',
+                    _platform == null,
+                    () => setState(() => _platform = null),
+                  ),
+                  _buildPlatformChip(
+                    'YouTube',
+                    PlatformType.youtube,
+                    const Color(0xFFFF0000),
+                  ),
+                  _buildPlatformChip(
+                    'Instagram',
+                    PlatformType.instagram,
+                    const Color(0xFFE1306C),
+                  ),
+                  _buildPlatformChip(
+                    'TikTok',
+                    PlatformType.tiktok,
+                    const Color(0xFF69C9D0),
+                  ),
+                  _buildPlatformChip(
+                    'Facebook',
+                    PlatformType.facebook,
+                    const Color(0xFF1877F2),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Time Range',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildFilterChip(
+                    'All Time',
+                    _dateFilter == 'all',
+                    () => setState(() => _dateFilter = 'all'),
+                  ),
+                  _buildFilterChip(
+                    'Today',
+                    _dateFilter == 'today',
+                    () => setState(() => _dateFilter = 'today'),
+                  ),
+                  _buildFilterChip(
+                    'This Week',
+                    _dateFilter == 'week',
+                    () => setState(() => _dateFilter = 'week'),
+                  ),
+                  _buildFilterChip(
+                    'This Month',
+                    _dateFilter == 'month',
+                    () => setState(() => _dateFilter = 'month'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Content Type',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildFilterChip(
+                    'All',
+                    _contentType == null,
+                    () => setState(() => _contentType = null),
+                  ),
+                  _buildFilterChip(
+                    'Videos',
+                    _contentType == ContentType.video,
+                    () => setState(() => _contentType = ContentType.video),
+                  ),
+                  _buildFilterChip(
+                    'Shorts',
+                    _contentType == ContentType.short,
+                    () => setState(() => _contentType = ContentType.short),
+                  ),
+                  _buildFilterChip(
+                    'Reels',
+                    _contentType == ContentType.reel,
+                    () => setState(() => _contentType = ContentType.reel),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () {
+                    widget.onApply(_platform, _dateFilter, _contentType);
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF00D4FF),
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Apply Filters',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, bool isSelected, VoidCallback onTap) {
+    return Semantics(
+      label: 'Filter: $label',
+      button: true,
+      selected: isSelected,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? const Color(0xFF00D4FF).withValues(alpha: 0.2)
+                : Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected
+                  ? const Color(0xFF00D4FF)
+                  : Colors.white.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? const Color(0xFF00D4FF) : Colors.white70,
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlatformChip(String label, PlatformType platform, Color color) {
+    final isSelected = _platform == platform;
+    return Semantics(
+      label: 'Filter by $label',
+      button: true,
+      selected: isSelected,
+      child: GestureDetector(
+        onTap: () => setState(() => _platform = platform),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? color.withValues(alpha: 0.2)
+                : Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? color : Colors.white.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? color : Colors.white70,
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+        ),
       ),
     );
   }

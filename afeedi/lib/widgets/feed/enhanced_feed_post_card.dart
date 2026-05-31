@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../models/content_model.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/analytics_service.dart';
+import '../../services/user_interaction_service.dart';
 import '../streaming/responsive_video_player.dart';
 import '../streaming/platform_branding_widget.dart';
 
@@ -11,9 +13,10 @@ class EnhancedFeedPostCard extends StatefulWidget {
   final VoidCallback? onLike;
   final VoidCallback? onComment;
   final VoidCallback? onShare;
+  final VoidCallback? onNotInterested;
   final bool showInteractions;
   final bool showPlatformLogo;
-  
+
   const EnhancedFeedPostCard({
     super.key,
     required this.content,
@@ -21,10 +24,11 @@ class EnhancedFeedPostCard extends StatefulWidget {
     this.onLike,
     this.onComment,
     this.onShare,
+    this.onNotInterested,
     this.showInteractions = true,
     this.showPlatformLogo = true,
   });
-  
+
   @override
   State<EnhancedFeedPostCard> createState() => _EnhancedFeedPostCardState();
 }
@@ -32,31 +36,110 @@ class EnhancedFeedPostCard extends StatefulWidget {
 class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
   bool _isLiked = false;
   bool _isSaved = false;
-  bool _showVideoPlayer = false;
-  
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      color: const Color(0xFF1A1A2E),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: Colors.white.withOpacity(0.1),
-          width: 1,
+    return GestureDetector(
+      onLongPress: _showContextMenu,
+      child: Card(
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        color: const Color(0xFF1A1A2E),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: Colors.white.withValues(alpha: 0.1),
+            width: 1,
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(),
-          _buildContent(),
-          if (widget.showInteractions) _buildInteractions(),
-        ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            _buildContent(),
+            if (widget.showInteractions) _buildInteractions(),
+          ],
+        ),
       ),
     );
   }
-  
+
+  void _showContextMenu() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1A1A2E),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(
+                Icons.thumb_down_outlined,
+                color: Colors.white70,
+              ),
+              title: const Text(
+                'Not Interested',
+                style: TextStyle(color: Colors.white),
+              ),
+              subtitle: const Text(
+                'See less content like this',
+                style: TextStyle(color: Colors.white54, fontSize: 12),
+              ),
+              onTap: () {
+                Navigator.pop(ctx);
+                UserInteractionService.instance.markNotInterested(
+                  widget.content.id,
+                );
+                widget.onNotInterested?.call();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Got it — we\'ll show you less of this'),
+                    duration: Duration(seconds: 2),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.flag_outlined, color: Colors.white70),
+              title: const Text(
+                'Report',
+                style: TextStyle(color: Colors.white),
+              ),
+              subtitle: const Text(
+                'Report inappropriate content',
+                style: TextStyle(color: Colors.white54, fontSize: 12),
+              ),
+              onTap: () {
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Thank you for your report'),
+                    duration: Duration(seconds: 2),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -68,10 +151,11 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             backgroundImage: widget.content.creatorAvatarUrl != null
                 ? NetworkImage(widget.content.creatorAvatarUrl!)
                 : null,
-            backgroundColor: AppTheme.primaryCyan.withOpacity(0.3),
+            backgroundColor: AppTheme.primaryCyan.withValues(alpha: 0.3),
             child: widget.content.creatorAvatarUrl == null
                 ? Text(
-                    widget.content.creatorName?.substring(0, 1).toUpperCase() ?? 'U',
+                    widget.content.creatorName?.substring(0, 1).toUpperCase() ??
+                        'U',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -80,7 +164,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                 : null,
           ),
           const SizedBox(width: 12),
-          
+
           // Creator info and platform
           Expanded(
             child: Column(
@@ -110,11 +194,14 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                   children: [
                     _buildPlatformBadge(),
                     const SizedBox(width: 8),
-                    Text(
-                      _getTimeAgo(),
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
-                        fontSize: 12,
+                    Flexible(
+                      child: Text(
+                        _getTimeAgo(),
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                     if (widget.content.durationSeconds != null) ...[
@@ -122,70 +209,79 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                       Icon(
                         Icons.access_time,
                         size: 12,
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        widget.content.formattedDuration,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
-                          fontSize: 12,
+                      Flexible(
+                        child: Text(
+                          widget.content.formattedDuration,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                     ],
                   ],
                 ),
+                if (widget.content.metadata['recommendationReason'] !=
+                    null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    widget.content.metadata['recommendationReason'] as String,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.45),
+                      fontSize: 11,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ],
             ),
           ),
-          
+
           // More options
           IconButton(
+            tooltip: 'More options',
             onPressed: _showMoreOptions,
             icon: Icon(
               Icons.more_vert,
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
             ),
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildPlatformLogo() {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: _getPlatformColor().withOpacity(0.2),
+        color: _getPlatformColor().withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(6),
       ),
-      child: Icon(
-        _getPlatformIcon(),
-        size: 16,
-        color: _getPlatformColor(),
-      ),
+      child: Icon(_getPlatformIcon(), size: 16, color: _getPlatformColor()),
     );
   }
-  
+
   Widget _buildPlatformBadge() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: _getPlatformColor().withOpacity(0.2),
+        color: _getPlatformColor().withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _getPlatformColor().withOpacity(0.5),
+          color: _getPlatformColor().withValues(alpha: 0.5),
           width: 1,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            _getPlatformIcon(),
-            size: 12,
-            color: _getPlatformColor(),
-          ),
+          Icon(_getPlatformIcon(), size: 12, color: _getPlatformColor()),
           const SizedBox(width: 4),
           Text(
             widget.content.platform.name.toUpperCase(),
@@ -199,7 +295,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   Widget _buildContent() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,7 +315,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-        
+
         if (widget.content.description != null) ...[
           const SizedBox(height: 8),
           Padding(
@@ -227,7 +323,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             child: Text(
               widget.content.description!,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 14,
               ),
               maxLines: 3,
@@ -235,12 +331,12 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             ),
           ),
         ],
-        
+
         const SizedBox(height: 12),
-        
+
         // Media content
         _buildMediaContent(),
-        
+
         // Tags
         if (widget.content.tags.isNotEmpty) ...[
           const SizedBox(height: 12),
@@ -249,16 +345,13 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ],
     );
   }
-  
+
   Widget _buildMediaContent() {
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _showVideoPlayer = true;
-        });
         _showVideoPlayerModal();
         widget.onTap?.call();
-        
+
         // Track content tap
         AnalyticsService.instance.trackUserInteraction(
           action: 'feed_content_tapped',
@@ -275,7 +368,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
         margin: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: Colors.black.withOpacity(0.3),
+          color: Colors.black.withValues(alpha: 0.3),
         ),
         child: Stack(
           children: [
@@ -288,6 +381,10 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                   width: double.infinity,
                   height: double.infinity,
                   fit: BoxFit.cover,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return const ColoredBox(color: Color(0xFF252545));
+                  },
                   errorBuilder: (context, error, stackTrace) {
                     return _buildPlaceholderThumbnail();
                   },
@@ -295,34 +392,41 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
               )
             else
               _buildPlaceholderThumbnail(),
-            
+
             // Play button overlay
             Center(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  widget.content.contentType == ContentType.video
-                      ? Icons.play_arrow
-                      : Icons.play_circle_filled,
-                  color: Colors.white,
-                  size: 32,
+              child: Semantics(
+                label: 'Play ${widget.content.title ?? 'video'}',
+                button: true,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.7),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    widget.content.contentType == ContentType.video
+                        ? Icons.play_arrow
+                        : Icons.play_circle_filled,
+                    color: Colors.white,
+                    size: 32,
+                  ),
                 ),
               ),
             ),
-            
+
             // Duration badge
             if (widget.content.durationSeconds != null)
               Positioned(
                 bottom: 8,
                 right: 8,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.8),
+                    color: Colors.black.withValues(alpha: 0.8),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -335,21 +439,19 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                   ),
                 ),
               ),
-            
+
             // Platform branding
             Positioned(
               top: 8,
               left: 8,
-              child: PlatformBrandingWidget(
-                platform: widget.content.platform,
-              ),
+              child: PlatformBrandingWidget(platform: widget.content.platform),
             ),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildPlaceholderThumbnail() {
     return Container(
       width: double.infinity,
@@ -360,8 +462,8 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            _getPlatformColor().withOpacity(0.3),
-            _getPlatformColor().withOpacity(0.1),
+            _getPlatformColor().withValues(alpha: 0.3),
+            _getPlatformColor().withValues(alpha: 0.1),
           ],
         ),
       ),
@@ -371,13 +473,13 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
           Icon(
             _getPlatformIcon(),
             size: 48,
-            color: _getPlatformColor().withOpacity(0.7),
+            color: _getPlatformColor().withValues(alpha: 0.7),
           ),
           const SizedBox(height: 8),
           Text(
             widget.content.platform.name.toUpperCase(),
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
@@ -386,7 +488,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   Widget _buildTags() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -397,7 +499,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: AppTheme.primaryCyan.withOpacity(0.2),
+              color: AppTheme.primaryCyan.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -413,7 +515,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   Widget _buildInteractions() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -423,13 +525,13 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
           _buildInteractionButton(
             icon: _isLiked ? Icons.favorite : Icons.favorite_border,
             label: _formatCount(widget.content.likeCount),
-            color: _isLiked ? Colors.red : Colors.white.withOpacity(0.7),
+            color: _isLiked ? Colors.red : Colors.white.withValues(alpha: 0.7),
             onTap: () {
               setState(() {
                 _isLiked = !_isLiked;
               });
               widget.onLike?.call();
-              
+
               AnalyticsService.instance.trackUserInteraction(
                 action: _isLiked ? 'content_liked' : 'content_unliked',
                 screen: 'feed',
@@ -440,18 +542,18 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
               );
             },
           ),
-          
+
           const SizedBox(width: 24),
-          
+
           // Comment button
           _buildInteractionButton(
             icon: Icons.comment_outlined,
             label: _formatCount(widget.content.metadata['comments'] ?? 0),
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             onTap: () {
               widget.onComment?.call();
               _showCommentsModal();
-              
+
               AnalyticsService.instance.trackUserInteraction(
                 action: 'content_comment_opened',
                 screen: 'feed',
@@ -462,18 +564,18 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
               );
             },
           ),
-          
+
           const SizedBox(width: 24),
-          
+
           // Share button
           _buildInteractionButton(
             icon: Icons.share_outlined,
             label: 'Share',
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             onTap: () {
               widget.onShare?.call();
               _showShareModal();
-              
+
               AnalyticsService.instance.trackUserInteraction(
                 action: 'content_share_opened',
                 screen: 'feed',
@@ -484,19 +586,54 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
               );
             },
           ),
-          
+
+          // Copy link button
+          IconButton(
+            tooltip: 'Copy link',
+            icon: const Icon(
+              Icons.link_outlined,
+              size: 20,
+              color: Colors.white70,
+            ),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            onPressed: () async {
+              final url =
+                  widget.content.videoUrl ?? widget.content.embedUrl ?? '';
+              if (url.isNotEmpty) {
+                await Clipboard.setData(ClipboardData(text: url));
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Link copied to clipboard'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+
           const Spacer(),
-          
+
           // Save button
           _buildInteractionButton(
             icon: _isSaved ? Icons.bookmark : Icons.bookmark_border,
             label: '',
-            color: _isSaved ? AppTheme.primaryCyan : Colors.white.withOpacity(0.7),
-            onTap: () {
+            color: _isSaved
+                ? AppTheme.primaryCyan
+                : Colors.white.withValues(alpha: 0.7),
+            onTap: () async {
+              // Show premium paywall when free user hits the save limit
+              if (!_isSaved &&
+                  UserInteractionService.instance.hasReachedSaveLimit()) {
+                _showSaveLimitPaywall();
+                return;
+              }
               setState(() {
                 _isSaved = !_isSaved;
               });
-              
+
               AnalyticsService.instance.trackUserInteraction(
                 action: _isSaved ? 'content_saved' : 'content_unsaved',
                 screen: 'feed',
@@ -511,7 +648,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   Widget _buildInteractionButton({
     required IconData icon,
     required String label,
@@ -539,7 +676,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   void _showVideoPlayerModal() {
     showModalBottomSheet(
       context: context,
@@ -560,7 +697,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -583,12 +720,16 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                   ),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close, color: Colors.white, size: 20),
+                      icon: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ],
@@ -597,7 +738,10 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             // Video Player
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Center(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
@@ -616,7 +760,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   void _showCommentsModal() {
     showModalBottomSheet(
       context: context,
@@ -626,20 +770,24 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            const Text(
               'Comments',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
+            Icon(Icons.comment_outlined, color: Colors.white38, size: 40),
+            const SizedBox(height: 12),
             Text(
-              'Comments feature coming soon!',
+              'No comments yet.\nView and discuss this content on its original platform.',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.6),
                 fontSize: 14,
+                height: 1.5,
               ),
             ),
           ],
@@ -647,7 +795,87 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
+  void _showSaveLimitPaywall() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1A1A2E),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Icon(
+                Icons.bookmark_added,
+                color: Color(0xFF00D4FF),
+                size: 48,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'You\'ve saved 20 videos!',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Upgrade to Afeedi Pro for unlimited saves, no ads, and exclusive features.',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF00D4FF),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    Navigator.pushNamed(context, '/premium');
+                  },
+                  child: const Text(
+                    'Upgrade to Pro — \$4.99/month',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text(
+                  'Not now',
+                  style: TextStyle(color: Colors.white54),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showShareModal() {
     showModalBottomSheet(
       context: context,
@@ -668,21 +896,57 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
             const SizedBox(height: 16),
             ListTile(
               leading: const Icon(Icons.link, color: Colors.white),
-              title: const Text('Copy Link', style: TextStyle(color: Colors.white)),
-              onTap: () {
-                // Copy video URL or embed URL
+              title: const Text(
+                'Copy Link',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () async {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Link copied to clipboard')),
-                );
+                final url =
+                    widget.content.videoUrl ??
+                    widget.content.embedUrl ??
+                    'https://afeedi.com';
+                await Clipboard.setData(ClipboardData(text: url));
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Link copied to clipboard'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
               },
             ),
             ListTile(
               leading: const Icon(Icons.share, color: Colors.white),
-              title: const Text('Share to...', style: TextStyle(color: Colors.white)),
-              onTap: () {
+              title: const Text(
+                'Share to...',
+                style: TextStyle(color: Colors.white),
+              ),
+              subtitle: const Text(
+                'Opens your device share sheet',
+                style: TextStyle(color: Colors.white54, fontSize: 12),
+              ),
+              onTap: () async {
                 Navigator.pop(context);
-                // Implement native sharing
+                final url =
+                    widget.content.videoUrl ??
+                    widget.content.embedUrl ??
+                    'https://afeedi.com';
+                await Clipboard.setData(ClipboardData(text: url));
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Link copied — paste it to share!'),
+                      behavior: SnackBarBehavior.floating,
+                      action: SnackBarAction(
+                        label: 'OK',
+                        textColor: const Color(0xFF00D4FF),
+                        onPressed: () {},
+                      ),
+                    ),
+                  );
+                }
               },
             ),
           ],
@@ -690,7 +954,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   void _showMoreOptions() {
     showModalBottomSheet(
       context: context,
@@ -702,17 +966,26 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
           children: [
             ListTile(
               leading: const Icon(Icons.schedule, color: Colors.white),
-              title: const Text('Schedule for Later', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Schedule for Later',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
               leading: const Icon(Icons.report, color: Colors.white),
-              title: const Text('Report', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Report',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
               leading: const Icon(Icons.block, color: Colors.white),
-              title: const Text('Not Interested', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Not Interested',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () => Navigator.pop(context),
             ),
           ],
@@ -720,7 +993,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
       ),
     );
   }
-  
+
   // Helper methods
   Color _getPlatformColor() {
     switch (widget.content.platform) {
@@ -732,11 +1005,9 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
         return const Color(0xFF000000);
       case PlatformType.facebook:
         return const Color(0xFF1877F2);
-      default:
-        return AppTheme.primaryCyan;
     }
   }
-  
+
   IconData _getPlatformIcon() {
     switch (widget.content.platform) {
       case PlatformType.youtube:
@@ -747,11 +1018,9 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
         return Icons.music_video;
       case PlatformType.facebook:
         return Icons.facebook;
-      default:
-        return Icons.video_library;
     }
   }
-  
+
   String _formatCount(int count) {
     if (count >= 1000000) {
       return '${(count / 1000000).toStringAsFixed(1)}M';
@@ -760,13 +1029,13 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
     }
     return count.toString();
   }
-  
+
   String _getTimeAgo() {
     if (widget.content.publishedAt == null) return 'Recently';
-    
+
     final now = DateTime.now();
     final difference = now.difference(widget.content.publishedAt!);
-    
+
     if (difference.inDays > 0) {
       return '${difference.inDays}d ago';
     } else if (difference.inHours > 0) {

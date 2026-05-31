@@ -1,0 +1,354 @@
+{
+  "@@locale": "ru",
+  "appName": "Афиди",
+  "tagline": "Все ваши любимые видео. Один премиальный опыт.",
+  "skip": "Пропустить",
+  "continueBtn": "Продолжить",
+  "getStarted": "Начать",
+  "signIn": "Войти",
+  "signOut": "Выйти",
+  "continueWithGoogle": "Продолжить с Google",
+  "continueWithApple": "Продолжить с Apple",
+  "alreadyHaveAccount": "Уже есть аккаунт? Войти",
+  "createAccount": "Создать аккаунт",
+  "email": "Электронная почта",
+  "password": "Пароль",
+  "name": "Имя",
+  "terms": "Условия",
+  "privacyPolicy": "Политика конфиденциальности",
+  "home": "Главная",
+  "videos": "Видео",
+  "discover": "Открыть",
+  "shorts": "Шорты",
+  "calendar": "Календарь",
+  "profile": "Профиль",
+  "search": "Поиск",
+  "notifications": "Уведомления",
+  "settings": "Настройки",
+  "trending": "В тренде",
+  "forYou": "Для вас",
+  "following": "Подписки",
+  "bookmarks": "Закладки",
+  "history": "История",
+  "saved": "Сохранённые",
+  "liked": "Понравившиеся",
+  "achievements": "Достижения",
+  "watchHistory": "История просмотров",
+  "continueWatching": "Продолжить просмотр",
+  "recommended": "Рекомендуемые",
+  "popular": "Популярные",
+  "newest": "Новые",
+  "categories": "Категории",
+  "allCategories": "Все категории",
+  "filter": "Фильтр",
+  "filters": "Фильтры",
+  "clearFilters": "Сбросить фильтры",
+  "applyFilters": "Применить фильтры",
+  "sortBy": "Сортировать по",
+  "platform": "Платформа",
+  "allPlatforms": "Все платформы",
+  "timeRange": "Временной диапазон",
+  "today": "Сегодня",
+  "thisWeek": "На этой неделе",
+  "thisMonth": "В этом месяце",
+  "allTime": "За всё время",
+  "contentType": "Тип контента",
+  "video": "Видео",
+  "short": "Шорт",
+  "reel": "Рилс",
+  "views": "просмотров",
+  "likes": "лайков",
+  "comments": "Комментарии",
+  "share": "Поделиться",
+  "save": "Сохранить",
+  "like": "Нравится",
+  "follow": "Подписаться",
+  "unfollow": "Отписаться",
+  "subscribe": "Подписаться",
+  "creator": "Автор",
+  "creatorProfile": "Профиль автора",
+  "noResults": "Нет результатов",
+  "noResultsFor": "Нет результатов для \"{query}\"",
+  "@noResultsFor": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "noContent": "Нет доступного контента",
+  "loading": "Загрузка...",
+  "retry": "Повторить",
+  "refresh": "Обновить",
+  "pullToRefresh": "Потяните, чтобы обновить",
+  "errorLoading": "Ошибка загрузки контента",
+  "noInternetConnection": "Нет подключения к интернету",
+  "tryAgain": "Попробовать снова",
+  "markAllRead": "Отметить всё прочитанным",
+  "allNotifications": "Все",
+  "unread": "Непрочитанные",
+  "achievement": "Достижение",
+  "videosWatched": "Просмотренные видео",
+  "watchTime": "Время просмотра",
+  "streak": "Серия",
+  "days": "дней",
+  "hours": "часов",
+  "minutes": "минут",
+  "editProfile": "Редактировать профиль",
+  "language": "Язык",
+  "selectLanguage": "Выбрать язык",
+  "darkMode": "Тёмный режим",
+  "notifications_setting": "Уведомления",
+  "pushNotifications": "Push-уведомления",
+  "emailNotifications": "Уведомления по электронной почте",
+  "privacy": "Конфиденциальность",
+  "account": "Аккаунт",
+  "help": "Помощь",
+  "about": "О приложении",
+  "version": "Версия",
+  "deleteAccount": "Удалить аккаунт",
+  "logout": "Выйти",
+  "premium": "Премиум",
+  "upgradeToPremium": "Перейти на Премиум",
+  "free": "Бесплатно",
+  "month": "месяц",
+  "year": "год",
+  "subscribe_action": "Подписаться",
+  "currentPlan": "Текущий план",
+  "addToCalendar": "Добавить в календарь",
+  "scheduledContent": "Запланированный контент",
+  "noContentScheduled": "На этот день контент не запланирован",
+  "contentForDate": "Контент на {date}",
+  "@contentForDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "interests": "Интересы",
+  "selectInterests": "Выберите интересы",
+  "selectAtLeast3": "Пожалуйста, выберите не менее 3",
+  "personalizingFeed": "Персонализация ленты...",
+  "feedReady": "Ваша лента готова!",
+  "welcomeBack": "С возвращением!",
+  "hi": "Привет",
+  "letsGetStarted": "Давайте начнём",
+  "onboardingWelcome": "Привет! Я ваш помощник Афиди. Я помогу настроить идеальную ленту контента. Как вас зовут?",
+  "onboardingComplete": "Ваша персонализированная лента готова! Нажмите ниже, чтобы начать исследование.",
+  "gaming": "Игры",
+  "music": "Музыка",
+  "technology": "Технологии",
+  "food": "Еда и кулинария",
+  "fitness": "Фитнес",
+  "travel": "Путешествия",
+  "art": "Искусство и дизайн",
+  "nature": "Природа",
+  "comedy": "Комедия",
+  "fashion": "Мода",
+  "education": "Образование",
+  "sports": "Спорт",
+  "news": "Новости",
+  "science": "Наука",
+  "youtube": "YouTube",
+  "tiktok": "TikTok",
+  "instagram": "Instagram",
+  "facebook": "Facebook",
+  "signingIn": "Вход...",
+  "authenticationFailed": "Ошибка аутентификации",
+  "somethingWentWrong": "Что-то пошло не так",
+  "noContentYet": "Контента пока нет",
+  "startExploring": "Начните исследование, чтобы увидеть контент здесь",
+  "watchedVideos": "Просмотрено {count} видео",
+  "@watchedVideos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newLabel": "Новое",
+  "discoverCreators": "Найдите авторов для подписки",
+  "followCreatorsHint": "Подпишитесь на авторов",
+  "findCreators": "Найти авторов",
+  "dismiss": "Закрыть",
+  "resetAll": "Сбросить всё",
+  "back": "Назад",
+  "cancel": "Отмена",
+  "delete": "Удалить",
+  "clear": "Очистить",
+  "update": "Обновить",
+  "play": "Воспроизвести",
+  "manage": "Управлять",
+  "seePlans": "Посмотреть планы",
+  "disconnect": "Отключить",
+  "viewAll": "Смотреть всё",
+  "showMore": "Показать больше",
+  "showLess": "Свернуть",
+  "memberSince": "Участник с {date}",
+  "@memberSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noLikedContent": "Нет понравившегося контента",
+  "noLikedContentHint": "Видео, которые вам понравятся, появятся здесь",
+  "nothingSavedYet": "Ничего не сохранено",
+  "bookmarkContentHint": "Добавьте контент в закладки, чтобы увидеть его здесь",
+  "noHistoryYet": "История пуста",
+  "noHistoryHint": "Просмотренные видео появятся здесь",
+  "watchedOf": "Просмотрено {watched} из {total}",
+  "@watchedOf": {
+    "placeholders": {
+      "watched": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFromHistory": "Удалить из истории",
+  "engagementScore": "Оценка вовлечённости",
+  "ofMaxKeepWatching": "{pct}% от максимума — продолжайте смотреть!",
+  "@ofMaxKeepWatching": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "watchedLabel": "Просмотрено",
+  "displayName": "Отображаемое имя",
+  "nameCannotBeEmpty": "Имя не может быть пустым",
+  "nameTooLong": "Имя слишком длинное (макс. 50 символов)",
+  "bio": "О себе",
+  "defaultBio": "Любопытный ум. Исследователь контента. Вижу мир через один фид.",
+  "editProfileTooltip": "Редактировать профиль",
+  "googleCalendar": "Google Календарь",
+  "readOnlyAccess": "Доступ только для чтения",
+  "readOnlyAccessHint": "Мы только читаем события, никогда не изменяем их",
+  "seeEventsInApp": "Просматривать события в приложении",
+  "seeEventsInAppHint": "Ваш календарь отображается рядом с расписанием контента",
+  "privateAndLocal": "Приватно и локально",
+  "privateAndLocalHint": "Данные хранятся на устройстве, мы никогда не делимся ими",
+  "connecting": "Подключение...",
+  "connectWithGoogle": "Подключить Google",
+  "couldNotConnect": "Не удалось подключиться — проверьте разрешения и попробуйте снова.",
+  "noUpcomingEvents": "Предстоящих событий нет",
+  "allDay": "Весь день",
+  "personalizedContentSchedule": "Ваше персональное расписание контента",
+  "contentCategories": "Категории контента",
+  "categoryFilter": "Фильтр по категории",
+  "percentageFilter": "Фильтр по проценту",
+  "educationPct": "Образование: {pct}%",
+  "@educationPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainmentPct": "Развлечения: {pct}%",
+  "@entertainmentPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "searchContent": "Поиск контента...",
+  "monthView": "Месяц",
+  "weekView": "Неделя",
+  "dayView": "День",
+  "noFilterContent": "Нет контента: {filter}",
+  "@noFilterContent": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
+  "tryDifferentFilter": "Попробуйте другой фильтр или дату",
+  "itemsScheduled": "{count} запланировано",
+  "@itemsScheduled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainment": "Развлечения",
+  "aiRecommendations": "Рекомендации ИИ",
+  "suggestedFor": "Предложено на {time}",
+  "@suggestedFor": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "movedNear": "\"{item}\" перемещён рядом с \"{target}\"",
+  "@movedNear": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownTitle": "Неизвестное название",
+  "unknownCreator": "Неизвестный автор",
+  "playback": "Воспроизведение",
+  "autoplay": "Автовоспроизведение",
+  "autoplayHint": "Автоматически воспроизводить следующее видео",
+  "videoQuality": "Качество видео",
+  "dataSaver": "Экономия данных",
+  "dataSaverHint": "Уменьшить использование данных при потоковом воспроизведении",
+  "pushNotificationsHint": "Новый контент от подписок",
+  "appearance": "Внешний вид",
+  "darkModeHint": "Использовать тёмную тему во всём приложении",
+  "appLanguage": "Язык приложения",
+  "contentLanguage": "Язык контента",
+  "library": "Библиотека",
+  "savedVideos": "Сохранённые видео",
+  "previouslyWatchedVideos": "Ранее просмотренные видео",
+  "privacyAndData": "Конфиденциальность и данные",
+  "usageAnalytics": "Аналитика использования",
+  "usageAnalyticsHint": "Помогите улучшить приложение с помощью анонимных данных",
+  "clearWatchHistory": "Очистить историю просмотров",
+  "clearWatchHistoryHint": "Удалить все видео из истории",
+  "clearCache": "Очистить кэш",
+  "clearCacheHint": "Освободить место в памяти",
+  "changePassword": "Изменить пароль",
+  "appVersion": "Версия приложения",
+  "termsOfService": "Условия использования",
+  "afeediProActive": "Afeedi Pro — Активен",
+  "upgradeToPro": "Перейти на Pro",
+  "proFeatures": "Без рекламы · Безлимитное сохранение · ИИ-лента",
+  "freeFeatures": "Без рекламы, ИИ-лента, безлимитное сохранение",
+  "clearHistoryConfirm": "Это удалит все видео из вашей истории просмотров. Это действие нельзя отменить.",
+  "watchHistoryClearedSnackbar": "История просмотров очищена",
+  "cacheClearedSnackbar": "Кэш успешно очищен",
+  "currentPassword": "Текущий пароль",
+  "newPassword": "Новый пароль",
+  "confirmNewPassword": "Подтвердите новый пароль",
+  "minEightChars": "Мин. 8 символов",
+  "passwordsDoNotMatch": "Пароли не совпадают",
+  "required": "Обязательно",
+  "passwordChangedSuccessfully": "Пароль успешно изменён",
+  "currentPasswordIncorrect": "Текущий пароль неверен",
+  "signOutConfirm": "Вы уверены, что хотите выйти?",
+  "deleteAccountConfirm": "Вы уверены? Это действие нельзя отменить.",
+  "videosWatchedLabel": "Просмотрено\nвидео",
+  "watchTimeLabel": "Время\nпросмотра",
+  "goodMorning": "Доброе утро!",
+  "goodAfternoon": "Добрый день!",
+  "goodEvening": "Добрый вечер!",
+  "noNotifications": "Нет уведомлений",
+  "allCaughtUp": "Вы в курсе всего!"
+}

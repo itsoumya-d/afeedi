@@ -1,0 +1,354 @@
+{
+  "@@locale": "id",
+  "appName": "Afeedi",
+  "tagline": "Semua video favorit Anda. Satu pengalaman premium.",
+  "skip": "Lewati",
+  "continueBtn": "Lanjutkan",
+  "getStarted": "Mulai",
+  "signIn": "Masuk",
+  "signOut": "Keluar",
+  "continueWithGoogle": "Lanjutkan dengan Google",
+  "continueWithApple": "Lanjutkan dengan Apple",
+  "alreadyHaveAccount": "Sudah punya akun? Masuk",
+  "createAccount": "Buat akun",
+  "email": "Email",
+  "password": "Kata sandi",
+  "name": "Nama",
+  "terms": "Syarat",
+  "privacyPolicy": "Kebijakan privasi",
+  "home": "Beranda",
+  "videos": "Video",
+  "discover": "Temukan",
+  "shorts": "Pendek",
+  "calendar": "Kalender",
+  "profile": "Profil",
+  "search": "Cari",
+  "notifications": "Notifikasi",
+  "settings": "Pengaturan",
+  "trending": "Trending",
+  "forYou": "Untuk Anda",
+  "following": "Mengikuti",
+  "bookmarks": "Penanda",
+  "history": "Riwayat",
+  "saved": "Disimpan",
+  "liked": "Disukai",
+  "achievements": "Pencapaian",
+  "watchHistory": "Riwayat tontonan",
+  "continueWatching": "Lanjutkan menonton",
+  "recommended": "Direkomendasikan",
+  "popular": "Populer",
+  "newest": "Terbaru",
+  "categories": "Kategori",
+  "allCategories": "Semua kategori",
+  "filter": "Filter",
+  "filters": "Filter",
+  "clearFilters": "Hapus filter",
+  "applyFilters": "Terapkan filter",
+  "sortBy": "Urutkan berdasarkan",
+  "platform": "Platform",
+  "allPlatforms": "Semua platform",
+  "timeRange": "Rentang waktu",
+  "today": "Hari ini",
+  "thisWeek": "Minggu ini",
+  "thisMonth": "Bulan ini",
+  "allTime": "Sepanjang waktu",
+  "contentType": "Jenis konten",
+  "video": "Video",
+  "short": "Pendek",
+  "reel": "Reel",
+  "views": "tayangan",
+  "likes": "suka",
+  "comments": "Komentar",
+  "share": "Bagikan",
+  "save": "Simpan",
+  "like": "Suka",
+  "follow": "Ikuti",
+  "unfollow": "Berhenti mengikuti",
+  "subscribe": "Berlangganan",
+  "creator": "Kreator",
+  "creatorProfile": "Profil kreator",
+  "noResults": "Tidak ada hasil",
+  "noResultsFor": "Tidak ada hasil untuk \"{query}\"",
+  "@noResultsFor": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "noContent": "Tidak ada konten tersedia",
+  "loading": "Memuat...",
+  "retry": "Coba lagi",
+  "refresh": "Segarkan",
+  "pullToRefresh": "Tarik untuk menyegarkan",
+  "errorLoading": "Kesalahan memuat konten",
+  "noInternetConnection": "Tidak ada koneksi internet",
+  "tryAgain": "Coba lagi",
+  "markAllRead": "Tandai semua sudah dibaca",
+  "allNotifications": "Semua",
+  "unread": "Belum dibaca",
+  "achievement": "Pencapaian",
+  "videosWatched": "Video yang ditonton",
+  "watchTime": "Waktu menonton",
+  "streak": "Rangkaian",
+  "days": "hari",
+  "hours": "jam",
+  "minutes": "menit",
+  "editProfile": "Edit profil",
+  "language": "Bahasa",
+  "selectLanguage": "Pilih bahasa",
+  "darkMode": "Mode gelap",
+  "notifications_setting": "Notifikasi",
+  "pushNotifications": "Notifikasi push",
+  "emailNotifications": "Notifikasi email",
+  "privacy": "Privasi",
+  "account": "Akun",
+  "help": "Bantuan",
+  "about": "Tentang",
+  "version": "Versi",
+  "deleteAccount": "Hapus akun",
+  "logout": "Keluar",
+  "premium": "Premium",
+  "upgradeToPremium": "Tingkatkan ke Premium",
+  "free": "Gratis",
+  "month": "bulan",
+  "year": "tahun",
+  "subscribe_action": "Berlangganan",
+  "currentPlan": "Paket saat ini",
+  "addToCalendar": "Tambah ke kalender",
+  "scheduledContent": "Konten terjadwal",
+  "noContentScheduled": "Tidak ada konten yang dijadwalkan untuk hari ini",
+  "contentForDate": "Konten untuk {date}",
+  "@contentForDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "interests": "Minat",
+  "selectInterests": "Pilih minat Anda",
+  "selectAtLeast3": "Silakan pilih setidaknya 3",
+  "personalizingFeed": "Mempersonalisasi feed Anda...",
+  "feedReady": "Feed Anda siap!",
+  "welcomeBack": "Selamat datang kembali!",
+  "hi": "Halo",
+  "letsGetStarted": "Mari kita mulai",
+  "onboardingWelcome": "Halo! Saya asisten Afeedi Anda. Saya akan membantu menyiapkan feed konten sempurna untuk Anda. Siapa nama Anda?",
+  "onboardingComplete": "Feed yang dipersonalisasi Anda siap! Ketuk di bawah untuk mulai menjelajah.",
+  "gaming": "Gaming",
+  "music": "Musik",
+  "technology": "Teknologi",
+  "food": "Makanan & Memasak",
+  "fitness": "Kebugaran",
+  "travel": "Perjalanan",
+  "art": "Seni & Desain",
+  "nature": "Alam",
+  "comedy": "Komedi",
+  "fashion": "Mode",
+  "education": "Pendidikan",
+  "sports": "Olahraga",
+  "news": "Berita",
+  "science": "Sains",
+  "youtube": "YouTube",
+  "tiktok": "TikTok",
+  "instagram": "Instagram",
+  "facebook": "Facebook",
+  "signingIn": "Sedang masuk...",
+  "authenticationFailed": "Autentikasi gagal",
+  "somethingWentWrong": "Ada yang salah",
+  "noContentYet": "Belum ada konten",
+  "startExploring": "Mulai menjelajah untuk melihat konten di sini",
+  "watchedVideos": "Menonton {count} video",
+  "@watchedVideos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newLabel": "Baru",
+  "discoverCreators": "Temukan kreator untuk diikuti",
+  "followCreatorsHint": "Ikuti kreator untuk melihat konten mereka",
+  "findCreators": "Cari kreator",
+  "dismiss": "Tutup",
+  "resetAll": "Reset semua",
+  "back": "Kembali",
+  "cancel": "Batal",
+  "delete": "Hapus",
+  "clear": "Bersihkan",
+  "update": "Perbarui",
+  "play": "Putar",
+  "manage": "Kelola",
+  "seePlans": "Lihat paket",
+  "disconnect": "Putuskan",
+  "viewAll": "Lihat semua",
+  "showMore": "Tampilkan lebih",
+  "showLess": "Tampilkan lebih sedikit",
+  "memberSince": "Anggota sejak {date}",
+  "@memberSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noLikedContent": "Tidak ada konten yang disukai",
+  "noLikedContentHint": "Video yang Anda sukai akan muncul di sini",
+  "nothingSavedYet": "Belum ada yang disimpan",
+  "bookmarkContentHint": "Tandai konten untuk melihatnya di sini",
+  "noHistoryYet": "Belum ada riwayat",
+  "noHistoryHint": "Video yang Anda tonton akan muncul di sini",
+  "watchedOf": "Ditonton {watched} dari {total}",
+  "@watchedOf": {
+    "placeholders": {
+      "watched": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFromHistory": "Hapus dari riwayat",
+  "engagementScore": "Skor keterlibatan",
+  "ofMaxKeepWatching": "{pct}% dari maks — terus menonton!",
+  "@ofMaxKeepWatching": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "watchedLabel": "Ditonton",
+  "displayName": "Nama tampilan",
+  "nameCannotBeEmpty": "Nama tidak boleh kosong",
+  "nameTooLong": "Nama terlalu panjang (maks. 50 karakter)",
+  "bio": "Bio",
+  "defaultBio": "Pikiran penasaran. Penjelajah konten. Melihat dunia satu umpan sekaligus.",
+  "editProfileTooltip": "Edit profil",
+  "googleCalendar": "Google Kalender",
+  "readOnlyAccess": "Akses hanya baca",
+  "readOnlyAccessHint": "Kami hanya membaca acara, tidak pernah mengubahnya",
+  "seeEventsInApp": "Lihat acara di aplikasi",
+  "seeEventsInAppHint": "Kalender Anda muncul bersama jadwal konten Anda",
+  "privateAndLocal": "Pribadi & lokal",
+  "privateAndLocalHint": "Data tetap di perangkat; kami tidak pernah membagikannya",
+  "connecting": "Menghubungkan...",
+  "connectWithGoogle": "Hubungkan dengan Google",
+  "couldNotConnect": "Tidak dapat terhubung — periksa izin dan coba lagi.",
+  "noUpcomingEvents": "Tidak ada acara mendatang",
+  "allDay": "Sepanjang hari",
+  "personalizedContentSchedule": "Jadwal konten personal Anda",
+  "contentCategories": "Kategori konten",
+  "categoryFilter": "Filter kategori",
+  "percentageFilter": "Filter persentase",
+  "educationPct": "Edukasi: {pct}%",
+  "@educationPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainmentPct": "Hiburan: {pct}%",
+  "@entertainmentPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "searchContent": "Cari konten...",
+  "monthView": "Bulan",
+  "weekView": "Minggu",
+  "dayView": "Hari",
+  "noFilterContent": "Tidak ada konten {filter}",
+  "@noFilterContent": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
+  "tryDifferentFilter": "Coba filter atau tanggal berbeda",
+  "itemsScheduled": "{count} item dijadwalkan",
+  "@itemsScheduled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainment": "Hiburan",
+  "aiRecommendations": "Rekomendasi AI",
+  "suggestedFor": "Disarankan untuk {time}",
+  "@suggestedFor": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "movedNear": "\"{item}\" dipindahkan dekat \"{target}\"",
+  "@movedNear": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownTitle": "Judul tidak diketahui",
+  "unknownCreator": "Kreator tidak diketahui",
+  "playback": "Pemutaran",
+  "autoplay": "Putar otomatis",
+  "autoplayHint": "Putar video berikutnya secara otomatis",
+  "videoQuality": "Kualitas video",
+  "dataSaver": "Penghemat data",
+  "dataSaverHint": "Kurangi penggunaan data saat streaming",
+  "pushNotificationsHint": "Konten baru dari kreator yang diikuti",
+  "appearance": "Tampilan",
+  "darkModeHint": "Gunakan tema gelap di seluruh aplikasi",
+  "appLanguage": "Bahasa aplikasi",
+  "contentLanguage": "Bahasa konten",
+  "library": "Perpustakaan",
+  "savedVideos": "Video tersimpan",
+  "previouslyWatchedVideos": "Video yang sebelumnya ditonton",
+  "privacyAndData": "Privasi & data",
+  "usageAnalytics": "Analitik penggunaan",
+  "usageAnalyticsHint": "Bantu tingkatkan aplikasi dengan data anonim",
+  "clearWatchHistory": "Hapus riwayat tontonan",
+  "clearWatchHistoryHint": "Hapus semua video dari riwayat",
+  "clearCache": "Hapus cache",
+  "clearCacheHint": "Bebaskan ruang penyimpanan",
+  "changePassword": "Ubah kata sandi",
+  "appVersion": "Versi aplikasi",
+  "termsOfService": "Syarat layanan",
+  "afeediProActive": "Afeedi Pro — Aktif",
+  "upgradeToPro": "Tingkatkan ke Pro",
+  "proFeatures": "Bebas iklan · Simpan tak terbatas · Feed AI",
+  "freeFeatures": "Bebas iklan, feed AI, simpan tak terbatas",
+  "clearHistoryConfirm": "Ini akan menghapus semua video dari riwayat tontonan Anda. Tindakan ini tidak dapat dibatalkan.",
+  "watchHistoryClearedSnackbar": "Riwayat tontonan dihapus",
+  "cacheClearedSnackbar": "Cache berhasil dihapus",
+  "currentPassword": "Kata sandi saat ini",
+  "newPassword": "Kata sandi baru",
+  "confirmNewPassword": "Konfirmasi kata sandi baru",
+  "minEightChars": "Min. 8 karakter",
+  "passwordsDoNotMatch": "Kata sandi tidak cocok",
+  "required": "Wajib",
+  "passwordChangedSuccessfully": "Kata sandi berhasil diubah",
+  "currentPasswordIncorrect": "Kata sandi saat ini salah",
+  "signOutConfirm": "Apakah Anda yakin ingin keluar?",
+  "deleteAccountConfirm": "Apakah Anda yakin? Ini tidak dapat dibatalkan.",
+  "videosWatchedLabel": "Video\nDitonton",
+  "watchTimeLabel": "Waktu\nTonton",
+  "goodMorning": "Selamat pagi!",
+  "goodAfternoon": "Selamat siang!",
+  "goodEvening": "Selamat malam!",
+  "noNotifications": "Tidak ada notifikasi",
+  "allCaughtUp": "Kamu sudah terkini!"
+}

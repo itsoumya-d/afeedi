@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../models/content_item.dart';
@@ -127,56 +128,61 @@ class _ContextualRecommendationsWidgetState
           id: 'c1',
           title: 'Morning News Briefing',
           description: 'Start your day with the latest news',
-          imageUrl: 'https://example.com/news.jpg',
+          thumbnailUrl: 'https://example.com/news.jpg',
           platform: 'News App',
-          duration: const Duration(minutes: 15),
+          contentType: 'video',
+          durationSeconds: 15 * 60,
           recommendationReason: 'Perfect for your $timeContext routine',
-          genres: ['News', 'Current Events'],
-          rating: 4.5,
+          tags: ['News', 'Current Events'],
+          category: 'Entertainment',
         ),
         ContentItem(
           id: 'c2',
           title: '$timeContext Playlist',
           description: 'Curated music for your $timeContext',
-          imageUrl: 'https://example.com/music.jpg',
+          thumbnailUrl: 'https://example.com/music.jpg',
           platform: 'Music App',
-          duration: const Duration(minutes: 45),
+          contentType: 'video',
+          durationSeconds: 45 * 60,
           recommendationReason: 'Matches your $timeContext mood',
-          genres: ['Music', 'Playlist'],
-          rating: 4.8,
+          tags: ['Music', 'Playlist'],
+          category: 'Entertainment',
         ),
         ContentItem(
           id: 'c3',
           title: '$timeContext Meditation',
           description: 'Guided meditation for $timeContext',
-          imageUrl: 'https://example.com/meditation.jpg',
+          thumbnailUrl: 'https://example.com/meditation.jpg',
           platform: 'Wellness App',
-          duration: const Duration(minutes: 10),
+          contentType: 'video',
+          durationSeconds: 10 * 60,
           recommendationReason: 'Perfect for your $timeContext schedule',
-          genres: ['Wellness', 'Meditation'],
-          rating: 4.7,
+          tags: ['Wellness', 'Meditation'],
+          category: 'Entertainment',
         ),
         ContentItem(
           id: 'c4',
           title: 'Quick $timeContext Workout',
           description: '15-minute workout for $timeContext',
-          imageUrl: 'https://example.com/workout.jpg',
+          thumbnailUrl: 'https://example.com/workout.jpg',
           platform: 'Fitness App',
-          duration: const Duration(minutes: 15),
+          contentType: 'video',
+          durationSeconds: 15 * 60,
           recommendationReason: 'Fits your $timeContext schedule',
-          genres: ['Fitness', 'Workout'],
-          rating: 4.6,
+          tags: ['Fitness', 'Workout'],
+          category: 'Entertainment',
         ),
         ContentItem(
           id: 'c5',
           title: '$timeContext Podcast',
           description: 'Popular podcast for $timeContext listening',
-          imageUrl: 'https://example.com/podcast.jpg',
+          thumbnailUrl: 'https://example.com/podcast.jpg',
           platform: 'Podcast App',
-          duration: const Duration(minutes: 30),
+          contentType: 'video',
+          durationSeconds: 30 * 60,
           recommendationReason: 'Trending for $timeContext listening',
-          genres: ['Podcast', 'Talk'],
-          rating: 4.9,
+          tags: ['Podcast', 'Talk'],
+          category: 'Entertainment',
         ),
       ];
     } else {
@@ -186,56 +192,61 @@ class _ContextualRecommendationsWidgetState
           id: 'c6',
           title: 'Pre-Meeting Prep',
           description: 'Quick tips before your upcoming meeting',
-          imageUrl: 'https://example.com/meeting.jpg',
+          thumbnailUrl: 'https://example.com/meeting.jpg',
           platform: 'Productivity App',
-          duration: const Duration(minutes: 5),
+          contentType: 'video',
+          durationSeconds: 5 * 60,
           recommendationReason: 'You have a meeting in 30 minutes',
-          genres: ['Productivity', 'Business'],
-          rating: 4.5,
+          tags: ['Productivity', 'Business'],
+          category: 'Entertainment',
         ),
         ContentItem(
           id: 'c7',
           title: 'Commute Entertainment',
           description: 'Perfect for your drive home',
-          imageUrl: 'https://example.com/commute.jpg',
+          thumbnailUrl: 'https://example.com/commute.jpg',
           platform: 'Entertainment App',
-          duration: const Duration(minutes: 25),
+          contentType: 'video',
+          durationSeconds: 25 * 60,
           recommendationReason: 'Matches your commute time',
-          genres: ['Entertainment', 'Comedy'],
-          rating: 4.7,
+          tags: ['Entertainment', 'Comedy'],
+          category: 'Entertainment',
         ),
         ContentItem(
           id: 'c8',
           title: 'Workout Playlist',
           description: 'Energetic music for your scheduled workout',
-          imageUrl: 'https://example.com/workout_music.jpg',
+          thumbnailUrl: 'https://example.com/workout_music.jpg',
           platform: 'Music App',
-          duration: const Duration(minutes: 45),
+          contentType: 'video',
+          durationSeconds: 45 * 60,
           recommendationReason: 'For your 5PM workout',
-          genres: ['Music', 'Fitness'],
-          rating: 4.8,
+          tags: ['Music', 'Fitness'],
+          category: 'Entertainment',
         ),
         ContentItem(
           id: 'c9',
           title: 'Dinner Recipe',
           description: 'Quick and easy dinner ideas',
-          imageUrl: 'https://example.com/recipe.jpg',
+          thumbnailUrl: 'https://example.com/recipe.jpg',
           platform: 'Cooking App',
-          duration: const Duration(minutes: 10),
+          contentType: 'video',
+          durationSeconds: 10 * 60,
           recommendationReason: 'It\'s almost dinner time',
-          genres: ['Cooking', 'Food'],
-          rating: 4.6,
+          tags: ['Cooking', 'Food'],
+          category: 'Entertainment',
         ),
         ContentItem(
           id: 'c10',
           title: 'Evening Wind Down',
           description: 'Relaxing content before bed',
-          imageUrl: 'https://example.com/relax.jpg',
+          thumbnailUrl: 'https://example.com/relax.jpg',
           platform: 'Wellness App',
-          duration: const Duration(minutes: 15),
+          contentType: 'video',
+          durationSeconds: 15 * 60,
           recommendationReason: 'Based on your bedtime routine',
-          genres: ['Wellness', 'Sleep'],
-          rating: 4.9,
+          tags: ['Wellness', 'Sleep'],
+          category: 'Entertainment',
         ),
       ];
     }
@@ -264,47 +275,47 @@ class _ContextualRecommendationsWidgetState
         : 'Based on Your Calendar';
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: UIScaling.spacing(context, 2),
-            vertical: UIScaling.spacing(context, 1),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                contextTitle,
-                style: AppTextStyles.heading2,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: UIScaling.spacing(context, 2),
+                vertical: UIScaling.spacing(context, 1),
               ),
-              SizedBox(height: UIScaling.spacing(context, 0.5)),
-              Text(
-                _getSubtitle(),
-                style: AppTextStyles.body2.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(contextTitle, style: AppTextStyles.heading2),
+                  SizedBox(height: UIScaling.spacing(context, 0.5)),
+                  Text(
+                    _getSubtitle(),
+                    style: AppTextStyles.body2.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        SizedBox(height: UIScaling.spacing(context, 1)),
-        SizedBox(
-          height: UIScaling.cardHeight(context, isLarge: true),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: _recommendations.length,
-            padding: EdgeInsets.symmetric(
-              horizontal: UIScaling.spacing(context, 2),
             ),
-            itemBuilder: (context, index) {
-              final item = _recommendations[index];
-              return _buildRecommendationCard(item, index);
-            },
-          ),
-        ),
-      ],
-    ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideY(
+            SizedBox(height: UIScaling.spacing(context, 1)),
+            SizedBox(
+              height: UIScaling.cardHeight(context, isLarge: true),
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _recommendations.length,
+                padding: EdgeInsets.symmetric(
+                  horizontal: UIScaling.spacing(context, 2),
+                ),
+                itemBuilder: (context, index) {
+                  final item = _recommendations[index];
+                  return _buildRecommendationCard(item, index);
+                },
+              ),
+            ),
+          ],
+        )
+        .animate()
+        .fadeIn(duration: 400.ms, delay: 100.ms)
+        .slideY(
           begin: 0.1,
           end: 0,
           duration: 400.ms,
@@ -350,147 +361,157 @@ class _ContextualRecommendationsWidgetState
       onTap: () {
         widget.onItemTap(item);
       },
-      child: Container(
-        width: UIScaling.cardWidth(context, isLarge: true),
-        margin: EdgeInsets.only(
-          right: UIScaling.spacing(context, 1.5),
-          bottom: UIScaling.spacing(context, 1),
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.cardBackground,
-          borderRadius: BorderRadius.circular(UIScaling.radius(context)),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.shadow.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image
-            Expanded(
-              flex: 3,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.network(
-                    item.imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: AppColors.getPlatformColor(item.platform),
-                        child: Center(
-                          child: Icon(
-                            Icons.image,
-                            color: AppColors.white,
-                            size: 32,
-                          ),
-                        ),
-                      );
-                    },
+      child:
+          Container(
+                width: UIScaling.cardWidth(context),
+                margin: EdgeInsets.only(
+                  right: UIScaling.spacing(context, 1.5),
+                  bottom: UIScaling.spacing(context, 1),
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.cardBackground,
+                  borderRadius: BorderRadius.circular(
+                    UIScaling.radius(context),
                   ),
-                  // Platform badge
-                  Positioned(
-                    top: UIScaling.spacing(context, 1),
-                    left: UIScaling.spacing(context, 1),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: UIScaling.spacing(context, 0.75),
-                        vertical: UIScaling.spacing(context, 0.25),
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.getPlatformColor(item.platform),
-                        borderRadius: BorderRadius.circular(
-                          UIScaling.radius(context, 0.5),
-                        ),
-                      ),
-                      child: Text(
-                        item.platform,
-                        style: AppTextStyles.tag.copyWith(
-                          color: AppColors.white,
-                        ),
-                      ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.shadow.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
-                  ),
-                  // Duration badge
-                  Positioned(
-                    bottom: UIScaling.spacing(context, 1),
-                    right: UIScaling.spacing(context, 1),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: UIScaling.spacing(context, 0.75),
-                        vertical: UIScaling.spacing(context, 0.25),
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.black.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(
-                          UIScaling.radius(context, 0.5),
-                        ),
-                      ),
-                      child: Text(
-                        _formatDuration(item.duration),
-                        style: AppTextStyles.tag.copyWith(
-                          color: AppColors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Content details
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: EdgeInsets.all(UIScaling.spacing(context, 1)),
+                  ],
+                ),
+                clipBehavior: Clip.antiAlias,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.title,
-                      style: AppTextStyles.heading4,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: UIScaling.spacing(context, 0.5)),
-                    Text(
-                      item.description,
-                      style: AppTextStyles.body2.copyWith(
-                        color: AppColors.textSecondary,
+                    // Image
+                    Expanded(
+                      flex: 3,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          CachedNetworkImage(
+                            imageUrl: item.thumbnailUrl ?? '',
+                            fit: BoxFit.cover,
+                            placeholder: (ctx, url) =>
+                                Container(color: Colors.grey[900]),
+                            errorWidget: (ctx, url, err) => Container(
+                              color: AppColors.getPlatformColor(item.platform),
+                              child: Center(
+                                child: Icon(
+                                  Icons.image,
+                                  color: AppColors.white,
+                                  size: 32,
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Platform badge
+                          Positioned(
+                            top: UIScaling.spacing(context, 1),
+                            left: UIScaling.spacing(context, 1),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: UIScaling.spacing(context, 0.75),
+                                vertical: UIScaling.spacing(context, 0.25),
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.getPlatformColor(
+                                  item.platform,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  UIScaling.radius(context, 0.5),
+                                ),
+                              ),
+                              child: Text(
+                                item.platform,
+                                style: AppTextStyles.tag.copyWith(
+                                  color: AppColors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Duration badge
+                          Positioned(
+                            bottom: UIScaling.spacing(context, 1),
+                            right: UIScaling.spacing(context, 1),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: UIScaling.spacing(context, 0.75),
+                                vertical: UIScaling.spacing(context, 0.25),
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.black.withValues(alpha: 0.7),
+                                borderRadius: BorderRadius.circular(
+                                  UIScaling.radius(context, 0.5),
+                                ),
+                              ),
+                              child: Text(
+                                _formatDuration(
+                                  Duration(seconds: item.durationSeconds),
+                                ),
+                                style: AppTextStyles.tag.copyWith(
+                                  color: AppColors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    if (widget.showRecommendationReason &&
-                        item.recommendationReason != null)
-                      Padding(
-                        padding: EdgeInsets.only(
-                          top: UIScaling.spacing(context, 0.5),
-                        ),
-                        child: Text(
-                          item.recommendationReason!,
-                          style: AppTextStyles.recommendationReason,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                    // Content details
+                    Expanded(
+                      flex: 2,
+                      child: Padding(
+                        padding: EdgeInsets.all(UIScaling.spacing(context, 1)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.title,
+                              style: AppTextStyles.heading4,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(height: UIScaling.spacing(context, 0.5)),
+                            Text(
+                              item.description ?? '',
+                              style: AppTextStyles.body2.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (widget.showRecommendationReason &&
+                                item.recommendationReason.isNotEmpty)
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  top: UIScaling.spacing(context, 0.5),
+                                ),
+                                child: Text(
+                                  item.recommendationReason,
+                                  style: AppTextStyles.recommendationReason,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
                         ),
                       ),
+                    ),
                   ],
                 ),
+              )
+              .animate()
+              .fadeIn(duration: 300.ms, delay: (100 + index * 50).ms)
+              .slideY(
+                begin: 0.1,
+                end: 0,
+                duration: 300.ms,
+                curve: Curves.easeOutQuad,
+                delay: (100 + index * 50).ms,
               ),
-            ),
-          ],
-        ),
-      ).animate().fadeIn(duration: 300.ms, delay: (100 + index * 50).ms).slideY(
-            begin: 0.1,
-            end: 0,
-            duration: 300.ms,
-            curve: Curves.easeOutQuad,
-            delay: (100 + index * 50).ms,
-          ),
     );
   }
 
@@ -515,7 +536,9 @@ class _ContextualRecommendationsWidgetState
             height: 24,
             decoration: BoxDecoration(
               color: AppColors.shimmerBase,
-              borderRadius: BorderRadius.circular(UIScaling.radius(context, 0.5)),
+              borderRadius: BorderRadius.circular(
+                UIScaling.radius(context, 0.5),
+              ),
             ),
           ),
           SizedBox(height: UIScaling.spacing(context, 0.5)),
@@ -525,7 +548,9 @@ class _ContextualRecommendationsWidgetState
             height: 16,
             decoration: BoxDecoration(
               color: AppColors.shimmerBase,
-              borderRadius: BorderRadius.circular(UIScaling.radius(context, 0.5)),
+              borderRadius: BorderRadius.circular(
+                UIScaling.radius(context, 0.5),
+              ),
             ),
           ),
           SizedBox(height: UIScaling.spacing(context, 2)),
@@ -536,13 +561,19 @@ class _ContextualRecommendationsWidgetState
               itemCount: 5,
               itemBuilder: (context, index) {
                 return Container(
-                  width: UIScaling.cardWidth(context, isLarge: true),
-                  margin: EdgeInsets.only(right: UIScaling.spacing(context, 1.5)),
-                  decoration: BoxDecoration(
-                    color: AppColors.shimmerBase,
-                    borderRadius: BorderRadius.circular(UIScaling.radius(context)),
-                  ),
-                ).animate(onPlay: (controller) => controller.repeat()).shimmer(
+                      width: UIScaling.cardWidth(context),
+                      margin: EdgeInsets.only(
+                        right: UIScaling.spacing(context, 1.5),
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.shimmerBase,
+                        borderRadius: BorderRadius.circular(
+                          UIScaling.radius(context),
+                        ),
+                      ),
+                    )
+                    .animate(onPlay: (controller) => controller.repeat())
+                    .shimmer(
                       duration: 1500.ms,
                       color: AppColors.shimmerHighlight,
                     );
@@ -562,11 +593,7 @@ class _ContextualRecommendationsWidgetState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              color: AppColors.error,
-              size: 48,
-            ),
+            Icon(Icons.error_outline, color: AppColors.error, size: 48),
             SizedBox(height: UIScaling.spacing(context, 1)),
             Text(
               'Failed to load contextual recommendations',
@@ -592,11 +619,7 @@ class _ContextualRecommendationsWidgetState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.info_outline,
-              color: AppColors.primary,
-              size: 48,
-            ),
+            Icon(Icons.info_outline, color: AppColors.primary, size: 48),
             SizedBox(height: UIScaling.spacing(context, 1)),
             Text(
               'No contextual recommendations available',

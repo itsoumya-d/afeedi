@@ -11,7 +11,7 @@ class VideoControlsWidget extends StatefulWidget {
   final VoidCallback? onFullscreen;
   final Function(String)? onQualityChanged;
   final Function(double)? onProgress;
-  
+
   const VideoControlsWidget({
     super.key,
     required this.player,
@@ -21,7 +21,7 @@ class VideoControlsWidget extends StatefulWidget {
     this.onQualityChanged,
     this.onProgress,
   });
-  
+
   @override
   State<VideoControlsWidget> createState() => _VideoControlsWidgetState();
 }
@@ -35,13 +35,13 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
   bool _showVolumeSlider = false;
   String _currentQuality = '720p';
   bool _showQualitySelector = false;
-  
+
   @override
   void initState() {
     super.initState();
     _updatePlayerState();
   }
-  
+
   void _updatePlayerState() {
     if (widget.player != null) {
       setState(() {
@@ -52,7 +52,7 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
       });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Positioned(
@@ -64,10 +64,7 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.transparent,
-              Colors.black.withOpacity(0.7),
-            ],
+            colors: [Colors.transparent, Colors.black.withValues(alpha: 0.7)],
           ),
         ),
         child: Column(
@@ -75,7 +72,7 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
           children: [
             // Progress bar
             _buildProgressBar(),
-            
+
             // Control buttons
             _buildControlButtons(),
           ],
@@ -83,7 +80,7 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
       ),
     );
   }
-  
+
   Widget _buildProgressBar() {
     return Container(
       height: 4,
@@ -94,9 +91,9 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
           thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
           overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
           activeTrackColor: Colors.red,
-          inactiveTrackColor: Colors.white.withOpacity(0.3),
+          inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
           thumbColor: Colors.red,
-          overlayColor: Colors.red.withOpacity(0.2),
+          overlayColor: Colors.red.withValues(alpha: 0.2),
         ),
         child: Slider(
           value: _duration > 0 ? _currentTime / _duration : 0.0,
@@ -107,7 +104,7 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
             });
             widget.player?.seekTo(newTime);
             widget.onProgress?.call(value);
-            
+
             AnalyticsService.instance.trackUserInteraction(
               action: 'video_seeked',
               screen: 'video_player',
@@ -122,7 +119,7 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
       ),
     );
   }
-  
+
   Widget _buildControlButtons() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -130,32 +127,32 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
         children: [
           // Play/Pause button
           _buildPlayPauseButton(),
-          
+
           const SizedBox(width: 16),
-          
+
           // Time display
           _buildTimeDisplay(),
-          
+
           const Spacer(),
-          
+
           // Volume control (desktop only)
           if (!widget.isMobile) ...<Widget>[
             _buildVolumeControl(),
             const SizedBox(width: 16),
           ],
-          
+
           // Quality selector
           _buildQualityButton(),
-          
+
           const SizedBox(width: 16),
-          
+
           // Fullscreen button
           _buildFullscreenButton(),
         ],
       ),
     );
   }
-  
+
   Widget _buildPlayPauseButton() {
     return GestureDetector(
       onTap: () async {
@@ -172,7 +169,7 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha: 0.9),
           shape: BoxShape.circle,
         ),
         child: Icon(
@@ -183,7 +180,7 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
       ),
     );
   }
-  
+
   Widget _buildTimeDisplay() {
     return Text(
       '${_formatTime(_currentTime)} / ${_formatTime(_duration)}',
@@ -194,7 +191,7 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
       ),
     );
   }
-  
+
   Widget _buildVolumeControl() {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -204,13 +201,11 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
             setState(() {
               _isMuted = !_isMuted;
             });
-            
+
             AnalyticsService.instance.trackUserInteraction(
               action: _isMuted ? 'video_muted' : 'video_unmuted',
               screen: 'video_player',
-              additionalData: {
-                'content_id': widget.content.id,
-              },
+              additionalData: {'content_id': widget.content.id},
             );
           },
           child: Icon(
@@ -229,7 +224,7 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
                 thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 4),
                 overlayShape: const RoundSliderOverlayShape(overlayRadius: 8),
                 activeTrackColor: Colors.white,
-                inactiveTrackColor: Colors.white.withOpacity(0.3),
+                inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
                 thumbColor: Colors.white,
               ),
               child: Slider(
@@ -247,7 +242,7 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
       ],
     );
   }
-  
+
   Widget _buildQualityButton() {
     return GestureDetector(
       onTap: () {
@@ -260,7 +255,7 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -284,10 +279,10 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
                     _currentQuality = quality;
                     _showQualitySelector = false;
                   });
-                  
+
                   widget.player?.setQuality(quality);
                   widget.onQualityChanged?.call(quality);
-                  
+
                   AnalyticsService.instance.trackUserInteraction(
                     action: 'video_quality_changed',
                     screen: 'video_player',
@@ -303,24 +298,20 @@ class _VideoControlsWidgetState extends State<VideoControlsWidget> {
       ),
     );
   }
-  
+
   Widget _buildFullscreenButton() {
     return GestureDetector(
       onTap: widget.onFullscreen,
-      child: const Icon(
-        Icons.fullscreen,
-        color: Colors.white,
-        size: 24,
-      ),
+      child: const Icon(Icons.fullscreen, color: Colors.white, size: 24),
     );
   }
-  
+
   String _formatTime(double seconds) {
     final duration = Duration(seconds: seconds.round());
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
     final secs = duration.inSeconds.remainder(60);
-    
+
     if (hours > 0) {
       return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
     } else {
@@ -334,14 +325,14 @@ class MiniVideoControls extends StatelessWidget {
   final StreamingPlayer? player;
   final Content content;
   final VoidCallback? onFullscreen;
-  
+
   const MiniVideoControls({
     super.key,
     required this.player,
     required this.content,
     this.onFullscreen,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Positioned(
@@ -350,10 +341,7 @@ class MiniVideoControls extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildMiniButton(
-            icon: Icons.fullscreen,
-            onTap: onFullscreen,
-          ),
+          _buildMiniButton(icon: Icons.fullscreen, onTap: onFullscreen),
           const SizedBox(height: 8),
           _buildMiniButton(
             icon: player?.isPlaying == true ? Icons.pause : Icons.play_arrow,
@@ -371,25 +359,18 @@ class MiniVideoControls extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _buildMiniButton({
-    required IconData icon,
-    VoidCallback? onTap,
-  }) {
+
+  Widget _buildMiniButton({required IconData icon, VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.7),
+          color: Colors.black.withValues(alpha: 0.7),
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          icon,
-          color: Colors.white,
-          size: 20,
-        ),
+        child: Icon(icon, color: Colors.white, size: 20),
       ),
     );
   }

@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/content_model.dart';
 import '../../services/social_media_streaming_service.dart';
 import '../../services/analytics_service.dart';
 import '../../utils/logger.dart';
 import 'platform_branding_widget.dart';
-import 'video_controls_widget.dart';
 
 // Platform-specific imports - only for web
 // import 'dart:html' as html;
@@ -43,7 +43,6 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
   bool _hasError = false;
   String? _errorMessage;
   SocialMediaEmbedResult? _embedResult;
-  String? _webViewId;
 
   @override
   void initState() {
@@ -52,6 +51,21 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
   }
 
   Future<void> _initializePlayer() async {
+    // Instagram & Facebook: enforce link-out immediately (ToS compliance —
+    // oEmbed requires Meta App Review; until approved, redirect to native app)
+    if (widget.content.platform == PlatformType.instagram ||
+        widget.content.platform == PlatformType.facebook) {
+      if (mounted) setState(() => _isLoading = false);
+      Future.delayed(const Duration(milliseconds: 800), () {
+        if (!mounted) return;
+        final url = widget.content.videoUrl ?? widget.content.embedUrl;
+        if (url != null && url.isNotEmpty) {
+          _openInBrowser(url);
+        }
+      });
+      return;
+    }
+
     try {
       setState(() {
         _isLoading = true;
@@ -63,12 +77,13 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
       await SocialMediaStreamingService.instance.initialize();
 
       // Get embed data for the content
-      final embedResult = await SocialMediaStreamingService.instance.getEmbedData(
-        url: widget.content.videoUrl ?? widget.content.embedUrl ?? '',
-        platform: widget.content.platform,
-        maxWidth: widget.maxWidth,
-        maxHeight: widget.maxHeight,
-      );
+      final embedResult = await SocialMediaStreamingService.instance
+          .getEmbedData(
+            url: widget.content.videoUrl ?? widget.content.embedUrl ?? '',
+            platform: widget.content.platform,
+            maxWidth: widget.maxWidth,
+            maxHeight: widget.maxHeight,
+          );
 
       if (embedResult.success) {
         setState(() {
@@ -87,7 +102,9 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
           },
         );
       } else {
-        throw Exception(embedResult.errorMessage ?? 'Failed to load embed data');
+        throw Exception(
+          embedResult.errorMessage ?? 'Failed to load embed data',
+        );
       }
     } catch (error) {
       Logger.error('Failed to initialize social media player: $error');
@@ -126,10 +143,8 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
           child: Stack(
             children: [
               // Main content
-              Positioned.fill(
-                child: _buildPlayerContent(),
-              ),
-              
+              Positioned.fill(child: _buildPlayerContent()),
+
               // Platform branding overlay
               if (widget.showBranding && _embedResult != null)
                 Positioned(
@@ -140,7 +155,7 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
                     size: 24,
                   ),
                 ),
-              
+
               // Fullscreen button
               if (widget.onFullscreen != null)
                 Positioned(
@@ -148,12 +163,9 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
                   right: 8,
                   child: IconButton(
                     onPressed: widget.onFullscreen,
-                    icon: const Icon(
-                      Icons.fullscreen,
-                      color: Colors.white,
-                    ),
+                    icon: const Icon(Icons.fullscreen, color: Colors.white),
                     style: IconButton.styleFrom(
-                      backgroundColor: Colors.black.withOpacity(0.7),
+                      backgroundColor: Colors.black.withValues(alpha: 0.7),
                     ),
                   ),
                 ),
@@ -168,15 +180,15 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
     if (_isLoading) {
       return _buildLoadingState();
     }
-    
+
     if (_hasError) {
       return _buildErrorState();
     }
-    
+
     if (_embedResult != null) {
       return _buildEmbedPlayer();
     }
-    
+
     return _buildErrorState();
   }
 
@@ -193,10 +205,7 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
             SizedBox(height: 16),
             Text(
               'Loading video...',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.white, fontSize: 16),
             ),
           ],
         ),
@@ -211,11 +220,7 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              color: Colors.white,
-              size: 48,
-            ),
+            const Icon(Icons.error_outline, color: Colors.white, size: 48),
             const SizedBox(height: 16),
             Text(
               'Failed to load video',
@@ -231,10 +236,7 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   _errorMessage!,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -270,8 +272,9 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
   }
 
   Widget _buildWebEmbedPlayer() {
-    // For now, use mobile player on web as well
-    // TODO: Implement proper web embed support
+    // Shows thumbnail + "Open Video" CTA that routes to the platform's web player.
+    // Direct embedding of Instagram/TikTok/Facebook content violates their ToS;
+    // the redirect pattern is intentional and ToS-compliant on all platforms.
     return _buildMobileEmbedPlayer();
   }
 
@@ -283,11 +286,7 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              _getPlatformIcon(),
-              color: Colors.white,
-              size: 64,
-            ),
+            Icon(_getPlatformIcon(), color: Colors.white, size: 64),
             const SizedBox(height: 16),
             Text(
               'Tap to view on ${widget.content.platform.name}',
@@ -303,10 +302,7 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   _embedResult!.title!,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -316,7 +312,10 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => _openInBrowser(
-                _embedResult?.fallbackUrl ?? widget.content.videoUrl ?? widget.content.embedUrl ?? '',
+                _embedResult?.fallbackUrl ??
+                    widget.content.videoUrl ??
+                    widget.content.embedUrl ??
+                    '',
               ),
               child: const Text('Open Video'),
             ),
@@ -352,11 +351,14 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
     }
   }
 
-  void _openInBrowser(String url) {
-    // For mobile platforms, use url_launcher
-    // This would require adding url_launcher dependency
-    print('Opening URL: $url');
-    Logger.info('Would open URL in browser: $url');
+  Future<void> _openInBrowser(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return;
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      Logger.error('Could not launch URL: $url');
+    }
   }
 
   @override
@@ -391,7 +393,7 @@ class CompactSocialMediaVideoPlayer extends StatelessWidget {
           color: Colors.black,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: Colors.grey.withOpacity(0.3),
+            color: Colors.grey.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -411,11 +413,11 @@ class CompactSocialMediaVideoPlayer extends StatelessWidget {
                       )
                     : _buildPlaceholder(),
               ),
-              
+
               // Play button overlay
               Positioned.fill(
                 child: Container(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: 0.3),
                   child: Center(
                     child: Icon(
                       Icons.play_circle_filled,
@@ -425,7 +427,7 @@ class CompactSocialMediaVideoPlayer extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               // Platform branding
               Positioned(
                 top: 4,
@@ -435,9 +437,9 @@ class CompactSocialMediaVideoPlayer extends StatelessWidget {
                   size: 16,
                 ),
               ),
-              
+
               // Duration badge (if available)
-              if (content.metadata?['duration'] != null)
+              if (content.metadata['duration'] != null)
                 Positioned(
                   bottom: 4,
                   right: 4,
@@ -447,20 +449,22 @@ class CompactSocialMediaVideoPlayer extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
+                      color: Colors.black.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      _formatDuration(Duration(seconds: content.metadata?['duration'] ?? 0)),
+                      _formatDuration(
+                        Duration(seconds: content.metadata['duration'] ?? 0),
+                      ),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                   ),
-                 ),
-              ],
+                  ),
+                ),
+            ],
           ),
         ),
       ),

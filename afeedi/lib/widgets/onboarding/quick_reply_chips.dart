@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class QuickReplyChips extends StatelessWidget {
+class QuickReplyChips extends StatefulWidget {
   final List<String> quickReplies;
   final Function(String) onReplyTap;
   final Animation<Offset> slideAnimation;
@@ -15,17 +15,32 @@ class QuickReplyChips extends StatelessWidget {
   });
 
   @override
+  State<QuickReplyChips> createState() => _QuickReplyChipsState();
+}
+
+class _QuickReplyChipsState extends State<QuickReplyChips> {
+  String? _pressedChip;
+
+  @override
   Widget build(BuildContext context) {
     return SlideTransition(
-      position: slideAnimation,
+      position: widget.slideAnimation,
       child: FadeTransition(
-        opacity: fadeAnimation,
+        opacity: widget.fadeAnimation,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: quickReplies.map((reply) => _buildQuickReplyChip(reply)).toList(),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                for (int i = 0; i < widget.quickReplies.length; i++) ...[
+                  _buildQuickReplyChip(widget.quickReplies[i]),
+                  if (i < widget.quickReplies.length - 1)
+                    const SizedBox(width: 8),
+                ],
+              ],
+            ),
           ),
         ),
       ),
@@ -33,68 +48,43 @@ class QuickReplyChips extends StatelessWidget {
   }
 
   Widget _buildQuickReplyChip(String text) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          constraints: BoxConstraints(
-            maxWidth: constraints.maxWidth * 0.9,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => onReplyTap(text),
-              borderRadius: BorderRadius.circular(24),
-              splashColor: const Color(0xFF00D4FF).withOpacity(0.3),
-              highlightColor: const Color(0xFF00D4FF).withOpacity(0.1),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.24),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (text.contains(RegExp(r'[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]', unicode: true)))
-                      Text(
-                        text.split(' ').firstWhere((part) => part.contains(RegExp(r'[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]', unicode: true)), orElse: () => ''),
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    if (text.contains(RegExp(r'[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]', unicode: true)))
-                      const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        text.replaceAll(RegExp(r'[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]', unicode: true), '').trim(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          height: 1.2,
-                        ),
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      color: Colors.white.withOpacity(0.7),
-                      size: 10,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
+    final isPressed = _pressedChip == text;
+
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressedChip = text),
+      onTapCancel: () => setState(() => _pressedChip = null),
+      onTap: () {
+        setState(() => _pressedChip = null);
+        widget.onReplyTap(text);
       },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        constraints: const BoxConstraints(minHeight: 40),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          color: isPressed ? const Color(0xFF00D4FF) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isPressed
+                ? const Color(0xFF00D4FF)
+                : Colors.white.withValues(alpha: 0.35),
+            width: 1.5,
+          ),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: isPressed
+                ? Colors.white
+                : Colors.white.withValues(alpha: 0.9),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            height: 1.2,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
     );
   }
 }

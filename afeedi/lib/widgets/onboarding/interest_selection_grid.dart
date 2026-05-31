@@ -79,8 +79,11 @@ class _InterestSelectionGridState extends State<InterestSelectionGrid> {
       return _availableInterests;
     }
     return _availableInterests
-        .where((interest) =>
-            interest['name'].toLowerCase().contains(_searchQuery.toLowerCase()))
+        .where(
+          (interest) => interest['name'].toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          ),
+        )
         .toList();
   }
 
@@ -107,7 +110,7 @@ class _InterestSelectionGridState extends State<InterestSelectionGrid> {
                   )
                 : null,
             filled: true,
-            fillColor: Colors.grey.withOpacity(0.1),
+            fillColor: Colors.grey.withValues(alpha: 0.1),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -167,47 +170,56 @@ class _InterestSelectionGridState extends State<InterestSelectionGrid> {
   }
 
   Widget _buildInterestItem(
-      String name, IconData icon, bool isSelected, int index) {
+    String name,
+    IconData icon,
+    bool isSelected,
+    int index,
+  ) {
     return InkWell(
-      onTap: () => _toggleInterest(name),
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primaryLight.withOpacity(0.2)
-              : Colors.grey.withOpacity(0.1),
+          onTap: () => _toggleInterest(name),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.primaryLight
-                : Colors.transparent,
-            width: 2,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? AppColors.primaryLight : Colors.grey[600],
-              size: 28,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              name,
-              style: TextStyle(
-                color: isSelected ? AppColors.primaryLight : Colors.grey[800],
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 12,
+          child: Container(
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? AppColors.primaryLight.withValues(alpha: 0.2)
+                  : Colors.grey.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected ? AppColors.primaryLight : Colors.transparent,
+                width: 2,
               ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
-          ],
-        ),
-      ),
-    ).animate().fadeIn(duration: 300.ms, delay: (50 * index).ms).slideY(begin: 0.1, end: 0);
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  color: isSelected ? AppColors.primaryLight : Colors.grey[600],
+                  size: 28,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  name,
+                  style: TextStyle(
+                    color: isSelected
+                        ? AppColors.primaryLight
+                        : Colors.grey[800],
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    fontSize: 12,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        )
+        .animate()
+        .fadeIn(duration: 300.ms, delay: (50 * index).ms)
+        .slideY(begin: 0.1, end: 0);
   }
 
   Widget _buildCustomInterestInput() {
@@ -216,7 +228,7 @@ class _InterestSelectionGridState extends State<InterestSelectionGrid> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.1),
+        color: Colors.grey.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -224,9 +236,7 @@ class _InterestSelectionGridState extends State<InterestSelectionGrid> {
         children: [
           Text(
             'Don\'t see your interest?',
-            style: AppTextStyles.caption.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Row(

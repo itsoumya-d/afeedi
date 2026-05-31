@@ -1,51 +1,57 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import '../core/config/supabase_config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
-import '../models/platform_connection_model.dart';
-import '../models/analytics_model.dart';
+import '../core/storage/local_storage_service.dart';
 import 'auth_service.dart';
 import 'analytics_service.dart';
 
 class UserManagementService {
   static UserManagementService? _instance;
-  static UserManagementService get instance => _instance ??= UserManagementService._();
-  
+  static UserManagementService get instance =>
+      _instance ??= UserManagementService._();
+
   UserManagementService._();
-  
-  final _supabase = SupabaseConfig.client;
-  
+
+  final _storage = LocalStorageService.instance;
+
+  // -------------------------------------------------------------------------
+  // User Profile  (stored in SharedPreferences as JSON)
+  // -------------------------------------------------------------------------
+
   // Get user profile
-  Future<SupabaseResponse<UserProfile>> getUserProfile([String? userId]) async {
+  Future<LocalStorageResponse<UserProfile>> getUserProfile([
+    String? userId,
+  ]) async {
     try {
       final targetUserId = userId ?? AuthService.instance.currentUser?.id;
       if (targetUserId == null) {
-        return SupabaseResponse.error('User not authenticated');
+        return LocalStorageResponse.error('User not authenticated');
       }
-      
-      final response = await _supabase
-          .from(SupabaseConfig.userProfilesTable)
-          .select()
-          .eq('user_id', targetUserId)
-          .maybeSingle();
-      
-      if (response == null) {
-        return SupabaseResponse.error('User profile not found');
+
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_profileKey(targetUserId));
+
+      if (raw == null) {
+        return LocalStorageResponse.error('User profile not found');
       }
-      
-      final profile = UserProfile.fromJson(response);
-      return SupabaseResponse.success(profile);
+
+      final profile = UserProfile.fromJson(
+        Map<String, dynamic>.from(jsonDecode(raw) as Map),
+      );
+      return LocalStorageResponse.success(profile);
     } catch (error) {
       await AnalyticsService.instance.trackError(
         errorType: 'user_management_error',
         errorMessage: error.toString(),
         screen: 'user_profile',
       );
-      return SupabaseResponse.error(error.toString());
+      return LocalStorageResponse.error(error.toString());
     }
   }
-  
+
   // Update user profile
-  Future<SupabaseResponse<UserProfile>> updateUserProfile({
+  Future<LocalStorageResponse<UserProfile>> updateUserProfile({
     String? displayName,
     String? bio,
     DateTime? dateOfBirth,
@@ -57,82 +63,87 @@ class UserManagementService {
     try {
       final user = AuthService.instance.currentUser;
       if (user == null) {
-        return SupabaseResponse.error('User not authenticated');
+        return LocalStorageResponse.error('User not authenticated');
       }
-      
-      final updateData = <String, dynamic>{
-        'updated_at': DateTime.now().toIso8601String(),
-      };
-      
-      if (displayName != null) updateData['display_name'] = displayName;
-      if (bio != null) updateData['bio'] = bio;
-      if (dateOfBirth != null) updateData['date_of_birth'] = dateOfBirth.toIso8601String();
-      if (timezone != null) updateData['timezone'] = timezone;
-      if (language != null) updateData['language'] = language;
-      if (country != null) updateData['country'] = country;
-      if (avatarUrl != null) updateData['avatar_url'] = avatarUrl;
-      
-      final response = await _supabase
-          .from(SupabaseConfig.userProfilesTable)
-          .update(updateData)
-          .eq('user_id', user.id)
-          .select()
-          .single();
-      
-      final updatedProfile = UserProfile.fromJson(response);
-      
+
+      final existingResponse = await getUserProfile(user.id);
+      final existing = existingResponse.success
+          ? existingResponse.data!
+          : _defaultProfile(user.id);
+
+      final updated = existing.copyWith(
+        displayName: displayName ?? existing.displayName,
+        bio: bio ?? existing.bio,
+        dateOfBirth: dateOfBirth ?? existing.dateOfBirth,
+        timezone: timezone ?? existing.timezone,
+        language: language ?? existing.language,
+        country: country ?? existing.country,
+        avatarUrl: avatarUrl ?? existing.avatarUrl,
+        updatedAt: DateTime.now(),
+      );
+
+      await _saveProfile(updated);
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'profile_updated',
         screen: 'profile_settings',
         additionalData: {
-          'fields_updated': updateData.keys.toList(),
+          'fields_updated': [
+            if (displayName != null) 'display_name',
+            if (bio != null) 'bio',
+            if (dateOfBirth != null) 'date_of_birth',
+            if (timezone != null) 'timezone',
+            if (language != null) 'language',
+            if (country != null) 'country',
+            if (avatarUrl != null) 'avatar_url',
+          ],
         },
       );
-      
-      return SupabaseResponse.success(updatedProfile);
+
+      return LocalStorageResponse.success(updated);
     } catch (error) {
       await AnalyticsService.instance.trackError(
         errorType: 'user_management_error',
         errorMessage: error.toString(),
         screen: 'profile_settings',
       );
-      return SupabaseResponse.error(error.toString());
+      return LocalStorageResponse.error(error.toString());
     }
   }
-  
+
+  // -------------------------------------------------------------------------
+  // User Preferences  (stored via LocalStorageService / Hive)
+  // -------------------------------------------------------------------------
+
   // Get user preferences
-  Future<SupabaseResponse<UserPreferences>> getUserPreferences([String? userId]) async {
+  Future<LocalStorageResponse<UserPreferences>> getUserPreferences([
+    String? userId,
+  ]) async {
     try {
       final targetUserId = userId ?? AuthService.instance.currentUser?.id;
       if (targetUserId == null) {
-        return SupabaseResponse.error('User not authenticated');
+        return LocalStorageResponse.error('User not authenticated');
       }
-      
-      final response = await _supabase
-          .from(SupabaseConfig.userPreferencesTable)
-          .select()
-          .eq('user_id', targetUserId)
-          .maybeSingle();
-      
-      if (response == null) {
-        // Create default preferences if none exist
+
+      final prefs = await _storage.getUserPreferences(targetUserId);
+
+      if (prefs == null) {
         return await _createDefaultPreferences(targetUserId);
       }
-      
-      final preferences = UserPreferences.fromJson(response);
-      return SupabaseResponse.success(preferences);
+
+      return LocalStorageResponse.success(prefs);
     } catch (error) {
       await AnalyticsService.instance.trackError(
         errorType: 'user_management_error',
         errorMessage: error.toString(),
         screen: 'user_preferences',
       );
-      return SupabaseResponse.error(error.toString());
+      return LocalStorageResponse.error(error.toString());
     }
   }
-  
+
   // Update user preferences
-  Future<SupabaseResponse<UserPreferences>> updateUserPreferences({
+  Future<LocalStorageResponse<UserPreferences>> updateUserPreferences({
     List<String>? contentCategories,
     Map<String, int>? platformPriorities,
     NotificationSettings? notificationSettings,
@@ -143,169 +154,158 @@ class UserManagementService {
     try {
       final user = AuthService.instance.currentUser;
       if (user == null) {
-        return SupabaseResponse.error('User not authenticated');
+        return LocalStorageResponse.error('User not authenticated');
       }
-      
-      final updateData = <String, dynamic>{
-        'updated_at': DateTime.now().toIso8601String(),
-      };
-      
-      if (contentCategories != null) {
-        updateData['content_categories'] = contentCategories;
-      }
-      if (platformPriorities != null) {
-        updateData['platform_priorities'] = platformPriorities;
-      }
-      if (notificationSettings != null) {
-        updateData['notification_settings'] = notificationSettings.toJson();
-      }
-      if (privacySettings != null) {
-        updateData['privacy_settings'] = privacySettings.toJson();
-      }
-      if (aiRecommendationsEnabled != null) {
-        updateData['ai_recommendations_enabled'] = aiRecommendationsEnabled;
-      }
-      if (matureContentEnabled != null) {
-        updateData['mature_content_enabled'] = matureContentEnabled;
-      }
-      
-      final response = await _supabase
-          .from(SupabaseConfig.userPreferencesTable)
-          .update(updateData)
-          .eq('user_id', user.id)
-          .select()
-          .single();
-      
-      final updatedPreferences = UserPreferences.fromJson(response);
-      
+
+      final existing =
+          await _storage.getUserPreferences(user.id) ??
+          _defaultPreferences(user.id);
+
+      final updated = existing.copyWith(
+        contentCategories: contentCategories ?? existing.contentCategories,
+        platformPriorities: platformPriorities ?? existing.platformPriorities,
+        notificationSettings:
+            notificationSettings ?? existing.notificationSettings,
+        privacySettings: privacySettings ?? existing.privacySettings,
+        aiRecommendationsEnabled:
+            aiRecommendationsEnabled ?? existing.aiRecommendationsEnabled,
+        matureContentEnabled:
+            matureContentEnabled ?? existing.matureContentEnabled,
+        updatedAt: DateTime.now(),
+      );
+
+      await _storage.saveUserPreferences(updated);
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'preferences_updated',
         screen: 'preferences_settings',
         additionalData: {
-          'fields_updated': updateData.keys.toList(),
+          'fields_updated': [
+            if (contentCategories != null) 'content_categories',
+            if (platformPriorities != null) 'platform_priorities',
+            if (notificationSettings != null) 'notification_settings',
+            if (privacySettings != null) 'privacy_settings',
+            if (aiRecommendationsEnabled != null) 'ai_recommendations_enabled',
+            if (matureContentEnabled != null) 'mature_content_enabled',
+          ],
         },
       );
-      
-      return SupabaseResponse.success(updatedPreferences);
+
+      return LocalStorageResponse.success(updated);
     } catch (error) {
       await AnalyticsService.instance.trackError(
         errorType: 'user_management_error',
         errorMessage: error.toString(),
         screen: 'preferences_settings',
       );
-      return SupabaseResponse.error(error.toString());
+      return LocalStorageResponse.error(error.toString());
     }
   }
-  
+
+  // -------------------------------------------------------------------------
+  // Onboarding
+  // -------------------------------------------------------------------------
+
   // Update onboarding progress
-  Future<SupabaseResponse<UserProfile>> updateOnboardingProgress({
+  Future<LocalStorageResponse<UserProfile>> updateOnboardingProgress({
     required int step,
     bool? completed,
   }) async {
     try {
       final user = AuthService.instance.currentUser;
       if (user == null) {
-        return SupabaseResponse.error('User not authenticated');
+        return LocalStorageResponse.error('User not authenticated');
       }
-      
-      final updateData = {
-        'onboarding_step': step,
-        'updated_at': DateTime.now().toIso8601String(),
-      };
-      
-      if (completed != null) {
-        updateData['onboarding_completed'] = completed;
-      }
-      
-      final response = await _supabase
-          .from(SupabaseConfig.userProfilesTable)
-          .update(updateData)
-          .eq('user_id', user.id)
-          .select()
-          .single();
-      
-      final updatedProfile = UserProfile.fromJson(response);
-      
+
+      final existingResponse = await getUserProfile(user.id);
+      final existing = existingResponse.success
+          ? existingResponse.data!
+          : _defaultProfile(user.id);
+
+      final updated = existing.copyWith(
+        onboardingStep: step,
+        onboardingCompleted: completed ?? existing.onboardingCompleted,
+        updatedAt: DateTime.now(),
+      );
+
+      await _saveProfile(updated);
+
       await AnalyticsService.instance.trackOnboardingEvent(
-        eventName: completed == true ? 'onboarding_completed' : 'onboarding_step_completed',
+        eventName: completed == true
+            ? 'onboarding_completed'
+            : 'onboarding_step_completed',
         stepNumber: step,
         stepName: _getOnboardingStepName(step),
       );
-      
-      return SupabaseResponse.success(updatedProfile);
+
+      return LocalStorageResponse.success(updated);
     } catch (error) {
       await AnalyticsService.instance.trackError(
         errorType: 'user_management_error',
         errorMessage: error.toString(),
         screen: 'onboarding',
       );
-      return SupabaseResponse.error(error.toString());
+      return LocalStorageResponse.error(error.toString());
     }
   }
-  
-  // Get user statistics
+
+  // -------------------------------------------------------------------------
+  // User Statistics
+  // -------------------------------------------------------------------------
+
+  // Get user statistics from local storage
   Future<Map<String, dynamic>> getUserStatistics([String? userId]) async {
     try {
       final targetUserId = userId ?? AuthService.instance.currentUser?.id;
-      if (targetUserId == null) {
-        return {};
-      }
-      
-      // Get content interactions count
-      final interactionsResponse = await _supabase
-          .from(SupabaseConfig.contentInteractionsTable)
-          .select('interaction_type')
-          .eq('user_id', targetUserId);
-      
-      final interactions = interactionsResponse as List;
+      if (targetUserId == null) return {};
+
+      // Content interactions
+      final rawInteractions = await _storage.getContentInteractions(
+        targetUserId,
+      );
       final interactionCounts = <String, int>{};
-      
-      for (final interaction in interactions) {
-        final type = interaction['interaction_type'] as String;
+      for (final interaction in rawInteractions) {
+        final type = interaction['interaction_type'] as String? ?? 'unknown';
         interactionCounts[type] = (interactionCounts[type] ?? 0) + 1;
       }
-      
-      // Get platform connections count
-      final connectionsResponse = await _supabase
-          .from(SupabaseConfig.platformConnectionsTable)
-          .select('platform')
-          .eq('user_id', targetUserId)
-          .eq('is_active', true);
-      
-      final connections = connectionsResponse as List;
-      final connectedPlatforms = connections.map((c) => c['platform']).toList();
-      
-      // Get scheduled content count
-      final scheduledResponse = await _supabase
-          .from(SupabaseConfig.scheduledContentTable)
-          .select('id')
-          .eq('user_id', targetUserId)
-          .gt('scheduled_for', DateTime.now().toIso8601String());
-      
-      final upcomingScheduled = (scheduledResponse as List).length;
-      
-      // Get recommendations metrics
-      final recommendationsResponse = await _supabase
-          .from(SupabaseConfig.recommendationsTable)
-          .select('is_shown, is_clicked')
-          .eq('user_id', targetUserId);
-      
-      final recommendations = recommendationsResponse as List;
-      final totalRecommendations = recommendations.length;
-      final clickedRecommendations = recommendations
+
+      // Platform connections
+      final connections = await _storage.getPlatformConnections(targetUserId);
+      final connectedPlatforms = connections
+          .where((c) => c.isActive)
+          .map((c) => c.platform.name)
+          .toList();
+
+      // Scheduled content (upcoming only)
+      final scheduled = await _storage.getScheduledContentForUser(targetUserId);
+      final now = DateTime.now();
+      final upcomingScheduled = scheduled.where((s) {
+        final scheduledFor = s['scheduled_for'] as String?;
+        if (scheduledFor == null) return false;
+        try {
+          return DateTime.parse(scheduledFor).isAfter(now);
+        } catch (_) {
+          return false;
+        }
+      }).length;
+
+      // Recommendations
+      final rawRecs = await _storage.getRecommendations(targetUserId);
+      final totalRecommendations = rawRecs.length;
+      final clickedRecommendations = rawRecs
           .where((r) => r['is_clicked'] == true)
           .length;
-      
+
       return {
-        'total_interactions': interactions.length,
+        'total_interactions': rawInteractions.length,
         'interaction_breakdown': interactionCounts,
         'connected_platforms': connectedPlatforms,
         'connected_platforms_count': connectedPlatforms.length,
         'upcoming_scheduled_content': upcomingScheduled,
         'total_recommendations': totalRecommendations,
         'clicked_recommendations': clickedRecommendations,
-        'recommendation_click_rate': totalRecommendations > 0 
-            ? clickedRecommendations / totalRecommendations 
+        'recommendation_click_rate': totalRecommendations > 0
+            ? clickedRecommendations / totalRecommendations
             : 0.0,
       };
     } catch (error) {
@@ -313,120 +313,149 @@ class UserManagementService {
       return {};
     }
   }
-  
+
+  // -------------------------------------------------------------------------
+  // GDPR: Export / Delete
+  // -------------------------------------------------------------------------
+
   // Export user data (GDPR compliance)
-  Future<SupabaseResponse<Map<String, dynamic>>> exportUserData() async {
+  Future<LocalStorageResponse<Map<String, dynamic>>> exportUserData() async {
     try {
       final user = AuthService.instance.currentUser;
       if (user == null) {
-        return SupabaseResponse.error('User not authenticated');
+        return LocalStorageResponse.error('User not authenticated');
       }
-      
+
       final exportData = <String, dynamic>{
         'export_timestamp': DateTime.now().toIso8601String(),
         'user_id': user.id,
       };
-      
-      // Get user profile
+
+      // Profile
       final profileResponse = await getUserProfile();
-      if (profileResponse.hasData) {
+      if (profileResponse.success) {
         exportData['profile'] = profileResponse.data!.toJson();
       }
-      
-      // Get user preferences
+
+      // Preferences
       final preferencesResponse = await getUserPreferences();
-      if (preferencesResponse.hasData) {
+      if (preferencesResponse.success) {
         exportData['preferences'] = preferencesResponse.data!.toJson();
       }
-      
-      // Get platform connections (without sensitive tokens)
+
+      // Platform connections (without sensitive tokens)
       final connections = await AuthService.instance.getPlatformConnections();
-      exportData['platform_connections'] = connections.map((c) => {
-        'platform': c.platform.name,
-        'platform_username': c.platformUsername,
-        'connected_at': c.createdAt.toIso8601String(),
-        'is_active': c.isActive,
-      }).toList();
-      
-      // Get content interactions
-      final interactionsResponse = await _supabase
-          .from(SupabaseConfig.contentInteractionsTable)
-          .select('interaction_type, created_at')
-          .eq('user_id', user.id)
-          .order('created_at', ascending: false);
-      
-      exportData['content_interactions'] = interactionsResponse;
-      
-      // Get scheduled content
-      final scheduledResponse = await _supabase
-          .from(SupabaseConfig.scheduledContentTable)
-          .select('scheduled_for, notes, created_at')
-          .eq('user_id', user.id)
-          .order('created_at', ascending: false);
-      
-      exportData['scheduled_content'] = scheduledResponse;
-      
-      // Get analytics events (last 30 days)
-      final analyticsResponse = await _supabase
-          .from(SupabaseConfig.analyticsEventsTable)
-          .select('event_type, event_name, created_at')
-          .eq('user_id', user.id)
-          .gt('created_at', DateTime.now().subtract(const Duration(days: 30)).toIso8601String())
-          .order('created_at', ascending: false);
-      
-      exportData['recent_analytics'] = analyticsResponse;
-      
+      exportData['platform_connections'] = connections
+          .map(
+            (c) => {
+              'platform': c.platform.name,
+              'platform_username': c.platformUsername,
+              'connected_at': c.createdAt.toIso8601String(),
+              'is_active': c.isActive,
+            },
+          )
+          .toList();
+
+      // Content interactions
+      exportData['content_interactions'] =
+          (await _storage.getContentInteractions(user.id))
+              .map(
+                (i) => {
+                  'interaction_type': i['interaction_type'],
+                  'created_at': i['created_at'],
+                },
+              )
+              .toList();
+
+      // Scheduled content
+      exportData['scheduled_content'] =
+          (await _storage.getScheduledContentForUser(user.id))
+              .map(
+                (s) => {
+                  'scheduled_for': s['scheduled_for'],
+                  'notes': s['notes'],
+                  'created_at': s['created_at'],
+                },
+              )
+              .toList();
+
+      // Analytics events (last 30 days)
+      final cutoff = DateTime.now().subtract(const Duration(days: 30));
+      exportData['recent_analytics'] =
+          (await _storage.getAnalyticsEvents(user.id))
+              .where((e) {
+                final raw = e['created_at'] as String?;
+                if (raw == null) return false;
+                try {
+                  return DateTime.parse(raw).isAfter(cutoff);
+                } catch (_) {
+                  return false;
+                }
+              })
+              .map(
+                (e) => {
+                  'event_type': e['event_type'],
+                  'event_name': e['event_name'],
+                  'created_at': e['created_at'],
+                },
+              )
+              .toList();
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'data_export_requested',
         screen: 'privacy_settings',
       );
-      
-      return SupabaseResponse.success(exportData);
+
+      return LocalStorageResponse.success(exportData);
     } catch (error) {
       await AnalyticsService.instance.trackError(
         errorType: 'user_management_error',
         errorMessage: error.toString(),
         screen: 'privacy_settings',
       );
-      return SupabaseResponse.error(error.toString());
+      return LocalStorageResponse.error(error.toString());
     }
   }
-  
+
   // Delete user data (GDPR compliance)
-  Future<SupabaseResponse<bool>> deleteUserData() async {
+  Future<LocalStorageResponse<bool>> deleteUserData() async {
     try {
       final user = AuthService.instance.currentUser;
       if (user == null) {
-        return SupabaseResponse.error('User not authenticated');
+        return LocalStorageResponse.error('User not authenticated');
       }
-      
-      // Delete user data (database CASCADE will handle related records)
-      await _supabase
-          .from(SupabaseConfig.usersTable)
-          .delete()
-          .eq('id', user.id);
-      
+
+      // Remove user record and profile from local storage
+      await _storage.deleteUser(user.id);
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_profileKey(user.id));
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'data_deletion_completed',
         screen: 'privacy_settings',
         additionalData: {'user_id': user.id},
       );
-      
+
       // Sign out the user
       await AuthService.instance.signOut();
-      
-      return SupabaseResponse.success(true);
+
+      return LocalStorageResponse.success(true);
     } catch (error) {
       await AnalyticsService.instance.trackError(
         errorType: 'user_management_error',
         errorMessage: error.toString(),
         screen: 'privacy_settings',
       );
-      return SupabaseResponse.error(error.toString());
+      return LocalStorageResponse.error(error.toString());
     }
   }
-  
-  // Search users (for admin purposes)
+
+  // -------------------------------------------------------------------------
+  // Admin Operations
+  // -------------------------------------------------------------------------
+
+  // Search users (admin only)
   Future<List<User>> searchUsers({
     String? query,
     UserRole? role,
@@ -439,59 +468,51 @@ class UserManagementService {
       if (currentUser == null || !currentUser.isAdmin) {
         return [];
       }
-      
-      var queryBuilder = _supabase
-          .from(SupabaseConfig.usersTable)
-          .select();
-      
+
+      var users = await _storage.getAllUsers();
+
       if (query != null && query.isNotEmpty) {
-        queryBuilder = queryBuilder.ilike('email', '%$query%');
+        final lq = query.toLowerCase();
+        users = users.where((u) => u.email.toLowerCase().contains(lq)).toList();
       }
-      
+
       if (role != null) {
-        queryBuilder = queryBuilder.eq('role', role.name);
+        users = users.where((u) => u.role == role).toList();
       }
-      
+
       if (isActive != null) {
-        queryBuilder = queryBuilder.eq('is_active', isActive);
+        users = users.where((u) => u.isActive == isActive).toList();
       }
-      
-      final response = await queryBuilder
-          .order('created_at', ascending: false)
-          .range(offset, offset + limit - 1);
-      
-      return (response as List)
-          .map((json) => User.fromJson(json))
-          .toList();
+
+      users.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return users.skip(offset).take(limit).toList();
     } catch (error) {
       debugPrint('Error searching users: $error');
       return [];
     }
   }
-  
+
   // Update user role (admin only)
-  Future<SupabaseResponse<User>> updateUserRole(
+  Future<LocalStorageResponse<User>> updateUserRole(
     String userId,
     UserRole newRole,
   ) async {
     try {
       final currentUser = AuthService.instance.currentUser;
       if (currentUser == null || !currentUser.isAdmin) {
-        return SupabaseResponse.error('Insufficient permissions');
+        return LocalStorageResponse.error('Insufficient permissions');
       }
-      
-      final response = await _supabase
-          .from(SupabaseConfig.usersTable)
-          .update({
-            'role': newRole.name,
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', userId)
-          .select()
-          .single();
-      
-      final updatedUser = User.fromJson(response);
-      
+
+      final target = await _storage.getUser(userId);
+      if (target == null) {
+        return LocalStorageResponse.error('User not found');
+      }
+
+      final updated = target.copyWith(role: newRole, updatedAt: DateTime.now());
+
+      await _storage.saveUser(updated);
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'user_role_updated',
         screen: 'admin_panel',
@@ -501,34 +522,38 @@ class UserManagementService {
           'admin_user_id': currentUser.id,
         },
       );
-      
-      return SupabaseResponse.success(updatedUser);
+
+      return LocalStorageResponse.success(updated);
     } catch (error) {
       await AnalyticsService.instance.trackError(
         errorType: 'user_management_error',
         errorMessage: error.toString(),
         screen: 'admin_panel',
       );
-      return SupabaseResponse.error(error.toString());
+      return LocalStorageResponse.error(error.toString());
     }
   }
-  
+
   // Deactivate user account (admin only)
-  Future<SupabaseResponse<bool>> deactivateUser(String userId) async {
+  Future<LocalStorageResponse<bool>> deactivateUser(String userId) async {
     try {
       final currentUser = AuthService.instance.currentUser;
       if (currentUser == null || !currentUser.isAdmin) {
-        return SupabaseResponse.error('Insufficient permissions');
+        return LocalStorageResponse.error('Insufficient permissions');
       }
-      
-      await _supabase
-          .from(SupabaseConfig.usersTable)
-          .update({
-            'is_active': false,
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', userId);
-      
+
+      final target = await _storage.getUser(userId);
+      if (target == null) {
+        return LocalStorageResponse.error('User not found');
+      }
+
+      final deactivated = target.copyWith(
+        isActive: false,
+        updatedAt: DateTime.now(),
+      );
+
+      await _storage.saveUser(deactivated);
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'user_deactivated',
         screen: 'admin_panel',
@@ -537,54 +562,75 @@ class UserManagementService {
           'admin_user_id': currentUser.id,
         },
       );
-      
-      return SupabaseResponse.success(true);
+
+      return LocalStorageResponse.success(true);
     } catch (error) {
       await AnalyticsService.instance.trackError(
         errorType: 'user_management_error',
         errorMessage: error.toString(),
         screen: 'admin_panel',
       );
-      return SupabaseResponse.error(error.toString());
+      return LocalStorageResponse.error(error.toString());
     }
   }
-  
-  // Private helper methods
-  
-  Future<SupabaseResponse<UserPreferences>> _createDefaultPreferences(
+
+  // -------------------------------------------------------------------------
+  // Private helpers
+  // -------------------------------------------------------------------------
+
+  String _profileKey(String userId) => 'user_profile_$userId';
+
+  Future<void> _saveProfile(UserProfile profile) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _profileKey(profile.userId),
+      jsonEncode(profile.toJson()),
+    );
+  }
+
+  UserProfile _defaultProfile(String userId) {
+    final now = DateTime.now();
+    return UserProfile(
+      id: 'profile_$userId',
+      userId: userId,
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
+
+  UserPreferences _defaultPreferences(String userId) {
+    final now = DateTime.now();
+    return UserPreferences(
+      id: 'prefs_$userId',
+      userId: userId,
+      contentCategories: const [],
+      platformPriorities: const {
+        'youtube': 1,
+        'instagram': 2,
+        'tiktok': 3,
+        'facebook': 4,
+      },
+      notificationSettings: const NotificationSettings(),
+      privacySettings: const PrivacySettings(),
+      aiRecommendationsEnabled: true,
+      matureContentEnabled: false,
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
+
+  Future<LocalStorageResponse<UserPreferences>> _createDefaultPreferences(
     String userId,
   ) async {
     try {
-      final defaultPreferences = {
-        'user_id': userId,
-        'content_categories': <String>[],
-        'platform_priorities': {
-          'youtube': 1,
-          'instagram': 2,
-          'tiktok': 3,
-          'facebook': 4,
-        },
-        'notification_settings': const NotificationSettings().toJson(),
-        'privacy_settings': const PrivacySettings().toJson(),
-        'ai_recommendations_enabled': true,
-        'mature_content_enabled': false,
-        'created_at': DateTime.now().toIso8601String(),
-        'updated_at': DateTime.now().toIso8601String(),
-      };
-      
-      final response = await _supabase
-          .from(SupabaseConfig.userPreferencesTable)
-          .insert(defaultPreferences)
-          .select()
-          .single();
-      
-      final preferences = UserPreferences.fromJson(response);
-      return SupabaseResponse.success(preferences);
+      final defaults = _defaultPreferences(userId);
+      await _storage.saveUserPreferences(defaults);
+      return LocalStorageResponse.success(defaults);
     } catch (error) {
-      return SupabaseResponse.error(error.toString());
+      return LocalStorageResponse.error(error.toString());
     }
   }
-  
+
   String _getOnboardingStepName(int step) {
     switch (step) {
       case 0:

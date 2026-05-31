@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../core/constants/app_urls.dart';
 import '../../core/theme/app_theme.dart';
+import '../../services/local_auth_service.dart';
+import '../../services/navigation_service.dart';
+import '../../services/user_management_service.dart';
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
@@ -8,22 +15,53 @@ class SettingsTab extends StatefulWidget {
   State<SettingsTab> createState() => _SettingsTabState();
 }
 
-class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClientMixin {
+class _SettingsTabState extends State<SettingsTab>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-  
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _dataCollection = prefs.getBool('setting_data_collection') ?? true;
+      _personalizedAds = prefs.getBool('setting_personalized_ads') ?? false;
+      _analyticsSharing = prefs.getBool('setting_analytics_sharing') ?? true;
+      _locationTracking = prefs.getBool('setting_location_tracking') ?? false;
+      _autoplay = prefs.getBool('setting_autoplay') ?? true;
+      _downloadOnWifi = prefs.getBool('setting_download_on_wifi') ?? true;
+      _highQuality = prefs.getBool('setting_high_quality') ?? false;
+      _pushNotifications = prefs.getBool('setting_push_notifications') ?? true;
+      _emailNotifications =
+          prefs.getBool('setting_email_notifications') ?? false;
+      _weeklyDigest = prefs.getBool('setting_weekly_digest') ?? true;
+      _trendingAlerts = prefs.getBool('setting_trending_alerts') ?? true;
+    });
+  }
+
+  Future<void> _saveSetting(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
+
   // Privacy settings
   bool _dataCollection = true;
   bool _personalizedAds = false;
   bool _analyticsSharing = true;
   bool _locationTracking = false;
-  
+
   // Content settings
   bool _autoplay = true;
   bool _downloadOnWifi = true;
   bool _highQuality = false;
   bool _darkMode = true;
-  
+
   // Notification settings
   bool _pushNotifications = true;
   bool _emailNotifications = false;
@@ -33,7 +71,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return Container(
       child: SingleChildScrollView(
         child: Column(
@@ -50,7 +88,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -67,11 +105,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
               ),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.person,
-              color: Colors.white,
-              size: 24,
-            ),
+            child: const Icon(Icons.person, color: Colors.white, size: 24),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -90,7 +124,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
                 Text(
                   'Customize your Afeedi experience',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
                   ),
                 ),
@@ -107,7 +141,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -121,7 +155,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           Text(
             'Active',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 9,
             ),
           ),
@@ -129,7 +163,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   Widget _buildPrivacySection() {
     return _buildSection(
       title: 'Privacy & Data',
@@ -140,25 +174,42 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           title: 'Data Collection',
           subtitle: 'Allow Afeedi to collect usage data for improvements',
           value: _dataCollection,
-          onChanged: (value) => setState(() => _dataCollection = value),
+          onChanged: (value) {
+            setState(() => _dataCollection = value);
+            _saveSetting('setting_data_collection', value);
+          },
         ),
         _buildToggleItem(
           title: 'Personalized Ads',
           subtitle: 'Show ads based on your interests and activity',
           value: _personalizedAds,
-          onChanged: (value) => setState(() => _personalizedAds = value),
+          onChanged: (value) {
+            setState(() => _personalizedAds = value);
+            _saveSetting('setting_personalized_ads', value);
+          },
         ),
         _buildToggleItem(
           title: 'Analytics Sharing',
           subtitle: 'Share anonymous analytics to improve the platform',
           value: _analyticsSharing,
-          onChanged: (value) => setState(() => _analyticsSharing = value),
+          onChanged: (value) {
+            setState(() => _analyticsSharing = value);
+            _saveSetting('setting_analytics_sharing', value);
+          },
         ),
         _buildToggleItem(
           title: 'Location Tracking',
           subtitle: 'Use location for content recommendations',
           value: _locationTracking,
-          onChanged: (value) => setState(() => _locationTracking = value),
+          onChanged: (value) {
+            setState(() => _locationTracking = value);
+            _saveSetting('setting_location_tracking', value);
+          },
+        ),
+        Divider(
+          color: Colors.white.withValues(alpha: 0.06),
+          indent: 16,
+          endIndent: 16,
         ),
         _buildActionItem(
           title: 'Download My Data',
@@ -166,17 +217,23 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           icon: Icons.download,
           onTap: () => _showDataDownloadDialog(),
         ),
+        Divider(
+          color: Colors.white.withValues(alpha: 0.06),
+          indent: 16,
+          endIndent: 16,
+        ),
         _buildActionItem(
           title: 'Delete Account',
           subtitle: 'Permanently delete your account and data',
           icon: Icons.delete_forever,
-          iconColor: Colors.red,
+          iconColor: Colors.redAccent,
+          isDangerous: true,
           onTap: () => _showDeleteAccountDialog(),
         ),
       ],
     );
   }
-  
+
   Widget _buildContentSection() {
     return _buildSection(
       title: 'Content & Playback',
@@ -216,7 +273,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ],
     );
   }
-  
+
   Widget _buildNotificationSection() {
     return _buildSection(
       title: 'Notifications',
@@ -250,7 +307,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ],
     );
   }
-  
+
   Widget _buildAccountSection() {
     return _buildSection(
       title: 'Account',
@@ -263,11 +320,21 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           icon: Icons.edit,
           onTap: () => _navigateToProfile(),
         ),
+        Divider(
+          color: Colors.white.withValues(alpha: 0.06),
+          indent: 16,
+          endIndent: 16,
+        ),
         _buildActionItem(
           title: 'Change Password',
           subtitle: 'Update your account password',
           icon: Icons.lock,
           onTap: () => _showChangePasswordDialog(),
+        ),
+        Divider(
+          color: Colors.white.withValues(alpha: 0.06),
+          indent: 16,
+          endIndent: 16,
         ),
         _buildActionItem(
           title: 'Subscription',
@@ -275,16 +342,34 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           icon: Icons.star,
           onTap: () => _navigateToSubscription(),
         ),
+        Divider(
+          color: Colors.white.withValues(alpha: 0.06),
+          indent: 16,
+          endIndent: 16,
+        ),
         _buildActionItem(
           title: 'Connected Accounts',
           subtitle: 'Manage linked social media accounts',
           icon: Icons.link,
           onTap: () => _showConnectedAccountsDialog(),
         ),
+        Divider(
+          color: Colors.white.withValues(alpha: 0.06),
+          indent: 16,
+          endIndent: 16,
+        ),
+        _buildActionItem(
+          title: 'Sign Out',
+          subtitle: 'Sign out of your Afeedi account',
+          icon: Icons.logout,
+          iconColor: Colors.redAccent,
+          isDangerous: true,
+          onTap: () => _showSignOutDialog(),
+        ),
       ],
     );
   }
-  
+
   Widget _buildAboutSection() {
     return _buildSection(
       title: 'About',
@@ -318,7 +403,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ],
     );
   }
-  
+
   Widget _buildSection({
     required String title,
     required IconData icon,
@@ -328,38 +413,23 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: iconColor.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: iconColor,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(
+              title.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white38,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2,
+              ),
             ),
           ),
           ...children,
@@ -367,107 +437,98 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   Widget _buildToggleItem({
     required String title,
     required String subtitle,
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: AppTheme.primaryCyan,
-            activeTrackColor: AppTheme.primaryCyan.withOpacity(0.3),
-            inactiveThumbColor: Colors.white.withOpacity(0.5),
-            inactiveTrackColor: Colors.white.withOpacity(0.2),
-          ),
-        ],
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.6),
+          fontSize: 12,
+        ),
+      ),
+      trailing: Switch(
+        value: value,
+        onChanged: onChanged,
+        activeColor: const Color(0xFF00D4FF),
+        activeTrackColor: const Color(0xFF00D4FF).withValues(alpha: 0.3),
+        inactiveThumbColor: Colors.white.withValues(alpha: 0.5),
+        inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
       ),
     );
   }
-  
+
   Widget _buildActionItem({
     required String title,
     required String subtitle,
     required IconData icon,
     Color? iconColor,
     VoidCallback? onTap,
+    bool isDangerous = false,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: iconColor ?? Colors.white.withOpacity(0.7),
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+    final effectiveColor = iconColor ?? Colors.white.withValues(alpha: 0.7);
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      leading: Icon(icon, color: effectiveColor, size: 20),
+      title: isDangerous
+          ? TextButton(
+              onPressed: onTap,
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.redAccent,
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                alignment: Alignment.centerLeft,
+              ),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.redAccent,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            )
+          : Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
               ),
             ),
-            if (onTap != null)
-              Icon(
-                Icons.chevron_right,
-                color: Colors.white.withOpacity(0.5),
-                size: 20,
-              ),
-          ],
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.6),
+          fontSize: 12,
         ),
       ),
+      trailing: (onTap != null && !isDangerous)
+          ? Icon(
+              Icons.chevron_right,
+              color: Colors.white.withValues(alpha: 0.4),
+              size: 20,
+            )
+          : null,
+      onTap: isDangerous ? null : onTap,
     );
   }
-  
+
   // Dialog methods
   void _showDataDownloadDialog() {
     showDialog(
@@ -475,28 +536,44 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF2D1B69),
         title: const Text(
-          'Download Data',
+          'Download My Data',
           style: TextStyle(color: Colors.white),
         ),
         content: Text(
-          'We\'ll prepare your data and send a download link to your email within 24 hours.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+          'Your data export includes your profile, preferences, watch history, and connected accounts. Tap Export to view and copy your data.',
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Implement data download
+              final response = await UserManagementService.instance
+                  .exportUserData();
+              if (!mounted) return;
+              if (response.success && response.data != null) {
+                final jsonStr = response.data.toString();
+                await Clipboard.setData(ClipboardData(text: jsonStr));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Your data has been copied to clipboard.'),
+                    duration: Duration(seconds: 4),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Sign in to export your data.'),
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+              }
             },
             child: const Text(
-              'Request',
+              'Export',
               style: TextStyle(color: AppTheme.primaryCyan),
             ),
           ),
@@ -504,7 +581,42 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
+  void _showSignOutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2D1B69),
+        title: const Text('Sign Out', style: TextStyle(color: Colors.white)),
+        content: Text(
+          'Are you sure you want to sign out?',
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await LocalAuthService.instance.signOut();
+              if (mounted) {
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil(AppRoutes.welcome, (_) => false);
+              }
+            },
+            child: const Text(
+              'Sign Out',
+              style: TextStyle(color: Colors.redAccent),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showDeleteAccountDialog() {
     showDialog(
       context: context,
@@ -515,52 +627,56 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           style: TextStyle(color: Colors.red),
         ),
         content: Text(
-          'This action cannot be undone. All your data will be permanently deleted.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+          'This action cannot be undone. All your data, history, and preferences will be permanently deleted.',
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Implement account deletion
+              final success = await LocalAuthService.instance.deleteAccount();
+              if (mounted) {
+                if (success) {
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil(AppRoutes.welcome, (_) => false);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Failed to delete account. Please try again.',
+                      ),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
   }
-  
+
   void _showClearCacheDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF2D1B69),
-        title: const Text(
-          'Clear Cache',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Clear Cache', style: TextStyle(color: Colors.white)),
         content: Text(
           'This will free up storage space but may slow down the app temporarily.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
             onPressed: () {
@@ -576,7 +692,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   void _showChangePasswordDialog() {
     showDialog(
       context: context,
@@ -588,15 +704,12 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         ),
         content: Text(
           'You will be redirected to change your password securely.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
             onPressed: () {
@@ -612,7 +725,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   void _showConnectedAccountsDialog() {
     showDialog(
       context: context,
@@ -642,28 +755,27 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   Widget _buildConnectedAccount(String platform, bool isConnected) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            platform,
-            style: const TextStyle(color: Colors.white),
-          ),
+          Text(platform, style: const TextStyle(color: Colors.white)),
           Text(
             isConnected ? 'Connected' : 'Not Connected',
             style: TextStyle(
-              color: isConnected ? AppTheme.primaryCyan : Colors.white.withOpacity(0.5),
+              color: isConnected
+                  ? AppTheme.primaryCyan
+                  : Colors.white.withValues(alpha: 0.5),
             ),
           ),
         ],
       ),
     );
   }
-  
+
   void _showHelpDialog() {
     showDialog(
       context: context,
@@ -675,7 +787,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         ),
         content: Text(
           'For support, please email us at support@afeedi.com or visit our help center.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
@@ -689,7 +801,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   void _showTermsDialog() {
     showDialog(
       context: context,
@@ -701,20 +813,22 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         ),
         content: Text(
           'You will be redirected to our website to view the complete terms of service.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Open terms URL
+              final uri = Uri.parse(AppUrls.termsOfService);
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              } else if (mounted) {
+                Navigator.pushNamed(context, AppRoutes.termsOfService);
+              }
             },
             child: const Text(
               'Open',
@@ -725,7 +839,7 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   void _showPrivacyDialog() {
     showDialog(
       context: context,
@@ -737,20 +851,22 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
         ),
         content: Text(
           'You will be redirected to our website to view the complete privacy policy.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Open privacy URL
+              final uri = Uri.parse(AppUrls.privacyPolicy);
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              } else if (mounted) {
+                Navigator.pushNamed(context, AppRoutes.privacyPolicy);
+              }
             },
             child: const Text(
               'Open',
@@ -761,13 +877,12 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
-  // Navigation methods
+
   void _navigateToProfile() {
-    // TODO: Navigate to profile screen
+    Navigator.pushNamed(context, AppRoutes.profile);
   }
-  
+
   void _navigateToSubscription() {
-    // TODO: Navigate to subscription screen
+    Navigator.pushNamed(context, AppRoutes.premium);
   }
 }

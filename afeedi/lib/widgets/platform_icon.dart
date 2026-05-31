@@ -5,18 +5,19 @@ class PlatformIcon extends StatelessWidget {
   final String platform;
   final double size;
   final Color? color;
-  
+
   const PlatformIcon({
     Key? key,
     required this.platform,
     this.size = 24.0,
     this.color,
   }) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context) {
-    final defaultColor = color ?? Theme.of(context).colorScheme.onSurface.withOpacity(0.8);
-    
+    final defaultColor =
+        color ?? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8);
+
     // Return the appropriate icon based on platform
     switch (platform.toLowerCase()) {
       case 'youtube':
@@ -73,12 +74,8 @@ class PlatformIcon extends StatelessWidget {
         return _buildPlatformIcon(Icons.public, defaultColor);
     }
   }
-  
+
   Widget _buildPlatformIcon(IconData icon, Color iconColor) {
-    return Icon(
-      icon,
-      size: size,
-      color: color ?? iconColor,
-    );
+    return Icon(icon, size: size, color: color ?? iconColor);
   }
 }

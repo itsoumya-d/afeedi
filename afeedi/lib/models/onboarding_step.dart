@@ -5,6 +5,7 @@ class OnboardingStep {
   final String? inputPlaceholder;
   final bool isGenreSelection;
   final bool isPlatformSelection;
+  final bool isLanguageSelection;
   final bool allowMultiSelect;
   final bool showSkipOption;
   final String? stepTitle;
@@ -20,6 +21,7 @@ class OnboardingStep {
     this.inputPlaceholder,
     this.isGenreSelection = false,
     this.isPlatformSelection = false,
+    this.isLanguageSelection = false,
     this.allowMultiSelect = false,
     this.showSkipOption = false,
     this.stepTitle,
@@ -37,6 +39,7 @@ class OnboardingStep {
       inputPlaceholder: map['inputPlaceholder'],
       isGenreSelection: map['isGenreSelection'] ?? false,
       isPlatformSelection: map['isPlatformSelection'] ?? false,
+      isLanguageSelection: map['isLanguageSelection'] ?? false,
       allowMultiSelect: map['allowMultiSelect'] ?? false,
       showSkipOption: map['showSkipOption'] ?? false,
       stepTitle: map['stepTitle'],

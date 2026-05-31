@@ -1,4 +1,4 @@
-package com.example.afeedi
+package com.afeedi.app
 
 import io.flutter.embedding.android.FlutterActivity
 

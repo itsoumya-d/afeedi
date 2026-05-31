@@ -6,19 +6,21 @@ class CalendarCustomizationScreen extends StatefulWidget {
   const CalendarCustomizationScreen({super.key});
 
   @override
-  State<CalendarCustomizationScreen> createState() => _CalendarCustomizationScreenState();
+  State<CalendarCustomizationScreen> createState() =>
+      _CalendarCustomizationScreenState();
 }
 
-class _CalendarCustomizationScreenState extends State<CalendarCustomizationScreen>
+class _CalendarCustomizationScreenState
+    extends State<CalendarCustomizationScreen>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
-  
+
   // Schedule preferences
   TimeOfDay _wakeUpTime = const TimeOfDay(hour: 7, minute: 0);
   TimeOfDay _sleepTime = const TimeOfDay(hour: 23, minute: 0);
   Set<int> _activeDays = {1, 2, 3, 4, 5}; // Monday to Friday
-  
+
   // Content preferences
   Map<String, bool> _contentTypes = {
     'educational': true,
@@ -28,18 +30,24 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
     'cooking': false,
     'music': true,
   };
-  
+
   // Reminder settings
   bool _enableReminders = true;
   int _reminderMinutes = 15;
   bool _smartScheduling = true;
   bool _adaptiveContent = true;
   String _schedulingStyle = 'balanced';
-  
+
   final List<String> _weekDays = [
-    'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+    'Sun',
   ];
-  
+
   final List<Map<String, dynamic>> _contentTypeOptions = [
     {
       'id': 'educational',
@@ -103,12 +111,12 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
     _fadeController.dispose();
     super.dispose();
   }
-  
+
   void _continue() {
     // Save calendar preferences and navigate to main app
     NavigationService.pushNamed('/dashboard');
   }
-  
+
   Future<void> _selectTime(BuildContext context, bool isWakeUp) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -127,7 +135,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
         );
       },
     );
-    
+
     if (picked != null) {
       setState(() {
         if (isWakeUp) {
@@ -170,6 +178,9 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
                         const SizedBox(height: 32),
                         _buildAISection(),
                         const SizedBox(height: 40),
+                        SizedBox(
+                          height: MediaQuery.of(context).padding.bottom + 16,
+                        ),
                       ],
                     ),
                   ),
@@ -182,7 +193,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -196,9 +207,12 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -217,7 +231,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
           Container(
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(2),
             ),
             child: FractionallySizedBox(
@@ -246,8 +260,10 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
           const SizedBox(height: 8),
           Text(
             'Set up your personalized viewing schedule',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontSize: 16,
             ),
             textAlign: TextAlign.center,
@@ -256,7 +272,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
       ),
     );
   }
-  
+
   Widget _buildScheduleSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,8 +288,10 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
         const SizedBox(height: 8),
         Text(
           'When do you typically watch content?',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
           ),
         ),
@@ -314,7 +332,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
           children: List.generate(7, (index) {
             final dayIndex = index + 1;
             final isActive = _activeDays.contains(dayIndex);
-            
+
             return GestureDetector(
               onTap: () {
                 setState(() {
@@ -329,21 +347,23 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: isActive 
+                  color: isActive
                       ? AppTheme.primaryCyan
-                      : Colors.white.withOpacity(0.1),
+                      : Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isActive 
+                    color: isActive
                         ? AppTheme.primaryCyan
-                        : Colors.white.withOpacity(0.3),
+                        : Colors.white.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Center(
                   child: Text(
                     _weekDays[index],
                     style: TextStyle(
-                      color: isActive ? Colors.white : Colors.white.withOpacity(0.7),
+                      color: isActive
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.7),
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
@@ -356,7 +376,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
       ],
     );
   }
-  
+
   Widget _buildTimeSelector(
     String label,
     TimeOfDay time,
@@ -368,22 +388,18 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withOpacity(0.2)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
         ),
         child: Column(
           children: [
-            Icon(
-              icon,
-              color: AppTheme.primaryCyan,
-              size: 24,
-            ),
+            Icon(icon, color: AppTheme.primaryCyan, size: 24),
             const SizedBox(height: 8),
             Text(
               label,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 14,
               ),
             ),
@@ -401,7 +417,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
       ),
     );
   }
-  
+
   Widget _buildContentTypesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -417,8 +433,10 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
         const SizedBox(height: 8),
         Text(
           'What type of content do you want scheduled?',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
           ),
         ),
@@ -436,7 +454,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
           itemBuilder: (context, index) {
             final option = _contentTypeOptions[index];
             final isSelected = _contentTypes[option['id']] ?? false;
-            
+
             return GestureDetector(
               onTap: () {
                 setState(() {
@@ -446,14 +464,14 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isSelected 
-                      ? option['color'].withOpacity(0.2)
-                      : Colors.white.withOpacity(0.1),
+                  color: isSelected
+                      ? option['color'].withValues(alpha: 0.2)
+                      : Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: isSelected 
+                    color: isSelected
                         ? option['color']
-                        : Colors.white.withOpacity(0.2),
+                        : Colors.white.withValues(alpha: 0.2),
                     width: isSelected ? 2 : 1,
                   ),
                 ),
@@ -462,12 +480,16 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
                   children: [
                     Icon(
                       option['icon'],
-                      color: isSelected ? option['color'] : Colors.white.withOpacity(0.7),
+                      color: isSelected
+                          ? option['color']
+                          : Colors.white.withValues(alpha: 0.7),
                       size: 32,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       option['name'],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: isSelected ? option['color'] : Colors.white,
                         fontSize: 14,
@@ -479,7 +501,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
                     Text(
                       option['description'],
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                         fontSize: 10,
                       ),
                       textAlign: TextAlign.center,
@@ -495,7 +517,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
       ],
     );
   }
-  
+
   Widget _buildReminderSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -511,8 +533,10 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
         const SizedBox(height: 8),
         Text(
           'Get notified about your scheduled content',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
           ),
         ),
@@ -545,23 +569,27 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
                       margin: const EdgeInsets.only(right: 8),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
-                        color: isSelected 
-                            ? AppTheme.primaryCyan.withOpacity(0.2)
-                            : Colors.white.withOpacity(0.1),
+                        color: isSelected
+                            ? AppTheme.primaryCyan.withValues(alpha: 0.2)
+                            : Colors.white.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: isSelected 
+                          color: isSelected
                               ? AppTheme.primaryCyan
-                              : Colors.white.withOpacity(0.3),
+                              : Colors.white.withValues(alpha: 0.3),
                         ),
                       ),
                       child: Text(
                         '${minutes}m',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: isSelected ? AppTheme.primaryCyan : Colors.white,
+                          color: isSelected
+                              ? AppTheme.primaryCyan
+                              : Colors.white,
                           fontSize: 14,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.w400,
                         ),
                       ),
                     ),
@@ -574,7 +602,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
       ],
     );
   }
-  
+
   Widget _buildAISection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -590,8 +618,10 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
         const SizedBox(height: 8),
         Text(
           'Let AI optimize your viewing experience',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
           ),
         ),
@@ -631,7 +661,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
       ],
     );
   }
-  
+
   Widget _buildToggleOption(
     String title,
     String subtitle,
@@ -641,9 +671,9 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -653,6 +683,8 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
               children: [
                 Text(
                   title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -661,8 +693,10 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
                 ),
                 Text(
                   subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
                 ),
@@ -673,32 +707,32 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
             value: value,
             onChanged: onChanged,
             activeColor: AppTheme.primaryCyan,
-            activeTrackColor: AppTheme.primaryCyan.withOpacity(0.3),
+            activeTrackColor: AppTheme.primaryCyan.withValues(alpha: 0.3),
             inactiveThumbColor: Colors.grey,
-            inactiveTrackColor: Colors.grey.withOpacity(0.3),
+            inactiveTrackColor: Colors.grey.withValues(alpha: 0.3),
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildSchedulingStyleOption(String value, String label) {
     final isSelected = _schedulingStyle == value;
-    
+
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => _schedulingStyle = value),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected 
-                ? AppTheme.primaryCyan.withOpacity(0.2)
-                : Colors.white.withOpacity(0.1),
+            color: isSelected
+                ? AppTheme.primaryCyan.withValues(alpha: 0.2)
+                : Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isSelected 
+              color: isSelected
                   ? AppTheme.primaryCyan
-                  : Colors.white.withOpacity(0.3),
+                  : Colors.white.withValues(alpha: 0.3),
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -715,7 +749,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
       ),
     );
   }
-  
+
   Widget _buildBottomSection() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -736,10 +770,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
               ),
               child: const Text(
                 'Complete Setup',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -752,7 +783,7 @@ class _CalendarCustomizationScreenState extends State<CalendarCustomizationScree
             child: Text(
               'Skip customization',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 16,
               ),
             ),

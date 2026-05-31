@@ -1,9 +1,18 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/content_model.dart';
 import '../../services/content_service.dart';
-import '../../widgets/streaming/responsive_video_player.dart';
 import '../../services/analytics_service.dart';
+import '../../services/navigation_service.dart';
+import '../../services/subscription_service.dart';
+import '../../services/user_interaction_service.dart';
 
 class ShortsTab extends StatefulWidget {
   const ShortsTab({super.key});
@@ -18,47 +27,82 @@ class _ShortsTabState extends State<ShortsTab> {
   List<Content> _shortsContent = [];
   bool _isLoading = true;
   bool _hasError = false;
+  Set<String> _followedCreators = {};
+  Set<String> _likedContent = {};
+  Set<String> _savedContent = {};
+  int _scrollCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadShortsContent();
   }
-  
+
   Future<void> _loadShortsContent() async {
     try {
       setState(() {
         _isLoading = true;
         _hasError = false;
       });
-      
-      // Load short-form content from ContentService
-      final allContent = await ContentService.instance.getFeedContent();
-      final shorts = allContent.where((content) => 
-        content.contentType == ContentType.short || 
-        content.contentType == ContentType.reel ||
-        (content.durationSeconds != null && content.durationSeconds! <= 180)
-      ).toList();
-      
+
+      // Use personalized recommendations (genre-scored) as the primary pool,
+      // then filter to short-form content (<=3 min).
+      final allContent = await ContentService.instance
+          .getOnboardingBasedRecommendations(limit: 60);
+      var shorts = allContent
+          .where(
+            (content) =>
+                content.contentType == ContentType.short ||
+                content.contentType == ContentType.reel ||
+                (content.durationSeconds != null &&
+                    content.durationSeconds! <= 180),
+          )
+          .toList();
+      // If the personalized pool has no short-form items, fall back to the
+      // full feed filtered by duration — avoids showing an empty state.
+      if (shorts.isEmpty) {
+        final fallback = await ContentService.instance.getFeedContent();
+        shorts = fallback
+            .where(
+              (content) =>
+                  content.contentType == ContentType.short ||
+                  content.contentType == ContentType.reel ||
+                  (content.durationSeconds != null &&
+                      content.durationSeconds! <= 180),
+            )
+            .toList();
+      }
+
+      final followed = UserInteractionService.instance
+          .getFollowedCreatorIds()
+          .toSet();
+
+      // Pre-populate liked/saved state from the persistence service
+      final likedIds = <String>{};
+      final savedIds = <String>{};
+      for (final c in shorts) {
+        if (UserInteractionService.instance.isLiked(c.id)) likedIds.add(c.id);
+        if (UserInteractionService.instance.isSaved(c.id)) savedIds.add(c.id);
+      }
+
       setState(() {
         _shortsContent = shorts;
         _isLoading = false;
+        _followedCreators = followed;
+        _likedContent = likedIds;
+        _savedContent = savedIds;
       });
-      
-      // Track shorts tab view
+
       await AnalyticsService.instance.trackUserInteraction(
         action: 'shorts_tab_viewed',
         screen: 'shorts',
-        additionalData: {
-          'shorts_count': shorts.length,
-        },
+        additionalData: {'shorts_count': shorts.length},
       );
     } catch (error) {
       setState(() {
         _isLoading = false;
         _hasError = true;
       });
-      
       await AnalyticsService.instance.trackError(
         errorType: 'shorts_loading_error',
         errorMessage: error.toString(),
@@ -67,67 +111,67 @@ class _ShortsTabState extends State<ShortsTab> {
     }
   }
 
-  // Fallback mock data for demonstration
+  // Fallback mock data shown only when ContentService returns nothing
   final List<Map<String, dynamic>> _mockShortsData = [
     {
-      'id': '1',
-      'title': 'Quick Cooking Tips',
-      'creator': 'Chef Maria',
-      'duration': '0:45',
-      'likes': '12.5K',
-      'comments': '234',
-      'shares': '89',
-      'category': 'Food',
-      'thumbnail': 'https://via.placeholder.com/300x400/FF6B6B/FFFFFF?text=Cooking+Tips',
-      'description': 'Learn how to make perfect pasta in under 10 minutes!',
+      'id': 'dQw4w9WgXcQ',
+      'title': 'Never Gonna Give You Up',
+      'creator': 'Rick Astley',
+      'duration': '0:53',
+      'likes': '15.0M',
+      'comments': '1.2M',
+      'shares': '800K',
+      'category': 'Music',
+      'thumbnail': 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
+      'description': 'The classic hit from Rick Astley.',
     },
     {
-      'id': '2',
-      'title': 'Tech Review: Latest Gadgets',
-      'creator': 'TechGuru',
-      'duration': '1:20',
-      'likes': '8.9K',
-      'comments': '156',
-      'shares': '67',
-      'category': 'Technology',
-      'thumbnail': 'https://via.placeholder.com/300x400/4ECDC4/FFFFFF?text=Tech+Review',
-      'description': 'Unboxing and reviewing the newest smartphone features.',
+      'id': '9bZkp7q19f0',
+      'title': 'PSY - GANGNAM STYLE',
+      'creator': 'officialpsy',
+      'duration': '0:58',
+      'likes': '25.0M',
+      'comments': '3.5M',
+      'shares': '2.0M',
+      'category': 'Music',
+      'thumbnail': 'https://img.youtube.com/vi/9bZkp7q19f0/mqdefault.jpg',
+      'description': 'The video that broke the YouTube view counter.',
     },
     {
-      'id': '3',
-      'title': 'Fitness Challenge',
-      'creator': 'FitLife',
-      'duration': '0:30',
-      'likes': '15.2K',
-      'comments': '445',
-      'shares': '123',
-      'category': 'Health',
-      'thumbnail': 'https://via.placeholder.com/300x400/45B7D1/FFFFFF?text=Fitness',
-      'description': '30-second workout that you can do anywhere!',
+      'id': 'kJQP7kiw5Fk',
+      'title': 'Despacito',
+      'creator': 'Luis Fonsi',
+      'duration': '0:55',
+      'likes': '50.0M',
+      'comments': '5.0M',
+      'shares': '3.0M',
+      'category': 'Music',
+      'thumbnail': 'https://img.youtube.com/vi/kJQP7kiw5Fk/mqdefault.jpg',
+      'description': 'The most-streamed song of all time.',
     },
     {
-      'id': '4',
-      'title': 'Art Tutorial',
-      'creator': 'ArtisticSoul',
-      'duration': '2:15',
-      'likes': '6.7K',
-      'comments': '89',
-      'shares': '45',
-      'category': 'Art',
-      'thumbnail': 'https://via.placeholder.com/300x400/96CEB4/FFFFFF?text=Art+Tutorial',
-      'description': 'Learn watercolor techniques for beginners.',
+      'id': 'JGwWNGJdvx8',
+      'title': 'Shape of You',
+      'creator': 'Ed Sheeran',
+      'duration': '0:54',
+      'likes': '28.0M',
+      'comments': '2.8M',
+      'shares': '1.5M',
+      'category': 'Music',
+      'thumbnail': 'https://img.youtube.com/vi/JGwWNGJdvx8/mqdefault.jpg',
+      'description': 'Official music video for Shape of You.',
     },
     {
-      'id': '5',
-      'title': 'Travel Vlog',
-      'creator': 'Wanderlust',
-      'duration': '1:45',
-      'likes': '22.1K',
-      'comments': '567',
-      'shares': '234',
-      'category': 'Travel',
-      'thumbnail': 'https://via.placeholder.com/300x400/FFEAA7/FFFFFF?text=Travel',
-      'description': 'Hidden gems in Tokyo that tourists never see!',
+      'id': 'jNQXAC9IVRw',
+      'title': 'Me at the zoo',
+      'creator': 'jawed',
+      'duration': '0:19',
+      'likes': '3.5M',
+      'comments': '250K',
+      'shares': '100K',
+      'category': 'History',
+      'thumbnail': 'https://img.youtube.com/vi/jNQXAC9IVRw/mqdefault.jpg',
+      'description': 'The very first video ever uploaded to YouTube.',
     },
   ];
 
@@ -137,185 +181,1071 @@ class _ShortsTabState extends State<ShortsTab> {
     super.dispose();
   }
 
+  // ─── Platform helpers ──────────────────────────────────────────────────────
+
+  Color _getPlatformColor(PlatformType platform) {
+    switch (platform) {
+      case PlatformType.youtube:
+        return const Color(0xFFFF0000);
+      case PlatformType.instagram:
+        return const Color(0xFFE1306C);
+      case PlatformType.tiktok:
+        return const Color(0xFF010101);
+      case PlatformType.facebook:
+        return const Color(0xFF1877F2);
+    }
+  }
+
+  String _getPlatformLabel(PlatformType platform) {
+    switch (platform) {
+      case PlatformType.youtube:
+        return 'YT';
+      case PlatformType.instagram:
+        return 'IG';
+      case PlatformType.tiktok:
+        return 'TT';
+      case PlatformType.facebook:
+        return 'FB';
+    }
+  }
+
+  String _formatCount(int count) {
+    if (count >= 1000000000) {
+      return '${(count / 1000000000).toStringAsFixed(1)}B';
+    }
+    if (count >= 1000000) return '${(count / 1000000).toStringAsFixed(1)}M';
+    if (count >= 1000) return '${(count / 1000).toStringAsFixed(1)}K';
+    return count.toString();
+  }
+
+  // ─── Build ─────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Colors.black,
-        body: Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryCyan),
-          ),
-        ),
+        body: _ShimmerFeed(),
       );
     }
-    
+
     if (_hasError) {
-      return Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
+      return _buildErrorState();
+    }
+
+    if (_shortsContent.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await _loadShortsContent();
+        },
+        color: const Color(0xFF00D4FF),
+        backgroundColor: Colors.black87,
+        child: Stack(
+          children: [
+            PageView.builder(
+              controller: _pageController,
+              scrollDirection: Axis.vertical,
+              physics: const AlwaysScrollableScrollPhysics(),
+              onPageChanged: (index) {
+                HapticFeedback.selectionClick();
+                setState(() {
+                  _currentIndex = index;
+                  _scrollCount++;
+                });
+                if (index < _shortsContent.length) {
+                  final viewed = _shortsContent[index];
+                  AnalyticsService.instance.trackUserInteraction(
+                    action: 'short_viewed',
+                    screen: 'shorts',
+                    additionalData: {
+                      'content_id': viewed.id,
+                      'platform': viewed.platform.name,
+                      'index': index,
+                    },
+                  );
+                  // Viewing a short signals interest — 1 point per tag
+                  if (viewed.tags.isNotEmpty) _updateGenreWeights(viewed.tags);
+                }
+                _checkShortsUpsell();
+              },
+              itemCount: _shortsContent.length,
+              itemBuilder: (context, index) =>
+                  _buildShortItemFromContent(_shortsContent[index], index),
+            ),
+            // Progress dots overlaid at the top
+            _buildProgressDots(_shortsContent.length),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── Error / empty states ──────────────────────────────────────────────────
+
+  Widget _buildErrorState() {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white54, size: 64),
+            const SizedBox(height: 16),
+            const Text(
+              'Failed to load shorts',
+              style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadShortsContent,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(
-                Icons.error_outline,
-                color: Colors.white,
-                size: 64,
+                Icons.play_circle_outline,
+                size: 80,
+                color: Colors.white30,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               const Text(
-                'Failed to load shorts',
-                style: TextStyle(color: Colors.white, fontSize: 18),
+                'No Shorts available',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(
+              const SizedBox(height: 10),
+              const Text(
+                'Check back soon for new shorts',
+                style: TextStyle(color: Colors.white54, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 28),
+              TextButton.icon(
                 onPressed: _loadShortsContent,
-                child: const Text('Retry'),
+                icon: const Icon(Icons.refresh, color: AppTheme.primaryCyan),
+                label: const Text(
+                  'Refresh',
+                  style: TextStyle(color: AppTheme.primaryCyan),
+                ),
               ),
             ],
           ),
         ),
-      );
-    }
-    
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: PageView.builder(
-        controller: _pageController,
-        scrollDirection: Axis.vertical,
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-          
-          // Track short view
-          if (_shortsContent.isNotEmpty && index < _shortsContent.length) {
-            AnalyticsService.instance.trackUserInteraction(
-              action: 'short_viewed',
-              screen: 'shorts',
-              additionalData: {
-                'content_id': _shortsContent[index].id,
-                'platform': _shortsContent[index].platform.name,
-                'index': index,
-              },
+      ),
+    );
+  }
+
+  // ─── Progress dots (animated pill indicators) ──────────────────────────────
+
+  Widget _buildProgressDots(int count) {
+    // Cap dots at 10 to avoid horizontal overflow on long feeds
+    final displayCount = count.clamp(0, 10);
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(displayCount, (i) {
+            final active = i == _currentIndex.clamp(0, displayCount - 1);
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              margin: const EdgeInsets.symmetric(horizontal: 2),
+              width: active ? 16 : 6,
+              height: 4,
+              decoration: BoxDecoration(
+                color: active
+                    ? Colors.white
+                    : Colors.white.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(2),
+              ),
             );
+          }),
+        ),
+      ),
+    );
+  }
+
+  // ─── Content short card ────────────────────────────────────────────────────
+
+  Widget _buildShortItemFromContent(Content content, int index) {
+    final platformColor = _getPlatformColor(content.platform);
+    final isLiked = _likedContent.contains(content.id);
+    final isSaved = _savedContent.contains(content.id);
+    final likeCount = UserInteractionService.instance.getLikeCount(
+      content.id,
+      baseCount: content.likeCount,
+    );
+
+    return _ShortItemWrapper(
+      key: ValueKey(content.id),
+      content: content,
+      platformColor: platformColor,
+      isLiked: isLiked,
+      isSaved: isSaved,
+      likeCount: likeCount,
+      isCurrentIndex: index == _currentIndex,
+      onTap: () async {
+        if (content.platform == PlatformType.youtube) {
+          Navigator.pushNamed(context, AppRoutes.player, arguments: content);
+        } else {
+          final url = content.videoUrl;
+          if (url != null && url.isNotEmpty) {
+            final uri = Uri.tryParse(url);
+            if (uri != null) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
           }
-        },
-        itemCount: _shortsContent.isNotEmpty ? _shortsContent.length : _mockShortsData.length,
-        itemBuilder: (context, index) {
-          if (_shortsContent.isNotEmpty) {
-            return _buildShortItemFromContent(_shortsContent[index]);
-          } else {
-            return _buildShortItem(_mockShortsData[index]);
-          }
+        }
+      },
+      onDoubleTap: () {
+        _showHeartAnimation(context);
+        _handleLike(content);
+      },
+      interactionButtons: _buildInteractionButtons(
+        content: content,
+        isLiked: isLiked,
+        isSaved: isSaved,
+        likeCount: likeCount,
+      ),
+      contentInfo: _buildContentInfo(content),
+      platformBadge: _buildPlatformBadge(content.platform, platformColor),
+      thumbnailWidget: _buildThumbnail(content, platformColor),
+      youtubeOverlayBuilder: (overlay) => _InlineYouTubeShort(
+        videoId: content.platformContentId,
+        overlay: overlay,
+        onTap: () =>
+            Navigator.pushNamed(context, AppRoutes.player, arguments: content),
+        onDoubleTap: () {
+          _showHeartAnimation(context);
+          _handleLike(content);
         },
       ),
     );
   }
-  
-  Widget _buildShortItemFromContent(Content content) {
-    return Stack(
-      children: [
-        // Video player
-        Positioned.fill(
-          child: ResponsiveVideoPlayer(
-            content: content,
-            autoPlay: true,
-            showControls: false,
-            showBranding: true,
-          ),
+
+  // ─── Thumbnail ─────────────────────────────────────────────────────────────
+
+  Widget _buildThumbnail(Content content, Color platformColor) {
+    final url = content.thumbnailUrl;
+    if (url != null && url.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: url,
+        fit: BoxFit.cover,
+        placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+        errorWidget: (ctx, url, err) =>
+            _buildThumbnailFallback(content, platformColor),
+      );
+    }
+    return _buildThumbnailFallback(content, platformColor);
+  }
+
+  Widget _buildThumbnailFallback(Content content, Color platformColor) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.black,
+            platformColor.withValues(alpha: 0.55),
+            Colors.black,
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
         ),
-        
-        // Overlay with content info and interactions
-        Positioned(
-          right: 12,
-          bottom: 80,
-          child: _buildInteractionButtons(content),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.play_circle_outline,
+              size: 72,
+              color: Colors.white.withValues(alpha: 0.7),
+            ),
+            if (content.title != null) ...[
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Text(
+                  content.title!,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ],
         ),
-        
-        // Content info
-        Positioned(
-          left: 12,
-          bottom: 80,
-          right: 80,
-          child: _buildContentInfo(content),
-        ),
-      ],
+      ),
     );
   }
-  
-  Widget _buildInteractionButtons(Content content) {
+
+  // ─── Platform badge ────────────────────────────────────────────────────────
+
+  Widget _buildPlatformBadge(PlatformType platform, Color color) {
+    final isInstagram = platform == PlatformType.instagram;
+    final label = _getPlatformLabel(platform);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        gradient: isInstagram
+            ? const LinearGradient(
+                colors: [
+                  Color(0xFF833AB4),
+                  Color(0xFFE1306C),
+                  Color(0xFFFD1D1D),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        color: isInstagram ? null : color,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.4),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.8,
+        ),
+      ),
+    );
+  }
+
+  // ─── Right-side interaction buttons ────────────────────────────────────────
+
+  Widget _buildInteractionButtons({
+    required Content content,
+    required bool isLiked,
+    required bool isSaved,
+    required int likeCount,
+  }) {
+    final creatorId = content.creatorId ?? content.creatorName ?? content.id;
+    final isFollowed = _followedCreators.contains(creatorId);
+    final commentCount = (content.metadata['comments'] as num?)?.toInt() ?? 0;
+
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
+        // Creator avatar with follow "+" badge at the top of the button stack
+        _buildCreatorAvatarButton(content, creatorId, isFollowed),
+        const SizedBox(height: 22),
+
+        // Like — filled red when liked
         _buildActionButton(
-          icon: Icons.favorite_border,
-          label: content.likeCount.toString(),
+          icon: isLiked ? Icons.favorite : Icons.favorite_border,
+          label: _formatCount(likeCount),
           onTap: () => _handleLike(content),
+          iconColor: isLiked ? Colors.red : Colors.white,
+          semanticLabel: isLiked ? 'Unlike' : 'Like',
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 22),
+
+        // Comment
         _buildActionButton(
-          icon: Icons.comment,
-          label: '${content.metadata['comments'] ?? 0}',
+          icon: Icons.chat_bubble_outline,
+          label: _formatCount(commentCount),
           onTap: () => _handleComment(content),
+          semanticLabel: 'Comment',
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 22),
+
+        // Share — launches content URL externally
         _buildActionButton(
-          icon: Icons.share,
+          icon: Icons.reply_outlined,
           label: 'Share',
           onTap: () => _handleShare(content),
+          semanticLabel: 'Share',
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 22),
+
+        // Save / Bookmark
         _buildActionButton(
-          icon: Icons.more_vert,
-          label: '',
-          onTap: () => _showMoreOptions(content),
+          icon: isSaved ? Icons.bookmark : Icons.bookmark_border,
+          label: isSaved ? 'Saved' : 'Save',
+          onTap: () => _handleSave(content),
+          iconColor: isSaved ? AppTheme.primaryCyan : Colors.white,
+          semanticLabel: isSaved ? 'Remove bookmark' : 'Save to bookmarks',
         ),
       ],
     );
   }
-  
-  Widget _buildContentInfo(Content content) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '@${content.creatorName ?? 'Unknown'}',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+
+  /// Creator avatar circle (40 dp) with a "+" or check follow badge overlaid.
+  Widget _buildCreatorAvatarButton(
+    Content content,
+    String creatorId,
+    bool isFollowed,
+  ) {
+    final avatarUrl = content.creatorAvatarUrl;
+    final initial = (content.creatorName ?? '?')[0].toUpperCase();
+
+    return Semantics(
+      label: isFollowed ? 'Unfollow creator' : 'Follow creator',
+      button: true,
+      child: GestureDetector(
+        onTap: () => _handleFollow(creatorId),
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox(
+          width: 52,
+          height: 56,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.topCenter,
+            children: [
+              // Avatar circle — 40 dp diameter as required
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                  color: AppTheme.darkSecondary,
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: avatarUrl != null && avatarUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: avatarUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (ctx, url) =>
+                            Container(color: Colors.grey[900]),
+                        errorWidget: (ctx, url, err) => Center(
+                          child: Text(
+                            initial,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Center(
+                        child: Text(
+                          initial,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+              ),
+              // Follow badge at the bottom of the avatar
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    width: 18,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: isFollowed ? Colors.green.shade600 : Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      isFollowed ? Icons.check : Icons.add,
+                      color: Colors.white,
+                      size: 11,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 8),
+      ),
+    );
+  }
+
+  /// Single action button with minimum 44×44 dp touch target.
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    Color iconColor = Colors.white,
+    String? semanticLabel,
+  }) {
+    return Semantics(
+      label: semanticLabel ?? label,
+      button: true,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox(
+          width: 52,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 44,
+                height: 44,
+                child: Center(child: Icon(icon, color: iconColor, size: 26)),
+              ),
+              if (label.isNotEmpty)
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black54,
+                        blurRadius: 4,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─── Content info (bottom-left overlay) ────────────────────────────────────
+
+  Widget _buildContentInfo(Content content) {
+    final creatorId = content.creatorId ?? content.creatorName ?? content.id;
+    final isFollowed = _followedCreators.contains(creatorId);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Creator name + inline follow button
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Text(
+                '@${content.creatorName ?? 'Unknown'}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  shadows: [Shadow(color: Colors.black54, blurRadius: 6)],
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            _buildInlineFollowButton(creatorId, isFollowed),
+          ],
+        ),
+        const SizedBox(height: 6),
+
+        // Title — maxLines 2
         if (content.title != null)
           Text(
             content.title!,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 14,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-        if (content.description != null) ...[
+
+        // Hashtags from content.tags — maxLines 1
+        if (content.tags.isNotEmpty) ...[
           const SizedBox(height: 4),
           Text(
-            content.description!,
+            content.tags.take(4).map((t) => '#$t').join(' '),
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 12,
+              shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
             ),
-            maxLines: 3,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
         ],
+
+        // Audio info row
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            const Icon(Icons.music_note, color: Colors.white70, size: 13),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                'Original audio · @${content.creatorName ?? 'Unknown'}',
+                style: const TextStyle(color: Colors.white70, fontSize: 11),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
-  
+
+  Widget _buildInlineFollowButton(String creatorId, bool isFollowed) {
+    return GestureDetector(
+      onTap: () => _handleFollow(creatorId),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: isFollowed
+              ? Colors.white.withValues(alpha: 0.25)
+              : Colors.transparent,
+          border: Border.all(color: Colors.white, width: 1.5),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          isFollowed ? 'Following' : 'Follow',
+          style: TextStyle(
+            color: isFollowed ? Colors.white70 : Colors.white,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─── Mock short card (shown when service returns 0 results) ───────────────
+
+  Widget _buildMockShortItem(Map<String, dynamic> shortData) {
+    final thumbnailUrl = shortData['thumbnail'] as String?;
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Background thumbnail or gradient fallback
+        if (thumbnailUrl != null && thumbnailUrl.isNotEmpty)
+          CachedNetworkImage(
+            imageUrl: thumbnailUrl,
+            fit: BoxFit.cover,
+            placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+            errorWidget: (ctx, url, err) => _buildMockFallbackBg(),
+          )
+        else
+          _buildMockFallbackBg(),
+
+        // Gradient overlay
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.75),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.4, 1.0],
+              ),
+            ),
+          ),
+        ),
+
+        // Centre play button
+        Positioned.fill(
+          child: Center(
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  width: 2,
+                ),
+              ),
+              child: const Icon(
+                Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+          ),
+        ),
+
+        // Right-side actions
+        Positioned(
+          right: 10,
+          bottom: 110,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildActionButton(
+                icon: Icons.favorite_border,
+                label: shortData['likes'] as String? ?? '',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Tap a short from your personalized feed to interact',
+                      ),
+                      duration: Duration(seconds: 2),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 22),
+              _buildActionButton(
+                icon: Icons.chat_bubble_outline,
+                label: shortData['comments'] as String? ?? '',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Tap a short from your personalized feed to interact',
+                      ),
+                      duration: Duration(seconds: 2),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 22),
+              _buildActionButton(
+                icon: Icons.reply_outlined,
+                label: shortData['shares'] as String? ?? '',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Tap a short from your personalized feed to interact',
+                      ),
+                      duration: Duration(seconds: 2),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 22),
+              _buildActionButton(
+                icon: Icons.bookmark_border,
+                label: 'Save',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Tap a short from your personalized feed to interact',
+                      ),
+                      duration: Duration(seconds: 2),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+
+        // Bottom-left info
+        Positioned(
+          left: 14,
+          right: 80,
+          bottom: 110,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundColor: AppTheme.primaryCyan,
+                    child: Text(
+                      ((shortData['creator'] as String?) ?? '?')[0]
+                          .toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      '@${shortData['creator'] ?? 'Unknown'}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white, width: 1.2),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      'Follow',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                shortData['description'] as String? ?? '',
+                style: const TextStyle(color: Colors.white, fontSize: 13),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 5),
+              Row(
+                children: [
+                  const Icon(Icons.music_note, color: Colors.white70, size: 13),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      'Original audio · @${shortData['creator'] ?? 'Unknown'}',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMockFallbackBg() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.darkPrimary,
+            AppTheme.primaryCyan.withValues(alpha: 0.25),
+            AppTheme.darkPrimary,
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+    );
+  }
+
+  // ─── Interaction handlers ──────────────────────────────────────────────────
+
+  Future<void> _checkShortsUpsell() async {
+    final shouldShow = await SubscriptionService.instance
+        .shouldShowShortsUpsell(_scrollCount);
+    if (!shouldShow || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(seconds: 5),
+        backgroundColor: const Color(0xFF1A1A2E),
+        content: const Row(
+          children: [
+            Icon(Icons.bolt, color: Color(0xFF00D4FF), size: 18),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Go ad-free with Afeedi Pro',
+                style: TextStyle(color: Colors.white, fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+        action: SnackBarAction(
+          label: 'Upgrade',
+          textColor: const Color(0xFF00D4FF),
+          onPressed: () => Navigator.of(context).pushNamed(AppRoutes.premium),
+        ),
+      ),
+    );
+  }
+
+  void _showHeartAnimation(BuildContext context) {
+    final overlay = Overlay.of(context);
+    late OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (_) => Center(
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.0, end: 1.0),
+          duration: const Duration(milliseconds: 600),
+          onEnd: () => entry.remove(),
+          builder: (_, value, child) => Opacity(
+            opacity: value < 0.5 ? value * 2 : (1 - value) * 2,
+            child: Transform.scale(
+              scale: 0.5 + value * 0.5,
+              child: const Icon(Icons.favorite, color: Colors.white, size: 100),
+            ),
+          ),
+        ),
+      ),
+    );
+    overlay.insert(entry);
+  }
+
+  /// Toggles the like state for [content] and persists via [UserInteractionService].
   void _handleLike(Content content) {
+    HapticFeedback.lightImpact();
+    final wasLiked = _likedContent.contains(content.id);
+    setState(() {
+      if (wasLiked) {
+        _likedContent.remove(content.id);
+      } else {
+        _likedContent.add(content.id);
+      }
+    });
+    UserInteractionService.instance.toggleLike(
+      content.id,
+      baseCount: content.likeCount,
+    );
     AnalyticsService.instance.trackUserInteraction(
-      action: 'short_liked',
+      action: wasLiked ? 'short_unliked' : 'short_liked',
+      screen: 'shorts',
+      additionalData: {
+        'content_id': content.id,
+        'platform': content.platform.name,
+      },
+    );
+    // Liking a short is a strong engagement signal — update implicit weights
+    if (!wasLiked && content.tags.isNotEmpty) {
+      _updateGenreWeights(content.tags, points: 3);
+      // Viral loop: after liking, nudge the user to share (peak emotional moment)
+      _maybeShowShareNudge(content);
+    }
+  }
+
+  void _maybeShowShareNudge(Content content) {
+    final likedCount = UserInteractionService.instance
+        .getLikedContentIds()
+        .length;
+    // Show the nudge on the 3rd and every 10th like (not too often)
+    if (likedCount != 3 && likedCount % 10 != 0) return;
+    final url = content.videoUrl ?? content.embedUrl;
+    if (url == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Loved it? Share it with a friend →'),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF1A1A2E),
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: 'Share',
+          textColor: const Color(0xFF00D4FF),
+          onPressed: () async {
+            final title = content.title ?? 'Check this out on Afeedi';
+            final msg =
+                '$title\n$url\n\nFound on Afeedi — AI-curated feed from YouTube, TikTok, Instagram & more.';
+            await Clipboard.setData(ClipboardData(text: msg));
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Share text copied — paste it anywhere!'),
+                  behavior: SnackBarBehavior.floating,
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _updateGenreWeights(List<String> tags, {int points = 1}) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final weightsRaw = prefs.getString('genre_implicit_weights') ?? '';
+      final weights = <String, int>{};
+      for (final entry in weightsRaw.split(',')) {
+        final parts = entry.split(':');
+        if (parts.length == 2) weights[parts[0]] = int.tryParse(parts[1]) ?? 0;
+      }
+      for (final tag in tags) {
+        if (tag.isNotEmpty) weights[tag] = (weights[tag] ?? 0) + points;
+      }
+      await prefs.setString(
+        'genre_implicit_weights',
+        weights.entries
+            .where((e) => e.key.isNotEmpty)
+            .map((e) => '${e.key}:${e.value}')
+            .join(','),
+      );
+    } catch (_) {}
+  }
+
+  Future<void> _handleSave(Content content) async {
+    final wasSaved = _savedContent.contains(content.id);
+    setState(() {
+      if (wasSaved) {
+        _savedContent.remove(content.id);
+      } else {
+        _savedContent.add(content.id);
+      }
+    });
+    await UserInteractionService.instance.toggleSave(content.id);
+    await AnalyticsService.instance.trackUserInteraction(
+      action: wasSaved ? 'short_unsaved' : 'short_saved',
       screen: 'shorts',
       additionalData: {
         'content_id': content.id,
@@ -323,7 +1253,24 @@ class _ShortsTabState extends State<ShortsTab> {
       },
     );
   }
-  
+
+  Future<void> _handleFollow(String creatorId) async {
+    final wasFollowed = _followedCreators.contains(creatorId);
+    final next = await UserInteractionService.instance.toggleFollow(creatorId);
+    setState(() {
+      if (next) {
+        _followedCreators.add(creatorId);
+      } else {
+        _followedCreators.remove(creatorId);
+      }
+    });
+    await AnalyticsService.instance.trackUserInteraction(
+      action: wasFollowed ? 'creator_unfollowed' : 'creator_followed',
+      screen: 'shorts',
+      additionalData: {'creator_id': creatorId},
+    );
+  }
+
   void _handleComment(Content content) {
     AnalyticsService.instance.trackUserInteraction(
       action: 'short_comment_opened',
@@ -333,11 +1280,255 @@ class _ShortsTabState extends State<ShortsTab> {
         'platform': content.platform.name,
       },
     );
-    // TODO: Open comment sheet
+    if (context.mounted) _showCommentsSheet(context, content);
   }
-  
-  void _handleShare(Content content) {
-    AnalyticsService.instance.trackUserInteraction(
+
+  static const List<Map<String, String>> _sampleComments = [
+    {
+      'name': 'Alex_M',
+      'text': 'This is exactly what I needed today 🙌',
+      'time': '1m ago',
+    },
+    {
+      'name': 'riya.codes',
+      'text': 'The editing on this is insane 🔥',
+      'time': '4m ago',
+    },
+    {
+      'name': 'TechWithJordan',
+      'text': 'Can you drop the source for this?',
+      'time': '12m ago',
+    },
+    {
+      'name': 'sunsetsandsam',
+      'text': 'Watched it 3 times already lol',
+      'time': '23m ago',
+    },
+    {
+      'name': 'CaseyReacts',
+      'text': 'Never thought about it this way. Mind blown.',
+      'time': '45m ago',
+    },
+    {
+      'name': 'dev.priya',
+      'text': 'More content like this please 👏',
+      'time': '1h ago',
+    },
+    {
+      'name': 'KyleLennox7',
+      'text': 'Tag someone who needs to see this',
+      'time': '2h ago',
+    },
+    {
+      'name': 'mia.watches',
+      'text': 'The quality has improved so much 💯',
+      'time': '3h ago',
+    },
+  ];
+
+  static const List<Color> _commentAvatarColors = [
+    Color(0xFF00D4FF),
+    Color(0xFFFF6B9D),
+    Color(0xFF7C4DFF),
+    Color(0xFF00BFA5),
+    Color(0xFFFF8F00),
+    Color(0xFF4CAF50),
+    Color(0xFFE91E63),
+    Color(0xFF2196F3),
+  ];
+
+  Widget _buildCommentsList(ScrollController controller) {
+    return ListView.builder(
+      controller: controller,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: _sampleComments.length,
+      itemBuilder: (_, i) {
+        final comment = _sampleComments[i];
+        final color = _commentAvatarColors[i % _commentAvatarColors.length];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: color.withValues(alpha: 0.25),
+                child: Text(
+                  comment['name']![0].toUpperCase(),
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      comment['name']!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      comment['text']!,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      comment['time']!,
+                      style: const TextStyle(
+                        color: Colors.white38,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showCommentsSheet(BuildContext context, Content content) {
+    final commentController = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) => DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.3,
+          maxChildSize: 0.9,
+          builder: (_, controller) => Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFF1A1A2E),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 8),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      const Text(
+                        'Comments',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white54),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(color: Colors.white12),
+                Expanded(child: _buildCommentsList(controller)),
+                SafeArea(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      bottom: MediaQuery.of(ctx).viewInsets.bottom + 8,
+                      top: 8,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0D0B1E),
+                              borderRadius: BorderRadius.circular(22),
+                              border: Border.all(color: Colors.white12),
+                            ),
+                            child: TextField(
+                              controller: commentController,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: const InputDecoration(
+                                hintText: 'Add a comment...',
+                                hintStyle: TextStyle(color: Colors.white38),
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () {
+                            final text = commentController.text.trim();
+                            if (text.isEmpty) return;
+                            commentController.clear();
+                            FocusScope.of(ctx).unfocus();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Comment posted!'),
+                                duration: Duration(seconds: 2),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF00D4FF),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.send,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Tracks the share, then launches the content URL in an external browser.
+  Future<void> _handleShare(Content content) async {
+    await UserInteractionService.instance.trackShare(content.id);
+    await AnalyticsService.instance.trackUserInteraction(
       action: 'short_shared',
       screen: 'shorts',
       additionalData: {
@@ -345,297 +1536,332 @@ class _ShortsTabState extends State<ShortsTab> {
         'platform': content.platform.name,
       },
     );
-    // TODO: Implement share functionality
+
+    final shareUrl = content.videoUrl ?? content.embedUrl;
+    if (shareUrl != null && shareUrl.isNotEmpty) {
+      final uri = Uri.tryParse(shareUrl);
+      if (uri != null) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    }
   }
-  
-  void _showMoreOptions(Content content) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.grey[900],
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.report, color: Colors.white),
-              title: const Text('Report', style: TextStyle(color: Colors.white)),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.block, color: Colors.white),
-              title: const Text('Not Interested', style: TextStyle(color: Colors.white)),
-              onTap: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      ),
-    );
+}
+
+// ─── Per-short wrapper with animated opacity + progress indicator ──────────
+
+class _ShortItemWrapper extends StatefulWidget {
+  final Content content;
+  final Color platformColor;
+  final bool isLiked;
+  final bool isSaved;
+  final int likeCount;
+  final bool isCurrentIndex;
+  final VoidCallback onTap;
+  final VoidCallback onDoubleTap;
+  final Widget interactionButtons;
+  final Widget contentInfo;
+  final Widget platformBadge;
+  final Widget thumbnailWidget;
+  final Widget Function(Widget overlay) youtubeOverlayBuilder;
+
+  const _ShortItemWrapper({
+    super.key,
+    required this.content,
+    required this.platformColor,
+    required this.isLiked,
+    required this.isSaved,
+    required this.likeCount,
+    required this.isCurrentIndex,
+    required this.onTap,
+    required this.onDoubleTap,
+    required this.interactionButtons,
+    required this.contentInfo,
+    required this.platformBadge,
+    required this.thumbnailWidget,
+    required this.youtubeOverlayBuilder,
+  });
+
+  @override
+  State<_ShortItemWrapper> createState() => _ShortItemWrapperState();
+}
+
+class _ShortItemWrapperState extends State<_ShortItemWrapper> {
+  bool _buttonsVisible = false;
+  Timer? _visibilityTimer;
+  final ValueNotifier<double> _progressNotifier = ValueNotifier(0.0);
+  Timer? _progressTimer;
+
+  static const _shortDurationSeconds = 60;
+
+  @override
+  void initState() {
+    super.initState();
+    _startFadeInTimer();
+    _startProgressTimer();
   }
 
-  Widget _buildShortItem(Map<String, dynamic> shortData) {
-    return Stack(
+  void _startFadeInTimer() {
+    _visibilityTimer?.cancel();
+    _visibilityTimer = Timer(const Duration(seconds: 1), () {
+      if (mounted) setState(() => _buttonsVisible = true);
+    });
+  }
+
+  void _startProgressTimer() {
+    _progressTimer?.cancel();
+    _progressNotifier.value = 0.0;
+    _progressTimer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      if (!mounted) return;
+      final next = _progressNotifier.value + (0.2 / _shortDurationSeconds);
+      if (next >= 1.0) {
+        _progressNotifier.value = 1.0;
+        _progressTimer?.cancel();
+      } else {
+        _progressNotifier.value = next;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _visibilityTimer?.cancel();
+    _progressTimer?.cancel();
+    _progressNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final overlay = Stack(
+      fit: StackFit.expand,
       children: [
-        // Video/Content Background
-        Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withOpacity(0.3),
-                Colors.black.withOpacity(0.7),
-              ],
-            ),
-          ),
-          child: Center(
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                color: AppTheme.primaryCyan.withOpacity(0.1),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.play_circle_outline,
-                    size: 80,
-                    color: Colors.white.withOpacity(0.8),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    shortData['title'],
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryPink,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      shortData['category'],
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+        // Gradient for readability
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.7),
                 ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.4, 1.0],
               ),
             ),
           ),
         ),
 
-        // Right Side Actions
+        // Platform badge top-right
+        Positioned(top: 56, right: 16, child: widget.platformBadge),
+
+        // Interaction buttons — animated fade-in after 1 second
         Positioned(
-          right: 12,
-          bottom: 100,
-          child: Column(
-            children: [
-              _buildActionButton(
-                icon: Icons.favorite_border,
-                label: shortData['likes'],
-                onTap: () {},
-              ),
-              const SizedBox(height: 20),
-              _buildActionButton(
-                icon: Icons.comment_outlined,
-                label: shortData['comments'],
-                onTap: () {},
-              ),
-              const SizedBox(height: 20),
-              _buildActionButton(
-                icon: Icons.share_outlined,
-                label: shortData['shares'],
-                onTap: () {},
-              ),
-              const SizedBox(height: 20),
-              _buildActionButton(
-                icon: Icons.bookmark_border,
-                label: '',
-                onTap: () {},
-              ),
-            ],
+          right: 10,
+          bottom: 110,
+          child: AnimatedOpacity(
+            opacity: _buttonsVisible ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeIn,
+            child: widget.interactionButtons,
           ),
         ),
 
-        // Bottom Content Info
-        Positioned(
-          left: 12,
-          right: 80,
-          bottom: 100,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: AppTheme.primaryCyan,
-                    child: Text(
-                      shortData['creator'][0],
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    shortData['creator'],
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.white, width: 1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      'Follow',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                shortData['description'],
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(
-                    Icons.access_time,
-                    size: 14,
-                    color: Colors.white.withOpacity(0.7),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    shortData['duration'],
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+        // Content info bottom-left
+        Positioned(left: 14, right: 80, bottom: 110, child: widget.contentInfo),
 
-        // Top Safe Area with Progress Indicators
+        // Progress indicator at the very bottom
         Positioned(
-          top: 0,
           left: 0,
           right: 0,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: List.generate(
-                        _shortsContent.isNotEmpty ? _shortsContent.length : _mockShortsData.length,
-                        (index) => Expanded(
-                          child: Container(
-                            height: 2,
-                            margin: const EdgeInsets.symmetric(horizontal: 1),
-                            decoration: BoxDecoration(
-                              color: index <= _currentIndex
-                                  ? Colors.white
-                                  : Colors.white.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(1),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ],
+          bottom: 0,
+          child: ValueListenableBuilder<double>(
+            valueListenable: _progressNotifier,
+            builder: (_, value, __) => LinearProgressIndicator(
+              value: value,
+              backgroundColor: Colors.white24,
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                Color(0xFF00D4FF),
               ),
+              minHeight: 3,
             ),
           ),
         ),
       ],
     );
+
+    if (widget.content.platform == PlatformType.youtube &&
+        widget.isCurrentIndex) {
+      return widget.youtubeOverlayBuilder(overlay);
+    }
+
+    return Semantics(
+      label: 'Watch ${widget.content.title ?? 'video'}',
+      button: true,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        onDoubleTap: widget.onDoubleTap,
+        behavior: HitTestBehavior.opaque,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [widget.thumbnailWidget, overlay],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Inline YouTube player widget ──────────────────────────────────────────
+
+class _InlineYouTubeShort extends StatefulWidget {
+  final String videoId;
+  final Widget overlay;
+  final VoidCallback onDoubleTap;
+  final VoidCallback onTap;
+  const _InlineYouTubeShort({
+    required this.videoId,
+    required this.overlay,
+    required this.onDoubleTap,
+    required this.onTap,
+  });
+
+  @override
+  State<_InlineYouTubeShort> createState() => _InlineYouTubeShortState();
+}
+
+class _InlineYouTubeShortState extends State<_InlineYouTubeShort> {
+  late final YoutubePlayerController _controller;
+  bool _isMuted = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = YoutubePlayerController.fromVideoId(
+      videoId: widget.videoId,
+      autoPlay: true,
+      params: const YoutubePlayerParams(
+        showControls: false,
+        showFullscreenButton: false,
+        playsInline: true,
+        mute: true,
+        loop: true,
+      ),
+    );
   }
 
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
+  void _toggleMute() {
+    setState(() {
+      _isMuted = !_isMuted;
+    });
+    if (_isMuted) {
+      _controller.mute();
+    } else {
+      _controller.unMute();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: Column(
+      onTap: widget.onTap,
+      onDoubleTap: widget.onDoubleTap,
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 24,
+          YoutubePlayerControllerProvider(
+            controller: _controller,
+            child: YoutubePlayer(controller: _controller),
+          ),
+          widget.overlay,
+          Positioned(
+            top: 56,
+            left: 16,
+            child: GestureDetector(
+              onTap: _toggleMute,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  _isMuted ? Icons.volume_off : Icons.volume_up,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
             ),
           ),
-          if (label.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Shimmer loading placeholder (shown while content is fetching) ─────────
+
+class _ShimmerFeed extends StatelessWidget {
+  const _ShimmerFeed();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade900,
+      highlightColor: Colors.grey.shade700,
+      child: Stack(
+        children: [
+          // Fake full-screen card background
+          Container(color: Colors.grey.shade900),
+
+          // Right-side action button stubs
+          Positioned(
+            right: 10,
+            bottom: 120,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(4, (i) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 22),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
                   ),
+                );
+              }),
+            ),
+          ),
+
+          // Bottom-left text stubs
+          Positioned(
+            left: 14,
+            right: 80,
+            bottom: 120,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(width: 120, height: 14, color: Colors.white),
+                const SizedBox(height: 8),
+                Container(
+                  width: double.infinity,
+                  height: 12,
+                  color: Colors.white,
                 ),
-              ]
+                const SizedBox(height: 6),
+                Container(width: 160, height: 10, color: Colors.white),
+              ],
+            ),
+          ),
         ],
       ),
     );

@@ -1,0 +1,354 @@
+{
+  "@@locale": "hi",
+  "appName": "अफीदी",
+  "tagline": "आपके सभी पसंदीदा वीडियो। एक प्रीमियम अनुभव।",
+  "skip": "छोड़ें",
+  "continueBtn": "जारी रखें",
+  "getStarted": "शुरू करें",
+  "signIn": "साइन इन करें",
+  "signOut": "साइन आउट करें",
+  "continueWithGoogle": "Google से जारी रखें",
+  "continueWithApple": "Apple से जारी रखें",
+  "alreadyHaveAccount": "पहले से खाता है? साइन इन करें",
+  "createAccount": "खाता बनाएं",
+  "email": "ईमेल",
+  "password": "पासवर्ड",
+  "name": "नाम",
+  "terms": "शर्तें",
+  "privacyPolicy": "गोपनीयता नीति",
+  "home": "होम",
+  "videos": "वीडियो",
+  "discover": "खोजें",
+  "shorts": "शॉर्ट्स",
+  "calendar": "कैलेंडर",
+  "profile": "प्रोफ़ाइल",
+  "search": "खोजें",
+  "notifications": "सूचनाएं",
+  "settings": "सेटिंग्स",
+  "trending": "ट्रेंडिंग",
+  "forYou": "आपके लिए",
+  "following": "फ़ॉलो किए",
+  "bookmarks": "बुकमार्क",
+  "history": "इतिहास",
+  "saved": "सहेजा गया",
+  "liked": "पसंद किया",
+  "achievements": "उपलब्धियां",
+  "watchHistory": "देखने का इतिहास",
+  "continueWatching": "देखना जारी रखें",
+  "recommended": "अनुशंसित",
+  "popular": "लोकप्रिय",
+  "newest": "नवीनतम",
+  "categories": "श्रेणियां",
+  "allCategories": "सभी श्रेणियां",
+  "filter": "फ़िल्टर",
+  "filters": "फ़िल्टर",
+  "clearFilters": "फ़िल्टर साफ़ करें",
+  "applyFilters": "फ़िल्टर लागू करें",
+  "sortBy": "इसके अनुसार क्रमबद्ध करें",
+  "platform": "प्लेटफ़ॉर्म",
+  "allPlatforms": "सभी प्लेटफ़ॉर्म",
+  "timeRange": "समय सीमा",
+  "today": "आज",
+  "thisWeek": "इस सप्ताह",
+  "thisMonth": "इस महीने",
+  "allTime": "हर समय",
+  "contentType": "सामग्री प्रकार",
+  "video": "वीडियो",
+  "short": "शॉर्ट",
+  "reel": "रील",
+  "views": "व्यूज",
+  "likes": "लाइक्स",
+  "comments": "टिप्पणियां",
+  "share": "शेयर करें",
+  "save": "सहेजें",
+  "like": "लाइक करें",
+  "follow": "फ़ॉलो करें",
+  "unfollow": "अनफ़ॉलो करें",
+  "subscribe": "सब्सक्राइब करें",
+  "creator": "क्रिएटर",
+  "creatorProfile": "क्रिएटर प्रोफ़ाइल",
+  "noResults": "कोई परिणाम नहीं",
+  "noResultsFor": "\"{query}\" के लिए कोई परिणाम नहीं",
+  "@noResultsFor": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "noContent": "कोई सामग्री उपलब्ध नहीं",
+  "loading": "लोड हो रहा है...",
+  "retry": "पुनः प्रयास करें",
+  "refresh": "रिफ्रेश करें",
+  "pullToRefresh": "रिफ्रेश के लिए खींचें",
+  "errorLoading": "सामग्री लोड करने में त्रुटि",
+  "noInternetConnection": "इंटरनेट कनेक्शन नहीं है",
+  "tryAgain": "फिर से प्रयास करें",
+  "markAllRead": "सभी पढ़े हुए मार्क करें",
+  "allNotifications": "सभी",
+  "unread": "अपठित",
+  "achievement": "उपलब्धि",
+  "videosWatched": "देखे गए वीडियो",
+  "watchTime": "देखने का समय",
+  "streak": "स्ट्रीक",
+  "days": "दिन",
+  "hours": "घंटे",
+  "minutes": "मिनट",
+  "editProfile": "प्रोफ़ाइल संपादित करें",
+  "language": "भाषा",
+  "selectLanguage": "भाषा चुनें",
+  "darkMode": "डार्क मोड",
+  "notifications_setting": "सूचनाएं",
+  "pushNotifications": "पुश नोटिफिकेशन",
+  "emailNotifications": "ईमेल नोटिफिकेशन",
+  "privacy": "गोपनीयता",
+  "account": "खाता",
+  "help": "सहायता",
+  "about": "के बारे में",
+  "version": "संस्करण",
+  "deleteAccount": "खाता हटाएं",
+  "logout": "लॉग आउट",
+  "premium": "प्रीमियम",
+  "upgradeToPremium": "प्रीमियम में अपग्रेड करें",
+  "free": "मुफ़्त",
+  "month": "महीना",
+  "year": "वर्ष",
+  "subscribe_action": "सब्सक्राइब करें",
+  "currentPlan": "वर्तमान योजना",
+  "addToCalendar": "कैलेंडर में जोड़ें",
+  "scheduledContent": "निर्धारित सामग्री",
+  "noContentScheduled": "इस दिन के लिए कोई सामग्री निर्धारित नहीं है",
+  "contentForDate": "{date} के लिए सामग्री",
+  "@contentForDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "interests": "रुचियां",
+  "selectInterests": "अपनी रुचियां चुनें",
+  "selectAtLeast3": "कृपया कम से कम 3 चुनें",
+  "personalizingFeed": "आपका फ़ीड व्यक्तिगत बना रहे हैं...",
+  "feedReady": "आपका फ़ीड तैयार है!",
+  "welcomeBack": "वापस स्वागत है!",
+  "hi": "नमस्ते",
+  "letsGetStarted": "चलिए शुरू करते हैं",
+  "onboardingWelcome": "नमस्ते! मैं आपका अफीदी सहायक हूं। मैं आपके लिए एकदम सही कंटेंट फ़ीड सेट अप करने में मदद करूंगा। आपका नाम क्या है?",
+  "onboardingComplete": "आपका व्यक्तिगत फ़ीड तैयार है! एक्सप्लोर करना शुरू करने के लिए नीचे टैप करें।",
+  "gaming": "गेमिंग",
+  "music": "संगीत",
+  "technology": "प्रौद्योगिकी",
+  "food": "खाना और पकाना",
+  "fitness": "फिटनेस",
+  "travel": "यात्रा",
+  "art": "कला और डिज़ाइन",
+  "nature": "प्रकृति",
+  "comedy": "कॉमेडी",
+  "fashion": "फैशन",
+  "education": "शिक्षा",
+  "sports": "खेल",
+  "news": "समाचार",
+  "science": "विज्ञान",
+  "youtube": "YouTube",
+  "tiktok": "TikTok",
+  "instagram": "Instagram",
+  "facebook": "Facebook",
+  "signingIn": "साइन इन हो रहा है...",
+  "authenticationFailed": "प्रमाणीकरण विफल",
+  "somethingWentWrong": "कुछ गलत हो गया",
+  "noContentYet": "अभी कोई सामग्री नहीं",
+  "startExploring": "यहां सामग्री देखने के लिए एक्सप्लोर करना शुरू करें",
+  "watchedVideos": "{count} वीडियो देखे",
+  "@watchedVideos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newLabel": "नया",
+  "discoverCreators": "फ़ॉलो करने के लिए क्रिएटर्स खोजें",
+  "followCreatorsHint": "क्रिएटर्स को फ़ॉलो करें",
+  "findCreators": "क्रिएटर्स ढूंढें",
+  "dismiss": "बंद करें",
+  "resetAll": "सब रीसेट करें",
+  "back": "वापस",
+  "cancel": "रद्द करें",
+  "delete": "हटाएं",
+  "clear": "साफ़ करें",
+  "update": "अपडेट करें",
+  "play": "चलाएं",
+  "manage": "प्रबंधित करें",
+  "seePlans": "प्लान देखें",
+  "disconnect": "डिस्कनेक्ट करें",
+  "viewAll": "सब देखें",
+  "showMore": "और दिखाएं",
+  "showLess": "कम दिखाएं",
+  "memberSince": "{date} से सदस्य",
+  "@memberSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noLikedContent": "कोई पसंदीदा सामग्री नहीं",
+  "noLikedContentHint": "जो वीडियो आपको पसंद आएंगे वे यहाँ दिखेंगे",
+  "nothingSavedYet": "अभी तक कुछ सहेजा नहीं",
+  "bookmarkContentHint": "सामग्री को बुकमार्क करें ताकि यहाँ दिखे",
+  "noHistoryYet": "अभी तक कोई इतिहास नहीं",
+  "noHistoryHint": "देखे गए वीडियो यहाँ दिखेंगे",
+  "watchedOf": "{total} में से {watched} देखा",
+  "@watchedOf": {
+    "placeholders": {
+      "watched": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFromHistory": "इतिहास से हटाएं",
+  "engagementScore": "एंगेजमेंट स्कोर",
+  "ofMaxKeepWatching": "अधिकतम का {pct}% — देखते रहें!",
+  "@ofMaxKeepWatching": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "watchedLabel": "देखे",
+  "displayName": "प्रदर्शन नाम",
+  "nameCannotBeEmpty": "नाम खाली नहीं हो सकता",
+  "nameTooLong": "नाम बहुत लंबा है (अधिकतम 50 अक्षर)",
+  "bio": "बायो",
+  "defaultBio": "जिज्ञासु मन। कंटेंट एक्सप्लोरर। एक फीड पर दुनिया देख रहा हूं।",
+  "editProfileTooltip": "प्रोफ़ाइल संपादित करें",
+  "googleCalendar": "Google Calendar",
+  "readOnlyAccess": "केवल पढ़ने की पहुंच",
+  "readOnlyAccessHint": "हम केवल इवेंट पढ़ते हैं, कभी संशोधित नहीं करते",
+  "seeEventsInApp": "ऐप में इवेंट देखें",
+  "seeEventsInAppHint": "आपका कैलेंडर आपके कंटेंट शेड्यूल के साथ दिखेगा",
+  "privateAndLocal": "निजी और स्थानीय",
+  "privateAndLocalHint": "डेटा डिवाइस पर रहता है; हम इसे कभी साझा नहीं करते",
+  "connecting": "कनेक्ट हो रहा है...",
+  "connectWithGoogle": "Google से कनेक्ट करें",
+  "couldNotConnect": "कनेक्ट नहीं हो सका — अनुमतियाँ जाँचें और पुनः प्रयास करें।",
+  "noUpcomingEvents": "कोई आगामी इवेंट नहीं",
+  "allDay": "पूरा दिन",
+  "personalizedContentSchedule": "आपका व्यक्तिगत कंटेंट शेड्यूल",
+  "contentCategories": "सामग्री श्रेणियाँ",
+  "categoryFilter": "श्रेणी फ़िल्टर",
+  "percentageFilter": "प्रतिशत फ़िल्टर",
+  "educationPct": "शिक्षा: {pct}%",
+  "@educationPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainmentPct": "मनोरंजन: {pct}%",
+  "@entertainmentPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "searchContent": "सामग्री खोजें...",
+  "monthView": "माह",
+  "weekView": "सप्ताह",
+  "dayView": "दिन",
+  "noFilterContent": "कोई {filter} सामग्री नहीं",
+  "@noFilterContent": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
+  "tryDifferentFilter": "कोई अलग फ़िल्टर या तारीख आज़माएं",
+  "itemsScheduled": "{count} आइटम शेड्यूल किए गए",
+  "@itemsScheduled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainment": "मनोरंजन",
+  "aiRecommendations": "AI अनुशंसाएं",
+  "suggestedFor": "{time} के लिए सुझाया गया",
+  "@suggestedFor": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "movedNear": "\"{item}\" को \"{target}\" के पास ले जाया गया",
+  "@movedNear": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownTitle": "अज्ञात शीर्षक",
+  "unknownCreator": "अज्ञात क्रिएटर",
+  "playback": "प्लेबैक",
+  "autoplay": "ऑटोप्ले",
+  "autoplayHint": "अगला वीडियो स्वचालित रूप से चलाएं",
+  "videoQuality": "वीडियो गुणवत्ता",
+  "dataSaver": "डेटा सेवर",
+  "dataSaverHint": "स्ट्रीमिंग के दौरान डेटा उपयोग कम करें",
+  "pushNotificationsHint": "फ़ॉलो किए गए क्रिएटर्स की नई सामग्री",
+  "appearance": "दिखावट",
+  "darkModeHint": "पूरे ऐप में डार्क थीम का उपयोग करें",
+  "appLanguage": "ऐप भाषा",
+  "contentLanguage": "सामग्री भाषा",
+  "library": "लाइब्रेरी",
+  "savedVideos": "सहेजे गए वीडियो",
+  "previouslyWatchedVideos": "पहले देखे गए वीडियो",
+  "privacyAndData": "गोपनीयता और डेटा",
+  "usageAnalytics": "उपयोग विश्लेषण",
+  "usageAnalyticsHint": "गुमनाम डेटा से ऐप सुधारने में मदद करें",
+  "clearWatchHistory": "देखने का इतिहास साफ़ करें",
+  "clearWatchHistoryHint": "इतिहास से सभी वीडियो हटाएं",
+  "clearCache": "कैश साफ़ करें",
+  "clearCacheHint": "स्टोरेज स्पेस खाली करें",
+  "changePassword": "पासवर्ड बदलें",
+  "appVersion": "ऐप संस्करण",
+  "termsOfService": "सेवा की शर्तें",
+  "afeediProActive": "Afeedi Pro — सक्रिय",
+  "upgradeToPro": "Pro में अपग्रेड करें",
+  "proFeatures": "विज्ञापन-मुक्त · असीमित सेव · AI फ़ीड",
+  "freeFeatures": "विज्ञापन-मुक्त, AI फ़ीड, असीमित सेव",
+  "clearHistoryConfirm": "इससे आपके देखने के इतिहास से सभी वीडियो हट जाएंगे। यह क्रिया पूर्ववत नहीं की जा सकती।",
+  "watchHistoryClearedSnackbar": "देखने का इतिहास साफ़ किया गया",
+  "cacheClearedSnackbar": "कैश सफलतापूर्वक साफ़ किया गया",
+  "currentPassword": "वर्तमान पासवर्ड",
+  "newPassword": "नया पासवर्ड",
+  "confirmNewPassword": "नया पासवर्ड पुष्टि करें",
+  "minEightChars": "न्यूनतम 8 अक्षर",
+  "passwordsDoNotMatch": "पासवर्ड मेल नहीं खाते",
+  "required": "आवश्यक",
+  "passwordChangedSuccessfully": "पासवर्ड सफलतापूर्वक बदला गया",
+  "currentPasswordIncorrect": "वर्तमान पासवर्ड गलत है",
+  "signOutConfirm": "क्या आप वाकई साइन आउट करना चाहते हैं?",
+  "deleteAccountConfirm": "क्या आप निश्चित हैं? इसे पूर्ववत नहीं किया जा सकता।",
+  "videosWatchedLabel": "देखे\nवीडियो",
+  "watchTimeLabel": "देखने\nका समय",
+  "goodMorning": "सुप्रभात!",
+  "goodAfternoon": "शुभ दोपहर!",
+  "goodEvening": "शुभ संध्या!",
+  "noNotifications": "कोई सूचना नहीं",
+  "allCaughtUp": "आप सब देख चुके हैं!"
+}

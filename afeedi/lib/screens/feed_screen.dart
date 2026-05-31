@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import '../core/theme/app_theme.dart';
 import '../widgets/feed/enhanced_feed_post_card.dart';
 import '../widgets/common/shared_bottom_navigation.dart';
 import '../services/content_service.dart';
@@ -15,7 +14,9 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
-  final RefreshController _refreshController = RefreshController(initialRefresh: false);
+  final RefreshController _refreshController = RefreshController(
+    initialRefresh: false,
+  );
   List<Content> _posts = [];
   bool _isLoading = true;
   List<PlatformType> _selectedPlatforms = PlatformType.values;
@@ -30,9 +31,10 @@ class _FeedScreenState extends State<FeedScreen> {
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
-      final feedContent = await ContentService.instance.getFeedContent();
+      final feedContent = await ContentService.instance
+          .getOnboardingBasedRecommendations(limit: 20);
       setState(() {
         _posts = feedContent;
         _isLoading = false;
@@ -41,49 +43,52 @@ class _FeedScreenState extends State<FeedScreen> {
       setState(() {
         _isLoading = false;
       });
-      print('Error loading feed: $e');
+      debugPrint('Error loading feed: $e');
     }
   }
 
-
-
   Future<void> _onRefresh() async {
     try {
-      final feedContent = await ContentService.instance.getFeedContent();
+      ContentService.instance.invalidateCache();
+      final feedContent = await ContentService.instance
+          .getOnboardingBasedRecommendations(limit: 20);
       setState(() {
         _posts = feedContent;
       });
       _refreshController.refreshCompleted();
     } catch (e) {
       _refreshController.refreshFailed();
-      print('Error refreshing feed: $e');
+      debugPrint('Error refreshing feed: $e');
     }
   }
 
   void _onLoading() async {
     try {
-      final morePosts = await ContentService.instance.getFeedContent(limit: 5);
+      final morePosts = await ContentService.instance
+          .getOnboardingBasedRecommendations(limit: 5);
       setState(() {
         _posts.addAll(morePosts);
       });
       _refreshController.loadComplete();
     } catch (e) {
       _refreshController.loadFailed();
-      print('Error loading more posts: $e');
+      debugPrint('Error loading more posts: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Scaffold(
+      backgroundColor: const Color(0xFF0D0B1E),
       appBar: AppBar(
-        title: const Text('Content Feed'),
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.primaryGradient,
-          ),
+        backgroundColor: const Color(0xFF1A1A2E),
+        title: const Text(
+          'Content Feed',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
@@ -95,6 +100,8 @@ class _FeedScreenState extends State<FeedScreen> {
       ),
       body: _isLoading
           ? const LoadingShimmer()
+          : _posts.isEmpty
+          ? _buildEmptyState()
           : SmartRefresher(
               controller: _refreshController,
               enablePullDown: true,
@@ -102,15 +109,21 @@ class _FeedScreenState extends State<FeedScreen> {
               onRefresh: _onRefresh,
               onLoading: _onLoading,
               child: ListView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding + 16),
                 itemCount: _posts.length,
                 itemBuilder: (context, index) {
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.only(bottom: 8),
                     child: EnhancedFeedPostCard(
                       content: _posts[index],
                       showPlatformLogo: true,
                       showInteractions: true,
+                      onNotInterested: () {
+                        final removedId = _posts[index].id;
+                        setState(() {
+                          _posts.removeWhere((p) => p.id == removedId);
+                        });
+                      },
                     ),
                   );
                 },
@@ -131,6 +144,62 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.video_library_outlined,
+              size: 72,
+              color: Colors.white24,
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'No content yet',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Pull down to refresh, or check your internet connection.',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.5),
+                fontSize: 14,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 28),
+            ElevatedButton.icon(
+              onPressed: _loadPosts,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Try Again'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00D4FF),
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                elevation: 0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showFilterDialog() {
     showDialog(
       context: context,
@@ -138,13 +207,24 @@ class _FeedScreenState extends State<FeedScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text('Filter Posts'),
+              backgroundColor: const Color(0xFF1A1A2E),
+              title: const Text(
+                'Filter Posts',
+                style: TextStyle(color: Colors.white),
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: PlatformType.values.map((platform) {
                   return CheckboxListTile(
-                    title: Text(platform.name),
+                    title: Text(
+                      platform.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Colors.white),
+                    ),
                     value: _selectedPlatforms.contains(platform),
+                    activeColor: const Color(0xFF00D4FF),
+                    checkColor: Colors.black,
                     onChanged: (bool? value) {
                       setDialogState(() {
                         if (value == true) {
@@ -160,14 +240,20 @@ class _FeedScreenState extends State<FeedScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.white54),
+                  ),
                 ),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                     _loadPosts(); // Reload posts with new filters
                   },
-                  child: const Text('Apply'),
+                  child: const Text(
+                    'Apply',
+                    style: TextStyle(color: Color(0xFF00D4FF)),
+                  ),
                 ),
               ],
             );

@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import '../../models/content_model.dart';
-import '../../models/user_model.dart';
-import '../../services/browser_streaming_service.dart';
-import '../../services/opensource_integration_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/analytics_service.dart';
 import 'responsive_video_player.dart';
@@ -15,7 +11,7 @@ class WebStreamingInterface extends StatefulWidget {
   final Function(Content)? onContentSelected;
   final Function(String)? onSearch;
   final EdgeInsets? padding;
-  
+
   const WebStreamingInterface({
     super.key,
     required this.contents,
@@ -24,7 +20,7 @@ class WebStreamingInterface extends StatefulWidget {
     this.onSearch,
     this.padding,
   });
-  
+
   @override
   State<WebStreamingInterface> createState() => _WebStreamingInterfaceState();
 }
@@ -36,36 +32,36 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
   bool _isFullscreen = false;
   String _searchQuery = '';
   List<Content> _filteredContents = [];
-  
+
   // Platform filter
   Set<PlatformType> _selectedPlatforms = {};
-  
+
   // View mode
   ViewMode _viewMode = ViewMode.grid;
-  
+
   @override
   void initState() {
     super.initState();
     _initializeInterface();
     _filteredContents = widget.contents;
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
-  
+
   void _initializeInterface() {
     // Initialize tab controller for different content categories
     _tabController = TabController(
       length: 5, // All, Videos, Shorts, Stories, Posts
       vsync: this,
     );
-    
+
     // Initialize all platforms as selected
     _selectedPlatforms = Set.from(PlatformType.values);
-    
+
     // Track interface initialization
     AnalyticsService.instance.trackUserInteraction(
       action: 'web_streaming_interface_initialized',
@@ -76,7 +72,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       },
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,19 +80,19 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       body: _isFullscreen ? _buildFullscreenPlayer() : _buildMainInterface(),
     );
   }
-  
+
   Widget _buildMainInterface() {
     return Column(
       children: [
         // Header with search and filters
         _buildHeader(),
-        
+
         // Platform filters
         _buildPlatformFilters(),
-        
+
         // Content tabs
         _buildContentTabs(),
-        
+
         // Main content area
         Expanded(
           child: _selectedContent != null
@@ -106,7 +102,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       ],
     );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -114,10 +110,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Colors.black,
-            Colors.black.withOpacity(0.8),
-          ],
+          colors: [Colors.black, Colors.black.withValues(alpha: 0.8)],
         ),
       ),
       child: Row(
@@ -131,36 +124,34 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
               fontWeight: FontWeight.bold,
             ),
           ),
-          
+
           const SizedBox(width: 24),
-          
+
           // Search bar
-          Expanded(
-            child: _buildSearchBar(),
-          ),
-          
+          Expanded(child: _buildSearchBar()),
+
           const SizedBox(width: 16),
-          
+
           // View mode toggle
           _buildViewModeToggle(),
-          
+
           const SizedBox(width: 16),
-          
+
           // User account or guest indicator
           _buildUserIndicator(),
         ],
       ),
     );
   }
-  
+
   Widget _buildSearchBar() {
     return Container(
       height: 40,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.white.withOpacity(0.3),
+          color: Colors.white.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -168,12 +159,10 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           hintText: 'Search content...',
-          hintStyle: TextStyle(
-            color: Colors.white.withOpacity(0.7),
-          ),
+          hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
           prefixIcon: Icon(
             Icons.search,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
           ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
@@ -186,26 +175,23 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
             _searchQuery = value;
             _filterContent();
           });
-          
+
           widget.onSearch?.call(value);
-          
+
           AnalyticsService.instance.trackUserInteraction(
             action: 'content_searched',
             screen: 'streaming_interface',
-            additionalData: {
-              'query': value,
-              'query_length': value.length,
-            },
+            additionalData: {'query': value, 'query_length': value.length},
           );
         },
       ),
     );
   }
-  
+
   Widget _buildViewModeToggle() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -218,42 +204,44 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       ),
     );
   }
-  
+
   Widget _buildViewModeButton(ViewMode mode, IconData icon) {
     final isSelected = _viewMode == mode;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
           _viewMode = mode;
         });
-        
+
         AnalyticsService.instance.trackUserInteraction(
           action: 'view_mode_changed',
           screen: 'streaming_interface',
-          additionalData: {
-            'new_mode': mode.name,
-          },
+          additionalData: {'new_mode': mode.name},
         );
       },
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withOpacity(0.2) : Colors.transparent,
+          color: isSelected
+              ? Colors.white.withValues(alpha: 0.2)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
         ),
         child: Icon(
           icon,
-          color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+          color: isSelected
+              ? Colors.white
+              : Colors.white.withValues(alpha: 0.7),
           size: 20,
         ),
       ),
     );
   }
-  
+
   Widget _buildUserIndicator() {
     final user = AuthService.instance.currentUser;
-    
+
     if (user != null) {
       return Row(
         mainAxisSize: MainAxisSize.min,
@@ -272,34 +260,24 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
           const SizedBox(width: 8),
           Text(
             user.email.split('@')[0],
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 14),
           ),
         ],
       );
     }
-    
+
     if (widget.enableGuestMode) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.orange.withOpacity(0.2),
+          color: Colors.orange.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.orange,
-            width: 1,
-          ),
+          border: Border.all(color: Colors.orange, width: 1),
         ),
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.person_outline,
-              color: Colors.orange,
-              size: 16,
-            ),
+            Icon(Icons.person_outline, color: Colors.orange, size: 16),
             SizedBox(width: 4),
             Text(
               'Guest',
@@ -313,10 +291,10 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
         ),
       );
     }
-    
+
     return const SizedBox();
   }
-  
+
   Widget _buildPlatformFilters() {
     return Container(
       height: 60,
@@ -327,7 +305,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
         itemBuilder: (context, index) {
           final platform = PlatformType.values[index];
           final isSelected = _selectedPlatforms.contains(platform);
-          
+
           return GestureDetector(
             onTap: () {
               setState(() {
@@ -338,7 +316,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
                 }
                 _filterContent();
               });
-              
+
               AnalyticsService.instance.trackUserInteraction(
                 action: 'platform_filter_toggled',
                 screen: 'streaming_interface',
@@ -352,14 +330,14 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
               margin: const EdgeInsets.only(right: 12, top: 8, bottom: 8),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected 
-                    ? Colors.white.withOpacity(0.2) 
+                color: isSelected
+                    ? Colors.white.withValues(alpha: 0.2)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected 
-                      ? Colors.white 
-                      : Colors.white.withOpacity(0.3),
+                  color: isSelected
+                      ? Colors.white
+                      : Colors.white.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -375,12 +353,12 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
                   Text(
                     _getPlatformName(platform),
                     style: TextStyle(
-                      color: isSelected 
-                          ? Colors.white 
-                          : Colors.white.withOpacity(0.7),
+                      color: isSelected
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.7),
                       fontSize: 14,
-                      fontWeight: isSelected 
-                          ? FontWeight.bold 
+                      fontWeight: isSelected
+                          ? FontWeight.bold
                           : FontWeight.normal,
                     ),
                   ),
@@ -392,13 +370,13 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       ),
     );
   }
-  
+
   Widget _buildContentTabs() {
     return Container(
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -407,10 +385,10 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
         controller: _tabController,
         indicatorColor: Colors.red,
         labelColor: Colors.white,
-        unselectedLabelColor: Colors.white.withOpacity(0.7),
+        unselectedLabelColor: Colors.white.withValues(alpha: 0.7),
         onTap: (index) {
           _filterContent();
-          
+
           AnalyticsService.instance.trackUserInteraction(
             action: 'content_tab_selected',
             screen: 'streaming_interface',
@@ -430,12 +408,12 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       ),
     );
   }
-  
+
   Widget _buildContentGrid() {
     if (_filteredContents.isEmpty) {
       return _buildEmptyState();
     }
-    
+
     switch (_viewMode) {
       case ViewMode.grid:
         return ResponsiveVideoGrid(
@@ -449,7 +427,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
         return _buildCarouselView();
     }
   }
-  
+
   Widget _buildListView() {
     return ListView.builder(
       padding: widget.padding ?? const EdgeInsets.all(16),
@@ -460,7 +438,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       },
     );
   }
-  
+
   Widget _buildListItem(Content content) {
     return GestureDetector(
       onTap: () => _selectContent(content),
@@ -468,10 +446,10 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -503,9 +481,9 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
                       ),
               ),
             ),
-            
+
             const SizedBox(width: 12),
-            
+
             // Content info
             Expanded(
               child: Column(
@@ -525,7 +503,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
                   Text(
                     content.creatorName ?? 'Unknown Creator',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 14,
                     ),
                   ),
@@ -540,7 +518,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
                       Text(
                         content.formattedViewCount,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                           fontSize: 12,
                         ),
                       ),
@@ -549,7 +527,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
                         Text(
                           content.formattedDuration,
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             fontSize: 12,
                           ),
                         ),
@@ -564,7 +542,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       ),
     );
   }
-  
+
   Widget _buildCarouselView() {
     return ResponsiveVideoCarousel(
       contents: _filteredContents,
@@ -573,10 +551,10 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       padding: widget.padding,
     );
   }
-  
+
   Widget _buildPlayerView() {
     if (_selectedContent == null) return const SizedBox();
-    
+
     return Column(
       children: [
         // Back button
@@ -593,17 +571,11 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                    ),
+                    Icon(Icons.arrow_back, color: Colors.white),
                     SizedBox(width: 8),
                     Text(
                       'Back to Grid',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ],
                 ),
@@ -611,7 +583,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
             ],
           ),
         ),
-        
+
         // Video player
         Expanded(
           child: ResponsiveVideoPlayer(
@@ -629,10 +601,10 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       ],
     );
   }
-  
+
   Widget _buildFullscreenPlayer() {
     if (_selectedContent == null) return const SizedBox();
-    
+
     return Stack(
       children: [
         ResponsiveVideoPlayer(
@@ -646,7 +618,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
             });
           },
         ),
-        
+
         // Exit fullscreen button
         Positioned(
           top: 16,
@@ -660,7 +632,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.black.withValues(alpha: 0.7),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
@@ -674,7 +646,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       ],
     );
   }
-  
+
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -683,13 +655,13 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
           Icon(
             Icons.video_library_outlined,
             size: 64,
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
             'No content found',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -698,7 +670,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
           Text(
             'Try adjusting your filters or search terms',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
               fontSize: 14,
             ),
           ),
@@ -706,14 +678,14 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       ),
     );
   }
-  
+
   void _selectContent(Content content) {
     setState(() {
       _selectedContent = content;
     });
-    
+
     widget.onContentSelected?.call(content);
-    
+
     AnalyticsService.instance.trackUserInteraction(
       action: 'content_selected',
       screen: 'streaming_interface',
@@ -724,7 +696,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       },
     );
   }
-  
+
   void _filterContent() {
     setState(() {
       _filteredContents = widget.contents.where((content) {
@@ -732,21 +704,21 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
         if (!_selectedPlatforms.contains(content.platform)) {
           return false;
         }
-        
+
         // Search filter
         if (_searchQuery.isNotEmpty) {
           final query = _searchQuery.toLowerCase();
           final title = content.title?.toLowerCase() ?? '';
           final creator = content.creatorName?.toLowerCase() ?? '';
           final description = content.description?.toLowerCase() ?? '';
-          
-          if (!title.contains(query) && 
-              !creator.contains(query) && 
+
+          if (!title.contains(query) &&
+              !creator.contains(query) &&
               !description.contains(query)) {
             return false;
           }
         }
-        
+
         // Tab filter
         final tabIndex = _tabController.index;
         switch (tabIndex) {
@@ -755,8 +727,8 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
           case 1: // Videos
             return content.contentType == ContentType.video;
           case 2: // Shorts
-            return content.contentType == ContentType.short || 
-                   content.contentType == ContentType.reel;
+            return content.contentType == ContentType.short ||
+                content.contentType == ContentType.reel;
           case 3: // Stories
             return content.contentType == ContentType.story;
           case 4: // Posts
@@ -767,7 +739,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
       }).toList();
     });
   }
-  
+
   String _getPlatformName(PlatformType platform) {
     switch (platform) {
       case PlatformType.youtube:
@@ -780,7 +752,7 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
         return 'Facebook';
     }
   }
-  
+
   String _getTabName(int index) {
     switch (index) {
       case 0:
@@ -800,8 +772,4 @@ class _WebStreamingInterfaceState extends State<WebStreamingInterface>
 }
 
 // View mode enum
-enum ViewMode {
-  grid,
-  list,
-  carousel,
-}
+enum ViewMode { grid, list, carousel }

@@ -37,16 +37,42 @@ class GenreSelection extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
+            color: Colors.white.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Row(
+                children: [
+                  const Text(
+                    'Pick your interests',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    selectedGenres.length < 3
+                        ? 'Select ${3 - selectedGenres.length} more'
+                        : '${selectedGenres.length} selected ✓',
+                    style: TextStyle(
+                      color: selectedGenres.length >= 3
+                          ? const Color(0xFF00D4FF)
+                          : Colors.white54,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
               _buildSearchField(),
               const SizedBox(height: 16),
               _buildGenreGrid(),
@@ -62,10 +88,10 @@ class GenreSelection extends StatelessWidget {
   Widget _buildSearchField() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -77,14 +103,14 @@ class GenreSelection extends StatelessWidget {
         decoration: InputDecoration(
           hintText: 'Search interests...',
           hintStyle: TextStyle(
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withValues(alpha: 0.6),
             fontSize: 14,
           ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 16),
           prefixIcon: Icon(
             Icons.search,
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withValues(alpha: 0.6),
             size: 20,
           ),
         ),
@@ -93,6 +119,24 @@ class GenreSelection extends StatelessWidget {
   }
 
   Widget _buildGenreGrid() {
+    if (filteredGenres.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32),
+        child: Column(
+          children: [
+            const Icon(Icons.search_off, color: Colors.white38, size: 40),
+            const SizedBox(height: 12),
+            Text(
+              'No genres match your search',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.5),
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -102,52 +146,54 @@ class GenreSelection extends StatelessWidget {
 
   Widget _buildGenreChip(Genre genre) {
     final isSelected = selectedGenres.contains(genre);
-    
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => onGenreToggle(genre),
-        borderRadius: BorderRadius.circular(20),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected 
-                ? const Color(0xFF00D4FF).withOpacity(0.3)
-                : Colors.white.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isSelected 
-                  ? const Color(0xFF00D4FF)
-                  : Colors.white.withOpacity(0.3),
-              width: 1.5,
+
+    return Semantics(
+      label: '${genre.name}${isSelected ? ', selected' : ''}',
+      button: true,
+      selected: isSelected,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => onGenreToggle(genre),
+          borderRadius: BorderRadius.circular(20),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? const Color(0xFF00D4FF).withValues(alpha: 0.3)
+                  : Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isSelected
+                    ? const Color(0xFF00D4FF)
+                    : Colors.white.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
             ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                genre.emoji,
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                genre.name,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(genre.emoji, style: const TextStyle(fontSize: 16)),
+                const SizedBox(width: 6),
+                Text(
+                  genre.name,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  ),
                 ),
-              ),
-              if (isSelected) ...[
-                const SizedBox(width: 4),
-                const Icon(
-                  Icons.check_circle,
-                  color: Color(0xFF00D4FF),
-                  size: 16,
-                ),
+                if (isSelected) ...[
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.check_circle,
+                    color: Color(0xFF00D4FF),
+                    size: 16,
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -159,10 +205,10 @@ class GenreSelection extends StatelessWidget {
       width: double.infinity,
       height: 48,
       child: ElevatedButton(
-        onPressed: selectedGenres.isEmpty ? null : onContinue,
+        onPressed: selectedGenres.length < 3 ? null : onContinue,
         style: ElevatedButton.styleFrom(
-          backgroundColor: selectedGenres.isEmpty 
-              ? Colors.white.withOpacity(0.1)
+          backgroundColor: selectedGenres.length < 3
+              ? Colors.white.withValues(alpha: 0.1)
               : const Color(0xFF00D4FF),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
@@ -171,13 +217,10 @@ class GenreSelection extends StatelessWidget {
           elevation: 0,
         ),
         child: Text(
-          selectedGenres.isEmpty
-              ? 'Select at least one genre'
-              : 'Continue with ${selectedGenres.length} genre${selectedGenres.length == 1 ? '' : 's'} ✨',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          selectedGenres.length < 3
+              ? 'Select at least 3 interests'
+              : 'Continue with ${selectedGenres.length} interests ✨',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );

@@ -1,0 +1,355 @@
+{
+  "@@locale": "ar",
+  "@@textDirection": "rtl",
+  "appName": "أفيدي",
+  "tagline": "جميع مقاطع الفيديو المفضلة لديك. تجربة متميزة.",
+  "skip": "تخطي",
+  "continueBtn": "متابعة",
+  "getStarted": "ابدأ الآن",
+  "signIn": "تسجيل الدخول",
+  "signOut": "تسجيل الخروج",
+  "continueWithGoogle": "المتابعة مع Google",
+  "continueWithApple": "المتابعة مع Apple",
+  "alreadyHaveAccount": "لديك حساب بالفعل؟ تسجيل الدخول",
+  "createAccount": "إنشاء حساب",
+  "email": "البريد الإلكتروني",
+  "password": "كلمة المرور",
+  "name": "الاسم",
+  "terms": "الشروط",
+  "privacyPolicy": "سياسة الخصوصية",
+  "home": "الرئيسية",
+  "videos": "مقاطع الفيديو",
+  "discover": "اكتشاف",
+  "shorts": "قصيرة",
+  "calendar": "التقويم",
+  "profile": "الملف الشخصي",
+  "search": "بحث",
+  "notifications": "الإشعارات",
+  "settings": "الإعدادات",
+  "trending": "الرائج",
+  "forYou": "لك",
+  "following": "المتابَعون",
+  "bookmarks": "الإشارات المرجعية",
+  "history": "السجل",
+  "saved": "المحفوظات",
+  "liked": "المعجبة بها",
+  "achievements": "الإنجازات",
+  "watchHistory": "سجل المشاهدة",
+  "continueWatching": "متابعة المشاهدة",
+  "recommended": "موصى به",
+  "popular": "الأكثر شعبية",
+  "newest": "الأحدث",
+  "categories": "الفئات",
+  "allCategories": "جميع الفئات",
+  "filter": "تصفية",
+  "filters": "الفلاتر",
+  "clearFilters": "مسح الفلاتر",
+  "applyFilters": "تطبيق الفلاتر",
+  "sortBy": "ترتيب حسب",
+  "platform": "المنصة",
+  "allPlatforms": "جميع المنصات",
+  "timeRange": "النطاق الزمني",
+  "today": "اليوم",
+  "thisWeek": "هذا الأسبوع",
+  "thisMonth": "هذا الشهر",
+  "allTime": "كل الأوقات",
+  "contentType": "نوع المحتوى",
+  "video": "فيديو",
+  "short": "قصير",
+  "reel": "ريل",
+  "views": "مشاهدة",
+  "likes": "إعجابات",
+  "comments": "التعليقات",
+  "share": "مشاركة",
+  "save": "حفظ",
+  "like": "إعجاب",
+  "follow": "متابعة",
+  "unfollow": "إلغاء المتابعة",
+  "subscribe": "اشتراك",
+  "creator": "المبدع",
+  "creatorProfile": "ملف المبدع",
+  "noResults": "لا توجد نتائج",
+  "noResultsFor": "لا توجد نتائج لـ \"{query}\"",
+  "@noResultsFor": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "noContent": "لا يوجد محتوى متاح",
+  "loading": "جارٍ التحميل...",
+  "retry": "إعادة المحاولة",
+  "refresh": "تحديث",
+  "pullToRefresh": "اسحب للتحديث",
+  "errorLoading": "خطأ في تحميل المحتوى",
+  "noInternetConnection": "لا يوجد اتصال بالإنترنت",
+  "tryAgain": "حاول مجددًا",
+  "markAllRead": "تحديد الكل كمقروء",
+  "allNotifications": "الكل",
+  "unread": "غير مقروء",
+  "achievement": "إنجاز",
+  "videosWatched": "الفيديوهات المشاهدة",
+  "watchTime": "وقت المشاهدة",
+  "streak": "السلسلة",
+  "days": "أيام",
+  "hours": "ساعات",
+  "minutes": "دقائق",
+  "editProfile": "تعديل الملف الشخصي",
+  "language": "اللغة",
+  "selectLanguage": "اختر اللغة",
+  "darkMode": "الوضع الداكن",
+  "notifications_setting": "الإشعارات",
+  "pushNotifications": "إشعارات الدفع",
+  "emailNotifications": "إشعارات البريد الإلكتروني",
+  "privacy": "الخصوصية",
+  "account": "الحساب",
+  "help": "المساعدة",
+  "about": "حول",
+  "version": "الإصدار",
+  "deleteAccount": "حذف الحساب",
+  "logout": "تسجيل الخروج",
+  "premium": "بريميوم",
+  "upgradeToPremium": "الترقية إلى بريميوم",
+  "free": "مجاني",
+  "month": "شهر",
+  "year": "سنة",
+  "subscribe_action": "اشتراك",
+  "currentPlan": "الخطة الحالية",
+  "addToCalendar": "إضافة إلى التقويم",
+  "scheduledContent": "المحتوى المجدوَل",
+  "noContentScheduled": "لا يوجد محتوى مجدوَل لهذا اليوم",
+  "contentForDate": "محتوى {date}",
+  "@contentForDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "interests": "الاهتمامات",
+  "selectInterests": "اختر اهتماماتك",
+  "selectAtLeast3": "يرجى اختيار 3 على الأقل",
+  "personalizingFeed": "جارٍ تخصيص خلاصتك...",
+  "feedReady": "خلاصتك جاهزة!",
+  "welcomeBack": "مرحباً بعودتك!",
+  "hi": "مرحبا",
+  "letsGetStarted": "لنبدأ",
+  "onboardingWelcome": "مرحباً! أنا مساعدك في أفيدي. سأساعدك في إعداد خلاصة المحتوى المثالية لك. ما اسمك؟",
+  "onboardingComplete": "خلاصتك الشخصية جاهزة! اضغط أدناه للبدء في الاستكشاف.",
+  "gaming": "ألعاب",
+  "music": "موسيقى",
+  "technology": "تكنولوجيا",
+  "food": "الطعام والطبخ",
+  "fitness": "اللياقة البدنية",
+  "travel": "السفر",
+  "art": "الفن والتصميم",
+  "nature": "الطبيعة",
+  "comedy": "كوميديا",
+  "fashion": "الموضة",
+  "education": "التعليم",
+  "sports": "رياضة",
+  "news": "أخبار",
+  "science": "علوم",
+  "youtube": "YouTube",
+  "tiktok": "TikTok",
+  "instagram": "Instagram",
+  "facebook": "Facebook",
+  "signingIn": "جارٍ تسجيل الدخول...",
+  "authenticationFailed": "فشل المصادقة",
+  "somethingWentWrong": "حدث خطأ ما",
+  "noContentYet": "لا يوجد محتوى بعد",
+  "startExploring": "ابدأ الاستكشاف لرؤية المحتوى هنا",
+  "watchedVideos": "شاهدت {count} فيديو",
+  "@watchedVideos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newLabel": "جديد",
+  "discoverCreators": "اكتشف منشئي المحتوى للمتابعة",
+  "followCreatorsHint": "اتبع المنشئين لعرض محتواهم",
+  "findCreators": "ابحث عن المنشئين",
+  "dismiss": "تجاهل",
+  "resetAll": "إعادة تعيين الكل",
+  "back": "رجوع",
+  "cancel": "إلغاء",
+  "delete": "حذف",
+  "clear": "مسح",
+  "update": "تحديث",
+  "play": "تشغيل",
+  "manage": "إدارة",
+  "seePlans": "عرض الخطط",
+  "disconnect": "قطع الاتصال",
+  "viewAll": "عرض الكل",
+  "showMore": "عرض المزيد",
+  "showLess": "عرض أقل",
+  "memberSince": "عضو منذ {date}",
+  "@memberSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noLikedContent": "لا يوجد محتوى معجب به",
+  "noLikedContentHint": "ستظهر مقاطع الفيديو التي تعجبك هنا",
+  "nothingSavedYet": "لم يتم حفظ أي شيء بعد",
+  "bookmarkContentHint": "احفظ المحتوى لرؤيته هنا",
+  "noHistoryYet": "لا يوجد سجل بعد",
+  "noHistoryHint": "ستظهر مقاطع الفيديو التي شاهدتها هنا",
+  "watchedOf": "شاهدت {watched} من {total}",
+  "@watchedOf": {
+    "placeholders": {
+      "watched": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFromHistory": "إزالة من السجل",
+  "engagementScore": "نقاط التفاعل",
+  "ofMaxKeepWatching": "{pct}% من الحد الأقصى — واصل المشاهدة!",
+  "@ofMaxKeepWatching": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "watchedLabel": "شوهد",
+  "displayName": "اسم العرض",
+  "nameCannotBeEmpty": "لا يمكن أن يكون الاسم فارغاً",
+  "nameTooLong": "الاسم طويل جداً (الحد الأقصى 50 حرفاً)",
+  "bio": "نبذة",
+  "defaultBio": "عقل فضولي. مستكشف محتوى. أشاهد العالم خطوة بخطوة.",
+  "editProfileTooltip": "تعديل الملف الشخصي",
+  "googleCalendar": "تقويم Google",
+  "readOnlyAccess": "وصول للقراءة فقط",
+  "readOnlyAccessHint": "نقرأ الأحداث فقط ولا نعدّلها أبداً",
+  "seeEventsInApp": "عرض الأحداث في التطبيق",
+  "seeEventsInAppHint": "يظهر تقويمك جنباً إلى جنب مع جدول المحتوى",
+  "privateAndLocal": "خاص ومحلي",
+  "privateAndLocalHint": "تبقى البيانات على الجهاز ولا نشاركها أبداً",
+  "connecting": "جارٍ الاتصال...",
+  "connectWithGoogle": "الاتصال بـ Google",
+  "couldNotConnect": "تعذّر الاتصال — تحقق من الأذونات وحاول مجدداً.",
+  "noUpcomingEvents": "لا توجد أحداث قادمة",
+  "allDay": "طوال اليوم",
+  "personalizedContentSchedule": "جدول المحتوى الشخصي",
+  "contentCategories": "فئات المحتوى",
+  "categoryFilter": "تصفية الفئة",
+  "percentageFilter": "تصفية النسبة",
+  "educationPct": "التعليم: {pct}%",
+  "@educationPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainmentPct": "الترفيه: {pct}%",
+  "@entertainmentPct": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "searchContent": "ابحث عن محتوى...",
+  "monthView": "شهر",
+  "weekView": "أسبوع",
+  "dayView": "يوم",
+  "noFilterContent": "لا يوجد محتوى {filter}",
+  "@noFilterContent": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
+  "tryDifferentFilter": "جرّب تصفية أو تاريخاً مختلفاً",
+  "itemsScheduled": "{count} عنصر مجدوَل",
+  "@itemsScheduled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "entertainment": "ترفيه",
+  "aiRecommendations": "توصيات الذكاء الاصطناعي",
+  "suggestedFor": "مقترح لـ {time}",
+  "@suggestedFor": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "movedNear": "تم نقل \"{item}\" بالقرب من \"{target}\"",
+  "@movedNear": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownTitle": "عنوان غير معروف",
+  "unknownCreator": "منشئ غير معروف",
+  "playback": "التشغيل",
+  "autoplay": "التشغيل التلقائي",
+  "autoplayHint": "تشغيل الفيديو التالي تلقائياً",
+  "videoQuality": "جودة الفيديو",
+  "dataSaver": "توفير البيانات",
+  "dataSaverHint": "تقليل استهلاك البيانات أثناء البث",
+  "pushNotificationsHint": "محتوى جديد من المنشئين المتابَعين",
+  "appearance": "المظهر",
+  "darkModeHint": "استخدام السمة الداكنة في التطبيق",
+  "appLanguage": "لغة التطبيق",
+  "contentLanguage": "لغة المحتوى",
+  "library": "المكتبة",
+  "savedVideos": "الفيديوهات المحفوظة",
+  "previouslyWatchedVideos": "الفيديوهات المشاهدة سابقاً",
+  "privacyAndData": "الخصوصية والبيانات",
+  "usageAnalytics": "تحليلات الاستخدام",
+  "usageAnalyticsHint": "ساعد في تحسين التطبيق ببيانات مجهولة",
+  "clearWatchHistory": "مسح سجل المشاهدة",
+  "clearWatchHistoryHint": "إزالة جميع الفيديوهات من سجل المشاهدة",
+  "clearCache": "مسح ذاكرة التخزين المؤقت",
+  "clearCacheHint": "تحرير مساحة التخزين",
+  "changePassword": "تغيير كلمة المرور",
+  "appVersion": "إصدار التطبيق",
+  "termsOfService": "شروط الخدمة",
+  "afeediProActive": "أفيدي برو — نشط",
+  "upgradeToPro": "الترقية إلى برو",
+  "proFeatures": "بدون إعلانات · حفظ غير محدود · خلاصة ذكاء اصطناعي",
+  "freeFeatures": "بدون إعلانات، خلاصة ذكاء اصطناعي، حفظ غير محدود",
+  "clearHistoryConfirm": "سيزيل هذا جميع الفيديوهات من سجل مشاهدتك. لا يمكن التراجع عن هذا الإجراء.",
+  "watchHistoryClearedSnackbar": "تم مسح سجل المشاهدة",
+  "cacheClearedSnackbar": "تم مسح ذاكرة التخزين المؤقت بنجاح",
+  "currentPassword": "كلمة المرور الحالية",
+  "newPassword": "كلمة المرور الجديدة",
+  "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
+  "minEightChars": "الحد الأدنى 8 أحرف",
+  "passwordsDoNotMatch": "كلمات المرور غير متطابقة",
+  "required": "مطلوب",
+  "passwordChangedSuccessfully": "تم تغيير كلمة المرور بنجاح",
+  "currentPasswordIncorrect": "كلمة المرور الحالية غير صحيحة",
+  "signOutConfirm": "هل أنت متأكد من تسجيل الخروج؟",
+  "deleteAccountConfirm": "هل أنت متأكد؟ لا يمكن التراجع عن هذا.",
+  "videosWatchedLabel": "فيديوهات\nمشاهَدة",
+  "watchTimeLabel": "وقت\nالمشاهدة",
+  "goodMorning": "صباح الخير!",
+  "goodAfternoon": "مساء الخير!",
+  "goodEvening": "مساء النور!",
+  "noNotifications": "لا توجد إشعارات",
+  "allCaughtUp": "أنت محدث!"
+}

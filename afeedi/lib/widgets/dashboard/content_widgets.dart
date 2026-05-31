@@ -12,18 +12,18 @@ class ContentWidgets extends StatelessWidget {
       children: [
         Text(
           'Recent Activity',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         const _RecentContentSection(),
         const SizedBox(height: 24),
         Text(
           'Trending Topics',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         const _TrendingTopicsSection(),
@@ -109,14 +109,10 @@ class _ContentCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryCyan.withOpacity(0.1),
+                  color: AppTheme.primaryCyan.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  icon,
-                  color: AppTheme.primaryCyan,
-                  size: 20,
-                ),
+                child: Icon(icon, color: AppTheme.primaryCyan, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -137,19 +133,19 @@ class _ContentCard extends StatelessWidget {
                         Flexible(
                           child: Text(
                             platform,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppTheme.primaryPink,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: AppTheme.primaryPink,
+                                  fontWeight: FontWeight.w500,
+                                ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Flexible(
                           child: Text(
                             ' • $time',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[600],
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: Colors.grey[600]),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -157,17 +153,14 @@ class _ContentCard extends StatelessWidget {
                     ),
                     Text(
                       engagement,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[500],
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
                     ),
                   ],
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
-                color: Colors.grey[400],
-              ),
+              Icon(Icons.chevron_right, color: Colors.grey[400]),
             ],
           ),
         ),
@@ -205,10 +198,7 @@ class _TrendingChip extends StatelessWidget {
   final String name;
   final String posts;
 
-  const _TrendingChip({
-    required this.name,
-    required this.posts,
-  });
+  const _TrendingChip({required this.name, required this.posts});
 
   @override
   Widget build(BuildContext context) {
@@ -240,10 +230,7 @@ class _TrendingChip extends StatelessWidget {
             ),
             Text(
               posts,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 12,
-              ),
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
             ),
           ],
         ),

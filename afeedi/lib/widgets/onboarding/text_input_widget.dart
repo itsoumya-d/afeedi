@@ -31,97 +31,38 @@ class TextInputWidget extends StatefulWidget {
 }
 
 class _TextInputWidgetState extends State<TextInputWidget> {
-
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
     return SlideTransition(
       position: widget.slideAnimation,
       child: FadeTransition(
         opacity: widget.fadeAnimation,
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.2),
-              width: 1,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: bottomInset),
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.2),
+                width: 1,
+              ),
             ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildInputField(),
-              if (widget.suggestions.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                _buildSuggestions(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Suggestion chips shown above the input field
+                if (widget.suggestions.isNotEmpty) ...[
+                  _buildSuggestions(),
+                  const SizedBox(height: 12),
+                ],
+                _buildInputRow(),
               ],
-              const SizedBox(height: 12),
-              _buildSendButton(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInputField() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: TextField(
-        controller: widget.controller,
-        focusNode: widget.focusNode,
-        enabled: widget.isEnabled,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-        ),
-        maxLines: 3,
-        minLines: 1,
-        onSubmitted: widget.onSubmitted,
-        textInputAction: TextInputAction.send,
-        decoration: InputDecoration(
-          hintText: widget.hintText,
-          hintStyle: TextStyle(
-            color: Colors.white.withOpacity(0.6),
-            fontSize: 16,
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
-          suffixIcon: ValueListenableBuilder<TextEditingValue>(
-            valueListenable: widget.controller,
-            builder: (context, value, child) {
-              return AnimatedOpacity(
-                opacity: value.text.trim().isNotEmpty ? 1.0 : 0.5,
-                duration: const Duration(milliseconds: 200),
-                child: IconButton(
-                  onPressed: value.text.trim().isNotEmpty && widget.isEnabled ? widget.onSend : null,
-                  icon: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: value.text.trim().isNotEmpty && widget.isEnabled
-                          ? const Color(0xFF00D4FF)
-                          : Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Icon(
-                      Icons.send,
-                      color: Colors.white,
-                      size: 16,
-                    ),
-                  ),
-                ),
-              );
-            },
+            ),
           ),
         ),
       ),
@@ -135,87 +76,138 @@ class _TextInputWidgetState extends State<TextInputWidget> {
         Text(
           'Quick suggestions:',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: widget.suggestions.map((suggestion) {
-            return GestureDetector(
-              onTap: () {
-                widget.controller.text = suggestion;
-                widget.onSuggestionTap?.call(suggestion);
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
-                    width: 1,
-                  ),
-                ),
-                child: Text(
-                  suggestion,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Row(
+            children: [
+              for (int i = 0; i < widget.suggestions.length; i++) ...[
+                _buildSuggestionChip(widget.suggestions[i]),
+                if (i < widget.suggestions.length - 1) const SizedBox(width: 8),
+              ],
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildSendButton() {
+  Widget _buildSuggestionChip(String suggestion) {
+    return GestureDetector(
+      onTap: () {
+        widget.controller.text = suggestion;
+        widget.onSuggestionTap?.call(suggestion);
+      },
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 32),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        child: Text(
+          suggestion,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.9),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+
+  /// Input field and circular send button in a single row.
+  Widget _buildInputRow() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(child: _buildInputField()),
+        const SizedBox(width: 10),
+        _buildCircularSendButton(),
+      ],
+    );
+  }
+
+  Widget _buildInputField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: TextField(
+        controller: widget.controller,
+        focusNode: widget.focusNode,
+        enabled: widget.isEnabled,
+        style: const TextStyle(color: Colors.white, fontSize: 15),
+        maxLines: 4,
+        minLines: 1,
+        onSubmitted: widget.onSubmitted,
+        textInputAction: TextInputAction.send,
+        decoration: InputDecoration(
+          hintText: widget.hintText,
+          hintStyle: TextStyle(
+            color: Colors.white.withValues(alpha: 0.5),
+            fontSize: 15,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 18,
+            vertical: 12,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCircularSendButton() {
     return ValueListenableBuilder<TextEditingValue>(
       valueListenable: widget.controller,
       builder: (context, value, child) {
-        final hasText = value.text.trim().isNotEmpty;
-        
+        final hasText = value.text.trim().isNotEmpty && widget.isEnabled;
+
         return AnimatedOpacity(
-          opacity: hasText ? 1.0 : 0.6,
+          opacity: hasText ? 1.0 : 0.45,
           duration: const Duration(milliseconds: 200),
           child: SizedBox(
-            width: double.infinity,
+            width: 48,
             height: 48,
-            child: ElevatedButton(
-              onPressed: hasText && widget.isEnabled ? widget.onSend : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: hasText && widget.isEnabled
-                    ? const Color(0xFF00D4FF)
-                    : Colors.white.withOpacity(0.1),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            child: Material(
+              color: hasText
+                  ? const Color(0xFF00D4FF)
+                  : Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(24),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(24),
+                onTap: hasText ? widget.onSend : null,
+                child: const Center(
+                  child: Icon(
+                    Icons.send_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                 ),
-                elevation: 0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.send,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    hasText ? 'Send Message' : 'Type something...',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
               ),
             ),
           ),

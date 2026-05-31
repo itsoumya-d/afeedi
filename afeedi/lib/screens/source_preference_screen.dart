@@ -13,18 +13,18 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
-  
+
   Map<String, double> _platformPriorities = {
     'youtube': 80.0,
     'instagram': 60.0,
     'tiktok': 40.0,
     'facebook': 30.0,
   };
-  
+
   bool _showAttribution = true;
   bool _showCreatorInfo = true;
   String _attributionStyle = 'overlay';
-  
+
   final List<Map<String, dynamic>> _platforms = [
     {
       'id': 'youtube',
@@ -74,7 +74,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
     _fadeController.dispose();
     super.dispose();
   }
-  
+
   void _continue() {
     // Save platform preferences
     NavigationService.pushNamed('/calendar-customization');
@@ -109,6 +109,9 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
                         const SizedBox(height: 32),
                         _buildPreviewSection(),
                         const SizedBox(height: 40),
+                        SizedBox(
+                          height: MediaQuery.of(context).padding.bottom + 16,
+                        ),
                       ],
                     ),
                   ),
@@ -121,7 +124,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -135,9 +138,12 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -156,7 +162,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
           Container(
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(2),
             ),
             child: FractionallySizedBox(
@@ -185,8 +191,10 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
           const SizedBox(height: 8),
           Text(
             'Customize your content mix from different platforms',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontSize: 16,
             ),
             textAlign: TextAlign.center,
@@ -195,7 +203,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
       ),
     );
   }
-  
+
   Widget _buildPlatformPrioritiesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,8 +219,10 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
         const SizedBox(height: 8),
         Text(
           'Adjust how much content you want from each platform',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
           ),
         ),
@@ -221,17 +231,17 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
       ],
     );
   }
-  
+
   Widget _buildPlatformSlider(Map<String, dynamic> platform) {
     final priority = _platformPriorities[platform['id']] ?? 50.0;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -240,7 +250,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: platform['color'].withOpacity(0.2),
+                  color: platform['color'].withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -256,6 +266,8 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
                   children: [
                     Text(
                       platform['name'],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -264,8 +276,10 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
                     ),
                     Text(
                       platform['description'],
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 14,
                       ),
                     ),
@@ -273,9 +287,12 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: platform['color'].withOpacity(0.2),
+                  color: platform['color'].withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -293,9 +310,9 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: platform['color'],
-              inactiveTrackColor: Colors.white.withOpacity(0.2),
+              inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
               thumbColor: platform['color'],
-              overlayColor: platform['color'].withOpacity(0.2),
+              overlayColor: platform['color'].withValues(alpha: 0.2),
               trackHeight: 6,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
             ),
@@ -315,7 +332,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
       ),
     );
   }
-  
+
   Widget _buildAttributionSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,8 +348,10 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
         const SizedBox(height: 8),
         Text(
           'Configure how creator information is displayed',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
           ),
         ),
@@ -372,7 +391,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
       ],
     );
   }
-  
+
   Widget _buildAttributionToggle(
     String title,
     String subtitle,
@@ -382,9 +401,9 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -394,6 +413,8 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
               children: [
                 Text(
                   title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -402,8 +423,10 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
                 ),
                 Text(
                   subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
                 ),
@@ -414,32 +437,32 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
             value: value,
             onChanged: onChanged,
             activeColor: AppTheme.primaryCyan,
-            activeTrackColor: AppTheme.primaryCyan.withOpacity(0.3),
+            activeTrackColor: AppTheme.primaryCyan.withValues(alpha: 0.3),
             inactiveThumbColor: Colors.grey,
-            inactiveTrackColor: Colors.grey.withOpacity(0.3),
+            inactiveTrackColor: Colors.grey.withValues(alpha: 0.3),
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildAttributionStyleOption(String value, String label) {
     final isSelected = _attributionStyle == value;
-    
+
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => _attributionStyle = value),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected 
-                ? AppTheme.primaryCyan.withOpacity(0.2)
-                : Colors.white.withOpacity(0.1),
+            color: isSelected
+                ? AppTheme.primaryCyan.withValues(alpha: 0.2)
+                : Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isSelected 
+              color: isSelected
                   ? AppTheme.primaryCyan
-                  : Colors.white.withOpacity(0.3),
+                  : Colors.white.withValues(alpha: 0.3),
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -456,7 +479,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
       ),
     );
   }
-  
+
   Widget _buildPreviewSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -472,8 +495,10 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
         const SizedBox(height: 8),
         Text(
           'See how content will appear with your settings',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withValues(alpha: 0.8),
             fontSize: 14,
           ),
         ),
@@ -481,9 +506,9 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
         Container(
           height: 200,
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.2)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
           ),
           child: Stack(
             children: [
@@ -495,8 +520,8 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.blue.withOpacity(0.3),
-                      Colors.purple.withOpacity(0.3),
+                      Colors.blue.withValues(alpha: 0.3),
+                      Colors.purple.withValues(alpha: 0.3),
                     ],
                   ),
                 ),
@@ -516,12 +541,12 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
       ],
     );
   }
-  
+
   Widget _buildAttributionPreview() {
     Widget attributionWidget = Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.7),
+        color: Colors.black.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -534,7 +559,10 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
             style: TextStyle(color: Colors.white, fontSize: 12),
           ),
           if (_showCreatorInfo) ...[
-            const Text(' • ', style: TextStyle(color: Colors.white, fontSize: 12)),
+            const Text(
+              ' • ',
+              style: TextStyle(color: Colors.white, fontSize: 12),
+            ),
             const Text(
               '@creator',
               style: TextStyle(color: Colors.white, fontSize: 12),
@@ -543,14 +571,10 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
         ],
       ),
     );
-    
+
     switch (_attributionStyle) {
       case 'overlay':
-        return Positioned(
-          top: 12,
-          left: 12,
-          child: attributionWidget,
-        );
+        return Positioned(top: 12, left: 12, child: attributionWidget);
       case 'bottom':
         return Positioned(
           bottom: 12,
@@ -559,20 +583,12 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
           child: attributionWidget,
         );
       case 'corner':
-        return Positioned(
-          top: 12,
-          right: 12,
-          child: attributionWidget,
-        );
+        return Positioned(top: 12, right: 12, child: attributionWidget);
       default:
-        return Positioned(
-          top: 12,
-          left: 12,
-          child: attributionWidget,
-        );
+        return Positioned(top: 12, left: 12, child: attributionWidget);
     }
   }
-  
+
   Widget _buildBottomSection() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -593,10 +609,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
               ),
               child: const Text(
                 'Continue',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -609,7 +622,7 @@ class _SourcePreferenceScreenState extends State<SourcePreferenceScreen>
             child: Text(
               'Use default settings',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 16,
               ),
             ),

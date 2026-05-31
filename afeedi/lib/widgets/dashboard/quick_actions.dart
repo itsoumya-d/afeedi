@@ -12,9 +12,9 @@ class QuickActions extends StatelessWidget {
       children: [
         Text(
           'Quick Actions',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         GridView.count(
@@ -41,7 +41,7 @@ class QuickActions extends StatelessWidget {
               title: 'Notifications',
               subtitle: 'Check updates',
               gradient: const LinearGradient(
-                colors: [AppTheme.primaryPink, AppTheme.accentOrange],
+                colors: [AppTheme.primaryPink, Color(0xFFFF7043)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -52,7 +52,7 @@ class QuickActions extends StatelessWidget {
               title: 'Schedule',
               subtitle: 'Plan your day',
               gradient: const LinearGradient(
-                colors: [AppTheme.accentOrange, AppTheme.accentPurple],
+                colors: [Color(0xFFFF7043), Color(0xFF7C4DFF)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -63,7 +63,7 @@ class QuickActions extends StatelessWidget {
               title: 'Settings',
               subtitle: 'Customize app',
               gradient: const LinearGradient(
-                colors: [AppTheme.accentPurple, AppTheme.primaryCyan],
+                colors: [Color(0xFF7C4DFF), AppTheme.primaryCyan],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -108,11 +108,7 @@ class _QuickActionCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                color: Colors.white,
-                size: 32,
-              ),
+              Icon(icon, color: Colors.white, size: 32),
               const SizedBox(height: 8),
               Text(
                 title,
@@ -124,10 +120,7 @@ class _QuickActionCard extends StatelessWidget {
               ),
               Text(
                 subtitle,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ],
           ),

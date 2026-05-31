@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../src/stubs/html.dart' if (dart.library.html) 'dart:html' as html;
 import 'dart:math';
 import '../../models/content_model.dart';
 import '../../services/youtube_player_service.dart';
-import '../../services/analytics_service.dart';
-import '../../core/theme/app_theme.dart';
 
 class EnhancedYouTubePlayer extends StatefulWidget {
   final Content content;
@@ -15,7 +15,7 @@ class EnhancedYouTubePlayer extends StatefulWidget {
   final VoidCallback? onPlayerReady;
   final Function(String)? onError;
   final bool allowFullscreen;
-  
+
   const EnhancedYouTubePlayer({
     super.key,
     required this.content,
@@ -26,7 +26,7 @@ class EnhancedYouTubePlayer extends StatefulWidget {
     this.onError,
     this.allowFullscreen = true,
   });
-  
+
   @override
   State<EnhancedYouTubePlayer> createState() => _EnhancedYouTubePlayerState();
 }
@@ -34,44 +34,59 @@ class EnhancedYouTubePlayer extends StatefulWidget {
 class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
   bool _isLoading = true;
   bool _hasError = false;
-  String _errorMessage = '';
-  YouTubePlayerResult? _playerResult;
   String? _containerId;
   bool _showFallbackOptions = false;
-  
+  int _retryCount = 0;
+  static const _maxRetries = 3;
+  String _quality = 'Auto';
+
   @override
   void initState() {
     super.initState();
-    _initializePlayer();
+    _loadQualitySetting().then((_) => _initializePlayer());
   }
-  
+
+  Future<void> _loadQualitySetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    _quality = prefs.getString('setting_video_quality') ?? 'Auto';
+  }
+
   @override
   void dispose() {
     _cleanupPlayer();
     super.dispose();
   }
-  
+
   Future<void> _initializePlayer() async {
     if (widget.content.platform != PlatformType.youtube) {
       setState(() {
         _hasError = true;
-        _errorMessage = 'Content is not from YouTube';
         _isLoading = false;
       });
       return;
     }
-    
+
+    // Guard against missing or empty video IDs before attempting player init
+    if (widget.content.platformContentId.isEmpty) {
+      setState(() {
+        _hasError = true;
+        _isLoading = false;
+      });
+      widget.onError?.call('Missing YouTube video ID');
+      return;
+    }
+
     try {
       setState(() {
         _isLoading = true;
         _hasError = false;
       });
-      
+
       // Generate unique container ID for web
       if (kIsWeb) {
         _containerId = 'youtube-player-${Random().nextInt(999999)}';
       }
-      
+
       // Wait for widget to be built before creating player
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await _createPlayer();
@@ -79,13 +94,12 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
     } catch (error) {
       setState(() {
         _hasError = true;
-        _errorMessage = error.toString();
         _isLoading = false;
       });
       widget.onError?.call(error.toString());
     }
   }
-  
+
   Future<void> _createPlayer() async {
     try {
       final result = await YouTubePlayerService.instance.createPlayer(
@@ -93,16 +107,15 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
         containerId: _containerId ?? 'youtube-player-fallback',
         autoplay: widget.autoPlay,
         showControls: widget.showControls,
+        quality: _quality,
       );
-      
+
       setState(() {
-        _playerResult = result;
         _isLoading = false;
         _hasError = !result.success;
-        _errorMessage = result.errorMessage ?? '';
         _showFallbackOptions = !result.success;
       });
-      
+
       if (result.success) {
         widget.onPlayerReady?.call();
       } else {
@@ -111,25 +124,24 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
     } catch (error) {
       setState(() {
         _hasError = true;
-        _errorMessage = error.toString();
         _isLoading = false;
         _showFallbackOptions = true;
       });
       widget.onError?.call(error.toString());
     }
   }
-  
+
   void _cleanupPlayer() {
     if (kIsWeb && _containerId != null) {
       final container = html.document.getElementById(_containerId!);
       container?.children.clear();
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final aspectRatio = widget.aspectRatio ?? 16 / 9;
-    
+
     return AspectRatio(
       aspectRatio: aspectRatio,
       child: Container(
@@ -144,23 +156,51 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       ),
     );
   }
-  
+
   Widget _buildPlayerContent() {
     if (_isLoading) {
       return _buildLoadingState();
     }
-    
+
+    // Show dedicated "video unavailable" state when video ID is missing
+    if (widget.content.platformContentId.isEmpty) {
+      return _buildVideoUnavailableState();
+    }
+
     if (_hasError || _showFallbackOptions) {
       return _buildErrorState();
     }
-    
+
     if (kIsWeb && _containerId != null) {
       return _buildWebPlayer();
     }
-    
+
     return _buildMobilePlayer();
   }
-  
+
+  Widget _buildVideoUnavailableState() {
+    return Container(
+      color: Colors.black,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.broken_image, color: Colors.white30, size: 56),
+            const SizedBox(height: 16),
+            const Text(
+              'Video unavailable',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildLoadingState() {
     return Container(
       color: Colors.black,
@@ -169,21 +209,23 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
           // Thumbnail background
           if (widget.content.thumbnailUrl != null)
             Positioned.fill(
-              child: Image.network(
-                widget.content.thumbnailUrl!,
+              child: CachedNetworkImage(
+                imageUrl: widget.content.thumbnailUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return _buildThumbnailPlaceholder();
-                },
+                placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+                errorWidget: (ctx, url, err) => Container(
+                  color: Colors.grey[900],
+                  child: const Icon(Icons.broken_image, color: Colors.white38),
+                ),
               ),
             )
           else
             _buildThumbnailPlaceholder(),
-          
+
           // Loading overlay
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.7),
+              color: Colors.black.withValues(alpha: 0.7),
               child: const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -194,10 +236,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
                     SizedBox(height: 16),
                     Text(
                       'Loading YouTube Player...',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 14),
                     ),
                   ],
                 ),
@@ -208,7 +247,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       ),
     );
   }
-  
+
   Widget _buildErrorState() {
     return Container(
       color: Colors.black,
@@ -217,21 +256,23 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
           // Thumbnail background
           if (widget.content.thumbnailUrl != null)
             Positioned.fill(
-              child: Image.network(
-                widget.content.thumbnailUrl!,
+              child: CachedNetworkImage(
+                imageUrl: widget.content.thumbnailUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return _buildThumbnailPlaceholder();
-                },
+                placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+                errorWidget: (ctx, url, err) => Container(
+                  color: Colors.grey[900],
+                  child: const Icon(Icons.broken_image, color: Colors.white38),
+                ),
               ),
             )
           else
             _buildThumbnailPlaceholder(),
-          
+
           // Error overlay with options
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.8),
+              color: Colors.black.withValues(alpha: 0.8),
               padding: const EdgeInsets.all(16),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -257,7 +298,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
                   Text(
                     'Tap to watch on YouTube',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 14,
                     ),
                     textAlign: TextAlign.center,
@@ -272,10 +313,25 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       ),
     );
   }
-  
+
   Widget _buildActionButtons() {
+    final bool exhausted = _retryCount >= _maxRetries;
+
     return Column(
       children: [
+        if (exhausted)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              'Video unavailable. Please try again later.',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.9),
+                fontSize: 13,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+
         // Primary action - Open in YouTube
         ElevatedButton.icon(
           onPressed: _openInYouTube,
@@ -289,22 +345,22 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           ),
         ),
-        
+
         const SizedBox(height: 12),
-        
-        // Secondary action - Retry embed
+
+        // Secondary action - Retry embed (always visible; resets count when exhausted)
         TextButton.icon(
-          onPressed: _retryPlayer,
-          icon: Icon(Icons.refresh, color: Colors.white.withOpacity(0.8)),
+          onPressed: exhausted ? _resetAndRetry : _retryPlayer,
+          icon: Icon(Icons.refresh, color: Colors.white.withValues(alpha: 0.8)),
           label: Text(
-            'Try Again',
-            style: TextStyle(color: Colors.white.withOpacity(0.8)),
+            exhausted ? 'Retry' : 'Try Again',
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
           ),
         ),
       ],
     );
   }
-  
+
   Widget _buildWebPlayer() {
     return Stack(
       children: [
@@ -317,7 +373,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
             },
           ),
         ),
-        
+
         // Fallback overlay if needed
         if (_showFallbackOptions)
           Positioned(
@@ -325,19 +381,16 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
             right: 8,
             child: IconButton(
               onPressed: _openInYouTube,
-              icon: const Icon(
-                Icons.open_in_new,
-                color: Colors.white,
-              ),
+              icon: const Icon(Icons.open_in_new, color: Colors.white),
               style: IconButton.styleFrom(
-                backgroundColor: Colors.black.withOpacity(0.7),
+                backgroundColor: Colors.black.withValues(alpha: 0.7),
               ),
             ),
           ),
       ],
     );
   }
-  
+
   Widget _buildMobilePlayer() {
     return GestureDetector(
       onTap: _openInYouTube,
@@ -346,21 +399,23 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
           // Thumbnail
           if (widget.content.thumbnailUrl != null)
             Positioned.fill(
-              child: Image.network(
-                widget.content.thumbnailUrl!,
+              child: CachedNetworkImage(
+                imageUrl: widget.content.thumbnailUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return _buildThumbnailPlaceholder();
-                },
+                placeholder: (ctx, url) => Container(color: Colors.grey[900]),
+                errorWidget: (ctx, url, err) => Container(
+                  color: Colors.grey[900],
+                  child: const Icon(Icons.broken_image, color: Colors.white38),
+                ),
               ),
             )
           else
             _buildThumbnailPlaceholder(),
-          
+
           // Play button overlay
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               child: const Center(
                 child: Icon(
                   Icons.play_circle_filled,
@@ -370,7 +425,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
               ),
             ),
           ),
-          
+
           // Duration badge
           if (widget.content.durationSeconds != null)
             Positioned(
@@ -379,7 +434,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.8),
+                  color: Colors.black.withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -392,7 +447,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
                 ),
               ),
             ),
-          
+
           // YouTube logo
           Positioned(
             top: 8,
@@ -417,7 +472,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       ),
     );
   }
-  
+
   Widget _buildThumbnailPlaceholder() {
     return Container(
       color: Colors.grey[900],
@@ -425,11 +480,7 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.play_circle_outline,
-              color: Colors.red,
-              size: 48,
-            ),
+            Icon(Icons.play_circle_outline, color: Colors.red, size: 48),
             SizedBox(height: 8),
             Text(
               'YouTube',
@@ -444,10 +495,12 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       ),
     );
   }
-  
+
   Future<void> _openInYouTube() async {
-    final success = await YouTubePlayerService.instance.openInYouTube(widget.content);
-    
+    final success = await YouTubePlayerService.instance.openInYouTube(
+      widget.content,
+    );
+
     if (!success) {
       // Show error message
       if (mounted) {
@@ -460,14 +513,23 @@ class _EnhancedYouTubePlayerState extends State<EnhancedYouTubePlayer> {
       }
     }
   }
-  
+
   Future<void> _retryPlayer() async {
+    if (_retryCount >= _maxRetries) return;
+
     setState(() {
       _isLoading = true;
       _hasError = false;
       _showFallbackOptions = false;
     });
-    
+
+    await Future.delayed(Duration(seconds: pow(2, _retryCount).toInt()));
+    _retryCount++;
     await _createPlayer();
+  }
+
+  void _resetAndRetry() {
+    _retryCount = 0;
+    _retryPlayer();
   }
 }

@@ -2,15 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class OAuthService {
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: [
-      'email',
-      'https://www.googleapis.com/auth/youtube.readonly',
-    ],
+    scopes: ['email', 'https://www.googleapis.com/auth/youtube.readonly'],
   );
 
   // Google Sign-In (for authentication)
@@ -41,10 +36,7 @@ class OAuthService {
     try {
       final result = await connectGoogle();
       if (result != null) {
-        return {
-          ...result,
-          'platform': 'youtube',
-        };
+        return {...result, 'platform': 'youtube'};
       }
     } catch (error) {
       debugPrint('YouTube OAuth Error: $error');
@@ -58,7 +50,7 @@ class OAuthService {
       final LoginResult result = await FacebookAuth.instance.login(
         permissions: ['instagram_basic', 'instagram_content_publish'],
       );
-      
+
       if (result.status == LoginStatus.success) {
         final userData = await FacebookAuth.instance.getUserData(
           fields: "name,email,picture",
@@ -76,25 +68,16 @@ class OAuthService {
     return null;
   }
 
-  // TikTok OAuth (using Web Auth)
+  // TikTok OAuth
+  // TikTok's OAuth requires registration in the TikTok for Developers portal
+  // (https://developers.tiktok.com) and approval for the Login Kit product.
+  // Until a real client_key is configured, this returns null to prevent
+  // a fake "Connected" badge from appearing to users.
   static Future<Map<String, dynamic>?> connectTikTok() async {
-    try {
-      // Simulate OAuth flow with mock data for development
-      await Future.delayed(const Duration(seconds: 2));
-      
-      // Return mock successful connection
-      return {
-        'platform': 'tiktok',
-        'authCode': 'mock_tiktok_code_${DateTime.now().millisecondsSinceEpoch}',
-        'accessToken': 'mock_tiktok_token_${DateTime.now().millisecondsSinceEpoch}',
-        'userId': 'mock_tiktok_user_${DateTime.now().millisecondsSinceEpoch}',
-        'displayName': 'TikTok User',
-        'connected_at': DateTime.now().toIso8601String(),
-      };
-    } catch (error) {
-      debugPrint('TikTok OAuth Error: $error');
-      return null;
-    }
+    debugPrint(
+      'TikTok OAuth: not configured — register at developers.tiktok.com',
+    );
+    return null;
   }
 
   // Facebook OAuth
@@ -103,7 +86,7 @@ class OAuthService {
       final LoginResult result = await FacebookAuth.instance.login(
         permissions: ['email', 'public_profile', 'pages_read_engagement'],
       );
-      
+
       if (result.status == LoginStatus.success) {
         final userData = await FacebookAuth.instance.getUserData(
           fields: "name,email,picture",
@@ -130,7 +113,7 @@ class OAuthService {
           AppleIDAuthorizationScopes.fullName,
         ],
       );
-      
+
       return {
         'platform': 'apple',
         'userIdentifier': credential.userIdentifier,

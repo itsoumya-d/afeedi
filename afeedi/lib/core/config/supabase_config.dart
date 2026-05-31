@@ -7,21 +7,21 @@ class SupabaseConfig {
     'SUPABASE_URL',
     defaultValue: 'https://your-project.supabase.co',
   );
-  
+
   static const String supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
     defaultValue: 'your-anon-key-here',
   );
-  
+
   static const String supabaseServiceRoleKey = String.fromEnvironment(
     'SUPABASE_SERVICE_ROLE_KEY',
     defaultValue: 'your-service-role-key-here',
   );
-  
+
   // Development configuration
   static const String devSupabaseUrl = 'https://your-dev-project.supabase.co';
   static const String devSupabaseAnonKey = 'your-dev-anon-key';
-  
+
   // Get the appropriate configuration based on environment
   static String get currentUrl {
     if (kDebugMode) {
@@ -29,23 +29,23 @@ class SupabaseConfig {
     }
     return supabaseUrl;
   }
-  
+
   static String get currentAnonKey {
     if (kDebugMode) {
       return devSupabaseAnonKey;
     }
     return supabaseAnonKey;
   }
-  
+
   // Stub initialize method
   static Future<void> initialize() async {
     // No-op implementation for local storage
     debugPrint('Supabase initialization skipped - using local storage');
   }
-  
+
   // Stub client getter
   static SupabaseClient get client => SupabaseClient();
-  
+
   // Database table names
   static const String usersTable = 'users';
   static const String userProfilesTable = 'user_profiles';
@@ -132,131 +132,135 @@ class SupabaseQueryBuilder {
   Future<void> upsert(Map<String, dynamic> data) async {
     // No-op implementation
   }
-  
+
   Future<void> insert(Map<String, dynamic> data) async {
     // No-op implementation
   }
-  
+
   Future<void> update(Map<String, dynamic> data) async {
     // No-op implementation
   }
-  
+
   Future<void> delete() async {
     // No-op implementation
   }
-  
+
   Future<List<Map<String, dynamic>>> select([String? columns]) async {
     return [];
   }
-  
+
   SupabaseQueryBuilder eq(String column, dynamic value) {
     return this;
   }
-  
+
   SupabaseQueryBuilder neq(String column, dynamic value) {
     return this;
   }
-  
+
   SupabaseQueryBuilder gt(String column, dynamic value) {
     return this;
   }
-  
+
   SupabaseQueryBuilder gte(String column, dynamic value) {
     return this;
   }
-  
+
   SupabaseQueryBuilder lt(String column, dynamic value) {
     return this;
   }
-  
+
   SupabaseQueryBuilder lte(String column, dynamic value) {
     return this;
   }
-  
+
   SupabaseQueryBuilder like(String column, String pattern) {
     return this;
   }
-  
+
   SupabaseQueryBuilder ilike(String column, String pattern) {
     return this;
   }
-  
+
   SupabaseQueryBuilder is_(String column, dynamic value) {
     return this;
   }
-  
+
   SupabaseQueryBuilder in_(String column, List values) {
     return this;
   }
-  
+
   SupabaseQueryBuilder contains(String column, dynamic value) {
     return this;
   }
-  
+
   SupabaseQueryBuilder containedBy(String column, dynamic value) {
     return this;
   }
-  
+
   SupabaseQueryBuilder rangeGt(String column, dynamic value) {
     return this;
   }
-  
+
   SupabaseQueryBuilder rangeGte(String column, dynamic value) {
     return this;
   }
-  
+
   SupabaseQueryBuilder rangeLt(String column, dynamic value) {
     return this;
   }
-  
+
   SupabaseQueryBuilder rangeLte(String column, dynamic value) {
     return this;
   }
-  
+
   SupabaseQueryBuilder rangeAdjacent(String column, dynamic value) {
     return this;
   }
-  
+
   SupabaseQueryBuilder overlaps(String column, dynamic value) {
     return this;
   }
-  
-  SupabaseQueryBuilder textSearch(String column, String query, {String? config}) {
+
+  SupabaseQueryBuilder textSearch(
+    String column,
+    String query, {
+    String? config,
+  }) {
     return this;
   }
-  
+
   SupabaseQueryBuilder match(Map<String, dynamic> query) {
     return this;
   }
-  
+
   SupabaseQueryBuilder not(String column, String operator, dynamic value) {
     return this;
   }
-  
+
   SupabaseQueryBuilder or(String filters) {
     return this;
   }
-  
+
   SupabaseQueryBuilder filter(String column, String operator, dynamic value) {
     return this;
   }
-  
+
   SupabaseQueryBuilder order(String column, {bool ascending = true}) {
     return this;
   }
-  
+
   SupabaseQueryBuilder limit(int count) {
     return this;
   }
-  
+
   SupabaseQueryBuilder range(int from, int to) {
     return this;
   }
-  
+
   SupabaseQueryBuilder single() {
     return this;
   }
-  
+
   SupabaseQueryBuilder maybeSingle() {
     return this;
   }

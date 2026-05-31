@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/ad_service.dart';
 import '../services/analytics_service.dart';
 import '../services/subscription_service.dart';
 
@@ -557,27 +558,74 @@ class _PremiumScreenState extends State<PremiumScreen> {
           );
         }
 
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () => _handleSubscribe(context, planName),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: color,
-              foregroundColor: Colors.black,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+        return Column(
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => _handleSubscribe(context, planName),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: color,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Start 7-Day Free Trial — $price after',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-              elevation: 0,
             ),
-            child: Text(
-              'Start 7-Day Free Trial — $price after',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _handleWatchAd(context),
+                icon: const Icon(Icons.play_circle_outline, size: 18),
+                label: const Text(
+                  'Watch a short ad for 24-hour access',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white70,
+                  side: const BorderSide(color: Colors.white24),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
             ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _handleWatchAd(BuildContext context) {
+    AnalyticsService.instance.trackUserInteraction(
+      action: 'watch_ad_tap',
+      screen: 'premium',
+    );
+    AdService.instance.showRewardedAd(
+      onRewarded: () {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('24-hour Pro access unlocked! Enjoy Afeedi.'),
+            backgroundColor: Color(0xFF32D74B),
           ),
         );
+        Navigator.pop(context);
       },
     );
   }

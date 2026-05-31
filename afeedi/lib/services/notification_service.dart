@@ -309,19 +309,19 @@ class NotificationService {
       _initTimezone();
       final location = tz.local;
       final now = tz.TZDateTime.now(location);
-      // Calculate next Sunday at 10:00 AM
-      final daysUntilSunday = (DateTime.sunday - now.weekday + 7) % 7;
-      var nextSunday = tz.TZDateTime(
+      // Calculate next Friday at 6:00 PM — peak engagement window per research
+      final daysUntilFriday = (DateTime.friday - now.weekday + 7) % 7;
+      var nextFriday = tz.TZDateTime(
         location,
         now.year,
         now.month,
-        now.day + daysUntilSunday,
-        10, // 10 AM
+        now.day + daysUntilFriday,
+        18, // 6 PM
         0,
       );
-      // If today is Sunday but already past 10AM, schedule for next week
-      if (daysUntilSunday == 0 && now.hour >= 10) {
-        nextSunday = nextSunday.add(const Duration(days: 7));
+      // If today is Friday but already past 6PM, schedule for next week
+      if (daysUntilFriday == 0 && now.hour >= 18) {
+        nextFriday = nextFriday.add(const Duration(days: 7));
       }
 
       final genreHint = genres.isNotEmpty
@@ -334,16 +334,14 @@ class NotificationService {
         _weeklyNewContentId,
         'Your Weekly Digest is ready ✨',
         '5 top picks in $genreHint — curated just for you.',
-        nextSunday,
+        nextFriday,
         details,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.wallClockTime,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
       );
-      debugPrint(
-        'NotificationService: weekly digest scheduled for Sunday 10AM',
-      );
+      debugPrint('NotificationService: weekly digest scheduled for Friday 6PM');
     } catch (e) {
       debugPrint('NotificationService _scheduleWeeklyDigest error: $e');
     }

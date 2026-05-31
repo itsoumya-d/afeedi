@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/content_model.dart';
+import '../services/analytics_service.dart';
 import '../services/content_service.dart';
 import '../services/user_interaction_service.dart';
 import '../widgets/streaming/enhanced_youtube_player.dart';
@@ -26,6 +28,7 @@ class _PlayerScreenState extends State<PlayerScreen>
   bool _isFullscreen = false;
   bool _isDescriptionExpanded = false;
   bool _dataSaverMode = false;
+  bool _isRewatch = false;
   double _playbackSpeed = 1.0;
   late DateTime _watchStartTime;
   List<Content> _relatedContent = [];
@@ -41,6 +44,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     _incrementVideoCount();
     _loadRelatedContent();
     _loadSettings();
+    _checkRewatch();
     _progressTimer = Timer.periodic(
       const Duration(seconds: 30),
       (_) => _saveWatchTime(),
@@ -49,6 +53,14 @@ class _PlayerScreenState extends State<PlayerScreen>
       _isLiked = UserInteractionService.instance.isLiked(widget.content.id);
       _isSaved = UserInteractionService.instance.isSaved(widget.content.id);
     });
+  }
+
+  Future<void> _checkRewatch() async {
+    final prefs = await SharedPreferences.getInstance();
+    final watchedIds = prefs.getStringList('watched_ids') ?? [];
+    if (watchedIds.contains(widget.content.id)) {
+      _isRewatch = true;
+    }
   }
 
   Future<void> _loadSettings() async {
@@ -155,19 +167,30 @@ class _PlayerScreenState extends State<PlayerScreen>
       DateTime.now().toIso8601String(),
     );
 
-    // Update implicit genre weights when user watches >20% of content
-    if (progress > 0.2 && widget.content.tags.isNotEmpty) {
+    // Update implicit genre weights based on watch behaviour
+    if (widget.content.tags.isNotEmpty) {
       final weightsRaw = prefs.getString('genre_implicit_weights') ?? '';
       final weights = <String, int>{};
       for (final entry in weightsRaw.split(',')) {
         final parts = entry.split(':');
         if (parts.length == 2) weights[parts[0]] = int.tryParse(parts[1]) ?? 0;
       }
-      // Weight increases proportionally to watch completion (0.2→1.0 mapped to 1→5 points)
-      final points = ((progress - 0.2) / 0.8 * 4 + 1).round().clamp(1, 5);
-      for (final tag in widget.content.tags) {
-        if (tag.isNotEmpty) weights[tag] = (weights[tag] ?? 0) + points;
+
+      if (elapsed < 5 && progress < 0.05) {
+        // Early skip (< 5 s): negative signal — penalise genre by 1 point
+        for (final tag in widget.content.tags) {
+          if (tag.isNotEmpty) weights[tag] = (weights[tag] ?? 0) - 1;
+        }
+      } else if (progress > 0.2) {
+        // Weight increases proportionally to watch completion (0.2→1.0 mapped to 1→5 points)
+        int points = ((progress - 0.2) / 0.8 * 4 + 1).round().clamp(1, 5);
+        // Rewatch bonus: +1 extra point for re-watching content
+        if (_isRewatch && progress > 0.1) points += 1;
+        for (final tag in widget.content.tags) {
+          if (tag.isNotEmpty) weights[tag] = (weights[tag] ?? 0) + points;
+        }
       }
+
       final newWeightsRaw = weights.entries
           .where((e) => e.key.isNotEmpty)
           .map((e) => '${e.key}:${e.value}')
@@ -188,13 +211,144 @@ class _PlayerScreenState extends State<PlayerScreen>
   }
 
   void _share() {
-    final url = widget.content.videoUrl ?? widget.content.embedUrl;
-    if (url != null && url.isNotEmpty) {
-      Clipboard.setData(ClipboardData(text: url));
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Link copied to clipboard')));
-    }
+    final url = widget.content.videoUrl ?? widget.content.embedUrl ?? '';
+    final title = widget.content.title ?? 'Check this out';
+    final message = Uri.encodeComponent('$title\n$url');
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF1A1A2E),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Share clip',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _shareChannelButton(
+                      ctx,
+                      label: 'WhatsApp',
+                      icon: Icons.chat,
+                      color: const Color(0xFF25D366),
+                      onTap: () {
+                        launchUrl(
+                          Uri.parse('https://wa.me/?text=$message'),
+                          mode: LaunchMode.externalApplication,
+                        );
+                        _trackShare('whatsapp');
+                      },
+                    ),
+                    _shareChannelButton(
+                      ctx,
+                      label: 'Twitter / X',
+                      icon: Icons.alternate_email,
+                      color: const Color(0xFF1DA1F2),
+                      onTap: () {
+                        launchUrl(
+                          Uri.parse(
+                            'https://twitter.com/intent/tweet?text=$message',
+                          ),
+                          mode: LaunchMode.externalApplication,
+                        );
+                        _trackShare('twitter');
+                      },
+                    ),
+                    _shareChannelButton(
+                      ctx,
+                      label: 'Email',
+                      icon: Icons.email_outlined,
+                      color: const Color(0xFFFF6B35),
+                      onTap: () {
+                        final subject = Uri.encodeComponent(title);
+                        final body = Uri.encodeComponent('$title\n\n$url');
+                        launchUrl(
+                          Uri.parse('mailto:?subject=$subject&body=$body'),
+                        );
+                        _trackShare('email');
+                      },
+                    ),
+                    _shareChannelButton(
+                      ctx,
+                      label: 'Copy link',
+                      icon: Icons.link,
+                      color: Colors.white24,
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: url));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Link copied to clipboard'),
+                          ),
+                        );
+                        _trackShare('clipboard');
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _shareChannelButton(
+    BuildContext ctx, {
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(ctx);
+        onTap();
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 26,
+            backgroundColor: color.withValues(alpha: 0.15),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white70, fontSize: 11),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _trackShare(String channel) {
+    AnalyticsService.instance.trackUserInteraction(
+      action: 'clip_share',
+      screen: 'player',
+      additionalData: {
+        'channel': channel,
+        'content_id': widget.content.id,
+        'platform': widget.content.platform.name,
+      },
+    );
   }
 
   String _speedLabel(double speed) {

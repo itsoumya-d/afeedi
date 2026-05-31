@@ -59,6 +59,66 @@ class AdService {
     return id;
   }
 
+  RewardedAd? _rewardedAd;
+  bool _rewardedAdLoading = false;
+
+  /// Preloads a rewarded ad. Call this when the app goes to foreground or
+  /// when the premium screen is about to be shown.
+  Future<void> loadRewardedAd() async {
+    if (!_initialized || _rewardedAdLoading || _rewardedAd != null) return;
+    final id = rewardedAdUnitId;
+    if (id.isEmpty) return;
+    _rewardedAdLoading = true;
+    try {
+      await RewardedAd.load(
+        adUnitId: id,
+        request: const AdRequest(),
+        rewardedAdLoadCallback: RewardedAdLoadCallback(
+          onAdLoaded: (ad) {
+            _rewardedAd = ad;
+            _rewardedAdLoading = false;
+            debugPrint('AdService: rewarded ad loaded');
+          },
+          onAdFailedToLoad: (err) {
+            _rewardedAd = null;
+            _rewardedAdLoading = false;
+            debugPrint('AdService: rewarded ad failed to load: $err');
+          },
+        ),
+      );
+    } catch (e) {
+      _rewardedAdLoading = false;
+      debugPrint('AdService: loadRewardedAd error: $e');
+    }
+  }
+
+  /// Shows the preloaded rewarded ad. Calls [onRewarded] if user completes it.
+  /// Automatically preloads the next ad after showing.
+  Future<void> showRewardedAd({VoidCallback? onRewarded}) async {
+    final ad = _rewardedAd;
+    if (ad == null) {
+      debugPrint('AdService: no rewarded ad available');
+      return;
+    }
+    _rewardedAd = null;
+    ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (a) {
+        a.dispose();
+        loadRewardedAd(); // Preload next
+      },
+      onAdFailedToShowFullScreenContent: (a, err) {
+        a.dispose();
+        loadRewardedAd();
+      },
+    );
+    await ad.show(
+      onUserEarnedReward: (_, __) {
+        onRewarded?.call();
+        debugPrint('AdService: user earned reward');
+      },
+    );
+  }
+
   Future<void> initialize() async {
     if (_initialized) return;
     _initialized = true;

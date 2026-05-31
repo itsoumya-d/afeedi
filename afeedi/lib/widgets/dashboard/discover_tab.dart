@@ -20,7 +20,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
   String _selectedTimeWindow = '7d';
   String _selectedTimeFilter = 'Today';
   String _sortMode =
-      'hot'; // 'hot' = sorted by viewCount desc, 'rising' = sorted by publishedAt desc
+      'hot'; // 'hot' = viewCount, 'rising' = publishedAt, 'velocity' = Wilson score
   List<Content> _content = [];
   List<Content> _trending = [];
   bool _isLoading = true;
@@ -211,10 +211,22 @@ class _DiscoverTabState extends State<DiscoverTab> {
     });
   }
 
+  /// Velocity score: (likeCount + viewCount × 0.01) / √(ageHours + 1)
+  /// Surfaces content gaining engagement fastest, regardless of total view count.
+  double _velocityScore(Content c) {
+    final ageHours = c.publishedAt != null
+        ? DateTime.now().difference(c.publishedAt!).inHours.toDouble()
+        : 720.0; // default 30 days for dateless content
+    return (c.likeCount + c.viewCount * 0.01) /
+        (ageHours + 1.0).clamp(1.0, double.infinity);
+  }
+
   List<Content> _applySort(List<Content> items) {
     final sorted = List<Content>.from(items);
     if (_sortMode == 'hot') {
       sorted.sort((a, b) => b.viewCount.compareTo(a.viewCount));
+    } else if (_sortMode == 'velocity') {
+      sorted.sort((a, b) => _velocityScore(b).compareTo(_velocityScore(a)));
     } else {
       // rising: newer first
       sorted.sort((a, b) {
@@ -407,6 +419,38 @@ class _DiscoverTabState extends State<DiscoverTab> {
                         ),
                       ),
                     ),
+                    const SizedBox(width: 4),
+                    Tooltip(
+                      message: 'Velocity — fastest-gaining right now',
+                      child: GestureDetector(
+                        onTap: () => _onSortModeChanged('velocity'),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: _sortMode == 'velocity'
+                                ? const Color(
+                                    0xFF00D4FF,
+                                  ).withValues(alpha: 0.25)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: _sortMode == 'velocity'
+                                  ? const Color(0xFF00D4FF)
+                                  : Colors.white24,
+                              width: 1,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.bolt,
+                            size: 18,
+                            color: _sortMode == 'velocity'
+                                ? const Color(0xFF00D4FF)
+                                : Colors.white54,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -416,7 +460,12 @@ class _DiscoverTabState extends State<DiscoverTab> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
               child: Text(
-                'Showing $_filteredCount trending items • $_selectedTimeFilter • ${_sortMode == 'hot' ? 'Hot' : 'Rising'}',
+                'Showing $_filteredCount trending items • $_selectedTimeFilter • '
+                '${_sortMode == 'hot'
+                    ? 'Hot'
+                    : _sortMode == 'velocity'
+                    ? 'Velocity'
+                    : 'Rising'}',
                 style: const TextStyle(color: Colors.white54, fontSize: 11),
               ),
             ),

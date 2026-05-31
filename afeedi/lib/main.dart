@@ -96,9 +96,15 @@ Future<void> _appMain() async {
     await UmpService.requestConsentIfRequired();
 
     // Initialize AdMob (non-blocking; ads load lazily when widgets mount)
-    AdService.instance.initialize().catchError(
-      (e) => debugPrint('AdService init error: $e'),
-    );
+    AdService.instance
+        .initialize()
+        .then((_) {
+          // Preload rewarded ad immediately after init so it's ready when needed
+          AdService.instance.loadRewardedAd().catchError(
+            (e) => debugPrint('AdService rewarded preload error: $e'),
+          );
+        })
+        .catchError((e) => debugPrint('AdService init error: $e'));
   } catch (error) {
     // Handle initialization errors
     debugPrint('Initialization error: $error');

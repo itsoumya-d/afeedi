@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
+import '../core/storage/local_storage_service.dart';
 import '../services/local_auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -597,53 +598,132 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       },
     ];
 
+    final connectedCount = platforms.where((p) => p['connected'] as bool).length;
+    final totalCount = platforms.length;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+          child: Row(
+            children: [
+              const Icon(Icons.devices, color: Color(0xFF4ECDC4), size: 18),
+              const SizedBox(width: 8),
+              const Text(
+                'Connected Platforms',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4ECDC4).withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF4ECDC4).withOpacity(0.3)),
+                ),
+                child: Text(
+                  '$connectedCount / $totalCount',
+                  style: const TextStyle(
+                    color: Color(0xFF4ECDC4),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
           child: Text(
-            'Connected Platforms',
+            'Connect all 4 to unlock the Content Explorer achievement',
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+              color: Colors.white.withOpacity(0.45),
+              fontSize: 11,
             ),
           ),
         ),
-        ...platforms.map((p) => ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: (p['color'] as Color).withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  p['icon'] as IconData,
-                  color: p['color'] as Color,
-                  size: 22,
+        ...platforms.map((p) => Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.03),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: (p['connected'] as bool)
+                      ? const Color(0xFF00E5FF).withOpacity(0.3)
+                      : Colors.white.withOpacity(0.08),
                 ),
               ),
-              title: Text(
-                p['name'] as String,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-              ),
-              trailing: p['connected'] as bool
-                  ? const Icon(Icons.check_circle, color: Color(0xFF00E5FF))
-                  : TextButton(
-                      onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('${p['name']} connection coming soon'),
-                          backgroundColor: const Color(0xFF2D1B69),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                leading: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: (p['color'] as Color).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    p['icon'] as IconData,
+                    color: p['color'] as Color,
+                    size: 22,
+                  ),
+                ),
+                title: Text(
+                  p['name'] as String,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                subtitle: Text(
+                  (p['connected'] as bool) ? 'Connected' : 'Not connected',
+                  style: TextStyle(
+                    color: (p['connected'] as bool)
+                        ? const Color(0xFF00E5FF).withOpacity(0.8)
+                        : Colors.white.withOpacity(0.4),
+                    fontSize: 11,
+                  ),
+                ),
+                trailing: (p['connected'] as bool)
+                    ? const Icon(Icons.check_circle, color: Color(0xFF00E5FF), size: 22)
+                    : TextButton(
+                        onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${p['name']} connection coming soon',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            backgroundColor: const Color(0xFF2D1B69),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: const Text(
+                          'Connect',
+                          style: TextStyle(
+                            color: Color(0xFF00E5FF),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                      child: const Text(
-                        'Connect',
-                        style: TextStyle(color: Color(0xFF00E5FF)),
-                      ),
-                    ),
+              ),
             )),
+        const SizedBox(height: 4),
       ],
     );
   }
@@ -705,19 +785,31 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   Widget _buildAchievementCard(Map<String, dynamic> achievement) {
     final isUnlocked = achievement['unlocked'] as bool;
     final progress = achievement['progress'] as double;
+    final achievementColor = achievement['color'] as Color;
+    final progressPct = (progress * 100).toInt();
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isUnlocked
-            ? (achievement['color'] as Color).withOpacity(0.1)
-            : Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
+            ? achievementColor.withOpacity(0.12)
+            : Colors.white.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: isUnlocked
-              ? (achievement['color'] as Color).withOpacity(0.5)
+              ? achievementColor.withOpacity(0.55)
               : Colors.white.withOpacity(0.1),
+          width: isUnlocked ? 1.5 : 1,
         ),
+        boxShadow: isUnlocked
+            ? [
+                BoxShadow(
+                  color: achievementColor.withOpacity(0.15),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                )
+              ]
+            : null,
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -725,43 +817,85 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           Stack(
             alignment: Alignment.center,
             children: [
-              if (!isUnlocked)
-                SizedBox(
-                  width: 50,
-                  height: 50,
-                  child: CircularProgressIndicator(
-                    value: progress,
-                    strokeWidth: 3,
-                    backgroundColor: Colors.white.withOpacity(0.2),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                        achievement['color'] as Color),
+              // Progress ring for locked achievements
+              SizedBox(
+                width: 56,
+                height: 56,
+                child: CircularProgressIndicator(
+                  value: isUnlocked ? 1.0 : progress,
+                  strokeWidth: 3,
+                  backgroundColor: Colors.white.withOpacity(0.12),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    isUnlocked
+                        ? achievementColor
+                        : achievementColor.withOpacity(0.6),
                   ),
                 ),
+              ),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: isUnlocked
-                      ? (achievement['color'] as Color).withOpacity(0.2)
-                      : Colors.white.withOpacity(0.1),
+                      ? achievementColor.withOpacity(0.22)
+                      : Colors.white.withOpacity(0.08),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   achievement['icon'] as IconData,
                   color: isUnlocked
-                      ? achievement['color'] as Color
-                      : Colors.white.withOpacity(0.5),
-                  size: 24,
+                      ? achievementColor
+                      : Colors.white.withOpacity(0.4),
+                  size: 22,
                 ),
               ),
+              // Lock badge for completely locked (0% progress)
+              if (!isUnlocked && progress == 0)
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2D1B69),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                          color: Colors.white.withOpacity(0.2), width: 1),
+                    ),
+                    child: Icon(
+                      Icons.lock,
+                      color: Colors.white.withOpacity(0.5),
+                      size: 10,
+                    ),
+                  ),
+                ),
+              // Checkmark for unlocked
+              if (isUnlocked)
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: achievementColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 10,
+                    ),
+                  ),
+                ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Text(
             achievement['title'] as String,
             style: TextStyle(
-              color: isUnlocked ? Colors.white : Colors.white.withOpacity(0.7),
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+              color: isUnlocked ? Colors.white : Colors.white.withOpacity(0.65),
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
             ),
             textAlign: TextAlign.center,
           ),
@@ -769,24 +903,50 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           Text(
             achievement['description'] as String,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              fontSize: 12,
+              color: Colors.white.withOpacity(isUnlocked ? 0.6 : 0.45),
+              fontSize: 11,
             ),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          if (!isUnlocked) ...[
-            const SizedBox(height: 8),
+          const SizedBox(height: 8),
+          if (isUnlocked)
             Text(
-              '${(progress * 100).toInt()}%',
+              'Unlocked!',
               style: TextStyle(
-                color: achievement['color'] as Color,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+                color: achievementColor,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
               ),
+            )
+          else
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      backgroundColor: Colors.white.withOpacity(0.1),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(achievementColor),
+                      minHeight: 4,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '$progressPct%',
+                  style: TextStyle(
+                    color: achievementColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
-          ],
         ],
       ),
     );

@@ -23,8 +23,11 @@ void main() {
     test('checkHealth returns false when server unreachable', () async {
       // No server running — should return false within timeout
       final result = await svc.checkHealth();
-      expect(result, isFalse,
-          reason: 'Should report server unavailable when no server is running');
+      expect(
+        result,
+        isFalse,
+        reason: 'Should report server unavailable when no server is running',
+      );
     });
 
     test('isAvailable returns false before successful health check', () {
@@ -33,8 +36,11 @@ void main() {
 
     test('getFeed returns empty list when server unreachable', () async {
       final items = await svc.getFeed();
-      expect(items, isEmpty,
-          reason: 'Should return empty list, not throw, when offline');
+      expect(
+        items,
+        isEmpty,
+        reason: 'Should return empty list, not throw, when offline',
+      );
     });
 
     test('getTrending returns empty list when server unreachable', () async {
@@ -49,8 +55,11 @@ void main() {
 
     test('search with empty query returns empty list', () async {
       final items = await svc.search('');
-      expect(items, isEmpty,
-          reason: 'Empty query should short-circuit and return []');
+      expect(
+        items,
+        isEmpty,
+        reason: 'Empty query should short-circuit and return []',
+      );
     });
 
     test('getById returns null when server unreachable', () async {

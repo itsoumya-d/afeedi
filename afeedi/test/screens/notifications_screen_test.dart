@@ -66,8 +66,7 @@ class _NotificationsWidgetState extends State<_NotificationsWidget>
         return _items.where((n) => !n.read).toList();
       case 2:
         return _items
-            .where((n) =>
-                n.type == 'recommendation' || n.type == 'trending')
+            .where((n) => n.type == 'recommendation' || n.type == 'trending')
             .toList();
       default:
         return _items;
@@ -75,10 +74,10 @@ class _NotificationsWidgetState extends State<_NotificationsWidget>
   }
 
   void _markAllRead() => setState(() {
-        for (final n in _items) {
-          n.read = true;
-        }
-      });
+    for (final n in _items) {
+      n.read = true;
+    }
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -90,8 +89,7 @@ class _NotificationsWidgetState extends State<_NotificationsWidget>
             if (_unreadCount > 0) ...[
               const SizedBox(width: 8),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: const Color(0xFF00D4FF),
                   borderRadius: BorderRadius.circular(10),
@@ -100,9 +98,10 @@ class _NotificationsWidgetState extends State<_NotificationsWidget>
                   '$_unreadCount',
                   key: const Key('unread_badge'),
                   style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold),
+                    color: Colors.black,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -154,40 +153,46 @@ class _NotificationsWidgetState extends State<_NotificationsWidget>
 // ─── Test helper ─────────────────────────────────────────────────────────────
 
 List<_Notif> _sampleNotifications() => [
-      _Notif(
-          id: '1',
-          title: 'New video from Flutter',
-          body: 'Flutter just released a new video',
-          type: 'new_content',
-          read: false),
-      _Notif(
-          id: '2',
-          title: 'Recommended for you',
-          body: 'Advanced Dart Patterns',
-          type: 'recommendation',
-          read: false),
-      _Notif(
-          id: '3',
-          title: 'Trending now',
-          body: 'Python vs JavaScript',
-          type: 'trending',
-          read: true),
-      _Notif(
-          id: '4',
-          title: 'Achievement unlocked!',
-          body: 'You watched 5 videos',
-          type: 'achievement',
-          read: true),
-    ];
+  _Notif(
+    id: '1',
+    title: 'New video from Flutter',
+    body: 'Flutter just released a new video',
+    type: 'new_content',
+    read: false,
+  ),
+  _Notif(
+    id: '2',
+    title: 'Recommended for you',
+    body: 'Advanced Dart Patterns',
+    type: 'recommendation',
+    read: false,
+  ),
+  _Notif(
+    id: '3',
+    title: 'Trending now',
+    body: 'Python vs JavaScript',
+    type: 'trending',
+    read: true,
+  ),
+  _Notif(
+    id: '4',
+    title: 'Achievement unlocked!',
+    body: 'You watched 5 videos',
+    type: 'achievement',
+    read: true,
+  ),
+];
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 void main() {
   group('NotificationsScreen behaviour', () {
     testWidgets('renders with All / Unread / For You tabs', (tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: _NotificationsWidget(notifications: _sampleNotifications()),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: _NotificationsWidget(notifications: _sampleNotifications()),
+        ),
+      );
       await tester.pump();
 
       expect(find.text('All'), findsOneWidget);
@@ -196,9 +201,11 @@ void main() {
     });
 
     testWidgets('shows Notifications title in AppBar', (tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: _NotificationsWidget(notifications: _sampleNotifications()),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: _NotificationsWidget(notifications: _sampleNotifications()),
+        ),
+      );
       await tester.pump();
 
       expect(find.text('Notifications'), findsOneWidget);
@@ -206,7 +213,9 @@ void main() {
 
     testWidgets('unread badge shows correct count', (tester) async {
       final notifs = _sampleNotifications(); // 2 unread
-      await tester.pumpWidget(MaterialApp(home: _NotificationsWidget(notifications: notifs)));
+      await tester.pumpWidget(
+        MaterialApp(home: _NotificationsWidget(notifications: notifs)),
+      );
       await tester.pump();
 
       final badge = find.byKey(const Key('unread_badge'));
@@ -214,20 +223,26 @@ void main() {
       expect(tester.widget<Text>(badge).data, equals('2'));
     });
 
-    testWidgets('"Mark all read" button is visible when there are unread items',
-        (tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: _NotificationsWidget(notifications: _sampleNotifications()),
-      ));
-      await tester.pump();
+    testWidgets(
+      '"Mark all read" button is visible when there are unread items',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: _NotificationsWidget(notifications: _sampleNotifications()),
+          ),
+        );
+        await tester.pump();
 
-      expect(find.byKey(const Key('mark_all_read')), findsOneWidget);
-    });
+        expect(find.byKey(const Key('mark_all_read')), findsOneWidget);
+      },
+    );
 
     testWidgets('mark all read removes unread badge', (tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: _NotificationsWidget(notifications: _sampleNotifications()),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: _NotificationsWidget(notifications: _sampleNotifications()),
+        ),
+      );
       await tester.pump();
 
       expect(find.byKey(const Key('unread_badge')), findsOneWidget);
@@ -239,9 +254,11 @@ void main() {
     });
 
     testWidgets('mark all read hides the action button itself', (tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: _NotificationsWidget(notifications: _sampleNotifications()),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: _NotificationsWidget(notifications: _sampleNotifications()),
+        ),
+      );
       await tester.pump();
 
       await tester.tap(find.byKey(const Key('mark_all_read')));
@@ -251,9 +268,11 @@ void main() {
     });
 
     testWidgets('All tab shows every notification', (tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: _NotificationsWidget(notifications: _sampleNotifications()),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: _NotificationsWidget(notifications: _sampleNotifications()),
+        ),
+      );
       await tester.pump();
 
       // All tab is selected by default
@@ -264,9 +283,11 @@ void main() {
     });
 
     testWidgets('Unread tab shows only unread notifications', (tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: _NotificationsWidget(notifications: _sampleNotifications()),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: _NotificationsWidget(notifications: _sampleNotifications()),
+        ),
+      );
       await tester.pump();
 
       await tester.tap(find.text('Unread'));
@@ -279,11 +300,14 @@ void main() {
       expect(find.text('Achievement unlocked!'), findsNothing);
     });
 
-    testWidgets('For You tab shows only recommendation and trending items',
-        (tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: _NotificationsWidget(notifications: _sampleNotifications()),
-      ));
+    testWidgets('For You tab shows only recommendation and trending items', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: _NotificationsWidget(notifications: _sampleNotifications()),
+        ),
+      );
       await tester.pump();
 
       await tester.tap(find.text('For You'));
@@ -296,13 +320,16 @@ void main() {
       expect(find.text('Achievement unlocked!'), findsNothing);
     });
 
-    testWidgets('empty state shows when Unread tab has no unread items',
-        (tester) async {
+    testWidgets('empty state shows when Unread tab has no unread items', (
+      tester,
+    ) async {
       // All items read
-      final allRead = _sampleNotifications().map((n) => n..read = true).toList();
-      await tester.pumpWidget(MaterialApp(
-        home: _NotificationsWidget(notifications: allRead),
-      ));
+      final allRead = _sampleNotifications()
+          .map((n) => n..read = true)
+          .toList();
+      await tester.pumpWidget(
+        MaterialApp(home: _NotificationsWidget(notifications: allRead)),
+      );
       await tester.pump();
 
       await tester.tap(find.text('Unread'));
@@ -312,20 +339,26 @@ void main() {
       expect(find.text('No notifications'), findsOneWidget);
     });
 
-    testWidgets('empty state shows when notification list is empty', (tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: _NotificationsWidget(notifications: []),
-      ));
+    testWidgets('empty state shows when notification list is empty', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(home: _NotificationsWidget(notifications: [])),
+      );
       await tester.pump();
 
       expect(find.byKey(const Key('empty_state')), findsOneWidget);
     });
 
-    testWidgets('no unread badge when all notifications are read', (tester) async {
-      final allRead = _sampleNotifications().map((n) => n..read = true).toList();
-      await tester.pumpWidget(MaterialApp(
-        home: _NotificationsWidget(notifications: allRead),
-      ));
+    testWidgets('no unread badge when all notifications are read', (
+      tester,
+    ) async {
+      final allRead = _sampleNotifications()
+          .map((n) => n..read = true)
+          .toList();
+      await tester.pumpWidget(
+        MaterialApp(home: _NotificationsWidget(notifications: allRead)),
+      );
       await tester.pump();
 
       expect(find.byKey(const Key('unread_badge')), findsNothing);

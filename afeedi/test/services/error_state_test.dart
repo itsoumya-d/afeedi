@@ -18,9 +18,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
 
     Hive.init(tempDir.path);
     SharedPreferences.setMockInitialValues({});
@@ -35,7 +35,9 @@ void main() {
 
   group('ContentService error states', () {
     test('getVideoById returns null for non-existent ID', () async {
-      final result = await ContentService.instance.getVideoById('non_existent_id_xyz_999');
+      final result = await ContentService.instance.getVideoById(
+        'non_existent_id_xyz_999',
+      );
       expect(result, isNull);
     });
 
@@ -55,14 +57,20 @@ void main() {
         limit: 5,
       );
       for (final item in recommended) {
-        expect(item.id, isNot(equals(sourceId)),
-            reason: 'Recommended videos should not include the source video');
+        expect(
+          item.id,
+          isNot(equals(sourceId)),
+          reason: 'Recommended videos should not include the source video',
+        );
       }
     });
 
     test('loadMoreContent handles offset beyond dataset size', () async {
       // Use a very large offset — should return empty or handle gracefully
-      final result = await ContentService.instance.loadMoreContent(99999, limit: 5);
+      final result = await ContentService.instance.loadMoreContent(
+        99999,
+        limit: 5,
+      );
       // Should not throw; result may be empty or wrap around
       expect(result, isA<List>());
     });
@@ -99,7 +107,10 @@ void main() {
       await UserInteractionService.instance.toggleLike(id);
 
       // With baseCount 0, result should never be negative
-      final count = UserInteractionService.instance.getLikeCount(id, baseCount: 0);
+      final count = UserInteractionService.instance.getLikeCount(
+        id,
+        baseCount: 0,
+      );
       expect(count, greaterThanOrEqualTo(0));
     });
 
@@ -110,7 +121,8 @@ void main() {
 
     test('trackShare does not throw', () async {
       expect(
-        () async => UserInteractionService.instance.trackShare('share_content_1'),
+        () async =>
+            UserInteractionService.instance.trackShare('share_content_1'),
         returnsNormally,
       );
       await UserInteractionService.instance.trackShare('share_content_2');

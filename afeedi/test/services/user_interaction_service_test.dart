@@ -14,9 +14,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
   });
 
   tearDownAll(() async {
@@ -33,13 +33,17 @@ void main() {
 
   group('UserInteractionService', () {
     test('toggleLike returns true on first call', () async {
-      final result = await UserInteractionService.instance.toggleLike('content_1');
+      final result = await UserInteractionService.instance.toggleLike(
+        'content_1',
+      );
       expect(result, isTrue);
     });
 
     test('toggleLike returns false on second call (toggle off)', () async {
       await UserInteractionService.instance.toggleLike('content_2');
-      final result = await UserInteractionService.instance.toggleLike('content_2');
+      final result = await UserInteractionService.instance.toggleLike(
+        'content_2',
+      );
       expect(result, isFalse);
     });
 
@@ -60,21 +64,36 @@ void main() {
 
       // Before any like, count equals base
       expect(
-        UserInteractionService.instance.getLikeCount(contentId, baseCount: base),
+        UserInteractionService.instance.getLikeCount(
+          contentId,
+          baseCount: base,
+        ),
         equals(base),
       );
 
       // After one like, count increases by 1
-      await UserInteractionService.instance.toggleLike(contentId, baseCount: base);
+      await UserInteractionService.instance.toggleLike(
+        contentId,
+        baseCount: base,
+      );
       expect(
-        UserInteractionService.instance.getLikeCount(contentId, baseCount: base),
+        UserInteractionService.instance.getLikeCount(
+          contentId,
+          baseCount: base,
+        ),
         equals(base + 1),
       );
 
       // After un-like, count goes back to base
-      await UserInteractionService.instance.toggleLike(contentId, baseCount: base);
+      await UserInteractionService.instance.toggleLike(
+        contentId,
+        baseCount: base,
+      );
       expect(
-        UserInteractionService.instance.getLikeCount(contentId, baseCount: base),
+        UserInteractionService.instance.getLikeCount(
+          contentId,
+          baseCount: base,
+        ),
         equals(base),
       );
     });
@@ -88,7 +107,9 @@ void main() {
       expect(saved, isTrue);
       expect(UserInteractionService.instance.isSaved(contentId), isTrue);
 
-      final unsaved = await UserInteractionService.instance.toggleSave(contentId);
+      final unsaved = await UserInteractionService.instance.toggleSave(
+        contentId,
+      );
       expect(unsaved, isFalse);
       expect(UserInteractionService.instance.isSaved(contentId), isFalse);
     });
@@ -98,12 +119,15 @@ void main() {
 
       expect(UserInteractionService.instance.isFollowed(creatorId), isFalse);
 
-      final followed = await UserInteractionService.instance.toggleFollow(creatorId);
+      final followed = await UserInteractionService.instance.toggleFollow(
+        creatorId,
+      );
       expect(followed, isTrue);
       expect(UserInteractionService.instance.isFollowed(creatorId), isTrue);
 
-      final unfollowed =
-          await UserInteractionService.instance.toggleFollow(creatorId);
+      final unfollowed = await UserInteractionService.instance.toggleFollow(
+        creatorId,
+      );
       expect(unfollowed, isFalse);
       expect(UserInteractionService.instance.isFollowed(creatorId), isFalse);
     });

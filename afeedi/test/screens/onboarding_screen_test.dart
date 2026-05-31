@@ -25,11 +25,36 @@ void main() {
 
     setUp(() {
       genres = [
-        Genre(name: 'Gaming', emoji: '🎮', category: 'Entertainment', keywords: ['gaming']),
-        Genre(name: 'Music', emoji: '🎵', category: 'Entertainment', keywords: ['music']),
-        Genre(name: 'Technology', emoji: '💻', category: 'Education', keywords: ['tech']),
-        Genre(name: 'Comedy', emoji: '😂', category: 'Entertainment', keywords: ['comedy']),
-        Genre(name: 'Fitness', emoji: '💪', category: 'Health', keywords: ['fitness']),
+        Genre(
+          name: 'Gaming',
+          emoji: '🎮',
+          category: 'Entertainment',
+          keywords: ['gaming'],
+        ),
+        Genre(
+          name: 'Music',
+          emoji: '🎵',
+          category: 'Entertainment',
+          keywords: ['music'],
+        ),
+        Genre(
+          name: 'Technology',
+          emoji: '💻',
+          category: 'Education',
+          keywords: ['tech'],
+        ),
+        Genre(
+          name: 'Comedy',
+          emoji: '😂',
+          category: 'Entertainment',
+          keywords: ['comedy'],
+        ),
+        Genre(
+          name: 'Fitness',
+          emoji: '💪',
+          category: 'Health',
+          keywords: ['fitness'],
+        ),
       ];
     });
 
@@ -60,26 +85,30 @@ void main() {
     }
 
     testWidgets('renders without throwing', (tester) async {
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: genres,
-        selectedGenres: [],
-        onContinue: () {},
-        onGenreToggle: (_) {},
-      ));
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: genres,
+          selectedGenres: [],
+          onContinue: () {},
+          onGenreToggle: (_) {},
+        ),
+      );
       await tester.pump();
 
       expect(find.byType(GenreSelection), findsOneWidget);
     });
 
     testWidgets('displays genre chips for all filtered genres', (tester) async {
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: genres,
-        selectedGenres: [],
-        onContinue: () {},
-        onGenreToggle: (_) {},
-      ));
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: genres,
+          selectedGenres: [],
+          onContinue: () {},
+          onGenreToggle: (_) {},
+        ),
+      );
       await tester.pump();
 
       expect(find.text('Gaming'), findsOneWidget);
@@ -89,103 +118,132 @@ void main() {
       expect(find.text('Fitness'), findsOneWidget);
     });
 
-    testWidgets('continue button is disabled when nothing is selected', (tester) async {
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: genres,
-        selectedGenres: [],
-        onContinue: () {},
-        onGenreToggle: (_) {},
-      ));
+    testWidgets('continue button is disabled when nothing is selected', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: genres,
+          selectedGenres: [],
+          onContinue: () {},
+          onGenreToggle: (_) {},
+        ),
+      );
       await tester.pump();
 
       final button = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
       expect(button.onPressed, isNull);
     });
 
-    testWidgets('continue button shows disabled label when nothing selected', (tester) async {
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: genres,
-        selectedGenres: [],
-        onContinue: () {},
-        onGenreToggle: (_) {},
-      ));
+    testWidgets('continue button shows disabled label when nothing selected', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: genres,
+          selectedGenres: [],
+          onContinue: () {},
+          onGenreToggle: (_) {},
+        ),
+      );
       await tester.pump();
 
       // Button requires 3+ genres; disabled state shows this message
       expect(find.text('Select at least 3 interests'), findsOneWidget);
     });
 
-    testWidgets('continue button is enabled when at least 3 genres selected', (tester) async {
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: genres,
-        selectedGenres: genres.take(3).toList(),
-        onContinue: () {},
-        onGenreToggle: (_) {},
-      ));
+    testWidgets('continue button is enabled when at least 3 genres selected', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: genres,
+          selectedGenres: genres.take(3).toList(),
+          onContinue: () {},
+          onGenreToggle: (_) {},
+        ),
+      );
       await tester.pump();
 
       final button = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
       expect(button.onPressed, isNotNull);
     });
 
-    testWidgets('continue button shows count when genres are selected', (tester) async {
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: genres,
-        selectedGenres: genres.take(3).toList(),
-        onContinue: () {},
-        onGenreToggle: (_) {},
-      ));
+    testWidgets('continue button shows count when genres are selected', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: genres,
+          selectedGenres: genres.take(3).toList(),
+          onContinue: () {},
+          onGenreToggle: (_) {},
+        ),
+      );
       await tester.pump();
 
       // The button text format: 'Continue with 3 genres ✨'
-      expect(
-        find.textContaining('Continue with 3'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Continue with 3'), findsOneWidget);
     });
 
-    testWidgets('continue button shows interests count when 3 genres selected', (tester) async {
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: genres,
-        selectedGenres: genres.take(3).toList(),
-        onContinue: () {},
-        onGenreToggle: (_) {},
-      ));
-      await tester.pump();
+    testWidgets(
+      'continue button shows interests count when 3 genres selected',
+      (tester) async {
+        await tester.pumpWidget(
+          buildGenreSelection(
+            allGenres: genres,
+            filteredGenres: genres,
+            selectedGenres: genres.take(3).toList(),
+            onContinue: () {},
+            onGenreToggle: (_) {},
+          ),
+        );
+        await tester.pump();
 
-      // The button text format: 'Continue with 3 interests ✨'
-      expect(find.textContaining('Continue with 3 interests'), findsOneWidget);
-    });
+        // The button text format: 'Continue with 3 interests ✨'
+        expect(
+          find.textContaining('Continue with 3 interests'),
+          findsOneWidget,
+        );
+      },
+    );
 
-    testWidgets('continue button fires callback when genres are selected', (tester) async {
+    testWidgets('continue button fires callback when genres are selected', (
+      tester,
+    ) async {
       bool tapped = false;
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: genres,
-        selectedGenres: genres.take(3).toList(),
-        onContinue: () => tapped = true,
-        onGenreToggle: (_) {},
-      ));
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: genres,
+          selectedGenres: genres.take(3).toList(),
+          onContinue: () => tapped = true,
+          onGenreToggle: (_) {},
+        ),
+      );
       await tester.pump();
 
       await tester.tap(find.byType(ElevatedButton));
       expect(tapped, isTrue);
     });
 
-    testWidgets('tapping a chip invokes onGenreToggle with that genre', (tester) async {
+    testWidgets('tapping a chip invokes onGenreToggle with that genre', (
+      tester,
+    ) async {
       final toggled = <Genre>[];
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: genres,
-        selectedGenres: [],
-        onContinue: () {},
-        onGenreToggle: toggled.add,
-      ));
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: genres,
+          selectedGenres: [],
+          onContinue: () {},
+          onGenreToggle: toggled.add,
+        ),
+      );
       await tester.pump();
 
       await tester.tap(find.text('Gaming'));
@@ -196,80 +254,98 @@ void main() {
     });
 
     testWidgets('shows check_circle icon for selected genres', (tester) async {
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: genres,
-        selectedGenres: [genres.first],
-        onContinue: () {},
-        onGenreToggle: (_) {},
-      ));
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: genres,
+          selectedGenres: [genres.first],
+          onContinue: () {},
+          onGenreToggle: (_) {},
+        ),
+      );
       await tester.pump();
 
       expect(find.byIcon(Icons.check_circle), findsOneWidget);
     });
 
-    testWidgets('no check_circle icons when nothing is selected', (tester) async {
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: genres,
-        selectedGenres: [],
-        onContinue: () {},
-        onGenreToggle: (_) {},
-      ));
+    testWidgets('no check_circle icons when nothing is selected', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: genres,
+          selectedGenres: [],
+          onContinue: () {},
+          onGenreToggle: (_) {},
+        ),
+      );
       await tester.pump();
 
       expect(find.byIcon(Icons.check_circle), findsNothing);
     });
 
-    testWidgets('multiple selected genres all show check_circle', (tester) async {
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: genres,
-        selectedGenres: genres.take(3).toList(),
-        onContinue: () {},
-        onGenreToggle: (_) {},
-      ));
+    testWidgets('multiple selected genres all show check_circle', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: genres,
+          selectedGenres: genres.take(3).toList(),
+          onContinue: () {},
+          onGenreToggle: (_) {},
+        ),
+      );
       await tester.pump();
 
       expect(find.byIcon(Icons.check_circle), findsNWidgets(3));
     });
 
     testWidgets('search field is present', (tester) async {
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: genres,
-        selectedGenres: [],
-        onContinue: () {},
-        onGenreToggle: (_) {},
-      ));
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: genres,
+          selectedGenres: [],
+          onContinue: () {},
+          onGenreToggle: (_) {},
+        ),
+      );
       await tester.pump();
 
       expect(find.byType(TextField), findsOneWidget);
     });
 
     testWidgets('search field has search icon prefix', (tester) async {
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: genres,
-        selectedGenres: [],
-        onContinue: () {},
-        onGenreToggle: (_) {},
-      ));
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: genres,
+          selectedGenres: [],
+          onContinue: () {},
+          onGenreToggle: (_) {},
+        ),
+      );
       await tester.pump();
 
       expect(find.byIcon(Icons.search), findsOneWidget);
     });
 
-    testWidgets('typing in search field invokes onSearchChanged', (tester) async {
+    testWidgets('typing in search field invokes onSearchChanged', (
+      tester,
+    ) async {
       final queries = <String>[];
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: genres,
-        selectedGenres: [],
-        onContinue: () {},
-        onGenreToggle: (_) {},
-        onSearchChanged: queries.add,
-      ));
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: genres,
+          selectedGenres: [],
+          onContinue: () {},
+          onGenreToggle: (_) {},
+          onSearchChanged: queries.add,
+        ),
+      );
       await tester.pump();
 
       await tester.enterText(find.byType(TextField), 'gam');
@@ -281,13 +357,15 @@ void main() {
     testWidgets('only filtered genres are shown in chips', (tester) async {
       // Only pass Gaming in filteredGenres even though all are in allGenres
       final filtered = [genres.first]; // Gaming only
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: filtered,
-        selectedGenres: [],
-        onContinue: () {},
-        onGenreToggle: (_) {},
-      ));
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: filtered,
+          selectedGenres: [],
+          onContinue: () {},
+          onGenreToggle: (_) {},
+        ),
+      );
       await tester.pump();
 
       expect(find.text('Gaming'), findsOneWidget);
@@ -296,13 +374,15 @@ void main() {
     });
 
     testWidgets('empty filteredGenres shows no genre chips', (tester) async {
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: [],
-        selectedGenres: [],
-        onContinue: () {},
-        onGenreToggle: (_) {},
-      ));
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: [],
+          selectedGenres: [],
+          onContinue: () {},
+          onGenreToggle: (_) {},
+        ),
+      );
       await tester.pump();
 
       // None of the genre names should appear as chips
@@ -312,13 +392,15 @@ void main() {
     });
 
     testWidgets('genre emoji is shown in chip', (tester) async {
-      await tester.pumpWidget(buildGenreSelection(
-        allGenres: genres,
-        filteredGenres: [genres.first], // Gaming 🎮
-        selectedGenres: [],
-        onContinue: () {},
-        onGenreToggle: (_) {},
-      ));
+      await tester.pumpWidget(
+        buildGenreSelection(
+          allGenres: genres,
+          filteredGenres: [genres.first], // Gaming 🎮
+          selectedGenres: [],
+          onContinue: () {},
+          onGenreToggle: (_) {},
+        ),
+      );
       await tester.pump();
 
       expect(find.text('🎮'), findsOneWidget);
@@ -360,11 +442,17 @@ class _GenreSelectionHostState extends State<_GenreSelectionHost>
   void initState() {
     super.initState();
     _slideCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 300));
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
     _fadeCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 300));
-    _slideAnim = Tween<Offset>(begin: Offset.zero, end: Offset.zero)
-        .animate(_slideCtrl);
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _slideAnim = Tween<Offset>(
+      begin: Offset.zero,
+      end: Offset.zero,
+    ).animate(_slideCtrl);
     _fadeAnim = Tween<double>(begin: 1.0, end: 1.0).animate(_fadeCtrl);
     _slideCtrl.forward();
     _fadeCtrl.forward();
@@ -379,15 +467,15 @@ class _GenreSelectionHostState extends State<_GenreSelectionHost>
 
   @override
   Widget build(BuildContext context) => GenreSelection(
-        allGenres: widget.allGenres,
-        filteredGenres: widget.filteredGenres,
-        selectedGenres: widget.selectedGenres,
-        searchController: TextEditingController(),
-        searchFocusNode: FocusNode(),
-        onGenreToggle: widget.onGenreToggle,
-        onSearchChanged: widget.onSearchChanged,
-        onContinue: widget.onContinue,
-        slideAnimation: _slideAnim,
-        fadeAnimation: _fadeAnim,
-      );
+    allGenres: widget.allGenres,
+    filteredGenres: widget.filteredGenres,
+    selectedGenres: widget.selectedGenres,
+    searchController: TextEditingController(),
+    searchFocusNode: FocusNode(),
+    onGenreToggle: widget.onGenreToggle,
+    onSearchChanged: widget.onSearchChanged,
+    onContinue: widget.onContinue,
+    slideAnimation: _slideAnim,
+    fadeAnimation: _fadeAnim,
+  );
 }

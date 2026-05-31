@@ -23,23 +23,25 @@ void main() {
       timezone: 'UTC-5',
       contentInterests: ['technology', 'science', 'travel'],
       contentTypes: ['video', 'article', 'podcast'],
-      platformPriorities: {
-        'youtube': 0.8,
-        'instagram': 0.6,
-        'tiktok': 0.4,
-      },
+      platformPriorities: {'youtube': 0.8, 'instagram': 0.6, 'tiktok': 0.4},
       preferredCreators: ['Creator1', 'Creator2'],
       contentFilters: {'explicit': false, 'violent': false},
       preferredViewingTimes: ['evening', 'night'],
       averageSessionDuration: 'medium',
       contentDiscoveryStyle: 'balanced',
       genreAffinityScores: {'tech': 0.9, 'documentary': 0.7, 'comedy': 0.6},
-      contentMoodPreferences: {'morning': 'educational', 'evening': 'entertainment'},
+      contentMoodPreferences: {
+        'morning': 'educational',
+        'evening': 'entertainment',
+      },
       contentLengthPreferences: {'short': 80, 'medium': 15, 'long': 5},
       enableAIRecommendations: true,
       diversityLevel: 0.7,
       crossPlatformRecommendations: true,
-      timeBasedPreferences: {'morning': 'educational', 'evening': 'entertainment'},
+      timeBasedPreferences: {
+        'morning': 'educational',
+        'evening': 'entertainment',
+      },
       smartScheduling: true,
       theme: 'dark',
       compactMode: false,
@@ -48,75 +50,87 @@ void main() {
   });
 
   group('PersonalizedRecommendationService', () {
-    test('getPersonalizedRecommendations returns personalized recommendations', () async {
-      // Arrange
-      final userPreferences = mockUserPreferences;
+    test(
+      'getPersonalizedRecommendations returns personalized recommendations',
+      () async {
+        // Arrange
+        final userPreferences = mockUserPreferences;
 
-      // Act
-      final recommendations = await recommendationService.getPersonalizedRecommendations(
-        userPreferences: userPreferences,
-      );
+        // Act
+        final recommendations = await recommendationService
+            .getPersonalizedRecommendations(userPreferences: userPreferences);
 
-      // Assert
-      expect(recommendations, isNotEmpty);
-      expect(recommendations.length, 10);
+        // Assert
+        expect(recommendations, isNotEmpty);
+        expect(recommendations.length, 10);
 
-      // Verify that recommendations have a recommendationReason
-      final reasonedItems = recommendations.where((Recommendation item) {
-        return item.recommendationReason.isNotEmpty;
-      }).toList();
+        // Verify that recommendations have a recommendationReason
+        final reasonedItems = recommendations.where((Recommendation item) {
+          return item.recommendationReason.isNotEmpty;
+        }).toList();
 
-      expect(reasonedItems.length, greaterThan(0));
-    });
+        expect(reasonedItems.length, greaterThan(0));
+      },
+    );
 
-    test('getContextualRecommendations returns recommendations based on context', () async {
-      // Arrange
-      final context = {
-        'eventName': 'Business Meeting',
-        'eventType': 'meeting',
-        'location': 'Conference Room A',
-        'startTime': DateTime.now().add(const Duration(hours: 1)),
-        'endTime': DateTime.now().add(const Duration(hours: 2)),
-      };
+    test(
+      'getContextualRecommendations returns recommendations based on context',
+      () async {
+        // Arrange
+        final context = {
+          'eventName': 'Business Meeting',
+          'eventType': 'meeting',
+          'location': 'Conference Room A',
+          'startTime': DateTime.now().add(const Duration(hours: 1)),
+          'endTime': DateTime.now().add(const Duration(hours: 2)),
+        };
 
-      // Act
-      final recommendations = await recommendationService.getContextualRecommendations(
-        userPreferences: mockUserPreferences,
-        context: context,
-      );
+        // Act
+        final recommendations = await recommendationService
+            .getContextualRecommendations(
+              userPreferences: mockUserPreferences,
+              context: context,
+            );
 
-      // Assert
-      expect(recommendations, isNotEmpty);
-      expect(recommendations.length, 10);
+        // Assert
+        expect(recommendations, isNotEmpty);
+        expect(recommendations.length, 10);
 
-      // Verify that recommendations are related to the context
-      final contextualItems = recommendations.where((Recommendation item) {
-        return item.recommendationReason.toLowerCase().contains('meeting') ||
-               item.recommendationReason.toLowerCase().contains('business');
-      }).toList();
+        // Verify that recommendations are related to the context
+        final contextualItems = recommendations.where((Recommendation item) {
+          return item.recommendationReason.toLowerCase().contains('meeting') ||
+              item.recommendationReason.toLowerCase().contains('business');
+        }).toList();
 
-      expect(contextualItems.length, greaterThan(0));
-    });
+        expect(contextualItems.length, greaterThan(0));
+      },
+    );
 
-    test('getPlatformRecommendations returns recommendations for specific platform', () async {
-      // Arrange
-      const platform = 'youtube';
+    test(
+      'getPlatformRecommendations returns recommendations for specific platform',
+      () async {
+        // Arrange
+        const platform = 'youtube';
 
-      // Act
-      final recommendations = await recommendationService.getPlatformRecommendations(
-        userPreferences: mockUserPreferences,
-        platform: platform,
-        count: 5,
-      );
+        // Act
+        final recommendations = await recommendationService
+            .getPlatformRecommendations(
+              userPreferences: mockUserPreferences,
+              platform: platform,
+              count: 5,
+            );
 
-      // Assert
-      expect(recommendations, isNotEmpty);
-      expect(recommendations.length, lessThanOrEqualTo(5));
+        // Assert
+        expect(recommendations, isNotEmpty);
+        expect(recommendations.length, lessThanOrEqualTo(5));
 
-      // Verify that recommendations are for the specified platform
-      final platformItems = recommendations.where((Recommendation item) => item.platform.toLowerCase() == platform);
-      expect(platformItems, isNotEmpty);
-    });
+        // Verify that recommendations are for the specified platform
+        final platformItems = recommendations.where(
+          (Recommendation item) => item.platform.toLowerCase() == platform,
+        );
+        expect(platformItems, isNotEmpty);
+      },
+    );
 
     test('applyDiversityToRecommendations returns diverse recommendations', () {
       // Arrange
@@ -160,10 +174,11 @@ void main() {
       ];
 
       // Act
-      final diversifiedRecommendations = recommendationService.applyDiversityToRecommendations(
-        recommendations,
-        diversityFactor: 0.5,
-      );
+      final diversifiedRecommendations = recommendationService
+          .applyDiversityToRecommendations(
+            recommendations,
+            diversityFactor: 0.5,
+          );
 
       // Assert
       expect(diversifiedRecommendations, isNotEmpty);
@@ -178,31 +193,39 @@ void main() {
     });
   });
 
-    group('generateComprehensiveRecommendations', () {
-      test('returns empty list when user is not authenticated (caught exception)', () async {
+  group('generateComprehensiveRecommendations', () {
+    test(
+      'returns empty list when user is not authenticated (caught exception)',
+      () async {
         SharedPreferences.setMockInitialValues({});
         await AuthService.instance.initializeAuth();
 
         // Act
-        final recommendations = await recommendationService.generateComprehensiveRecommendations();
+        final recommendations = await recommendationService
+            .generateComprehensiveRecommendations();
 
         // Assert
         expect(recommendations, isEmpty);
-      });
+      },
+    );
 
-      test('returns seed data when authenticated but no platform connections', () async {
+    test(
+      'returns seed data when authenticated but no platform connections',
+      () async {
         // Setting mock preferences to simulate an authenticated user with no OAuth connections
         SharedPreferences.setMockInitialValues({
           'user_id': 'test_user',
-          'user_email': 'test@test.com'
+          'user_email': 'test@test.com',
         });
         await AuthService.instance.initializeAuth();
 
         // Act
-        final recommendations = await recommendationService.generateComprehensiveRecommendations();
+        final recommendations = await recommendationService
+            .generateComprehensiveRecommendations();
 
         // Assert: now falls back to seed content instead of empty list
         expect(recommendations, isNotEmpty);
-      });
+      },
+    );
   });
 }

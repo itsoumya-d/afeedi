@@ -22,7 +22,20 @@ void main() {
       final codes = LocaleService.supportedLanguages
           .map((l) => l['code'] as String)
           .toSet();
-      for (final code in ['en', 'hi', 'es', 'pt', 'fr', 'de', 'ar', 'id', 'ja', 'ko', 'zh', 'ru']) {
+      for (final code in [
+        'en',
+        'hi',
+        'es',
+        'pt',
+        'fr',
+        'de',
+        'ar',
+        'id',
+        'ja',
+        'ko',
+        'zh',
+        'ru',
+      ]) {
         expect(codes, contains(code), reason: 'Missing language code: $code');
       }
     });
@@ -89,13 +102,16 @@ void main() {
       expect(LocaleService.instance.locale.languageCode, 'ko');
     });
 
-    test('locale is valid after re-initialization with no saved value', () async {
-      // Reset to English first (tests run against singleton)
-      await LocaleService.instance.setLocale('en');
-      SharedPreferences.setMockInitialValues({});
-      await LocaleService.instance.initialize();
-      // No saved value → initialize leaves locale unchanged (already 'en')
-      expect(LocaleService.instance.locale.languageCode, 'en');
-    });
+    test(
+      'locale is valid after re-initialization with no saved value',
+      () async {
+        // Reset to English first (tests run against singleton)
+        await LocaleService.instance.setLocale('en');
+        SharedPreferences.setMockInitialValues({});
+        await LocaleService.instance.initialize();
+        // No saved value → initialize leaves locale unchanged (already 'en')
+        expect(LocaleService.instance.locale.languageCode, 'en');
+      },
+    );
   });
 }

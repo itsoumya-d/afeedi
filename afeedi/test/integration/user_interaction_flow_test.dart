@@ -20,14 +20,15 @@ void main() {
 
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    tempDir = await Directory.systemTemp
-        .createTemp('afeedi_interaction_flow_test_');
+    tempDir = await Directory.systemTemp.createTemp(
+      'afeedi_interaction_flow_test_',
+    );
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
 
     // Do one initial initialization so the singleton has _prefs set.
     SharedPreferences.setMockInitialValues({});
@@ -153,15 +154,20 @@ void main() {
     // getSavedContentIds — accumulation
     // ------------------------------------------------------------------
 
-    test('getSavedContentIds returns correct list after multiple saves',
-        () async {
-      await svc.toggleSave('t_savelist_a');
-      await svc.toggleSave('t_savelist_b');
-      await svc.toggleSave('t_savelist_c');
+    test(
+      'getSavedContentIds returns correct list after multiple saves',
+      () async {
+        await svc.toggleSave('t_savelist_a');
+        await svc.toggleSave('t_savelist_b');
+        await svc.toggleSave('t_savelist_c');
 
-      final saved = svc.getSavedContentIds();
-      expect(saved, containsAll(['t_savelist_a', 't_savelist_b', 't_savelist_c']));
-    });
+        final saved = svc.getSavedContentIds();
+        expect(
+          saved,
+          containsAll(['t_savelist_a', 't_savelist_b', 't_savelist_c']),
+        );
+      },
+    );
 
     test('getSavedContentIds excludes un-saved items', () async {
       await svc.toggleSave('t_saveex_a'); // save
@@ -177,15 +183,17 @@ void main() {
     // getFollowedCreatorIds — accumulation
     // ------------------------------------------------------------------
 
-    test('getFollowedCreatorIds returns correct list after multiple follows',
-        () async {
-      await svc.toggleFollow('t_fol_a');
-      await svc.toggleFollow('t_fol_b');
-      await svc.toggleFollow('t_fol_c');
+    test(
+      'getFollowedCreatorIds returns correct list after multiple follows',
+      () async {
+        await svc.toggleFollow('t_fol_a');
+        await svc.toggleFollow('t_fol_b');
+        await svc.toggleFollow('t_fol_c');
 
-      final followed = svc.getFollowedCreatorIds();
-      expect(followed, containsAll(['t_fol_a', 't_fol_b', 't_fol_c']));
-    });
+        final followed = svc.getFollowedCreatorIds();
+        expect(followed, containsAll(['t_fol_a', 't_fol_b', 't_fol_c']));
+      },
+    );
 
     test('getFollowedCreatorIds excludes unfollowed creators', () async {
       await svc.toggleFollow('t_folx_a'); // follow

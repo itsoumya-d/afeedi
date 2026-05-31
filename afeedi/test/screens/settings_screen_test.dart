@@ -9,10 +9,10 @@ import 'package:afeedi/screens/settings_screen.dart';
 import 'package:afeedi/l10n/app_localizations.dart';
 
 Widget _buildApp(Widget child) => MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: child,
-    );
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: child,
+);
 
 void main() {
   late Directory tempDir;
@@ -23,9 +23,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
 
     Hive.init(tempDir.path);
     SharedPreferences.setMockInitialValues({});

@@ -16,9 +16,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
 
     Hive.init(tempDir.path);
     SharedPreferences.setMockInitialValues({});
@@ -37,9 +37,7 @@ void main() {
 
   group('HistoryScreen', () {
     testWidgets('renders without errors', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: HistoryScreen()),
-      );
+      await tester.pumpWidget(const MaterialApp(home: HistoryScreen()));
       await tester.pump();
 
       expect(find.byType(HistoryScreen), findsOneWidget);
@@ -50,18 +48,14 @@ void main() {
       // No watched_ids or watch_progress_ keys → empty state
       SharedPreferences.setMockInitialValues({});
 
-      await tester.pumpWidget(
-        const MaterialApp(home: HistoryScreen()),
-      );
+      await tester.pumpWidget(const MaterialApp(home: HistoryScreen()));
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
       expect(find.text('No watch history yet.'), findsOneWidget);
     });
 
     testWidgets("shows correct title 'Watch History'", (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: HistoryScreen()),
-      );
+      await tester.pumpWidget(const MaterialApp(home: HistoryScreen()));
       await tester.pump();
 
       expect(find.text('Watch History'), findsOneWidget);

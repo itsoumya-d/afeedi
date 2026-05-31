@@ -24,9 +24,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
 
     Hive.init(tempDir.path);
     SharedPreferences.setMockInitialValues({});
@@ -96,8 +96,9 @@ void main() {
       expect(find.text('Streak'), findsOneWidget);
     });
 
-    testWidgets('has four tabs: Liked, Saved, History, Achievements',
-        (tester) async {
+    testWidgets('has four tabs: Liked, Saved, History, Achievements', (
+      tester,
+    ) async {
       await pumpProfile(tester);
       expect(find.text('Liked'), findsOneWidget);
       // 'Saved' appears in both the stat row and the tab label

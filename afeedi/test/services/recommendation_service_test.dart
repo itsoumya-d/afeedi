@@ -30,19 +30,18 @@ Content _content({
   DateTime? publishedAt,
   int durationSeconds = 300,
   PlatformType platform = PlatformType.youtube,
-}) =>
-    Content(
-      id: id,
-      platform: platform,
-      platformContentId: id,
-      contentType: ContentType.video,
-      tags: tags,
-      categories: categories,
-      durationSeconds: durationSeconds,
-      publishedAt: publishedAt,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
+}) => Content(
+  id: id,
+  platform: platform,
+  platformContentId: id,
+  contentType: ContentType.video,
+  tags: tags,
+  categories: categories,
+  durationSeconds: durationSeconds,
+  publishedAt: publishedAt,
+  createdAt: DateTime.now(),
+  updatedAt: DateTime.now(),
+);
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
@@ -78,7 +77,10 @@ void main() {
     });
 
     test('returns name suggestions for "call" keyword', () {
-      final suggestions = service.generateSuggestions('what should I call you?', []);
+      final suggestions = service.generateSuggestions(
+        'what should I call you?',
+        [],
+      );
       expect(suggestions, containsAll(['Alex', 'Sam', 'Jordan', 'Casey']));
     });
 
@@ -88,7 +90,10 @@ void main() {
     });
 
     test('returns mood suggestions for "feeling" keyword', () {
-      final suggestions = service.generateSuggestions('I am feeling excited', []);
+      final suggestions = service.generateSuggestions(
+        'I am feeling excited',
+        [],
+      );
       expect(suggestions, contains('Looking for something chill 😌'));
     });
 
@@ -96,10 +101,12 @@ void main() {
       final gaming = _genre('Gaming', ['gaming', 'game']);
       final suggestions = service.generateSuggestions('any input', [gaming]);
       expect(
-        suggestions.any((s) =>
-            s.contains('competitive games') ||
-            s.contains('Indie games') ||
-            s.contains('RPGs')),
+        suggestions.any(
+          (s) =>
+              s.contains('competitive games') ||
+              s.contains('Indie games') ||
+              s.contains('RPGs'),
+        ),
         isTrue,
       );
     });
@@ -233,10 +240,7 @@ void main() {
     test('includes selected genre names in the message', () {
       final msg = service.generateWelcomeMessage(
         userName: 'Sam',
-        selectedGenres: [
-          _genre('Gaming', []),
-          _genre('Music', []),
-        ],
+        selectedGenres: [_genre('Gaming', []), _genre('Music', [])],
         platformConnections: {},
       );
       expect(msg, contains('Gaming'));
@@ -357,17 +361,20 @@ void main() {
       expect(content.platform, equals(PlatformType.youtube));
     });
 
-    test('content with education category is identified correctly for scoring', () {
-      final educationContent = _content(
-        id: 'edu1',
-        categories: ['education', 'tutorials'],
-        tags: ['learning'],
-      );
-      expect(
-        educationContent.categories.any((c) => c.contains('education')),
-        isTrue,
-      );
-    });
+    test(
+      'content with education category is identified correctly for scoring',
+      () {
+        final educationContent = _content(
+          id: 'edu1',
+          categories: ['education', 'tutorials'],
+          tags: ['learning'],
+        );
+        expect(
+          educationContent.categories.any((c) => c.contains('education')),
+          isTrue,
+        );
+      },
+    );
 
     test('content with music tag is matched for evening scoring', () {
       final eveningContent = _content(
@@ -399,8 +406,9 @@ void main() {
     test('gaming tag matches gaming genre keyword', () {
       final gamingContent = _content(id: 'g1', tags: ['gaming', 'fps']);
       final gamingKeywords = ['gaming', 'game', 'games', 'esports', 'fps'];
-      final matches = gamingContent.tags
-          .any((tag) => gamingKeywords.any((kw) => tag.toLowerCase().contains(kw)));
+      final matches = gamingContent.tags.any(
+        (tag) => gamingKeywords.any((kw) => tag.toLowerCase().contains(kw)),
+      );
       expect(matches, isTrue);
     });
 

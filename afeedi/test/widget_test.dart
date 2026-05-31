@@ -17,9 +17,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
 
     Hive.init(tempDir.path);
     SharedPreferences.setMockInitialValues({});
@@ -40,9 +40,7 @@ void main() {
     };
 
     try {
-      await tester.pumpWidget(
-        const ProviderScope(child: AfeediApp()),
-      );
+      await tester.pumpWidget(const ProviderScope(child: AfeediApp()));
 
       // Advance past any startup timers (WelcomeScreen has a 300ms delay)
       await tester.pump(const Duration(milliseconds: 500));

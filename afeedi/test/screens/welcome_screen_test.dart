@@ -9,10 +9,10 @@ import 'package:afeedi/screens/welcome_screen.dart';
 import 'package:afeedi/l10n/app_localizations.dart';
 
 Widget _buildApp(Widget child) => MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: child,
-    );
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: child,
+);
 
 /// Pump the widget tree and drain all pending timers from the
 /// WelcomeScreen animation controllers (fade=1500ms, slide=1200ms,
@@ -20,9 +20,9 @@ Widget _buildApp(Widget child) => MaterialApp(
 Future<void> _pumpWelcome(WidgetTester tester) async {
   await tester.pumpWidget(_buildApp(const WelcomeScreen()));
   // Advance past the 300ms Future.delayed and then the animation durations
-  await tester.pump(const Duration(milliseconds: 300));  // fires the delayed
+  await tester.pump(const Duration(milliseconds: 300)); // fires the delayed
   await tester.pump(const Duration(milliseconds: 1500)); // fade animation
-  await tester.pump(const Duration(milliseconds: 100));  // slide animation tail
+  await tester.pump(const Duration(milliseconds: 100)); // slide animation tail
 }
 
 void main() {
@@ -34,9 +34,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
 
     Hive.init(tempDir.path);
     SharedPreferences.setMockInitialValues({});
@@ -137,16 +137,18 @@ void main() {
       );
     });
 
-    testWidgets('shows OutlinedButton widgets for OAuth sign-in',
-        (tester) async {
+    testWidgets('shows OutlinedButton widgets for OAuth sign-in', (
+      tester,
+    ) async {
       await _pumpWelcome(tester);
 
       // Google and Apple both use OutlinedButton.icon
       expect(find.byType(OutlinedButton), findsWidgets);
     });
 
-    testWidgets('renders correctly after all animations complete',
-        (tester) async {
+    testWidgets('renders correctly after all animations complete', (
+      tester,
+    ) async {
       await _pumpWelcome(tester);
 
       expect(find.byType(WelcomeScreen), findsOneWidget);

@@ -16,9 +16,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
 
     Hive.init(tempDir.path);
     SharedPreferences.setMockInitialValues({});
@@ -37,9 +37,7 @@ void main() {
 
   group('BookmarksScreen', () {
     testWidgets('renders without errors', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: BookmarksScreen()),
-      );
+      await tester.pumpWidget(const MaterialApp(home: BookmarksScreen()));
       await tester.pump();
 
       expect(find.byType(BookmarksScreen), findsOneWidget);
@@ -50,27 +48,21 @@ void main() {
       // No saved_ keys in prefs → empty state
       SharedPreferences.setMockInitialValues({});
 
-      await tester.pumpWidget(
-        const MaterialApp(home: BookmarksScreen()),
-      );
+      await tester.pumpWidget(const MaterialApp(home: BookmarksScreen()));
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
       expect(find.text('No saved videos yet.'), findsOneWidget);
     });
 
     testWidgets("has correct app bar title 'Bookmarks'", (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: BookmarksScreen()),
-      );
+      await tester.pumpWidget(const MaterialApp(home: BookmarksScreen()));
       await tester.pump();
 
       expect(find.text('Bookmarks'), findsOneWidget);
     });
 
     testWidgets('sort popup menu button exists', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: BookmarksScreen()),
-      );
+      await tester.pumpWidget(const MaterialApp(home: BookmarksScreen()));
       await tester.pump();
 
       // The AppBar has a PopupMenuButton identified by its filter_list icon

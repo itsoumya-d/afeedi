@@ -16,9 +16,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
 
     Hive.init(tempDir.path);
     SharedPreferences.setMockInitialValues({});
@@ -53,25 +53,44 @@ void main() {
     });
 
     test('getFeedContent includes short-form content', () async {
-      final allContent = await ContentService.instance.getFeedContent(limit: 100);
-      final shorts = allContent.where((c) =>
-          c.contentType == ContentType.short ||
-          c.contentType == ContentType.reel).toList();
-      expect(shorts, isNotEmpty, reason: 'Feed should include short-form content for ShortsTab');
+      final allContent = await ContentService.instance.getFeedContent(
+        limit: 100,
+      );
+      final shorts = allContent
+          .where(
+            (c) =>
+                c.contentType == ContentType.short ||
+                c.contentType == ContentType.reel,
+          )
+          .toList();
+      expect(
+        shorts,
+        isNotEmpty,
+        reason: 'Feed should include short-form content for ShortsTab',
+      );
     });
 
-    test('getFeedContent includes YouTube content with valid video IDs', () async {
-      final content = await ContentService.instance.getFeedContent(limit: 100);
-      final youtube = content.where((c) => c.platform == PlatformType.youtube).toList();
-      expect(youtube, isNotEmpty);
-      for (final item in youtube) {
-        expect(item.platformContentId, isNotEmpty);
-        expect(item.platformContentId.length, greaterThan(5));
-      }
-    });
+    test(
+      'getFeedContent includes YouTube content with valid video IDs',
+      () async {
+        final content = await ContentService.instance.getFeedContent(
+          limit: 100,
+        );
+        final youtube = content
+            .where((c) => c.platform == PlatformType.youtube)
+            .toList();
+        expect(youtube, isNotEmpty);
+        for (final item in youtube) {
+          expect(item.platformContentId, isNotEmpty);
+          expect(item.platformContentId.length, greaterThan(5));
+        }
+      },
+    );
 
     test('getTrendingVideos returns results sorted by velocity score', () async {
-      final trending = await ContentService.instance.getTrendingVideos(limit: 5);
+      final trending = await ContentService.instance.getTrendingVideos(
+        limit: 5,
+      );
       expect(trending, isNotEmpty);
       expect(trending.length, lessThanOrEqualTo(5));
       // Velocity score combines engagement + recency decay; just verify list is non-empty and bounded.
@@ -79,12 +98,19 @@ void main() {
 
     test('searchVideos finds content by title', () async {
       final results = await ContentService.instance.searchVideos('Flutter');
-      expect(results, isNotEmpty,
-          reason: 'Should find Flutter-related content');
+      expect(
+        results,
+        isNotEmpty,
+        reason: 'Should find Flutter-related content',
+      );
       for (final item in results) {
-        final matchesTitle = item.title?.toLowerCase().contains('flutter') ?? false;
-        final matchesTags = item.tags.any((t) => t.toLowerCase().contains('flutter'));
-        final matchesDesc = item.description?.toLowerCase().contains('flutter') ?? false;
+        final matchesTitle =
+            item.title?.toLowerCase().contains('flutter') ?? false;
+        final matchesTags = item.tags.any(
+          (t) => t.toLowerCase().contains('flutter'),
+        );
+        final matchesDesc =
+            item.description?.toLowerCase().contains('flutter') ?? false;
         expect(matchesTitle || matchesTags || matchesDesc, isTrue);
       }
     });
@@ -95,7 +121,9 @@ void main() {
     });
 
     test('getVideoById returns correct video', () async {
-      final allContent = await ContentService.instance.getFeedContent(limit: 100);
+      final allContent = await ContentService.instance.getFeedContent(
+        limit: 100,
+      );
       final firstId = allContent.first.id;
       final found = await ContentService.instance.getVideoById(firstId);
       expect(found, isNotNull);
@@ -103,7 +131,9 @@ void main() {
     });
 
     test('getVideoById returns null for non-existent ID', () async {
-      final found = await ContentService.instance.getVideoById('non_existent_id_xyz');
+      final found = await ContentService.instance.getVideoById(
+        'non_existent_id_xyz',
+      );
       expect(found, isNull);
     });
 
@@ -118,9 +148,14 @@ void main() {
     });
 
     test('getRecommendedVideos returns different content', () async {
-      final allContent = await ContentService.instance.getFeedContent(limit: 100);
+      final allContent = await ContentService.instance.getFeedContent(
+        limit: 100,
+      );
       final firstId = allContent.first.id;
-      final recommended = await ContentService.instance.getRecommendedVideos(firstId, limit: 5);
+      final recommended = await ContentService.instance.getRecommendedVideos(
+        firstId,
+        limit: 5,
+      );
       // Recommended should not include the source video
       for (final item in recommended) {
         expect(item.id, isNot(equals(firstId)));
@@ -140,8 +175,11 @@ void main() {
 
     test('YouTube content has valid thumbnail URLs', () async {
       final content = await ContentService.instance.getFeedContent(limit: 100);
-      final youtube = content.where((c) =>
-          c.platform == PlatformType.youtube && c.thumbnailUrl != null).toList();
+      final youtube = content
+          .where(
+            (c) => c.platform == PlatformType.youtube && c.thumbnailUrl != null,
+          )
+          .toList();
       expect(youtube, isNotEmpty);
       for (final item in youtube) {
         expect(item.thumbnailUrl, startsWith('https://img.youtube.com/vi/'));

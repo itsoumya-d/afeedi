@@ -18,9 +18,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
 
     Hive.init(tempDir.path);
     SharedPreferences.setMockInitialValues({
@@ -37,26 +37,34 @@ void main() {
     }
   });
 
-  testWidgets('ReferralScreen renders a Scaffold without throwing', (tester) async {
+  testWidgets('ReferralScreen renders a Scaffold without throwing', (
+    tester,
+  ) async {
     await tester.pumpWidget(_buildApp(const ReferralScreen()));
     await tester.pumpAndSettle();
     expect(find.byType(Scaffold), findsOneWidget);
   });
 
-  testWidgets('ReferralScreen shows "Invite Friends" app bar title', (tester) async {
+  testWidgets('ReferralScreen shows "Invite Friends" app bar title', (
+    tester,
+  ) async {
     await tester.pumpWidget(_buildApp(const ReferralScreen()));
     await tester.pumpAndSettle();
     expect(find.text('Invite Friends'), findsOneWidget);
   });
 
-  testWidgets('ReferralScreen shows referral code with AF- prefix', (tester) async {
+  testWidgets('ReferralScreen shows referral code with AF- prefix', (
+    tester,
+  ) async {
     await tester.pumpWidget(_buildApp(const ReferralScreen()));
     await tester.pumpAndSettle();
     // Code format is AF-XXXXXX
     expect(find.textContaining('AF-'), findsOneWidget);
   });
 
-  testWidgets('ReferralScreen shows "Your referral code" label', (tester) async {
+  testWidgets('ReferralScreen shows "Your referral code" label', (
+    tester,
+  ) async {
     await tester.pumpWidget(_buildApp(const ReferralScreen()));
     await tester.pumpAndSettle();
     expect(find.text('Your referral code'), findsOneWidget);
@@ -86,7 +94,9 @@ void main() {
     expect(find.text('Pro Days Earned'), findsOneWidget);
   });
 
-  testWidgets('ReferralScreen shows How the reward works section', (tester) async {
+  testWidgets('ReferralScreen shows How the reward works section', (
+    tester,
+  ) async {
     await tester.pumpWidget(_buildApp(const ReferralScreen()));
     await tester.pumpAndSettle();
     expect(find.text('How the reward works'), findsOneWidget);
@@ -102,10 +112,7 @@ void main() {
     await tester.pumpWidget(_buildApp(const ReferralScreen()));
     await tester.pumpAndSettle();
     // The copy button should have a Semantics label
-    expect(
-      find.bySemanticsLabel('Copy referral code'),
-      findsOneWidget,
-    );
+    expect(find.bySemanticsLabel('Copy referral code'), findsOneWidget);
   });
 
   testWidgets('ReferralScreen shows Give 7 Days Pro headline', (tester) async {

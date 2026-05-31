@@ -18,9 +18,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
 
     Hive.init(tempDir.path);
     SharedPreferences.setMockInitialValues({});
@@ -38,12 +38,16 @@ void main() {
   });
 
   group('DashboardScreen', () {
-    testWidgets('DashboardScreen renders with bottom navigation', (tester) async {
-      await tester.pumpWidget(MaterialApp(
+    testWidgets('DashboardScreen renders with bottom navigation', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const DashboardScreen(),
-        ));
+        ),
+      );
       // Pump once to build the widget tree without waiting for async content
       await tester.pump();
 
@@ -52,11 +56,13 @@ void main() {
     });
 
     testWidgets('DashboardScreen has 5 tabs', (tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(
+        MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const DashboardScreen(),
-        ));
+        ),
+      );
       await tester.pump();
 
       // The SharedBottomNavigation displays the 5 tab labels
@@ -68,11 +74,13 @@ void main() {
     });
 
     testWidgets('DashboardScreen shows Home tab by default', (tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(
+        MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const DashboardScreen(),
-        ));
+        ),
+      );
       await tester.pump();
 
       // The initial page is 0 (Home). PageController starts at page 0 by default.
@@ -80,25 +88,31 @@ void main() {
       expect(pageView.controller?.initialPage ?? 0, equals(0));
     });
 
-    testWidgets('DashboardScreen shows app bar with Afeedi branding',
-        (tester) async {
-      await tester.pumpWidget(MaterialApp(
+    testWidgets('DashboardScreen shows app bar with Afeedi branding', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const DashboardScreen(),
-        ));
+        ),
+      );
       await tester.pump();
 
       expect(find.text('Afeedi'), findsOneWidget);
     });
 
-    testWidgets('DashboardScreen contains PageView for tab content',
-        (tester) async {
-      await tester.pumpWidget(MaterialApp(
+    testWidgets('DashboardScreen contains PageView for tab content', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const DashboardScreen(),
-        ));
+        ),
+      );
       await tester.pump();
 
       expect(find.byType(PageView), findsOneWidget);

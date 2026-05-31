@@ -11,14 +11,15 @@ void main() {
 
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    tempDir =
-        await Directory.systemTemp.createTemp('afeedi_content_flow_test_');
+    tempDir = await Directory.systemTemp.createTemp(
+      'afeedi_content_flow_test_',
+    );
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
   });
 
   tearDownAll(() async {
@@ -35,19 +36,21 @@ void main() {
     test('initialize() completes without throwing', () async {
       // YouTubeLiveContentService will fail silently (network unavailable in
       // test environment); ContentService falls back to _sampleVideos.
-      await expectLater(
-        ContentService.instance.initialize(),
-        completes,
-      );
+      await expectLater(ContentService.instance.initialize(), completes);
     });
 
-    test('getVideos() returns non-empty list after init (uses seed data)',
-        () async {
-      await ContentService.instance.initialize();
-      final videos = await ContentService.instance.getVideos(limit: 10);
-      expect(videos, isNotEmpty,
-          reason: 'Should return seed data when live fetch is unavailable');
-    });
+    test(
+      'getVideos() returns non-empty list after init (uses seed data)',
+      () async {
+        await ContentService.instance.initialize();
+        final videos = await ContentService.instance.getVideos(limit: 10);
+        expect(
+          videos,
+          isNotEmpty,
+          reason: 'Should return seed data when live fetch is unavailable',
+        );
+      },
+    );
 
     test('getVideos() returns Content objects with valid fields', () async {
       await ContentService.instance.initialize();
@@ -62,18 +65,26 @@ void main() {
 
     test('searchVideos("flutter") returns results matching query', () async {
       await ContentService.instance.initialize();
-      final results =
-          await ContentService.instance.searchVideos('flutter', limit: 10);
-      expect(results, isNotEmpty,
-          reason: 'Seed data contains multiple Flutter videos');
+      final results = await ContentService.instance.searchVideos(
+        'flutter',
+        limit: 10,
+      );
+      expect(
+        results,
+        isNotEmpty,
+        reason: 'Seed data contains multiple Flutter videos',
+      );
       for (final item in results) {
         final q = 'flutter';
         final inTitle = item.title?.toLowerCase().contains(q) ?? false;
         final inDesc = item.description?.toLowerCase().contains(q) ?? false;
         final inTags = item.tags.any((t) => t.toLowerCase().contains(q));
         final inCreator = item.creatorName?.toLowerCase().contains(q) ?? false;
-        expect(inTitle || inDesc || inTags || inCreator, isTrue,
-            reason: 'Each result should be related to "flutter"');
+        expect(
+          inTitle || inDesc || inTags || inCreator,
+          isTrue,
+          reason: 'Each result should be related to "flutter"',
+        );
       }
     });
 
@@ -83,14 +94,18 @@ void main() {
       expect(results, isEmpty);
     });
 
-    test('getTrendingVideos() returns results sorted by velocity score', () async {
-      await ContentService.instance.initialize();
-      final trending =
-          await ContentService.instance.getTrendingVideos(limit: 5);
-      expect(trending, isNotEmpty);
-      expect(trending.length, lessThanOrEqualTo(5));
-      // Ordering is by engagement-velocity (engagement / recency decay), not raw engagement.
-    });
+    test(
+      'getTrendingVideos() returns results sorted by velocity score',
+      () async {
+        await ContentService.instance.initialize();
+        final trending = await ContentService.instance.getTrendingVideos(
+          limit: 5,
+        );
+        expect(trending, isNotEmpty);
+        expect(trending.length, lessThanOrEqualTo(5));
+        // Ordering is by engagement-velocity (engagement / recency decay), not raw engagement.
+      },
+    );
 
     test('loadMoreContent(0) returns 10 items', () async {
       await ContentService.instance.initialize();
@@ -101,24 +116,26 @@ void main() {
     test('loadMoreContent(10) returns different items than offset 0', () async {
       await ContentService.instance.initialize();
       final page1 = await ContentService.instance.loadMoreContent(0, limit: 10);
-      final page2 =
-          await ContentService.instance.loadMoreContent(10, limit: 10);
+      final page2 = await ContentService.instance.loadMoreContent(
+        10,
+        limit: 10,
+      );
 
       expect(page1, isNotEmpty);
       expect(page2, isNotEmpty);
 
       final ids1 = page1.map((c) => c.id).toSet();
       final ids2 = page2.map((c) => c.id).toSet();
-      expect(ids1.intersection(ids2), isEmpty,
-          reason: 'Pages at different offsets should yield different IDs');
+      expect(
+        ids1.intersection(ids2),
+        isEmpty,
+        reason: 'Pages at different offsets should yield different IDs',
+      );
     });
 
     test('refreshContent() completes without throwing', () async {
       await ContentService.instance.initialize();
-      await expectLater(
-        ContentService.instance.refreshContent(),
-        completes,
-      );
+      await expectLater(ContentService.instance.refreshContent(), completes);
     });
 
     test('getVideoById returns correct item', () async {
@@ -133,8 +150,9 @@ void main() {
 
     test('getVideoById returns null for unknown ID', () async {
       await ContentService.instance.initialize();
-      final found = await ContentService.instance
-          .getVideoById('__no_such_id__xyz__');
+      final found = await ContentService.instance.getVideoById(
+        '__no_such_id__xyz__',
+      );
       expect(found, isNull);
     });
 
@@ -151,8 +169,7 @@ void main() {
 
     test('getFeedContent returns non-empty list', () async {
       await ContentService.instance.initialize();
-      final feed =
-          await ContentService.instance.getFeedContent(limit: 10);
+      final feed = await ContentService.instance.getFeedContent(limit: 10);
       expect(feed, isNotEmpty);
     });
   });

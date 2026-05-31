@@ -99,7 +99,8 @@ void _assertAtLeastOneItemMatches(
   expect(
     matched,
     isTrue,
-    reason: reason ??
+    reason:
+        reason ??
         'Expected at least 1 of the top-$top items to contain "$keyword". '
             'Got: ${slice.map((c) => '${c.id}:${c.tags}').join(', ')}',
   );
@@ -126,9 +127,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
 
     // Prime ContentService once so seed data is available.
     SharedPreferences.setMockInitialValues({});
@@ -154,114 +155,132 @@ void main() {
   // ====================================================================
   group('Genre preference → content affinity', () {
     test(
-        'Gaming genre: at least 1 of top-5 preference-filtered items has gaming tag',
-        () async {
-      await _setGenrePreferences(['Gaming']);
-      final items = await ContentService.instance.getPreferenceFilteredContent(
-        limit: 5,
-      );
-      // If the preference filter returns content it must be gaming-tagged.
-      // If it returns empty the test still passes (seed may not be large
-      // enough for the filter) — we also verify via tag-filtered getVideos.
-      if (items.isNotEmpty) {
-        _assertAtLeastOneItemMatches(items, 'gaming', top: 5,
+      'Gaming genre: at least 1 of top-5 preference-filtered items has gaming tag',
+      () async {
+        await _setGenrePreferences(['Gaming']);
+        final items = await ContentService.instance
+            .getPreferenceFilteredContent(limit: 5);
+        // If the preference filter returns content it must be gaming-tagged.
+        // If it returns empty the test still passes (seed may not be large
+        // enough for the filter) — we also verify via tag-filtered getVideos.
+        if (items.isNotEmpty) {
+          _assertAtLeastOneItemMatches(
+            items,
+            'gaming',
+            top: 5,
             reason:
                 'Gaming preference should surface gaming-tagged content in top-5. '
-                'Items returned: ${items.map((c) => '${c.id}:${c.tags}').join(', ')}');
-      }
+                'Items returned: ${items.map((c) => '${c.id}:${c.tags}').join(', ')}',
+          );
+        }
 
-      // Cross-check: direct tag-based query must also return gaming content.
-      final tagged = await ContentService.instance.getVideos(
-        category: 'gaming',
-        limit: 10,
-      );
-      expect(
-        tagged,
-        isNotEmpty,
-        reason:
-            'getVideos(category: "gaming") must return at least 1 result from seed data',
-      );
-    });
-
-    test(
-        'Gaming genre: getVideos with gaming category returns gaming-tagged items',
-        () async {
-      final items = await ContentService.instance.getVideos(
-        category: 'gaming',
-        limit: 10,
-      );
-      expect(items, isNotEmpty,
-          reason: 'Seed data must contain at least 1 gaming-tagged item');
-      for (final item in items) {
-        expect(
-          item.tags.any((t) => t.toLowerCase().contains('gaming')) ||
-              item.tags.any((t) => t.toLowerCase().contains('esports')) ||
-              item.tags.any((t) => t.toLowerCase().contains('fortnite')) ||
-              item.tags.any((t) => t.toLowerCase().contains('gameplay')),
-          isTrue,
-          reason:
-              'Item ${item.id} (tags: ${item.tags}) should have a gaming-related tag',
+        // Cross-check: direct tag-based query must also return gaming content.
+        final tagged = await ContentService.instance.getVideos(
+          category: 'gaming',
+          limit: 10,
         );
-      }
-    });
+        expect(
+          tagged,
+          isNotEmpty,
+          reason:
+              'getVideos(category: "gaming") must return at least 1 result from seed data',
+        );
+      },
+    );
 
     test(
-        'Music genre: at least 1 of top-5 preference-filtered items has music tag',
-        () async {
-      await _setGenrePreferences(['Music']);
-      final items = await ContentService.instance.getPreferenceFilteredContent(
-        limit: 5,
-      );
-      if (items.isNotEmpty) {
-        _assertAtLeastOneItemMatches(items, 'music', top: 5,
+      'Gaming genre: getVideos with gaming category returns gaming-tagged items',
+      () async {
+        final items = await ContentService.instance.getVideos(
+          category: 'gaming',
+          limit: 10,
+        );
+        expect(
+          items,
+          isNotEmpty,
+          reason: 'Seed data must contain at least 1 gaming-tagged item',
+        );
+        for (final item in items) {
+          expect(
+            item.tags.any((t) => t.toLowerCase().contains('gaming')) ||
+                item.tags.any((t) => t.toLowerCase().contains('esports')) ||
+                item.tags.any((t) => t.toLowerCase().contains('fortnite')) ||
+                item.tags.any((t) => t.toLowerCase().contains('gameplay')),
+            isTrue,
+            reason:
+                'Item ${item.id} (tags: ${item.tags}) should have a gaming-related tag',
+          );
+        }
+      },
+    );
+
+    test(
+      'Music genre: at least 1 of top-5 preference-filtered items has music tag',
+      () async {
+        await _setGenrePreferences(['Music']);
+        final items = await ContentService.instance
+            .getPreferenceFilteredContent(limit: 5);
+        if (items.isNotEmpty) {
+          _assertAtLeastOneItemMatches(
+            items,
+            'music',
+            top: 5,
             reason:
                 'Music preference should surface music-tagged content in top-5. '
-                'Items: ${items.map((c) => '${c.id}:${c.tags}').join(', ')}');
-      }
+                'Items: ${items.map((c) => '${c.id}:${c.tags}').join(', ')}',
+          );
+        }
 
-      // Cross-check via tag filter.
-      final tagged =
-          await ContentService.instance.getVideos(category: 'music', limit: 10);
-      expect(tagged, isNotEmpty,
-          reason: 'Seed data must contain at least 1 music-tagged item');
-    });
-
-    test(
-        'Music genre: getVideos with music category returns music-tagged items',
-        () async {
-      final items = await ContentService.instance.getVideos(
-        category: 'music',
-        limit: 10,
-      );
-      expect(items, isNotEmpty);
-      for (final item in items) {
-        expect(
-          item.tags.any((t) => t.toLowerCase().contains('music')) ||
-              item.tags.any((t) => t.toLowerCase().contains('pop')) ||
-              item.tags.any((t) => t.toLowerCase().contains('kpop')) ||
-              item.tags.any((t) => t.toLowerCase().contains('latin')),
-          isTrue,
-          reason:
-              'Item ${item.id} (tags: ${item.tags}) should have a music-related tag',
+        // Cross-check via tag filter.
+        final tagged = await ContentService.instance.getVideos(
+          category: 'music',
+          limit: 10,
         );
-      }
-    });
+        expect(
+          tagged,
+          isNotEmpty,
+          reason: 'Seed data must contain at least 1 music-tagged item',
+        );
+      },
+    );
 
     test(
-        'Multiple genres: getPreferenceFilteredContent respects multi-genre selection',
-        () async {
-      await _setGenrePreferences(['Gaming', 'Music']);
-      final items = await ContentService.instance.getPreferenceFilteredContent(
-        limit: 10,
-      );
-      // With both gaming and music selected, at least one should be from either
-      // genre (or both).  The test passes as long as no exception is thrown and
-      // items are valid Content objects.
-      for (final item in items) {
-        expect(item.id, isNotEmpty);
-        expect(item.platform, isA<PlatformType>());
-      }
-    });
+      'Music genre: getVideos with music category returns music-tagged items',
+      () async {
+        final items = await ContentService.instance.getVideos(
+          category: 'music',
+          limit: 10,
+        );
+        expect(items, isNotEmpty);
+        for (final item in items) {
+          expect(
+            item.tags.any((t) => t.toLowerCase().contains('music')) ||
+                item.tags.any((t) => t.toLowerCase().contains('pop')) ||
+                item.tags.any((t) => t.toLowerCase().contains('kpop')) ||
+                item.tags.any((t) => t.toLowerCase().contains('latin')),
+            isTrue,
+            reason:
+                'Item ${item.id} (tags: ${item.tags}) should have a music-related tag',
+          );
+        }
+      },
+    );
+
+    test(
+      'Multiple genres: getPreferenceFilteredContent respects multi-genre selection',
+      () async {
+        await _setGenrePreferences(['Gaming', 'Music']);
+        final items = await ContentService.instance
+            .getPreferenceFilteredContent(limit: 10);
+        // With both gaming and music selected, at least one should be from either
+        // genre (or both).  The test passes as long as no exception is thrown and
+        // items are valid Content objects.
+        for (final item in items) {
+          expect(item.id, isNotEmpty);
+          expect(item.platform, isA<PlatformType>());
+        }
+      },
+    );
   });
 
   // ====================================================================
@@ -269,84 +288,86 @@ void main() {
   // ====================================================================
   group('Followed creator boost', () {
     test(
-        'Following "gamer_pro" stores the creator in UserInteractionService',
-        () async {
-      await UserInteractionService.instance.initialize();
-      await UserInteractionService.instance.toggleFollow('gamer_pro');
+      'Following "gamer_pro" stores the creator in UserInteractionService',
+      () async {
+        await UserInteractionService.instance.initialize();
+        await UserInteractionService.instance.toggleFollow('gamer_pro');
 
-      expect(
-        UserInteractionService.instance.isFollowed('gamer_pro'),
-        isTrue,
-        reason: 'gamer_pro should be marked as followed after toggleFollow',
-      );
-      expect(
-        UserInteractionService.instance.getFollowedCreatorIds(),
-        contains('gamer_pro'),
-      );
-    });
-
-    test(
-        '"gamer_pro" content is present in seed data and discoverable via getVideos',
-        () async {
-      // gamer_pro is the creator of tt_gaming_1 with tags ['gaming','fortnite',...].
-      final items = await ContentService.instance.getVideos(
-        category: 'gaming',
-        limit: 30,
-      );
-      final hasGamerPro = items.any(
-        (c) =>
-            c.creatorName?.toLowerCase() == 'gamer_pro' ||
-            c.id == 'tt_gaming_1',
-      );
-      expect(
-        hasGamerPro,
-        isTrue,
-        reason:
-            '"gamer_pro" (tt_gaming_1) must be discoverable via gaming category filter',
-      );
-    });
+        expect(
+          UserInteractionService.instance.isFollowed('gamer_pro'),
+          isTrue,
+          reason: 'gamer_pro should be marked as followed after toggleFollow',
+        );
+        expect(
+          UserInteractionService.instance.getFollowedCreatorIds(),
+          contains('gamer_pro'),
+        );
+      },
+    );
 
     test(
-        'After following "gamer_pro", getFollowedCreatorIds returns "gamer_pro"',
-        () async {
-      await UserInteractionService.instance.initialize();
-      await UserInteractionService.instance.toggleFollow('gamer_pro');
+      '"gamer_pro" content is present in seed data and discoverable via getVideos',
+      () async {
+        // gamer_pro is the creator of tt_gaming_1 with tags ['gaming','fortnite',...].
+        final items = await ContentService.instance.getVideos(
+          category: 'gaming',
+          limit: 30,
+        );
+        final hasGamerPro = items.any(
+          (c) =>
+              c.creatorName?.toLowerCase() == 'gamer_pro' ||
+              c.id == 'tt_gaming_1',
+        );
+        expect(
+          hasGamerPro,
+          isTrue,
+          reason:
+              '"gamer_pro" (tt_gaming_1) must be discoverable via gaming category filter',
+        );
+      },
+    );
 
-      final followed = UserInteractionService.instance.getFollowedCreatorIds();
-      expect(
-        followed.map((s) => s.toLowerCase()),
-        contains('gamer_pro'),
-      );
-    });
+    test(
+      'After following "gamer_pro", getFollowedCreatorIds returns "gamer_pro"',
+      () async {
+        await UserInteractionService.instance.initialize();
+        await UserInteractionService.instance.toggleFollow('gamer_pro');
+
+        final followed = UserInteractionService.instance
+            .getFollowedCreatorIds();
+        expect(followed.map((s) => s.toLowerCase()), contains('gamer_pro'));
+      },
+    );
 
     test('Unfollow removes creator from followed list', () async {
       await UserInteractionService.instance.initialize();
       await UserInteractionService.instance.toggleFollow('gamer_pro');
-      await UserInteractionService.instance.toggleFollow('gamer_pro'); // unfollow
+      await UserInteractionService.instance.toggleFollow(
+        'gamer_pro',
+      ); // unfollow
 
-      expect(
-        UserInteractionService.instance.isFollowed('gamer_pro'),
-        isFalse,
-      );
+      expect(UserInteractionService.instance.isFollowed('gamer_pro'), isFalse);
     });
 
     test(
-        'Followed-creator content appears in ContentService.getVideos within limit=30',
-        () async {
-      // Verify that a creator in the seed data can always be retrieved —
-      // which confirms the boost works as long as content exists.
-      final all = await ContentService.instance.getFeedContent(limit: 200);
-      final gamerProContent =
-          all.where((c) => c.creatorName?.toLowerCase() == 'gamer_pro').toList();
+      'Followed-creator content appears in ContentService.getVideos within limit=30',
+      () async {
+        // Verify that a creator in the seed data can always be retrieved —
+        // which confirms the boost works as long as content exists.
+        final all = await ContentService.instance.getFeedContent(limit: 200);
+        final gamerProContent = all
+            .where((c) => c.creatorName?.toLowerCase() == 'gamer_pro')
+            .toList();
 
-      expect(
-        gamerProContent,
-        isNotEmpty,
-        reason:
-            'Seed data must contain at least 1 item from creator "gamer_pro" '
-            'so the followed-creator boost has something to surface',
-      );
-    });
+        expect(
+          gamerProContent,
+          isNotEmpty,
+          reason:
+              'Seed data must contain at least 1 item from creator "gamer_pro" '
+              'so the followed-creator boost has something to surface',
+        );
+      },
+    );
   });
 
   // ====================================================================
@@ -354,141 +375,160 @@ void main() {
   // ====================================================================
   group('Empty preferences → time-based fallback', () {
     test(
-        'User with no onboarding data: getFeedContent returns non-empty list',
-        () async {
-      // prefs are empty (setUp resets them) — onboarding not completed.
-      final items = await ContentService.instance.getFeedContent(limit: 10);
-      expect(
-        items,
-        isNotEmpty,
-        reason:
-            'getFeedContent must return seed data even when no preferences exist',
-      );
-    });
-
-    test(
-        'User with no onboarding data: getFeedContent does not throw',
-        () async {
-      await expectLater(
-        ContentService.instance.getFeedContent(limit: 5),
-        completes,
-      );
-    });
-
-    test(
-        'User with no onboarding data: getPersonalizedContent returns non-empty list',
-        () async {
-      // Without an authenticated user getPersonalizedContent falls back to
-      // getTrendingVideos, which uses seed data.
-      final items =
-          await ContentService.instance.getPersonalizedContent(limit: 10);
-      expect(items, isNotEmpty,
+      'User with no onboarding data: getFeedContent returns non-empty list',
+      () async {
+        // prefs are empty (setUp resets them) — onboarding not completed.
+        final items = await ContentService.instance.getFeedContent(limit: 10);
+        expect(
+          items,
+          isNotEmpty,
           reason:
-              'getPersonalizedContent must return seed content even without prefs');
-    });
+              'getFeedContent must return seed data even when no preferences exist',
+        );
+      },
+    );
 
     test(
-        'User with no onboarding data: getPersonalizedContent items are valid Content objects',
-        () async {
-      final items =
-          await ContentService.instance.getPersonalizedContent(limit: 5);
-      for (final item in items) {
-        expect(item.id, isNotEmpty);
-        expect(item.platform, isA<PlatformType>());
-        expect(item.contentType, isA<ContentType>());
-      }
-    });
+      'User with no onboarding data: getFeedContent does not throw',
+      () async {
+        await expectLater(
+          ContentService.instance.getFeedContent(limit: 5),
+          completes,
+        );
+      },
+    );
 
     test(
-        'Signed-in user with completed onboarding but empty genre list does not throw',
-        () async {
-      await _signInMockUser();
-      // Completed onboarding but zero genres selected.
-      await _setGenrePreferences([]);
-      // getOnboardingBasedRecommendations must complete without throwing.
-      // In a test environment (no platform connections) it may return an empty
-      // list because ContentAggregationService requires connected accounts —
-      // the important thing is that no exception is raised.
-      await expectLater(
-        ContentService.instance.getOnboardingBasedRecommendations(limit: 10),
-        completes,
-      );
-    });
+      'User with no onboarding data: getPersonalizedContent returns non-empty list',
+      () async {
+        // Without an authenticated user getPersonalizedContent falls back to
+        // getTrendingVideos, which uses seed data.
+        final items = await ContentService.instance.getPersonalizedContent(
+          limit: 10,
+        );
+        expect(
+          items,
+          isNotEmpty,
+          reason:
+              'getPersonalizedContent must return seed content even without prefs',
+        );
+      },
+    );
+
+    test(
+      'User with no onboarding data: getPersonalizedContent items are valid Content objects',
+      () async {
+        final items = await ContentService.instance.getPersonalizedContent(
+          limit: 5,
+        );
+        for (final item in items) {
+          expect(item.id, isNotEmpty);
+          expect(item.platform, isA<PlatformType>());
+          expect(item.contentType, isA<ContentType>());
+        }
+      },
+    );
+
+    test(
+      'Signed-in user with completed onboarding but empty genre list does not throw',
+      () async {
+        await _signInMockUser();
+        // Completed onboarding but zero genres selected.
+        await _setGenrePreferences([]);
+        // getOnboardingBasedRecommendations must complete without throwing.
+        // In a test environment (no platform connections) it may return an empty
+        // list because ContentAggregationService requires connected accounts —
+        // the important thing is that no exception is raised.
+        await expectLater(
+          ContentService.instance.getOnboardingBasedRecommendations(limit: 10),
+          completes,
+        );
+      },
+    );
   });
 
   // ====================================================================
   // Group 4 — Search Accuracy
   // ====================================================================
   group('Search accuracy', () {
-    test('searchVideos("gaming") returns items with gaming-related content',
-        () async {
-      final results =
-          await ContentService.instance.searchVideos('gaming', limit: 10);
-      expect(
-        results,
-        isNotEmpty,
-        reason: 'Seed data contains gaming content; search should find it',
-      );
-      for (final item in results) {
-        final haystack = [
-          item.title ?? '',
-          item.description ?? '',
-          ...item.tags,
-          ...item.categories,
-        ].join(' ').toLowerCase();
-        expect(
-          haystack.contains('gaming') ||
-              haystack.contains('esports') ||
-              haystack.contains('fortnite') ||
-              haystack.contains('gameplay'),
-          isTrue,
-          reason:
-              'Search result ${item.id} should be related to "gaming". '
-              'Haystack: $haystack',
+    test(
+      'searchVideos("gaming") returns items with gaming-related content',
+      () async {
+        final results = await ContentService.instance.searchVideos(
+          'gaming',
+          limit: 10,
         );
-      }
-    });
+        expect(
+          results,
+          isNotEmpty,
+          reason: 'Seed data contains gaming content; search should find it',
+        );
+        for (final item in results) {
+          final haystack = [
+            item.title ?? '',
+            item.description ?? '',
+            ...item.tags,
+            ...item.categories,
+          ].join(' ').toLowerCase();
+          expect(
+            haystack.contains('gaming') ||
+                haystack.contains('esports') ||
+                haystack.contains('fortnite') ||
+                haystack.contains('gameplay'),
+            isTrue,
+            reason:
+                'Search result ${item.id} should be related to "gaming". '
+                'Haystack: $haystack',
+          );
+        }
+      },
+    );
 
-    test('searchVideos("music") returns items with music-related content',
-        () async {
-      final results =
-          await ContentService.instance.searchVideos('music', limit: 10);
-      expect(
-        results,
-        isNotEmpty,
-        reason: 'Seed data contains multiple music items',
-      );
-      for (final item in results) {
-        final haystack = [
-          item.title ?? '',
-          item.description ?? '',
-          ...item.tags,
-          ...item.categories,
-        ].join(' ').toLowerCase();
-        expect(
-          haystack.contains('music') ||
-              haystack.contains('song') ||
-              haystack.contains('pop') ||
-              haystack.contains('kpop') ||
-              haystack.contains('latin') ||
-              haystack.contains('classic'),
-          isTrue,
-          reason:
-              'Search result ${item.id} should be related to "music". '
-              'Haystack: $haystack',
+    test(
+      'searchVideos("music") returns items with music-related content',
+      () async {
+        final results = await ContentService.instance.searchVideos(
+          'music',
+          limit: 10,
         );
-      }
-    });
+        expect(
+          results,
+          isNotEmpty,
+          reason: 'Seed data contains multiple music items',
+        );
+        for (final item in results) {
+          final haystack = [
+            item.title ?? '',
+            item.description ?? '',
+            ...item.tags,
+            ...item.categories,
+          ].join(' ').toLowerCase();
+          expect(
+            haystack.contains('music') ||
+                haystack.contains('song') ||
+                haystack.contains('pop') ||
+                haystack.contains('kpop') ||
+                haystack.contains('latin') ||
+                haystack.contains('classic'),
+            isTrue,
+            reason:
+                'Search result ${item.id} should be related to "music". '
+                'Haystack: $haystack',
+          );
+        }
+      },
+    );
 
     test('searchVideos("") returns empty list', () async {
       final results = await ContentService.instance.searchVideos('');
-      expect(results, isEmpty,
-          reason: 'Empty query should yield no results');
+      expect(results, isEmpty, reason: 'Empty query should yield no results');
     });
 
     test('searchVideos returns items with valid fields', () async {
-      final results =
-          await ContentService.instance.searchVideos('flutter', limit: 5);
+      final results = await ContentService.instance.searchVideos(
+        'flutter',
+        limit: 5,
+      );
       for (final item in results) {
         expect(item.id, isNotEmpty);
         expect(item.platformContentId, isNotEmpty);
@@ -496,35 +536,53 @@ void main() {
       }
     });
 
-    test('searchVideos("beauty") returns beauty/skincare-related content',
-        () async {
-      final results =
-          await ContentService.instance.searchVideos('beauty', limit: 10);
-      expect(results, isNotEmpty,
-          reason: 'Seed data contains beauty/skincare items');
-      _assertAtLeastOneItemMatches(results, 'beauty',
+    test(
+      'searchVideos("beauty") returns beauty/skincare-related content',
+      () async {
+        final results = await ContentService.instance.searchVideos(
+          'beauty',
+          limit: 10,
+        );
+        expect(
+          results,
+          isNotEmpty,
+          reason: 'Seed data contains beauty/skincare items',
+        );
+        _assertAtLeastOneItemMatches(
+          results,
+          'beauty',
           top: results.length,
-          reason: 'Search results for "beauty" must include beauty content');
-    });
+          reason: 'Search results for "beauty" must include beauty content',
+        );
+      },
+    );
 
     test('searchVideos("sports") returns sports-related content', () async {
-      final results =
-          await ContentService.instance.searchVideos('sports', limit: 10);
-      expect(results, isNotEmpty,
-          reason: 'Seed data contains sports items');
-      _assertAtLeastOneItemMatches(results, 'sports',
-          top: results.length,
-          reason: 'Search results for "sports" must include sports content');
+      final results = await ContentService.instance.searchVideos(
+        'sports',
+        limit: 10,
+      );
+      expect(results, isNotEmpty, reason: 'Seed data contains sports items');
+      _assertAtLeastOneItemMatches(
+        results,
+        'sports',
+        top: results.length,
+        reason: 'Search results for "sports" must include sports content',
+      );
     });
 
     test('searchVideos("diy") returns DIY/crafts content', () async {
-      final results =
-          await ContentService.instance.searchVideos('diy', limit: 10);
-      expect(results, isNotEmpty,
-          reason: 'Seed data contains DIY content');
-      _assertAtLeastOneItemMatches(results, 'diy',
-          top: results.length,
-          reason: 'Search results for "diy" must include DIY content');
+      final results = await ContentService.instance.searchVideos(
+        'diy',
+        limit: 10,
+      );
+      expect(results, isNotEmpty, reason: 'Seed data contains DIY content');
+      _assertAtLeastOneItemMatches(
+        results,
+        'diy',
+        top: results.length,
+        reason: 'Search results for "diy" must include DIY content',
+      );
     });
   });
 
@@ -541,7 +599,15 @@ void main() {
     // Having multiple synonyms makes the match robust against minor tag changes.
     const genreCoverage = <String, List<String>>{
       'gaming': ['gaming', 'esports', 'gameplay', 'fortnite', 'gamer'],
-      'music': ['music', 'song', 'pop', 'kpop', 'latin', 'despacito', 'edsheeran'],
+      'music': [
+        'music',
+        'song',
+        'pop',
+        'kpop',
+        'latin',
+        'despacito',
+        'edsheeran',
+      ],
       'comedy': ['comedy', 'funny', 'humor', 'glitter'],
       'sports': ['sports', 'football', 'soccer', 'basketball', 'nba'],
       'movies': ['movies', 'films', 'cinema', 'marvel', 'reviews'],
@@ -590,77 +656,127 @@ void main() {
     // Individual genre tests provide more targeted failure messages.
 
     test('Seed data: gaming genre has at least 1 item', () async {
-      final items = await ContentService.instance
-          .getVideos(category: 'gaming', limit: 50);
-      expect(items, isNotEmpty,
-          reason:
-              'No gaming-tagged items found in seed data. '
-              'Add a Content entry with tags containing "gaming" to _sampleVideos.');
+      final items = await ContentService.instance.getVideos(
+        category: 'gaming',
+        limit: 50,
+      );
+      expect(
+        items,
+        isNotEmpty,
+        reason:
+            'No gaming-tagged items found in seed data. '
+            'Add a Content entry with tags containing "gaming" to _sampleVideos.',
+      );
     });
 
     test('Seed data: music genre has at least 1 item', () async {
-      final items =
-          await ContentService.instance.getVideos(category: 'music', limit: 50);
-      expect(items, isNotEmpty,
-          reason: 'No music-tagged items found in seed data.');
+      final items = await ContentService.instance.getVideos(
+        category: 'music',
+        limit: 50,
+      );
+      expect(
+        items,
+        isNotEmpty,
+        reason: 'No music-tagged items found in seed data.',
+      );
     });
 
     test('Seed data: comedy genre has at least 1 item', () async {
-      final results =
-          await ContentService.instance.searchVideos('comedy', limit: 50);
-      expect(results, isNotEmpty,
-          reason:
-              'No comedy-related items found in seed data. '
-              'Add a Content entry with tags containing "comedy" or "funny".');
+      final results = await ContentService.instance.searchVideos(
+        'comedy',
+        limit: 50,
+      );
+      expect(
+        results,
+        isNotEmpty,
+        reason:
+            'No comedy-related items found in seed data. '
+            'Add a Content entry with tags containing "comedy" or "funny".',
+      );
     });
 
     test('Seed data: sports genre has at least 1 item', () async {
-      final items = await ContentService.instance
-          .getVideos(category: 'sports', limit: 50);
-      expect(items, isNotEmpty,
-          reason: 'No sports-tagged items found in seed data.');
+      final items = await ContentService.instance.getVideos(
+        category: 'sports',
+        limit: 50,
+      );
+      expect(
+        items,
+        isNotEmpty,
+        reason: 'No sports-tagged items found in seed data.',
+      );
     });
 
     test('Seed data: movies genre has at least 1 item', () async {
-      final items = await ContentService.instance
-          .getVideos(category: 'movies', limit: 50);
-      expect(items, isNotEmpty,
-          reason: 'No movies-tagged items found in seed data.');
+      final items = await ContentService.instance.getVideos(
+        category: 'movies',
+        limit: 50,
+      );
+      expect(
+        items,
+        isNotEmpty,
+        reason: 'No movies-tagged items found in seed data.',
+      );
     });
 
     test('Seed data: beauty genre has at least 1 item', () async {
-      final items = await ContentService.instance
-          .getVideos(category: 'beauty', limit: 50);
-      expect(items, isNotEmpty,
-          reason: 'No beauty-tagged items found in seed data.');
+      final items = await ContentService.instance.getVideos(
+        category: 'beauty',
+        limit: 50,
+      );
+      expect(
+        items,
+        isNotEmpty,
+        reason: 'No beauty-tagged items found in seed data.',
+      );
     });
 
     test('Seed data: fashion genre has at least 1 item', () async {
-      final items = await ContentService.instance
-          .getVideos(category: 'fashion', limit: 50);
-      expect(items, isNotEmpty,
-          reason: 'No fashion-tagged items found in seed data.');
+      final items = await ContentService.instance.getVideos(
+        category: 'fashion',
+        limit: 50,
+      );
+      expect(
+        items,
+        isNotEmpty,
+        reason: 'No fashion-tagged items found in seed data.',
+      );
     });
 
     test('Seed data: pets genre has at least 1 item', () async {
-      final items =
-          await ContentService.instance.getVideos(category: 'pets', limit: 50);
-      expect(items, isNotEmpty,
-          reason: 'No pets-tagged items found in seed data.');
+      final items = await ContentService.instance.getVideos(
+        category: 'pets',
+        limit: 50,
+      );
+      expect(
+        items,
+        isNotEmpty,
+        reason: 'No pets-tagged items found in seed data.',
+      );
     });
 
     test('Seed data: cars genre has at least 1 item', () async {
-      final items =
-          await ContentService.instance.getVideos(category: 'cars', limit: 50);
-      expect(items, isNotEmpty,
-          reason: 'No cars-tagged items found in seed data.');
+      final items = await ContentService.instance.getVideos(
+        category: 'cars',
+        limit: 50,
+      );
+      expect(
+        items,
+        isNotEmpty,
+        reason: 'No cars-tagged items found in seed data.',
+      );
     });
 
     test('Seed data: DIY genre has at least 1 item', () async {
-      final items =
-          await ContentService.instance.getVideos(category: 'diy', limit: 50);
-      expect(items, isNotEmpty,
-          reason: 'No diy-tagged items found in seed data.');
+      final items = await ContentService.instance.getVideos(
+        category: 'diy',
+        limit: 50,
+      );
+      expect(
+        items,
+        isNotEmpty,
+        reason: 'No diy-tagged items found in seed data.',
+      );
     });
   });
 
@@ -670,43 +786,45 @@ void main() {
   group('OnboardingService genre catalogue integrity', () {
     test('getAllGenres returns at least 10 genres', () {
       final genres = OnboardingService.instance.getAllGenres();
-      expect(genres.length, greaterThanOrEqualTo(10),
-          reason: 'Onboarding should offer at least 10 genre options');
+      expect(
+        genres.length,
+        greaterThanOrEqualTo(10),
+        reason: 'Onboarding should offer at least 10 genre options',
+      );
     });
 
-    test('Every genre has a non-empty name, emoji, category, and keywords',
-        () {
+    test('Every genre has a non-empty name, emoji, category, and keywords', () {
       final genres = OnboardingService.instance.getAllGenres();
       for (final genre in genres) {
-        expect(genre.name, isNotEmpty,
-            reason: 'Genre name must not be empty');
-        expect(genre.emoji, isNotEmpty,
-            reason: 'Genre ${genre.name} must have an emoji');
-        expect(genre.category, isNotEmpty,
-            reason: 'Genre ${genre.name} must have a category');
-        expect(genre.keywords, isNotEmpty,
-            reason: 'Genre ${genre.name} must have at least 1 keyword');
+        expect(genre.name, isNotEmpty, reason: 'Genre name must not be empty');
+        expect(
+          genre.emoji,
+          isNotEmpty,
+          reason: 'Genre ${genre.name} must have an emoji',
+        );
+        expect(
+          genre.category,
+          isNotEmpty,
+          reason: 'Genre ${genre.name} must have a category',
+        );
+        expect(
+          genre.keywords,
+          isNotEmpty,
+          reason: 'Genre ${genre.name} must have at least 1 keyword',
+        );
       }
     });
 
     test('Gaming genre keywords contain "gaming"', () {
       final genres = OnboardingService.instance.getAllGenres();
-      final gaming =
-          genres.firstWhere((g) => g.name.toLowerCase() == 'gaming');
-      expect(
-        gaming.keywords.map((k) => k.toLowerCase()),
-        contains('gaming'),
-      );
+      final gaming = genres.firstWhere((g) => g.name.toLowerCase() == 'gaming');
+      expect(gaming.keywords.map((k) => k.toLowerCase()), contains('gaming'));
     });
 
     test('Music genre keywords contain "music"', () {
       final genres = OnboardingService.instance.getAllGenres();
-      final music =
-          genres.firstWhere((g) => g.name.toLowerCase() == 'music');
-      expect(
-        music.keywords.map((k) => k.toLowerCase()),
-        contains('music'),
-      );
+      final music = genres.firstWhere((g) => g.name.toLowerCase() == 'music');
+      expect(music.keywords.map((k) => k.toLowerCase()), contains('music'));
     });
 
     test('filterGenres("gaming") returns only the Gaming genre', () {

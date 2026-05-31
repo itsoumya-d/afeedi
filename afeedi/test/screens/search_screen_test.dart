@@ -9,10 +9,10 @@ import 'package:afeedi/screens/search_screen.dart';
 import 'package:afeedi/l10n/app_localizations.dart';
 
 Widget _buildApp(Widget child) => MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: child,
-    );
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: child,
+);
 
 void main() {
   late Directory tempDir;
@@ -23,9 +23,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
 
     Hive.init(tempDir.path);
     SharedPreferences.setMockInitialValues({});
@@ -80,7 +80,9 @@ void main() {
       expect(find.text('Popular Topics'), findsOneWidget);
     });
 
-    testWidgets('SearchScreen shows discover content by platform', (tester) async {
+    testWidgets('SearchScreen shows discover content by platform', (
+      tester,
+    ) async {
       await tester.pumpWidget(_buildApp(const SearchScreen()));
       await tester.pump();
 
@@ -94,8 +96,9 @@ void main() {
       expect(find.text('Recent Searches'), findsOneWidget);
     });
 
-    testWidgets('SearchScreen shows empty state (discover) before any search',
-        (tester) async {
+    testWidgets('SearchScreen shows empty state (discover) before any search', (
+      tester,
+    ) async {
       await tester.pumpWidget(_buildApp(const SearchScreen()));
       await tester.pump();
 
@@ -111,8 +114,9 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
     });
 
-    testWidgets('SearchScreen has platform filter chips after search',
-        (tester) async {
+    testWidgets('SearchScreen has platform filter chips after search', (
+      tester,
+    ) async {
       await tester.pumpWidget(_buildApp(const SearchScreen()));
       await tester.pump();
 
@@ -125,8 +129,9 @@ void main() {
       expect(find.text('TikTok'), findsWidgets);
     });
 
-    testWidgets('SearchScreen sanitizes very long queries gracefully',
-        (tester) async {
+    testWidgets('SearchScreen sanitizes very long queries gracefully', (
+      tester,
+    ) async {
       await tester.pumpWidget(_buildApp(const SearchScreen()));
       await tester.pump();
 
@@ -139,22 +144,26 @@ void main() {
       expect(find.byType(Scaffold), findsOneWidget);
     });
 
-    testWidgets('SearchScreen sanitizes HTML/script injection in query',
-        (tester) async {
+    testWidgets('SearchScreen sanitizes HTML/script injection in query', (
+      tester,
+    ) async {
       await tester.pumpWidget(_buildApp(const SearchScreen()));
       await tester.pump();
 
       // HTML tags should be stripped without causing errors
       await tester.enterText(
-          find.byType(TextField), '<script>alert(1)</script>flutter');
+        find.byType(TextField),
+        '<script>alert(1)</script>flutter',
+      );
       await tester.pump();
 
       // Screen still renders after HTML-injected input
       expect(find.byType(Scaffold), findsOneWidget);
     });
 
-    testWidgets('SearchScreen returns to discover view when query is cleared',
-        (tester) async {
+    testWidgets('SearchScreen returns to discover view when query is cleared', (
+      tester,
+    ) async {
       await tester.pumpWidget(_buildApp(const SearchScreen()));
       await tester.pump();
 

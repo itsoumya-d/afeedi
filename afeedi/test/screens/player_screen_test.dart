@@ -9,19 +9,19 @@ import 'package:afeedi/screens/player_screen.dart';
 import 'package:afeedi/models/content_model.dart';
 
 Content _makeContent() => Content(
-      id: 'test1',
-      platform: PlatformType.youtube,
-      platformContentId: 'dQw4w9WgXcQ',
-      contentType: ContentType.video,
-      title: 'Test Video',
-      creatorName: 'Test Creator',
-      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-      viewCount: 1000,
-      likeCount: 100,
-      tags: ['tech'],
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
+  id: 'test1',
+  platform: PlatformType.youtube,
+  platformContentId: 'dQw4w9WgXcQ',
+  contentType: ContentType.video,
+  title: 'Test Video',
+  creatorName: 'Test Creator',
+  videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+  viewCount: 1000,
+  likeCount: 100,
+  tags: ['tech'],
+  createdAt: DateTime.now(),
+  updatedAt: DateTime.now(),
+);
 
 void main() {
   late Directory tempDir;
@@ -32,9 +32,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
 
     Hive.init(tempDir.path);
     SharedPreferences.setMockInitialValues({});
@@ -52,8 +52,9 @@ void main() {
   });
 
   group('PlayerScreen', () {
-    testWidgets('renders without errors given a YouTube Content object',
-        (tester) async {
+    testWidgets('renders without errors given a YouTube Content object', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(home: PlayerScreen(content: _makeContent())),
       );
@@ -72,8 +73,9 @@ void main() {
       expect(find.byIcon(Icons.arrow_back), findsOneWidget);
     });
 
-    testWidgets('shows share button (Icons.share_outlined) in app bar',
-        (tester) async {
+    testWidgets('shows share button (Icons.share_outlined) in app bar', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(home: PlayerScreen(content: _makeContent())),
       );
@@ -138,8 +140,9 @@ void main() {
       expect(find.text('Saved'), findsOneWidget);
     });
 
-    testWidgets("renders correctly after async content loading",
-        (tester) async {
+    testWidgets("renders correctly after async content loading", (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(home: PlayerScreen(content: _makeContent())),
       );
@@ -163,8 +166,9 @@ void main() {
       expect(find.byIcon(Icons.speed), findsOneWidget);
     });
 
-    testWidgets('speed button is tappable and opens speed selector',
-        (tester) async {
+    testWidgets('speed button is tappable and opens speed selector', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(800, 1400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -205,8 +209,9 @@ void main() {
       expect(find.text('2×'), findsOneWidget);
     });
 
-    testWidgets('shows related content section header when async loads',
-        (tester) async {
+    testWidgets('shows related content section header when async loads', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(800, 2000);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);

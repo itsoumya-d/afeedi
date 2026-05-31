@@ -59,8 +59,12 @@ void main() {
         find.byWidgetPredicate(
           (w) =>
               w is Text &&
-              ['Good morning', 'Good afternoon', 'Good evening', 'Still up']
-                  .any((phrase) => w.data?.contains(phrase) ?? false),
+              [
+                'Good morning',
+                'Good afternoon',
+                'Good evening',
+                'Still up',
+              ].any((phrase) => w.data?.contains(phrase) ?? false),
         ),
         findsOneWidget,
       );
@@ -130,7 +134,11 @@ void main() {
         (chip) => find.text(chip).evaluate().isNotEmpty,
         orElse: () => '',
       );
-      expect(visibleChip, isNotEmpty, reason: 'At least one chip should be visible');
+      expect(
+        visibleChip,
+        isNotEmpty,
+        reason: 'At least one chip should be visible',
+      );
 
       await tester.tap(find.text(visibleChip).first);
       // _handleSend has a 700ms Future.delayed before responding; pump past it

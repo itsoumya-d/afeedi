@@ -25,9 +25,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
 
     Hive.init(tempDir.path);
     SharedPreferences.setMockInitialValues({});
@@ -85,8 +85,9 @@ void main() {
       await pumpHomeTab(tester);
       // Trending topics are derived from content tags (dynamic) or default to '#Trending'
       expect(
-        find.byWidgetPredicate((w) =>
-            w is Text && (w.data?.startsWith('#') ?? false)),
+        find.byWidgetPredicate(
+          (w) => w is Text && (w.data?.startsWith('#') ?? false),
+        ),
         findsWidgets,
       );
     });

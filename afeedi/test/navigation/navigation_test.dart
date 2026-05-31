@@ -24,9 +24,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (MethodCall call) async => tempDir.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall call) async => tempDir.path,
+        );
 
     Hive.init(tempDir.path);
     SharedPreferences.setMockInitialValues({});
@@ -44,13 +44,17 @@ void main() {
   });
 
   group('App Routes', () {
-    testWidgets('welcome screen renders (${AppRoutes.welcome})', (tester) async {
+    testWidgets('welcome screen renders (${AppRoutes.welcome})', (
+      tester,
+    ) async {
       SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const WelcomeScreen(),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const WelcomeScreen(),
+        ),
+      );
       // Advance past the 300ms Future.delayed in WelcomeScreen.initState
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.byType(Scaffold), findsOneWidget);
@@ -58,24 +62,29 @@ void main() {
 
     testWidgets('login screen renders (${AppRoutes.login})', (tester) async {
       SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const LoginScreen(),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const LoginScreen(),
+        ),
+      );
       // Advance past the 300ms Future.delayed used to start slide animation
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.byType(Scaffold), findsOneWidget);
     });
 
-    testWidgets('create account screen renders (${AppRoutes.createAccount})',
-        (tester) async {
+    testWidgets('create account screen renders (${AppRoutes.createAccount})', (
+      tester,
+    ) async {
       SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const CreateAccountScreen(),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const CreateAccountScreen(),
+        ),
+      );
       // Advance past the 300ms Future.delayed used to start slide animation
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.byType(Scaffold), findsOneWidget);
@@ -83,42 +92,52 @@ void main() {
 
     testWidgets('search screen renders (${AppRoutes.search})', (tester) async {
       SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const SearchScreen(),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const SearchScreen(),
+        ),
+      );
       await tester.pump();
       expect(find.byType(Scaffold), findsOneWidget);
     });
 
-    testWidgets('settings screen renders (${AppRoutes.settings})',
-        (tester) async {
+    testWidgets('settings screen renders (${AppRoutes.settings})', (
+      tester,
+    ) async {
       SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const SettingsScreen(),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const SettingsScreen(),
+        ),
+      );
       await tester.pump();
       expect(find.byType(Scaffold), findsOneWidget);
     });
 
-    testWidgets('profile screen renders (${AppRoutes.profile})', (tester) async {
+    testWidgets('profile screen renders (${AppRoutes.profile})', (
+      tester,
+    ) async {
       SharedPreferences.setMockInitialValues({});
       await tester.pumpWidget(const MaterialApp(home: ProfileScreen()));
       await tester.pump();
       expect(find.byType(Scaffold), findsOneWidget);
     });
 
-    testWidgets('notifications screen renders (${AppRoutes.notifications})',
-        (tester) async {
+    testWidgets('notifications screen renders (${AppRoutes.notifications})', (
+      tester,
+    ) async {
       SharedPreferences.setMockInitialValues({});
-      await tester.pumpWidget(MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const NotificationsScreen(),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const NotificationsScreen(),
+        ),
+      );
       await tester.pump();
       expect(find.byType(Scaffold), findsOneWidget);
     });

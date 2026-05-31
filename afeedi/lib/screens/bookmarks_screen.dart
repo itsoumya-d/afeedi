@@ -346,7 +346,9 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                     vertical: 1,
                   ),
                   decoration: BoxDecoration(
-                    color: _getPlatformColor(content.platform).withValues(alpha: 0.2),
+                    color: _getPlatformColor(
+                      content.platform,
+                    ).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: _getPlatformColor(

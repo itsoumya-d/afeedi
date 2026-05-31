@@ -339,7 +339,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.history, size: 80, color: Colors.white.withValues(alpha: 0.25)),
+          Icon(
+            Icons.history,
+            size: 80,
+            color: Colors.white.withValues(alpha: 0.25),
+          ),
           const SizedBox(height: 20),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 32),

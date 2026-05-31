@@ -3428,9 +3428,17 @@ class ContentService {
       final userLocale = await _getUserLocale(); // null when English / unset
 
       if (selectedGenres.isEmpty) {
-        return getFeedContent(
-          limit: limit,
-        ); // getFeedContent applies locale boost
+        final general = await getFeedContent(limit: limit);
+        return general
+            .map(
+              (c) => c.copyWith(
+                metadata: {
+                  ...c.metadata,
+                  'recommendationReason': 'Recommended',
+                },
+              ),
+            )
+            .toList();
       }
 
       // Score all content by genre match
@@ -3508,7 +3516,16 @@ class ContentService {
       }
 
       final final_result = result.isEmpty
-          ? await getFeedContent(limit: limit)
+          ? (await getFeedContent(limit: limit))
+                .map(
+                  (c) => c.copyWith(
+                    metadata: {
+                      ...c.metadata,
+                      'recommendationReason': 'Recommended',
+                    },
+                  ),
+                )
+                .toList()
           : result;
       _memPut(cacheKey, final_result);
       return final_result;

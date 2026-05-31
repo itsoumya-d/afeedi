@@ -57,7 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     List<Map<String, dynamic>> history = [];
     if (user != null) {
       try {
-        final interactions = await LocalStorageService.instance.getContentInteractions(user.id ?? '');
+        final interactions = await LocalStorageService.instance.getContentInteractions(user.id);
         history = interactions.take(20).toList();
       } catch (_) {}
     }

@@ -290,7 +290,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             margin: const EdgeInsets.only(bottom: 12),
             height: 80,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
@@ -299,7 +299,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   width: 112,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.08),
+                    color: Colors.white.withValues(alpha: 0.08),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(10),
                       bottomLeft: Radius.circular(10),
@@ -314,13 +314,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     children: [
                       Container(
                         height: 12,
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                       ),
                       const SizedBox(height: 8),
                       Container(
                         height: 10,
                         width: 120,
-                        color: Colors.white.withOpacity(0.07),
+                        color: Colors.white.withValues(alpha: 0.07),
                       ),
                     ],
                   ),
@@ -339,7 +339,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.history, size: 80, color: Colors.white.withOpacity(0.25)),
+          Icon(Icons.history, size: 80, color: Colors.white.withValues(alpha: 0.25)),
           const SizedBox(height: 20),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 32),
@@ -360,7 +360,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               'Start watching videos to see your history here.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.4),
+                color: Colors.white.withValues(alpha: 0.4),
                 fontSize: 14,
                 height: 1.5,
               ),
@@ -615,7 +615,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.35),
+                            color: Colors.white.withValues(alpha: 0.35),
                             fontSize: 10,
                           ),
                         ),
@@ -647,7 +647,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       child: Center(
         child: Icon(
           Icons.play_circle_outline,
-          color: _getPlatformColor(content.platform).withOpacity(0.4),
+          color: _getPlatformColor(content.platform).withValues(alpha: 0.4),
           size: 28,
         ),
       ),

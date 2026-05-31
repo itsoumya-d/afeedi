@@ -226,7 +226,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
           Icon(
             Icons.bookmarks_outlined,
             size: 80,
-            color: Colors.white.withOpacity(0.25),
+            color: Colors.white.withValues(alpha: 0.25),
           ),
           const SizedBox(height: 20),
           const Padding(
@@ -248,7 +248,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
               'Tap the bookmark icon on any video to save it here.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.4),
+                color: Colors.white.withValues(alpha: 0.4),
                 fontSize: 14,
                 height: 1.5,
               ),
@@ -265,7 +265,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
       itemCount: _displayed.length,
       separatorBuilder: (_, __) => Divider(
         height: 1,
-        color: Colors.white.withOpacity(0.06),
+        color: Colors.white.withValues(alpha: 0.06),
         indent: 16,
         endIndent: 16,
       ),
@@ -285,7 +285,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
         direction: DismissDirection.endToStart,
         onDismissed: (_) => _unsave(content),
         background: Container(
-          color: Colors.red.withOpacity(0.2),
+          color: Colors.red.withValues(alpha: 0.2),
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 20),
           child: const Icon(
@@ -346,12 +346,12 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                     vertical: 1,
                   ),
                   decoration: BoxDecoration(
-                    color: _getPlatformColor(content.platform).withOpacity(0.2),
+                    color: _getPlatformColor(content.platform).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: _getPlatformColor(
                         content.platform,
-                      ).withOpacity(0.5),
+                      ).withValues(alpha: 0.5),
                       width: 0.5,
                     ),
                   ),
@@ -387,7 +387,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
       child: Center(
         child: Icon(
           Icons.play_circle_outline,
-          color: _getPlatformColor(content.platform).withOpacity(0.5),
+          color: _getPlatformColor(content.platform).withValues(alpha: 0.5),
           size: 28,
         ),
       ),

@@ -486,9 +486,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 16),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.15),
+              color: Colors.green.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.green.withOpacity(0.4)),
+              border: Border.all(color: Colors.green.withValues(alpha: 0.4)),
             ),
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,

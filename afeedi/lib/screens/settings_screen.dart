@@ -131,7 +131,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _saveBool('setting_autoplay', v);
             },
             activeColor: const Color(0xFF00D4FF),
-            activeTrackColor: const Color(0xFF00D4FF).withOpacity(0.3),
+            activeTrackColor: const Color(0xFF00D4FF).withValues(alpha: 0.3),
             inactiveTrackColor: Colors.white12,
             inactiveThumbColor: Colors.white38,
           ),
@@ -167,7 +167,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _saveBool('setting_data_saver', v);
             },
             activeColor: const Color(0xFF00D4FF),
-            activeTrackColor: const Color(0xFF00D4FF).withOpacity(0.3),
+            activeTrackColor: const Color(0xFF00D4FF).withValues(alpha: 0.3),
             inactiveTrackColor: Colors.white12,
             inactiveThumbColor: Colors.white38,
           ),
@@ -205,7 +205,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               // cancelAllNotifications not yet exposed; preference saved above is enough to suppress future scheduling
             },
             activeColor: const Color(0xFF00D4FF),
-            activeTrackColor: const Color(0xFF00D4FF).withOpacity(0.3),
+            activeTrackColor: const Color(0xFF00D4FF).withValues(alpha: 0.3),
             inactiveTrackColor: Colors.white12,
             inactiveThumbColor: Colors.white38,
           ),
@@ -240,7 +240,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               themeModeNotifier.value = v ? ThemeMode.dark : ThemeMode.light;
             },
             activeColor: const Color(0xFF00D4FF),
-            activeTrackColor: const Color(0xFF00D4FF).withOpacity(0.3),
+            activeTrackColor: const Color(0xFF00D4FF).withValues(alpha: 0.3),
             inactiveTrackColor: Colors.white12,
             inactiveThumbColor: Colors.white38,
           ),
@@ -342,7 +342,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _saveBool('setting_analytics', v);
             },
             activeColor: const Color(0xFF00D4FF),
-            activeTrackColor: const Color(0xFF00D4FF).withOpacity(0.3),
+            activeTrackColor: const Color(0xFF00D4FF).withValues(alpha: 0.3),
             inactiveTrackColor: Colors.white12,
             inactiveThumbColor: Colors.white38,
           ),
@@ -504,7 +504,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: (isPremium ? Colors.green : const Color(0xFF00D4FF))
-                    .withOpacity(0.3),
+                    .withValues(alpha: 0.3),
               ),
             ),
             child: Row(

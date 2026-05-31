@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'screens/welcome_screen.dart';
+import 'screens/dashboard_screen.dart';
+import 'screens/enhanced_onboarding_flow.dart';
 import 'services/navigation_service.dart';
 import 'services/analytics_service.dart';
 import 'services/onboarding_service.dart';
@@ -64,9 +66,39 @@ class AfeediApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       navigatorKey: NavigationService.navigatorKey,
-      initialRoute: AppRoutes.enhancedOnboarding,
-      routes: AppRoutes.routes,
       debugShowCheckedModeBanner: false,
+      home: _buildInitialScreen(),
+      routes: AppRoutes.routes,
+    );
+  }
+
+  Widget _buildInitialScreen() {
+    return FutureBuilder<bool>(
+      future: OnboardingService.instance.isOnboardingCompleted(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            backgroundColor: Color(0xFF1A0A3E),
+            body: Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00E5FF)),
+              ),
+            ),
+          );
+        }
+
+        final isCompleted = snapshot.data ?? false;
+
+        if (isCompleted) {
+          return const DashboardScreen();
+        } else {
+          return EnhancedOnboardingFlow(
+            onComplete: () {
+              Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
+            },
+          );
+        }
+      },
     );
   }
 }

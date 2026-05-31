@@ -267,63 +267,7 @@ class PersonalizedRecommendationService {
     diversifiedList.shuffle(_random);
     return diversifiedList;
   }
-      
-      // Get calendar context if enabled
-      // List<CalendarEvent>? upcomingEvents;
-      // if (includeCalendarContext && onboardingPreferences.calendarIntegration) {
-      //   upcomingEvents = await CalendarService.instance.getUpcomingEvents(
-      //     limit: 5,
-      //     withinHours: 24,
-      //   );
-      // }
-      List<dynamic>? upcomingEvents; // Temporary placeholder
-      
-      // Get available content with expanded limit for better filtering
-      final availableContent = await ContentAggregationService.instance
-          .aggregateContent(
-            limit: limit * 5, // Get more content to choose from
-            platforms: _getPrioritizedPlatforms(onboardingPreferences, platforms),
-          );
-      
-      if (availableContent.isEmpty) {
-        return [];
-      }
-      
-      // Generate recommendations using comprehensive algorithm
-      final recommendations = await _generateComprehensiveRecommendations(
-        user: user,
-        content: availableContent,
-        preferences: onboardingPreferences,
-        behaviorInsights: behaviorInsights,
-        upcomingEvents: upcomingEvents,
-        limit: limit,
-      );
-      
-      // Save recommendations to database for analytics
-      await _saveRecommendations(recommendations);
-      
-      await AnalyticsService.instance.trackUserInteraction(
-        action: 'comprehensive_recommendations_generated',
-        screen: 'personalized_recommendation_service',
-        additionalData: {
-          'count': recommendations.length,
-          'algorithm_version': algorithmVersion,
-          'calendar_integrated': upcomingEvents != null,
-          'platforms': platforms?.map((p) => p.toString()).toList() ?? 'all',
-        },
-      );
-      
-      return recommendations;
-    } catch (error) {
-      await AnalyticsService.instance.trackError(
-        errorType: 'recommendation_error',
-        errorMessage: error.toString(),
-        screen: 'personalized_recommendation_service',
-      );
-      return [];
-    }
-  }
-  
+
   // Generate recommendations specifically aligned with calendar events
   Future<List<Recommendation>> generateCalendarContextualRecommendations({
     required CalendarEvent event,
@@ -1217,11 +1161,30 @@ class ScoredContent {
   final double score;
   final String? calendarContext;
   final String? timeContext;
-  
+
   ScoredContent({
     required this.content,
     required this.score,
     this.calendarContext,
     this.timeContext,
+  });
+}
+
+// Minimal CalendarEvent stub - full implementation pending backend integration
+class CalendarEvent {
+  final String id;
+  final String title;
+  final String eventType;
+  final String? description;
+  final String? location;
+  final DateTime? endTime;
+
+  const CalendarEvent({
+    required this.id,
+    required this.title,
+    required this.eventType,
+    this.description,
+    this.location,
+    this.endTime,
   });
 }

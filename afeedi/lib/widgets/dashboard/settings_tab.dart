@@ -11,763 +11,465 @@ class SettingsTab extends StatefulWidget {
 class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-  
-  // Privacy settings
+
+  // Content preferences
+  bool _autoplay = true;
+  int _videoQuality = 1; // 0=Low, 1=Auto, 2=High
+  bool _downloadOnWifi = true;
+
+  // Notifications
+  bool _pushNotifications = true;
+  bool _dailyDigest = true;
+  bool _trendingAlerts = false;
+  bool _emailNewsletter = false;
+
+  // Privacy & Data (GDPR)
   bool _dataCollection = true;
   bool _personalizedAds = false;
-  bool _analyticsSharing = true;
-  bool _locationTracking = false;
-  
-  // Content settings
-  bool _autoplay = true;
-  bool _downloadOnWifi = true;
-  bool _highQuality = false;
+
+  // Appearance
   bool _darkMode = true;
-  
-  // Notification settings
-  bool _pushNotifications = true;
-  bool _emailNotifications = false;
-  bool _weeklyDigest = true;
-  bool _trendingAlerts = true;
+  int _textSize = 1; // 0=Small, 1=Medium, 2=Large
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return Container(
+      color: const Color(0xFF1A0A3E),
       child: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
-            _buildPrivacySection(),
-            _buildContentSection(),
-            _buildNotificationSection(),
+            const SizedBox(height: 16),
             _buildAccountSection(),
-            _buildAboutSection(),
-            const SizedBox(height: 100), // Bottom padding for navigation
+            _buildDivider(),
+            _buildSectionHeader('Content Preferences', icon: Icons.play_circle_outline, color: AppTheme.primaryPink),
+            _buildSettingRow(
+              title: 'Autoplay Videos',
+              subtitle: 'Automatically play videos when scrolling',
+              trailing: _buildSwitch(_autoplay, (v) => setState(() => _autoplay = v)),
+            ),
+            _buildSettingRow(
+              title: 'Video Quality',
+              subtitle: 'Select playback quality',
+              trailing: _buildSegmentedControl(
+                segments: ['Low', 'Auto', 'High'],
+                selected: _videoQuality,
+                onChanged: (i) => setState(() => _videoQuality = i),
+              ),
+            ),
+            _buildSettingRow(
+              title: 'Download on WiFi Only',
+              subtitle: 'Save mobile data by downloading on WiFi',
+              trailing: _buildSwitch(_downloadOnWifi, (v) => setState(() => _downloadOnWifi = v)),
+            ),
+            _buildSettingRow(
+              title: 'Content Language',
+              trailing: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'English (US)',
+                  style: TextStyle(color: Colors.white, fontSize: 13),
+                ),
+              ),
+            ),
+            _buildDivider(),
+            _buildSectionHeader('Notifications', icon: Icons.notifications_outlined, color: const Color(0xFFFFE66D)),
+            _buildSettingRow(
+              title: 'Push Notifications',
+              subtitle: 'Receive alerts directly on your device',
+              trailing: _buildSwitch(_pushNotifications, (v) => setState(() => _pushNotifications = v)),
+            ),
+            if (_pushNotifications) ...[
+              _buildSubSettingRow(
+                title: 'Daily Digest',
+                trailing: _buildSwitch(_dailyDigest, (v) => setState(() => _dailyDigest = v)),
+              ),
+              _buildSubSettingRow(
+                title: 'Trending Alerts',
+                trailing: _buildSwitch(_trendingAlerts, (v) => setState(() => _trendingAlerts = v)),
+              ),
+            ],
+            _buildSettingRow(
+              title: 'Email Newsletter',
+              subtitle: 'Weekly curated content to your inbox',
+              trailing: _buildSwitch(_emailNewsletter, (v) => setState(() => _emailNewsletter = v)),
+            ),
+            _buildDivider(),
+            _buildSectionHeader('Privacy & Data', icon: Icons.shield_outlined, color: AppTheme.primaryCyan),
+            _buildSettingRow(
+              title: 'Data Collection Consent',
+              subtitle: 'Help us improve your recommendations',
+              trailing: _buildSwitch(_dataCollection, (v) => setState(() => _dataCollection = v)),
+            ),
+            _buildSettingRow(
+              title: 'Personalized Ads',
+              subtitle: 'Show ads tailored to your interests',
+              trailing: _buildSwitch(_personalizedAds, (v) => setState(() => _personalizedAds = v)),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+              child: OutlinedButton.icon(
+                onPressed: _onDownloadMyData,
+                icon: const Icon(Icons.download_outlined, size: 18),
+                label: const Text('Download My Data'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.primaryCyan,
+                  side: BorderSide(color: AppTheme.primaryCyan.withOpacity(0.6)),
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+              child: OutlinedButton.icon(
+                onPressed: _showDeleteAccountDialog,
+                icon: const Icon(Icons.delete_forever_outlined, size: 18),
+                label: const Text('Delete My Account'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.redAccent,
+                  side: BorderSide(color: Colors.redAccent.withOpacity(0.6)),
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildDivider(),
+            _buildSectionHeader('Appearance', icon: Icons.palette_outlined, color: const Color(0xFFB47AFF)),
+            _buildSettingRow(
+              title: 'Dark Mode',
+              subtitle: 'Use dark theme throughout the app',
+              trailing: _buildSwitch(_darkMode, (v) => setState(() => _darkMode = v)),
+            ),
+            _buildSettingRow(
+              title: 'Text Size',
+              subtitle: 'Adjust reading font size',
+              trailing: _buildSegmentedControl(
+                segments: ['S', 'M', 'L'],
+                selected: _textSize,
+                onChanged: (i) => setState(() => _textSize = i),
+              ),
+            ),
+            _buildDivider(),
+            _buildSectionHeader('About', icon: Icons.info_outline, color: Colors.grey),
+            _buildSettingRow(
+              title: 'App Version',
+              subtitle: '1.0.0 (Build 1)',
+              trailing: const SizedBox.shrink(),
+            ),
+            _buildSettingRow(
+              title: 'Privacy Policy',
+              trailing: Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.4), size: 20),
+              onTap: () => _showSnackBar('Opening Privacy Policy…'),
+            ),
+            _buildSettingRow(
+              title: 'Terms of Service',
+              trailing: Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.4), size: 20),
+              onTap: () => _showSnackBar('Opening Terms of Service…'),
+            ),
+            _buildSettingRow(
+              title: 'Rate the App',
+              trailing: Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.4), size: 20),
+              onTap: () => _showSnackBar('Thank you! Redirecting to app store…'),
+            ),
+            _buildSettingRow(
+              title: 'Contact Support',
+              trailing: Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.4), size: 20),
+              onTap: () => _showSnackBar('Email us at support@afeedi.com'),
+            ),
+            const SizedBox(height: 100),
           ],
         ),
       ),
     );
   }
-  
-  Widget _buildHeader() {
+
+  // ---------------------------------------------------------------------------
+  // Account card at the top
+  // ---------------------------------------------------------------------------
+  Widget _buildAccountSection() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
+      ),
       child: Row(
         children: [
+          // Avatar with initials
           Container(
-            width: 50,
-            height: 50,
+            width: 60,
+            height: 60,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 colors: [AppTheme.primaryCyan, AppTheme.primaryPink],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.person,
-              color: Colors.white,
-              size: 24,
+            child: const Center(
+              child: Text(
+                'AJ',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
+              ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Settings',
+                  'Alex Johnson',
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Customize your Afeedi experience',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          _buildQuickSettingsStats(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickSettingsStats() {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.notifications_active,
-            color: AppTheme.primaryCyan,
-            size: 16,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            'Active',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 9,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildPrivacySection() {
-    return _buildSection(
-      title: 'Privacy & Data',
-      icon: Icons.security,
-      iconColor: AppTheme.primaryCyan,
-      children: [
-        _buildToggleItem(
-          title: 'Data Collection',
-          subtitle: 'Allow Afeedi to collect usage data for improvements',
-          value: _dataCollection,
-          onChanged: (value) => setState(() => _dataCollection = value),
-        ),
-        _buildToggleItem(
-          title: 'Personalized Ads',
-          subtitle: 'Show ads based on your interests and activity',
-          value: _personalizedAds,
-          onChanged: (value) => setState(() => _personalizedAds = value),
-        ),
-        _buildToggleItem(
-          title: 'Analytics Sharing',
-          subtitle: 'Share anonymous analytics to improve the platform',
-          value: _analyticsSharing,
-          onChanged: (value) => setState(() => _analyticsSharing = value),
-        ),
-        _buildToggleItem(
-          title: 'Location Tracking',
-          subtitle: 'Use location for content recommendations',
-          value: _locationTracking,
-          onChanged: (value) => setState(() => _locationTracking = value),
-        ),
-        _buildActionItem(
-          title: 'Download My Data',
-          subtitle: 'Get a copy of your personal data',
-          icon: Icons.download,
-          onTap: () => _showDataDownloadDialog(),
-        ),
-        _buildActionItem(
-          title: 'Delete Account',
-          subtitle: 'Permanently delete your account and data',
-          icon: Icons.delete_forever,
-          iconColor: Colors.red,
-          onTap: () => _showDeleteAccountDialog(),
-        ),
-      ],
-    );
-  }
-  
-  Widget _buildContentSection() {
-    return _buildSection(
-      title: 'Content & Playback',
-      icon: Icons.play_circle,
-      iconColor: AppTheme.primaryPink,
-      children: [
-        _buildToggleItem(
-          title: 'Autoplay Videos',
-          subtitle: 'Automatically play videos when scrolling',
-          value: _autoplay,
-          onChanged: (value) => setState(() => _autoplay = value),
-        ),
-        _buildToggleItem(
-          title: 'Download on WiFi Only',
-          subtitle: 'Only download content when connected to WiFi',
-          value: _downloadOnWifi,
-          onChanged: (value) => setState(() => _downloadOnWifi = value),
-        ),
-        _buildToggleItem(
-          title: 'High Quality Playback',
-          subtitle: 'Use higher quality video when available',
-          value: _highQuality,
-          onChanged: (value) => setState(() => _highQuality = value),
-        ),
-        _buildToggleItem(
-          title: 'Dark Mode',
-          subtitle: 'Use dark theme throughout the app',
-          value: _darkMode,
-          onChanged: (value) => setState(() => _darkMode = value),
-        ),
-        _buildActionItem(
-          title: 'Clear Cache',
-          subtitle: 'Free up storage space by clearing cached data',
-          icon: Icons.cleaning_services,
-          onTap: () => _showClearCacheDialog(),
-        ),
-      ],
-    );
-  }
-  
-  Widget _buildNotificationSection() {
-    return _buildSection(
-      title: 'Notifications',
-      icon: Icons.notifications,
-      iconColor: const Color(0xFFFFE66D),
-      children: [
-        _buildToggleItem(
-          title: 'Push Notifications',
-          subtitle: 'Receive notifications on your device',
-          value: _pushNotifications,
-          onChanged: (value) => setState(() => _pushNotifications = value),
-        ),
-        _buildToggleItem(
-          title: 'Email Notifications',
-          subtitle: 'Receive updates via email',
-          value: _emailNotifications,
-          onChanged: (value) => setState(() => _emailNotifications = value),
-        ),
-        _buildToggleItem(
-          title: 'Weekly Digest',
-          subtitle: 'Get a summary of your week every Sunday',
-          value: _weeklyDigest,
-          onChanged: (value) => setState(() => _weeklyDigest = value),
-        ),
-        _buildToggleItem(
-          title: 'Trending Alerts',
-          subtitle: 'Get notified about trending content',
-          value: _trendingAlerts,
-          onChanged: (value) => setState(() => _trendingAlerts = value),
-        ),
-      ],
-    );
-  }
-  
-  Widget _buildAccountSection() {
-    return _buildSection(
-      title: 'Account',
-      icon: Icons.account_circle,
-      iconColor: const Color(0xFF4ECDC4),
-      children: [
-        _buildActionItem(
-          title: 'Edit Profile',
-          subtitle: 'Update your personal information',
-          icon: Icons.edit,
-          onTap: () => _navigateToProfile(),
-        ),
-        _buildActionItem(
-          title: 'Change Password',
-          subtitle: 'Update your account password',
-          icon: Icons.lock,
-          onTap: () => _showChangePasswordDialog(),
-        ),
-        _buildActionItem(
-          title: 'Subscription',
-          subtitle: 'Manage your premium subscription',
-          icon: Icons.star,
-          onTap: () => _navigateToSubscription(),
-        ),
-        _buildActionItem(
-          title: 'Connected Accounts',
-          subtitle: 'Manage linked social media accounts',
-          icon: Icons.link,
-          onTap: () => _showConnectedAccountsDialog(),
-        ),
-      ],
-    );
-  }
-  
-  Widget _buildAboutSection() {
-    return _buildSection(
-      title: 'About',
-      icon: Icons.info,
-      iconColor: Colors.grey,
-      children: [
-        _buildActionItem(
-          title: 'Help & Support',
-          subtitle: 'Get help or contact support',
-          icon: Icons.help,
-          onTap: () => _showHelpDialog(),
-        ),
-        _buildActionItem(
-          title: 'Terms of Service',
-          subtitle: 'Read our terms and conditions',
-          icon: Icons.description,
-          onTap: () => _showTermsDialog(),
-        ),
-        _buildActionItem(
-          title: 'Privacy Policy',
-          subtitle: 'Learn how we protect your privacy',
-          icon: Icons.privacy_tip,
-          onTap: () => _showPrivacyDialog(),
-        ),
-        _buildActionItem(
-          title: 'App Version',
-          subtitle: 'v1.0.0 (Build 1)',
-          icon: Icons.info_outline,
-          onTap: null,
-        ),
-      ],
-    );
-  }
-  
-  Widget _buildSection({
-    required String title,
-    required IconData icon,
-    required Color iconColor,
-    required List<Widget> children,
-  }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: iconColor.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: iconColor,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                const SizedBox(height: 2),
+                Text(
+                  'alex@email.com',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.55),
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 32,
+                  child: OutlinedButton(
+                    onPressed: () => _showSnackBar('Edit Profile coming soon'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.primaryCyan,
+                      side: const BorderSide(color: AppTheme.primaryCyan),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                    ),
+                    child: const Text('Edit Profile'),
+                  ),
+                ),
               ],
             ),
           ),
-          ...children,
         ],
       ),
     );
   }
-  
-  Widget _buildToggleItem({
-    required String title,
-    required String subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+
+  // ---------------------------------------------------------------------------
+  // Section header
+  // ---------------------------------------------------------------------------
+  Widget _buildSectionHeader(String title, {IconData? icon, Color? color}) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
       child: Row(
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
+          if (icon != null) ...[
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: (color ?? AppTheme.primaryCyan).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, size: 16, color: color ?? AppTheme.primaryCyan),
             ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: AppTheme.primaryCyan,
-            activeTrackColor: AppTheme.primaryCyan.withOpacity(0.3),
-            inactiveThumbColor: Colors.white.withOpacity(0.5),
-            inactiveTrackColor: Colors.white.withOpacity(0.2),
+            const SizedBox(width: 10),
+          ],
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.3,
+            ),
           ),
         ],
       ),
     );
   }
-  
-  Widget _buildActionItem({
+
+  // ---------------------------------------------------------------------------
+  // Standard setting row
+  // ---------------------------------------------------------------------------
+  Widget _buildSettingRow({
     required String title,
-    required String subtitle,
-    required IconData icon,
-    Color? iconColor,
+    String? subtitle,
+    required Widget trailing,
     VoidCallback? onTap,
   }) {
-    return GestureDetector(
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      minVerticalPadding: 0,
+      title: Text(
+        title,
+        style: const TextStyle(color: Colors.white, fontSize: 15),
+      ),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle,
+              style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+            )
+          : null,
+      trailing: trailing,
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: iconColor ?? Colors.white.withOpacity(0.7),
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (onTap != null)
-              Icon(
-                Icons.chevron_right,
-                color: Colors.white.withOpacity(0.5),
-                size: 20,
-              ),
-          ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Indented sub-setting row (shown when parent toggle is ON)
+  // ---------------------------------------------------------------------------
+  Widget _buildSubSettingRow({required String title, required Widget trailing}) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 32),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+        minVerticalPadding: 0,
+        title: Text(
+          title,
+          style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
         ),
+        trailing: trailing,
       ),
     );
   }
-  
-  // Dialog methods
-  void _showDataDownloadDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2D1B69),
-        title: const Text(
-          'Download Data',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          'We\'ll prepare your data and send a download link to your email within 24 hours.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
+
+  // ---------------------------------------------------------------------------
+  // Subtle section divider
+  // ---------------------------------------------------------------------------
+  Widget _buildDivider() {
+    return Divider(
+      color: Colors.white.withOpacity(0.08),
+      thickness: 1,
+      indent: 20,
+      endIndent: 20,
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Reusable Switch widget
+  // ---------------------------------------------------------------------------
+  Widget _buildSwitch(bool value, ValueChanged<bool> onChanged) {
+    return Switch(
+      value: value,
+      onChanged: onChanged,
+      activeColor: const Color(0xFF00E5FF),
+      activeTrackColor: const Color(0xFF00E5FF).withOpacity(0.3),
+      inactiveThumbColor: Colors.white.withOpacity(0.5),
+      inactiveTrackColor: Colors.white.withOpacity(0.15),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Compact segmented control
+  // ---------------------------------------------------------------------------
+  Widget _buildSegmentedControl({
+    required List<String> segments,
+    required int selected,
+    required ValueChanged<int> onChanged,
+  }) {
+    return Container(
+      height: 34,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(segments.length, (i) {
+          final isSelected = i == selected;
+          return GestureDetector(
+            onTap: () => onChanged(i),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: isSelected ? const Color(0xFF00E5FF) : Colors.transparent,
+                borderRadius: BorderRadius.circular(7),
+              ),
+              child: Text(
+                segments[i],
+                style: TextStyle(
+                  color: isSelected ? const Color(0xFF1A0A3E) : Colors.white.withOpacity(0.6),
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
             ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Implement data download
-            },
-            child: const Text(
-              'Request',
-              style: TextStyle(color: AppTheme.primaryCyan),
-            ),
-          ),
-        ],
+          );
+        }),
       ),
     );
   }
-  
+
+  // ---------------------------------------------------------------------------
+  // Actions
+  // ---------------------------------------------------------------------------
+  void _onDownloadMyData() {
+    _showSnackBar('Your data export will be ready in 24 hours');
+  }
+
   void _showDeleteAccountDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF2D1B69),
-        title: const Text(
-          'Delete Account',
-          style: TextStyle(color: Colors.red),
-        ),
-        content: Text(
-          'This action cannot be undone. All your data will be permanently deleted.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
+        title: const Text('Delete Account', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'Are you sure you want to delete your account? This action cannot be undone.',
+          style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white60)),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
-              // TODO: Implement account deletion
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Account deletion requested. You will receive a confirmation email.',
+                  ),
+                  backgroundColor: Colors.red,
+                ),
+              );
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
   }
-  
-  void _showClearCacheDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
         backgroundColor: const Color(0xFF2D1B69),
-        title: const Text(
-          'Clear Cache',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          'This will free up storage space but may slow down the app temporarily.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Implement cache clearing
-            },
-            child: const Text(
-              'Clear',
-              style: TextStyle(color: AppTheme.primaryCyan),
-            ),
-          ),
-        ],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
-  }
-  
-  void _showChangePasswordDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2D1B69),
-        title: const Text(
-          'Change Password',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          'You will be redirected to change your password securely.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Navigate to password change
-            },
-            child: const Text(
-              'Continue',
-              style: TextStyle(color: AppTheme.primaryCyan),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  void _showConnectedAccountsDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2D1B69),
-        title: const Text(
-          'Connected Accounts',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildConnectedAccount('Google', true),
-            _buildConnectedAccount('Facebook', false),
-            _buildConnectedAccount('Apple', true),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Close',
-              style: TextStyle(color: AppTheme.primaryCyan),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildConnectedAccount(String platform, bool isConnected) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            platform,
-            style: const TextStyle(color: Colors.white),
-          ),
-          Text(
-            isConnected ? 'Connected' : 'Not Connected',
-            style: TextStyle(
-              color: isConnected ? AppTheme.primaryCyan : Colors.white.withOpacity(0.5),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  void _showHelpDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2D1B69),
-        title: const Text(
-          'Help & Support',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          'For support, please email us at support@afeedi.com or visit our help center.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Close',
-              style: TextStyle(color: AppTheme.primaryCyan),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  void _showTermsDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2D1B69),
-        title: const Text(
-          'Terms of Service',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          'You will be redirected to our website to view the complete terms of service.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Open terms URL
-            },
-            child: const Text(
-              'Open',
-              style: TextStyle(color: AppTheme.primaryCyan),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  void _showPrivacyDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2D1B69),
-        title: const Text(
-          'Privacy Policy',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          'You will be redirected to our website to view the complete privacy policy.',
-          style: TextStyle(color: Colors.white.withOpacity(0.8)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Open privacy URL
-            },
-            child: const Text(
-              'Open',
-              style: TextStyle(color: AppTheme.primaryCyan),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  // Navigation methods
-  void _navigateToProfile() {
-    // TODO: Navigate to profile screen
-  }
-  
-  void _navigateToSubscription() {
-    // TODO: Navigate to subscription screen
   }
 }

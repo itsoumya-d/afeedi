@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/content_model.dart';
 import '../../services/social_media_streaming_service.dart';
 import '../../services/analytics_service.dart';
@@ -276,54 +277,99 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
   }
 
   Widget _buildMobileEmbedPlayer() {
-    // For mobile, we'll use a WebView or fallback to opening in browser
-    return Container(
-      color: Colors.black,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              _getPlatformIcon(),
-              color: Colors.white,
-              size: 64,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Tap to view on ${widget.content.platform.name}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+    final platformColor = _getPlatformColor();
+    final platformLabel = _getPlatformName();
+    final openUrl = _embedResult?.fallbackUrl ?? widget.content.videoUrl ?? widget.content.embedUrl ?? '';
+
+    return GestureDetector(
+      onTap: () => _openInBrowser(openUrl),
+      child: Container(
+        color: Colors.black,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: platformColor.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: platformColor.withOpacity(0.4), width: 2),
+                ),
+                child: Icon(
+                  _getPlatformIcon(),
+                  color: platformColor,
+                  size: 56,
+                ),
               ),
-            ),
-            if (_embedResult?.title != null) ...[
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  _embedResult!.title!,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
+              const SizedBox(height: 20),
+              Text(
+                'Tap to open in $platformLabel',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (widget.content.title != null) ...[
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    widget.content.title!,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: () => _openInBrowser(openUrl),
+                icon: const Icon(Icons.open_in_new, size: 18),
+                label: Text('Watch on $platformLabel'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: platformColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                 ),
               ),
             ],
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => _openInBrowser(
-                _embedResult?.fallbackUrl ?? widget.content.videoUrl ?? widget.content.embedUrl ?? '',
-              ),
-              child: const Text('Open Video'),
-            ),
-          ],
+          ),
         ),
       ),
     );
+  }
+
+  Color _getPlatformColor() {
+    switch (widget.content.platform) {
+      case PlatformType.instagram:
+        return const Color(0xFFE4405F);
+      case PlatformType.tiktok:
+        return const Color(0xFF69C9D0);
+      case PlatformType.facebook:
+        return const Color(0xFF1877F2);
+      default:
+        return Colors.white;
+    }
+  }
+
+  String _getPlatformName() {
+    switch (widget.content.platform) {
+      case PlatformType.instagram:
+        return 'Instagram';
+      case PlatformType.tiktok:
+        return 'TikTok';
+      case PlatformType.facebook:
+        return 'Facebook';
+      default:
+        return widget.content.platform.name;
+    }
   }
 
   double _getAspectRatio() {
@@ -352,11 +398,17 @@ class _SocialMediaVideoPlayerState extends State<SocialMediaVideoPlayer> {
     }
   }
 
-  void _openInBrowser(String url) {
-    // For mobile platforms, use url_launcher
-    // This would require adding url_launcher dependency
-    print('Opening URL: $url');
-    Logger.info('Would open URL in browser: $url');
+  Future<void> _openInBrowser(String url) async {
+    if (url.isEmpty) {
+      Logger.error('Cannot open empty URL');
+      return;
+    }
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      Logger.error('Could not launch URL: $url');
+    }
   }
 
   @override

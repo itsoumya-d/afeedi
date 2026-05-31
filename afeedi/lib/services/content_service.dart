@@ -239,7 +239,7 @@ class ContentService {
       videoUrl: 'https://www.youtube.com/embed/ukzFI9rgwfU',
       thumbnailUrl: 'https://img.youtube.com/vi/ukzFI9rgwfU/maxresdefault.jpg',
       creatorName: 'AI Academy',
-      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/AKedOLQJXUqKkKlhx_9H8m9s8c8VfE7rWv8c8c8c8c8=s88-c-k-c0x00ffffff-no-rj',
+      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/placeholder=s88-c-k',
       durationSeconds: 2550,
       viewCount: 1800000,
       likeCount: 67000,
@@ -248,6 +248,284 @@ class ContentService {
       contentType: ContentType.video,
       createdAt: DateTime.now().subtract(Duration(days: 8)),
       updatedAt: DateTime.now().subtract(Duration(days: 8)),
+    ),
+
+    // Tech/Programming
+    Content(
+      id: 'yt_7',
+      platform: PlatformType.youtube,
+      platformContentId: 'rFejpH_tAHM',
+      title: '100+ JavaScript Concepts you Need to Know',
+      description: 'Master the most important JavaScript concepts in one video — from closures to promises and beyond.',
+      videoUrl: 'https://www.youtube.com/embed/rFejpH_tAHM',
+      thumbnailUrl: 'https://img.youtube.com/vi/rFejpH_tAHM/maxresdefault.jpg',
+      creatorName: 'Fireship',
+      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/placeholder=s88-c-k',
+      durationSeconds: 660,
+      viewCount: 5200000,
+      likeCount: 198000,
+      publishedAt: DateTime.now().subtract(Duration(days: 14)),
+      tags: ['javascript', 'programming', 'web-development', 'concepts'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 14)),
+      updatedAt: DateTime.now().subtract(Duration(days: 14)),
+    ),
+    Content(
+      id: 'yt_8',
+      platform: PlatformType.youtube,
+      platformContentId: 'qnQ5RyxVOoQ',
+      title: 'Python Full Course for Beginners',
+      description: 'Learn Python programming from scratch in this comprehensive 6-hour full course covering all fundamentals.',
+      videoUrl: 'https://www.youtube.com/embed/qnQ5RyxVOoQ',
+      thumbnailUrl: 'https://img.youtube.com/vi/qnQ5RyxVOoQ/maxresdefault.jpg',
+      creatorName: 'Programming with Mosh',
+      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/placeholder=s88-c-k',
+      durationSeconds: 21600,
+      viewCount: 18000000,
+      likeCount: 520000,
+      publishedAt: DateTime.now().subtract(Duration(days: 30)),
+      tags: ['python', 'programming', 'beginners', 'tutorial'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 30)),
+      updatedAt: DateTime.now().subtract(Duration(days: 30)),
+    ),
+    Content(
+      id: 'yt_9',
+      platform: PlatformType.youtube,
+      platformContentId: 'huGgT9XBTJM',
+      title: 'Flutter Crash Course for Beginners 2024',
+      description: 'Build your first Flutter app from scratch in this 4-hour crash course for absolute beginners.',
+      videoUrl: 'https://www.youtube.com/embed/huGgT9XBTJM',
+      thumbnailUrl: 'https://img.youtube.com/vi/huGgT9XBTJM/maxresdefault.jpg',
+      creatorName: 'Traversy Media',
+      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/placeholder=s88-c-k',
+      durationSeconds: 14400,
+      viewCount: 890000,
+      likeCount: 31000,
+      publishedAt: DateTime.now().subtract(Duration(days: 20)),
+      tags: ['flutter', 'mobile', 'beginners', 'crash-course', '2024'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 20)),
+      updatedAt: DateTime.now().subtract(Duration(days: 20)),
+    ),
+    Content(
+      id: 'yt_10',
+      platform: PlatformType.youtube,
+      platformContentId: 'mTz0GXj8NN0',
+      title: 'NextJS 14 Full Course',
+      description: 'Complete Next.js 14 full course — server components, app router, data fetching and deployment.',
+      videoUrl: 'https://www.youtube.com/embed/mTz0GXj8NN0',
+      thumbnailUrl: 'https://img.youtube.com/vi/mTz0GXj8NN0/maxresdefault.jpg',
+      creatorName: 'Dave Gray',
+      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/placeholder=s88-c-k',
+      durationSeconds: 7200,
+      viewCount: 1100000,
+      likeCount: 38000,
+      publishedAt: DateTime.now().subtract(Duration(days: 18)),
+      tags: ['nextjs', 'react', 'web-development', 'full-stack'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 18)),
+      updatedAt: DateTime.now().subtract(Duration(days: 18)),
+    ),
+
+    // Science/Education
+    Content(
+      id: 'yt_11',
+      platform: PlatformType.youtube,
+      platformContentId: 'rhgwIhB5-oE',
+      title: 'What Is the Turing Test?',
+      description: 'Can machines think? Kurzgesagt explains the famous Turing Test and what it means for artificial intelligence.',
+      videoUrl: 'https://www.youtube.com/embed/rhgwIhB5-oE',
+      thumbnailUrl: 'https://img.youtube.com/vi/rhgwIhB5-oE/maxresdefault.jpg',
+      creatorName: 'Kurzgesagt',
+      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/placeholder=s88-c-k',
+      durationSeconds: 480,
+      viewCount: 2300000,
+      likeCount: 89000,
+      publishedAt: DateTime.now().subtract(Duration(days: 45)),
+      tags: ['ai', 'turing-test', 'science', 'education', 'technology'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 45)),
+      updatedAt: DateTime.now().subtract(Duration(days: 45)),
+    ),
+    Content(
+      id: 'yt_12',
+      platform: PlatformType.youtube,
+      platformContentId: 'Xjv1sY630IY',
+      title: 'The Web Is Not the Net',
+      description: 'Vsauce explores the difference between the internet and the World Wide Web — and how it all works.',
+      videoUrl: 'https://www.youtube.com/embed/Xjv1sY630IY',
+      thumbnailUrl: 'https://img.youtube.com/vi/Xjv1sY630IY/maxresdefault.jpg',
+      creatorName: 'Vsauce',
+      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/placeholder=s88-c-k',
+      durationSeconds: 780,
+      viewCount: 7800000,
+      likeCount: 312000,
+      publishedAt: DateTime.now().subtract(Duration(days: 90)),
+      tags: ['internet', 'web', 'education', 'science', 'technology'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 90)),
+      updatedAt: DateTime.now().subtract(Duration(days: 90)),
+    ),
+    Content(
+      id: 'yt_13',
+      platform: PlatformType.youtube,
+      platformContentId: '8Q9isOI7Fvo',
+      title: 'How Does GPS Work?',
+      description: 'SciShow breaks down the science and engineering behind the Global Positioning System we rely on every day.',
+      videoUrl: 'https://www.youtube.com/embed/8Q9isOI7Fvo',
+      thumbnailUrl: 'https://img.youtube.com/vi/8Q9isOI7Fvo/maxresdefault.jpg',
+      creatorName: 'SciShow',
+      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/placeholder=s88-c-k',
+      durationSeconds: 360,
+      viewCount: 4100000,
+      likeCount: 95000,
+      publishedAt: DateTime.now().subtract(Duration(days: 60)),
+      tags: ['gps', 'science', 'technology', 'engineering', 'education'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 60)),
+      updatedAt: DateTime.now().subtract(Duration(days: 60)),
+    ),
+
+    // Design/Creative
+    Content(
+      id: 'yt_14',
+      platform: PlatformType.youtube,
+      platformContentId: 'c9Wg6Cb_YlU',
+      title: 'Figma UI Design Tutorial',
+      description: 'Complete Figma tutorial for beginners — learn components, auto layout, prototyping and design systems.',
+      videoUrl: 'https://www.youtube.com/embed/c9Wg6Cb_YlU',
+      thumbnailUrl: 'https://img.youtube.com/vi/c9Wg6Cb_YlU/maxresdefault.jpg',
+      creatorName: 'DesignCourse',
+      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/placeholder=s88-c-k',
+      durationSeconds: 3600,
+      viewCount: 1600000,
+      likeCount: 62000,
+      publishedAt: DateTime.now().subtract(Duration(days: 25)),
+      tags: ['figma', 'ui-design', 'design', 'tutorial', 'ux'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 25)),
+      updatedAt: DateTime.now().subtract(Duration(days: 25)),
+    ),
+    Content(
+      id: 'yt_15',
+      platform: PlatformType.youtube,
+      platformContentId: 'o1aFLNDkXYs',
+      title: 'UI Design for Beginners',
+      description: 'Learn the principles of great UI design from scratch — color theory, typography, layout and real project walkthroughs.',
+      videoUrl: 'https://www.youtube.com/embed/o1aFLNDkXYs',
+      thumbnailUrl: 'https://img.youtube.com/vi/o1aFLNDkXYs/maxresdefault.jpg',
+      creatorName: 'developedbyed',
+      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/placeholder=s88-c-k',
+      durationSeconds: 7200,
+      viewCount: 3200000,
+      likeCount: 118000,
+      publishedAt: DateTime.now().subtract(Duration(days: 35)),
+      tags: ['ui-design', 'design', 'beginners', 'color-theory', 'typography'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 35)),
+      updatedAt: DateTime.now().subtract(Duration(days: 35)),
+    ),
+
+    // News/Current Events
+    Content(
+      id: 'yt_16',
+      platform: PlatformType.youtube,
+      platformContentId: 'FJ3N_2r6R-o',
+      title: 'The AI Revolution: How ChatGPT Changed Everything',
+      description: 'CNBC explores how ChatGPT and large language models are transforming industries, jobs, and daily life.',
+      videoUrl: 'https://www.youtube.com/embed/FJ3N_2r6R-o',
+      thumbnailUrl: 'https://img.youtube.com/vi/FJ3N_2r6R-o/maxresdefault.jpg',
+      creatorName: 'CNBC',
+      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/placeholder=s88-c-k',
+      durationSeconds: 720,
+      viewCount: 3400000,
+      likeCount: 72000,
+      publishedAt: DateTime.now().subtract(Duration(days: 12)),
+      tags: ['ai', 'chatgpt', 'technology', 'news', 'business'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 12)),
+      updatedAt: DateTime.now().subtract(Duration(days: 12)),
+    ),
+
+    // Lifestyle/Vlog
+    Content(
+      id: 'yt_17',
+      platform: PlatformType.youtube,
+      platformContentId: 'UHlEPyqhJQA',
+      title: 'Morning Routine for Productivity 2024',
+      description: 'Matt D\'Avella shares his evidence-based morning routine for maximising focus and creative output throughout the day.',
+      videoUrl: 'https://www.youtube.com/embed/UHlEPyqhJQA',
+      thumbnailUrl: 'https://img.youtube.com/vi/UHlEPyqhJQA/maxresdefault.jpg',
+      creatorName: 'Matt D\'Avella',
+      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/placeholder=s88-c-k',
+      durationSeconds: 540,
+      viewCount: 8700000,
+      likeCount: 340000,
+      publishedAt: DateTime.now().subtract(Duration(days: 9)),
+      tags: ['productivity', 'morning-routine', 'lifestyle', 'habits', '2024'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 9)),
+      updatedAt: DateTime.now().subtract(Duration(days: 9)),
+    ),
+    Content(
+      id: 'yt_18',
+      platform: PlatformType.youtube,
+      platformContentId: 'LLDqvvBpHe4',
+      title: 'I Learned to Code in 30 Days',
+      description: 'Traversy Media documents the journey of learning to code from absolute zero in just 30 days — the highs, lows, and lessons.',
+      videoUrl: 'https://www.youtube.com/embed/LLDqvvBpHe4',
+      thumbnailUrl: 'https://img.youtube.com/vi/LLDqvvBpHe4/maxresdefault.jpg',
+      creatorName: 'Traversy Media',
+      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/placeholder=s88-c-k',
+      durationSeconds: 900,
+      viewCount: 2100000,
+      likeCount: 87000,
+      publishedAt: DateTime.now().subtract(Duration(days: 6)),
+      tags: ['coding', 'programming', 'vlog', 'beginners', 'challenge'],
+      contentType: ContentType.video,
+      createdAt: DateTime.now().subtract(Duration(days: 6)),
+      updatedAt: DateTime.now().subtract(Duration(days: 6)),
+    ),
+
+    // TikTok-style short content
+    Content(
+      id: 'tk_1',
+      platform: PlatformType.tiktok,
+      platformContentId: 'tiktok_1',
+      title: 'Quick Flutter Tip: Using const Constructors',
+      description: 'Speed up your Flutter app with this simple tip',
+      videoUrl: 'https://www.tiktok.com/@flutterdev/video/example',
+      thumbnailUrl: 'https://picsum.photos/360/640?random=101',
+      creatorName: 'FlutterDev',
+      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/placeholder=s88-c-k',
+      durationSeconds: 58,
+      viewCount: 234000,
+      likeCount: 12400,
+      publishedAt: DateTime.now().subtract(const Duration(hours: 6)),
+      tags: ['flutter', 'programming', 'tips'],
+      contentType: ContentType.short,
+      createdAt: DateTime.now().subtract(const Duration(hours: 6)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 6)),
+    ),
+    Content(
+      id: 'tk_2',
+      platform: PlatformType.tiktok,
+      platformContentId: 'tiktok_2',
+      title: 'I learned this productivity hack and saved 2 hours/day',
+      description: 'Simple productivity tip that changed my work habits',
+      videoUrl: 'https://www.tiktok.com/@productivityhacks/video/example2',
+      thumbnailUrl: 'https://picsum.photos/360/640?random=102',
+      creatorName: 'ProductivityHacks',
+      creatorAvatarUrl: 'https://yt3.ggpht.com/ytc/placeholder=s88-c-k',
+      durationSeconds: 45,
+      viewCount: 892000,
+      likeCount: 67000,
+      publishedAt: DateTime.now().subtract(const Duration(hours: 12)),
+      tags: ['productivity', 'lifestyle', 'tips'],
+      contentType: ContentType.short,
+      createdAt: DateTime.now().subtract(const Duration(hours: 12)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 12)),
     ),
   ];
 
@@ -284,11 +562,11 @@ class ContentService {
   // Get trending videos
   Future<List<Content>> getTrendingVideos({int limit = 5}) async {
     await Future.delayed(Duration(milliseconds: 300));
-    
-    // Sort by views and likes for trending
+
+    // Sort by viewCount descending — most-watched content surfaces first
     List<Content> trending = List.from(_sampleVideos);
-    trending.sort((a, b) => (b.viewCount + b.likeCount).compareTo(a.viewCount + a.likeCount));
-    
+    trending.sort((a, b) => b.viewCount.compareTo(a.viewCount));
+
     return trending.take(limit).toList();
   }
 
@@ -353,10 +631,17 @@ class ContentService {
   // Get feed content (mixed content for feed screen)
   Future<List<Content>> getFeedContent({int limit = 10}) async {
     await Future.delayed(Duration(milliseconds: 600));
-    
+
     List<Content> feedContent = List.from(_sampleVideos);
-    feedContent.shuffle(Random());
-    
+    // Use a session-consistent seed so order is stable within a session
+    // but varies across sessions for fresh variety
+    final seed = DateTime.now().millisecondsSinceEpoch ~/ 600000; // changes every 10 min
+    feedContent.shuffle(Random(seed));
+
+    // Deduplicate by platformContentId
+    final seen = <String>{};
+    feedContent = feedContent.where((c) => seen.add(c.platformContentId)).toList();
+
     return feedContent.take(limit).toList();
   }
 
@@ -387,34 +672,53 @@ class ContentService {
       final enhancedService = EnhancedRecommendationService.instance;
       final onboardingService = OnboardingService();
       final authService = AuthService.instance;
-      
+
       // Check if user is authenticated
       final user = authService.currentUser;
       if (user == null) {
-        // Return general trending content for unauthenticated users
-        return getTrendingVideos(limit: limit);
+        // Return recent-first content for unauthenticated users
+        return _getRecentPrioritizedContent(limit: limit);
       }
-      
+
       // Check if onboarding is completed
       final isOnboardingCompleted = await onboardingService.isOnboardingCompleted();
       if (!isOnboardingCompleted) {
-        // Return general content if onboarding not completed
-        return getFeedContent(limit: limit);
+        // Return recent-first content if onboarding not completed
+        return _getRecentPrioritizedContent(limit: limit);
       }
-      
+
       // Get personalized recommendations
       final recommendations = await enhancedService.getPersonalizedRecommendations(
         userId: user.id,
         limit: limit,
       );
-      
+
       // Convert recommendations to content objects
       return recommendations.map((rec) => rec.content).toList();
     } catch (e) {
       print('Error getting personalized content: $e');
-      // Fallback to regular feed content
-      return getFeedContent(limit: limit);
+      // Fallback to recent-prioritized feed content
+      return _getRecentPrioritizedContent(limit: limit);
     }
+  }
+
+  // Helper: return content sorted so items published within the last 7 days come first,
+  // then the remainder sorted by viewCount descending.
+  List<Content> _getRecentPrioritizedContent({int limit = 10}) {
+    final now = DateTime.now();
+    final cutoff = now.subtract(const Duration(days: 7));
+
+    final recent = _sampleVideos
+        .where((c) => c.publishedAt != null && c.publishedAt!.isAfter(cutoff))
+        .toList()
+      ..sort((a, b) => (b.publishedAt ?? now).compareTo(a.publishedAt ?? now));
+
+    final older = _sampleVideos
+        .where((c) => c.publishedAt == null || !c.publishedAt!.isAfter(cutoff))
+        .toList()
+      ..sort((a, b) => b.viewCount.compareTo(a.viewCount));
+
+    return [...recent, ...older].take(limit).toList();
   }
 
   // Get onboarding-based recommendations for new users
@@ -500,6 +804,18 @@ class ContentService {
       // Fallback to regular filtered content
       return getVideos(platform: platform, category: category, limit: limit);
     }
+  }
+
+  // Get short-form content (shorts, reels, TikToks, and videos <= 3 min)
+  Future<List<Content>> getShortContent({int limit = 20}) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    final shorts = _sampleVideos.where((v) =>
+      v.contentType == ContentType.short ||
+      v.contentType == ContentType.reel ||
+      (v.durationSeconds != null && v.durationSeconds! <= 180)
+    ).toList();
+    shorts.shuffle();
+    return shorts.take(limit).toList();
   }
 
   // Track user interaction for recommendation improvement

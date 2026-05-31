@@ -281,19 +281,6 @@ class _ResponsiveVideoPlayerState extends State<ResponsiveVideoPlayer>
   
 
   
-  Widget _buildMobilePlayer() {
-    // Implementation for mobile WebView player
-    return Container(
-      color: Colors.black,
-      child: const Center(
-        child: Text(
-          'Mobile Player',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-    );
-  }
-  
   Widget _buildLoadingIndicator() {
     return Container(
       color: Colors.black.withOpacity(0.7),

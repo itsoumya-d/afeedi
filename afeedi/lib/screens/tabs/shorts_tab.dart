@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_theme.dart';
 import '../../models/content_model.dart';
 import '../../services/content_service.dart';
 import '../../widgets/streaming/responsive_video_player.dart';
@@ -12,7 +11,8 @@ class ShortsTab extends StatefulWidget {
   State<ShortsTab> createState() => _ShortsTabState();
 }
 
-class _ShortsTabState extends State<ShortsTab> {
+class _ShortsTabState extends State<ShortsTab>
+    with AutomaticKeepAliveClientMixin {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
   List<Content> _shortsContent = [];
@@ -20,31 +20,36 @@ class _ShortsTabState extends State<ShortsTab> {
   bool _hasError = false;
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   void initState() {
     super.initState();
     _loadShortsContent();
   }
-  
+
   Future<void> _loadShortsContent() async {
     try {
       setState(() {
         _isLoading = true;
         _hasError = false;
       });
-      
+
       // Load short-form content from ContentService
       final allContent = await ContentService.instance.getFeedContent();
-      final shorts = allContent.where((content) => 
-        content.contentType == ContentType.short || 
-        content.contentType == ContentType.reel ||
-        (content.durationSeconds != null && content.durationSeconds! <= 180)
-      ).toList();
-      
+      final shorts = allContent
+          .where((content) =>
+              content.contentType == ContentType.short ||
+              content.contentType == ContentType.reel ||
+              (content.durationSeconds != null &&
+                  content.durationSeconds! <= 180))
+          .toList();
+
       setState(() {
         _shortsContent = shorts;
         _isLoading = false;
       });
-      
+
       // Track shorts tab view
       await AnalyticsService.instance.trackUserInteraction(
         action: 'shorts_tab_viewed',
@@ -58,7 +63,7 @@ class _ShortsTabState extends State<ShortsTab> {
         _isLoading = false;
         _hasError = true;
       });
-      
+
       await AnalyticsService.instance.trackError(
         errorType: 'shorts_loading_error',
         errorMessage: error.toString(),
@@ -78,7 +83,8 @@ class _ShortsTabState extends State<ShortsTab> {
       'comments': '234',
       'shares': '89',
       'category': 'Food',
-      'thumbnail': 'https://via.placeholder.com/300x400/FF6B6B/FFFFFF?text=Cooking+Tips',
+      'thumbnail':
+          'https://via.placeholder.com/300x400/FF6B6B/FFFFFF?text=Cooking+Tips',
       'description': 'Learn how to make perfect pasta in under 10 minutes!',
     },
     {
@@ -90,7 +96,8 @@ class _ShortsTabState extends State<ShortsTab> {
       'comments': '156',
       'shares': '67',
       'category': 'Technology',
-      'thumbnail': 'https://via.placeholder.com/300x400/4ECDC4/FFFFFF?text=Tech+Review',
+      'thumbnail':
+          'https://via.placeholder.com/300x400/4ECDC4/FFFFFF?text=Tech+Review',
       'description': 'Unboxing and reviewing the newest smartphone features.',
     },
     {
@@ -102,7 +109,8 @@ class _ShortsTabState extends State<ShortsTab> {
       'comments': '445',
       'shares': '123',
       'category': 'Health',
-      'thumbnail': 'https://via.placeholder.com/300x400/45B7D1/FFFFFF?text=Fitness',
+      'thumbnail':
+          'https://via.placeholder.com/300x400/45B7D1/FFFFFF?text=Fitness',
       'description': '30-second workout that you can do anywhere!',
     },
     {
@@ -114,7 +122,8 @@ class _ShortsTabState extends State<ShortsTab> {
       'comments': '89',
       'shares': '45',
       'category': 'Art',
-      'thumbnail': 'https://via.placeholder.com/300x400/96CEB4/FFFFFF?text=Art+Tutorial',
+      'thumbnail':
+          'https://via.placeholder.com/300x400/96CEB4/FFFFFF?text=Art+Tutorial',
       'description': 'Learn watercolor techniques for beginners.',
     },
     {
@@ -126,7 +135,8 @@ class _ShortsTabState extends State<ShortsTab> {
       'comments': '567',
       'shares': '234',
       'category': 'Travel',
-      'thumbnail': 'https://via.placeholder.com/300x400/FFEAA7/FFFFFF?text=Travel',
+      'thumbnail':
+          'https://via.placeholder.com/300x400/FFEAA7/FFFFFF?text=Travel',
       'description': 'Hidden gems in Tokyo that tourists never see!',
     },
   ];
@@ -139,81 +149,257 @@ class _ShortsTabState extends State<ShortsTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Colors.black,
         body: Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryCyan),
-          ),
-        ),
+            child: CircularProgressIndicator(color: Colors.white)),
       );
     }
-    
+
     if (_hasError) {
-      return Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                color: Colors.white,
-                size: 64,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Failed to load shorts',
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _loadShortsContent,
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      );
+      return _buildErrorState();
     }
-    
+
+    // Use mock data if real content is empty
+    final itemCount = _shortsContent.isNotEmpty
+        ? _shortsContent.length
+        : _mockShortsData.length;
+
+    if (itemCount == 0) {
+      return _buildEmptyState();
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
-      body: PageView.builder(
-        controller: _pageController,
-        scrollDirection: Axis.vertical,
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-          
-          // Track short view
-          if (_shortsContent.isNotEmpty && index < _shortsContent.length) {
-            AnalyticsService.instance.trackUserInteraction(
-              action: 'short_viewed',
-              screen: 'shorts',
-              additionalData: {
-                'content_id': _shortsContent[index].id,
-                'platform': _shortsContent[index].platform.name,
-                'index': index,
-              },
-            );
-          }
-        },
-        itemCount: _shortsContent.isNotEmpty ? _shortsContent.length : _mockShortsData.length,
-        itemBuilder: (context, index) {
-          if (_shortsContent.isNotEmpty) {
-            return _buildShortItemFromContent(_shortsContent[index]);
-          } else {
-            return _buildShortItem(_mockShortsData[index]);
-          }
-        },
+      body: Stack(
+        children: [
+          PageView.builder(
+            controller: _pageController,
+            scrollDirection: Axis.vertical,
+            onPageChanged: (index) {
+              setState(() => _currentIndex = index);
+              AnalyticsService.instance.trackUserInteraction(
+                action: 'short_viewed',
+                screen: 'shorts',
+                additionalData: {'index': index},
+              );
+            },
+            itemCount: itemCount,
+            itemBuilder: (context, index) {
+              if (_shortsContent.isNotEmpty) {
+                return _buildContentShortCard(_shortsContent[index], index);
+              } else {
+                return _buildMockShortCard(_mockShortsData[index], index);
+              }
+            },
+          ),
+          // Top overlay with tab title
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _buildTopBar(),
+          ),
+        ],
       ),
     );
   }
-  
-  Widget _buildShortItemFromContent(Content content) {
+
+  Widget _buildTopBar() {
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+          16, MediaQuery.of(context).padding.top + 8, 16, 12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.black.withOpacity(0.7), Colors.transparent],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Shorts',
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMockShortCard(Map<String, dynamic> short, int index) {
+    // Use gradient colors based on category
+    final gradients = [
+      [const Color(0xFF1A0A3E), const Color(0xFF3D1B6E)],
+      [const Color(0xFF0D1B2A), const Color(0xFF1A3A5C)],
+      [const Color(0xFF1A0A2E), const Color(0xFF3D0A4E)],
+      [const Color(0xFF0A1A1A), const Color(0xFF0A3A2A)],
+    ];
+    final gradient = gradients[index % gradients.length];
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: gradient,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Play icon in center
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.play_arrow,
+                  color: Colors.white, size: 48),
+            ),
+          ),
+          // Bottom info
+          Positioned(
+            left: 16,
+            bottom: 100,
+            right: 80,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        short['category'] as String? ?? 'Video',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '@${(short['creator'] as String? ?? 'Creator').toLowerCase().replaceAll(' ', '')}',
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  short['title'] as String? ?? 'Short Video',
+                  style: TextStyle(
+                      color: Colors.white.withOpacity(0.9), fontSize: 14),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.music_note,
+                        color: Colors.white, size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Original Sound • ${short['creator']}',
+                      style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 12),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Right side actions
+          Positioned(
+            right: 12,
+            bottom: 100,
+            child: Column(
+              children: [
+                _buildActionButton(
+                    Icons.favorite, short['likes'] as String? ?? '0'),
+                const SizedBox(height: 20),
+                _buildActionButton(
+                    Icons.comment, short['comments'] as String? ?? '0'),
+                const SizedBox(height: 20),
+                _buildActionButton(
+                    Icons.share, short['shares'] as String? ?? '0'),
+                const SizedBox(height: 20),
+                _buildActionButton(Icons.bookmark_border, 'Save'),
+                const SizedBox(height: 20),
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white, width: 2),
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.2),
+                  ),
+                  child: const Icon(Icons.more_horiz,
+                      color: Colors.white, size: 20),
+                ),
+              ],
+            ),
+          ),
+          // Duration badge
+          Positioned(
+            bottom: 80,
+            left: 16,
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                short['duration'] as String? ?? '0:30',
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(IconData icon, String label) {
+    return GestureDetector(
+      onTap: () {},
+      child: Column(
+        children: [
+          Icon(icon, color: Colors.white, size: 32),
+          const SizedBox(height: 2),
+          Text(label,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContentShortCard(Content content, int index) {
     return Stack(
       children: [
         // Video player
@@ -225,55 +411,51 @@ class _ShortsTabState extends State<ShortsTab> {
             showBranding: true,
           ),
         ),
-        
-        // Overlay with content info and interactions
+
+        // Right side interaction buttons
         Positioned(
           right: 12,
-          bottom: 80,
+          bottom: 100,
           child: _buildInteractionButtons(content),
         ),
-        
-        // Content info
+
+        // Bottom content info
         Positioned(
           left: 12,
-          bottom: 80,
+          bottom: 100,
           right: 80,
           child: _buildContentInfo(content),
         ),
       ],
     );
   }
-  
+
   Widget _buildInteractionButtons(Content content) {
     return Column(
       children: [
         _buildActionButton(
-          icon: Icons.favorite_border,
-          label: content.likeCount.toString(),
-          onTap: () => _handleLike(content),
+          Icons.favorite_border,
+          content.formattedLikeCount,
         ),
         const SizedBox(height: 20),
         _buildActionButton(
-          icon: Icons.comment,
-          label: '${content.metadata['comments'] ?? 0}',
-          onTap: () => _handleComment(content),
+          Icons.comment,
+          '${content.metadata['comments'] ?? 0}',
         ),
         const SizedBox(height: 20),
         _buildActionButton(
-          icon: Icons.share,
-          label: 'Share',
-          onTap: () => _handleShare(content),
+          Icons.share,
+          'Share',
         ),
         const SizedBox(height: 20),
         _buildActionButton(
-          icon: Icons.more_vert,
-          label: '',
-          onTap: () => _showMoreOptions(content),
+          Icons.bookmark_border,
+          'Save',
         ),
       ],
     );
   }
-  
+
   Widget _buildContentInfo(Content content) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -282,18 +464,16 @@ class _ShortsTabState extends State<ShortsTab> {
           '@${content.creatorName ?? 'Unknown'}',
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         if (content.title != null)
           Text(
             content.title!,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-            ),
+            style: TextStyle(
+                color: Colors.white.withOpacity(0.9), fontSize: 14),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -301,342 +481,70 @@ class _ShortsTabState extends State<ShortsTab> {
           const SizedBox(height: 4),
           Text(
             content.description!,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-            ),
+            style: TextStyle(
+                color: Colors.white.withOpacity(0.7), fontSize: 12),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
         ],
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            const Icon(Icons.music_note, color: Colors.white, size: 14),
+            const SizedBox(width: 4),
+            Text(
+              'Original Sound • ${content.creatorName ?? 'Unknown'}',
+              style: TextStyle(
+                  color: Colors.white.withOpacity(0.8), fontSize: 12),
+            ),
+          ],
+        ),
       ],
     );
   }
-  
-  void _handleLike(Content content) {
-    AnalyticsService.instance.trackUserInteraction(
-      action: 'short_liked',
-      screen: 'shorts',
-      additionalData: {
-        'content_id': content.id,
-        'platform': content.platform.name,
-      },
-    );
-  }
-  
-  void _handleComment(Content content) {
-    AnalyticsService.instance.trackUserInteraction(
-      action: 'short_comment_opened',
-      screen: 'shorts',
-      additionalData: {
-        'content_id': content.id,
-        'platform': content.platform.name,
-      },
-    );
-    // TODO: Open comment sheet
-  }
-  
-  void _handleShare(Content content) {
-    AnalyticsService.instance.trackUserInteraction(
-      action: 'short_shared',
-      screen: 'shorts',
-      additionalData: {
-        'content_id': content.id,
-        'platform': content.platform.name,
-      },
-    );
-    // TODO: Implement share functionality
-  }
-  
-  void _showMoreOptions(Content content) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.grey[900],
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
+
+  Widget _buildEmptyState() {
+    return const Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ListTile(
-              leading: const Icon(Icons.report, color: Colors.white),
-              title: const Text('Report', style: TextStyle(color: Colors.white)),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.block, color: Colors.white),
-              title: const Text('Not Interested', style: TextStyle(color: Colors.white)),
-              onTap: () => Navigator.pop(context),
-            ),
+            Icon(Icons.video_library_outlined,
+                color: Colors.white30, size: 64),
+            SizedBox(height: 16),
+            Text('No shorts available',
+                style: TextStyle(color: Colors.white70, fontSize: 18)),
+            SizedBox(height: 8),
+            Text('Check back later for new content',
+                style: TextStyle(color: Colors.white38, fontSize: 14)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildShortItem(Map<String, dynamic> shortData) {
-    return Stack(
-      children: [
-        // Video/Content Background
-        Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withOpacity(0.3),
-                Colors.black.withOpacity(0.7),
-              ],
+  Widget _buildErrorState() {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, color: Colors.orange, size: 64),
+            const SizedBox(height: 16),
+            const Text('Failed to load',
+                style: TextStyle(color: Colors.white, fontSize: 18)),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _loadShortsContent,
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black),
+              child: const Text('Retry'),
             ),
-          ),
-          child: Center(
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                color: AppTheme.primaryCyan.withOpacity(0.1),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.play_circle_outline,
-                    size: 80,
-                    color: Colors.white.withOpacity(0.8),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    shortData['title'],
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryPink,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      shortData['category'],
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          ],
         ),
-
-        // Right Side Actions
-        Positioned(
-          right: 12,
-          bottom: 100,
-          child: Column(
-            children: [
-              _buildActionButton(
-                icon: Icons.favorite_border,
-                label: shortData['likes'],
-                onTap: () {},
-              ),
-              const SizedBox(height: 20),
-              _buildActionButton(
-                icon: Icons.comment_outlined,
-                label: shortData['comments'],
-                onTap: () {},
-              ),
-              const SizedBox(height: 20),
-              _buildActionButton(
-                icon: Icons.share_outlined,
-                label: shortData['shares'],
-                onTap: () {},
-              ),
-              const SizedBox(height: 20),
-              _buildActionButton(
-                icon: Icons.bookmark_border,
-                label: '',
-                onTap: () {},
-              ),
-            ],
-          ),
-        ),
-
-        // Bottom Content Info
-        Positioned(
-          left: 12,
-          right: 80,
-          bottom: 100,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: AppTheme.primaryCyan,
-                    child: Text(
-                      shortData['creator'][0],
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    shortData['creator'],
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.white, width: 1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      'Follow',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                shortData['description'],
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(
-                    Icons.access_time,
-                    size: 14,
-                    color: Colors.white.withOpacity(0.7),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    shortData['duration'],
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        // Top Safe Area with Progress Indicators
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: List.generate(
-                        _shortsContent.isNotEmpty ? _shortsContent.length : _mockShortsData.length,
-                        (index) => Expanded(
-                          child: Container(
-                            height: 2,
-                            margin: const EdgeInsets.symmetric(horizontal: 1),
-                            decoration: BoxDecoration(
-                              color: index <= _currentIndex
-                                  ? Colors.white
-                                  : Colors.white.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(1),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 24,
-            ),
-          ),
-          if (label.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ]
-        ],
       ),
     );
   }

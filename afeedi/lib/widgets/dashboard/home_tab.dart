@@ -20,6 +20,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   List<Content> _allPosts = [];
   bool _isLoading = false;
   bool _hasMore = true;
+  bool _hasError = false;
+  String _errorMessage = '';
   PlatformType? _selectedPlatform;
   
   @override
@@ -107,8 +109,10 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         _allPosts = [];
         _posts = [];
         _isLoading = false;
+        _hasError = true;
+        _errorMessage = e.toString();
       });
-      
+
       // Track error
       await AnalyticsService.instance.trackError(
         errorType: 'home_content_load_error',
@@ -171,6 +175,8 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
       _posts.clear();
       _allPosts.clear();
       _hasMore = true;
+      _hasError = false;
+      _errorMessage = '';
     });
     await _loadInitialPosts();
   }
@@ -390,6 +396,114 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     );
   }
   
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.video_library_outlined,
+              size: 64,
+              color: Colors.white.withOpacity(0.3),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'No content yet',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Your personalized feed is being prepared.\nPull down to refresh.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.5),
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton.icon(
+              onPressed: _refreshPosts,
+              icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('Refresh Feed'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00E5FF),
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.cloud_off_outlined,
+              size: 64,
+              color: Colors.orange.withOpacity(0.7),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Unable to load feed',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _errorMessage.isNotEmpty ? _errorMessage : 'Check your connection and try again.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.5),
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton.icon(
+              onPressed: () {
+                setState(() {
+                  _hasError = false;
+                  _errorMessage = '';
+                });
+                _refreshPosts();
+              },
+              icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('Try Again'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildFeed() {
     if (_isLoading && _posts.isEmpty) {
       return const Center(
@@ -398,7 +512,15 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
         ),
       );
     }
-    
+
+    if (_hasError && _posts.isEmpty) {
+      return _buildErrorState();
+    }
+
+    if (!_isLoading && _posts.isEmpty) {
+      return _buildEmptyState();
+    }
+
     return RefreshIndicator(
       onRefresh: _refreshPosts,
       color: AppTheme.primaryCyan,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
+import '../core/storage/local_storage_service.dart';
+import '../services/local_auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -10,19 +12,20 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateMixin {
   late TabController _tabController;
-  
-  final Map<String, dynamic> _userProfile = {
-    'name': 'Alex Johnson',
-    'email': 'alex.johnson@email.com',
-    'joinDate': 'January 2024',
-    'avatar': 'https://picsum.photos/120/120?random=user',
-    'isPremium': true,
-    'level': 15,
-    'totalWatchTime': '127 hours',
-    'videosWatched': 342,
-    'streakDays': 28,
+
+  Map<String, dynamic> _userProfile = {
+    'name': 'Afeedi User',
+    'email': '',
+    'joinDate': 'Recently',
+    'avatar': '',
+    'isPremium': false,
+    'level': 1,
+    'totalWatchTime': '0 min',
+    'videosWatched': 0,
+    'streakDays': 0,
+    'connectedPlatforms': 0,
   };
-  
+
   final List<Map<String, dynamic>> _achievements = [
     {
       'id': 'early_bird',
@@ -30,8 +33,8 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       'description': 'Watch 10 videos before 9 AM',
       'icon': Icons.wb_sunny,
       'color': Color(0xFFFFE66D),
-      'unlocked': true,
-      'progress': 1.0,
+      'unlocked': false,
+      'progress': 0.0,
     },
     {
       'id': 'binge_watcher',
@@ -39,8 +42,8 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       'description': 'Watch 5 hours in a single day',
       'icon': Icons.play_circle_filled,
       'color': Color(0xFFFF6B6B),
-      'unlocked': true,
-      'progress': 1.0,
+      'unlocked': false,
+      'progress': 0.0,
     },
     {
       'id': 'explorer',
@@ -49,7 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       'icon': Icons.explore,
       'color': Color(0xFF4ECDC4),
       'unlocked': false,
-      'progress': 0.75,
+      'progress': 0.0,
     },
     {
       'id': 'streak_master',
@@ -58,52 +61,63 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       'icon': Icons.local_fire_department,
       'color': Color(0xFFFF8A65),
       'unlocked': false,
-      'progress': 0.93,
+      'progress': 0.0,
     },
   ];
-  
-  final List<Map<String, dynamic>> _viewingHistory = [
-    {
-      'id': '1',
-      'title': 'Flutter State Management Deep Dive',
-      'creator': 'CodeMaster',
-      'platform': 'YouTube',
-      'thumbnail': 'https://picsum.photos/120/80?random=1',
-      'watchedAt': '2 hours ago',
-      'duration': '45:30',
-      'watchedDuration': '45:30',
-      'completed': true,
-    },
-    {
-      'id': '2',
-      'title': 'Amazing Travel Vlog - Japan',
-      'creator': 'TravelBuddy',
-      'platform': 'Instagram',
-      'thumbnail': 'https://picsum.photos/120/80?random=2',
-      'watchedAt': '1 day ago',
-      'duration': '12:15',
-      'watchedDuration': '8:30',
-      'completed': false,
-    },
-    {
-      'id': '3',
-      'title': 'Quick Cooking Tips',
-      'creator': 'ChefLife',
-      'platform': 'TikTok',
-      'thumbnail': 'https://picsum.photos/120/80?random=3',
-      'watchedAt': '2 days ago',
-      'duration': '1:30',
-      'watchedDuration': '1:30',
-      'completed': true,
-    },
-  ];
+
+  final List<Map<String, dynamic>> _viewingHistory = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _loadUserData();
   }
-  
+
+  Future<void> _loadUserData() async {
+    final user = LocalAuthService.instance.currentUser;
+    if (user != null) {
+      // Derive a display name from the email (part before @)
+      final emailName = user.email.split('@').first;
+      final displayName = emailName
+          .replaceAll(RegExp(r'[._\-]'), ' ')
+          .split(' ')
+          .map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : '')
+          .join(' ');
+
+      // Load platform connections count
+      int connectedCount = 0;
+      try {
+        final connections = await LocalStorageService.instance.getPlatformConnections(user.id);
+        connectedCount = connections.length;
+      } catch (_) {}
+
+      setState(() {
+        _userProfile = {
+          'name': displayName.isNotEmpty ? displayName : 'Afeedi User',
+          'email': user.email,
+          'joinDate': _formatJoinDate(user.createdAt),
+          'avatar': '',
+          'isPremium': user.isPremium,
+          'level': 1,
+          'totalWatchTime': '0 min',
+          'videosWatched': 0,
+          'streakDays': 0,
+          'connectedPlatforms': connectedCount,
+        };
+      });
+    }
+  }
+
+  String _formatJoinDate(DateTime? date) {
+    if (date == null) return 'Recently';
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return '${months[date.month - 1]} ${date.year}';
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -113,16 +127,16 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.darkPrimary,
+      backgroundColor: const Color(0xFF1A0A3E),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppTheme.primaryCyan.withOpacity(0.1),
-              AppTheme.darkPrimary,
-              AppTheme.primaryPink.withOpacity(0.1),
+              AppTheme.primaryCyan.withOpacity(0.08),
+              const Color(0xFF1A0A3E),
+              AppTheme.primaryPink.withOpacity(0.08),
             ],
           ),
         ),
@@ -130,17 +144,31 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           child: Column(
             children: [
               _buildAppBar(),
-              _buildProfileHeader(),
-              _buildStatsRow(),
-              _buildTabBar(),
               Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildAchievementsTab(),
-                    _buildHistoryTab(),
-                    _buildSubscriptionTab(),
-                  ],
+                child: SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      _buildProfileHeader(),
+                      const SizedBox(height: 12),
+                      _buildStreakBanner(),
+                      _buildStatsRow(),
+                      _buildPlatformConnections(),
+                      const SizedBox(height: 8),
+                      _buildTabBar(),
+                      SizedBox(
+                        height: 400,
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _buildAchievementsTab(),
+                            _buildHistoryTab(),
+                            _buildSubscriptionTab(),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -149,7 +177,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildAppBar() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -199,7 +227,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildProfileHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -207,22 +235,8 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         children: [
           Stack(
             children: [
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppTheme.primaryCyan,
-                    width: 3,
-                  ),
-                  image: DecorationImage(
-                    image: NetworkImage(_userProfile['avatar']),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              if (_userProfile['isPremium'])
+              _buildAvatarWidget(),
+              if (_userProfile['isPremium'] as bool)
                 Positioned(
                   bottom: 0,
                   right: 0,
@@ -231,7 +245,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                     decoration: BoxDecoration(
                       color: AppTheme.primaryPink,
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppTheme.darkPrimary, width: 2),
+                      border: Border.all(color: const Color(0xFF1A0A3E), width: 2),
                     ),
                     child: const Icon(
                       Icons.star,
@@ -244,7 +258,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           ),
           const SizedBox(height: 16),
           Text(
-            _userProfile['name'],
+            _userProfile['name'] as String,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 24,
@@ -253,7 +267,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           ),
           const SizedBox(height: 4),
           Text(
-            _userProfile['email'],
+            _userProfile['email'] as String,
             style: TextStyle(
               color: Colors.white.withOpacity(0.7),
               fontSize: 16,
@@ -270,7 +284,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                const Icon(
                   Icons.calendar_today,
                   color: AppTheme.primaryCyan,
                   size: 16,
@@ -278,7 +292,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 const SizedBox(width: 6),
                 Text(
                   'Joined ${_userProfile['joinDate']}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppTheme.primaryCyan,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -291,10 +305,184 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
-  Widget _buildStatsRow() {
+
+  Widget _buildAvatarWidget() {
+    final name = _userProfile['name'] as String? ?? 'U';
+    final initials = name
+        .split(' ')
+        .map((n) => n.isNotEmpty ? n[0] : '')
+        .take(2)
+        .join()
+        .toUpperCase();
+    final avatarUrl = _userProfile['avatar'] as String? ?? '';
+
     return Container(
-      margin: const EdgeInsets.all(20),
+      width: 90,
+      height: 90,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [AppTheme.primaryCyan, AppTheme.primaryPink],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: avatarUrl.isNotEmpty
+          ? ClipOval(
+              child: Image.network(
+                avatarUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _buildInitialsAvatar(initials),
+              ),
+            )
+          : _buildInitialsAvatar(initials),
+    );
+  }
+
+  Widget _buildInitialsAvatar(String initials) {
+    return Center(
+      child: Text(
+        initials.isNotEmpty ? initials : 'AU',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStreakBanner() {
+    final streak = _userProfile['streakDays'] as int? ?? 0;
+    final isActive = streak > 0;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isActive
+              ? [
+                  const Color(0xFFFF6B35).withOpacity(0.4),
+                  const Color(0xFFFF8A65).withOpacity(0.25),
+                ]
+              : [
+                  const Color(0xFFFF6B35).withOpacity(0.15),
+                  const Color(0xFFFF8A65).withOpacity(0.08),
+                ],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isActive
+              ? const Color(0xFFFF6B35).withOpacity(0.6)
+              : const Color(0xFFFF6B35).withOpacity(0.25),
+          width: isActive ? 1.5 : 1,
+        ),
+        boxShadow: isActive
+            ? [
+                BoxShadow(
+                  color: const Color(0xFFFF6B35).withOpacity(0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
+      ),
+      child: Row(
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              if (isActive)
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFFFF6B35).withOpacity(0.2),
+                  ),
+                ),
+              Icon(
+                Icons.local_fire_department,
+                color: isActive
+                    ? const Color(0xFFFF6B35)
+                    : const Color(0xFFFF6B35).withOpacity(0.5),
+                size: isActive ? 44 : 36,
+              ),
+            ],
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$streak Day${streak == 1 ? '' : 's'} Streak',
+                  style: TextStyle(
+                    color: isActive
+                        ? const Color(0xFFFF6B35)
+                        : const Color(0xFFFF8A65).withOpacity(0.7),
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isActive
+                      ? 'Keep it up! Watch today to continue.'
+                      : 'Start your streak today!',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (isActive)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF6B35).withOpacity(0.25),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFFF6B35).withOpacity(0.4)),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    '$streak',
+                    style: const TextStyle(
+                      color: Color(0xFFFF6B35),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    streak == 1 ? 'day' : 'days',
+                    style: TextStyle(
+                      color: const Color(0xFFFF6B35).withOpacity(0.8),
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatsRow() {
+    final videosWatched = _userProfile['videosWatched'] as int? ?? 0;
+    final watchTime = _userProfile['totalWatchTime'] as String? ?? '0 min';
+    final level = _userProfile['level'] as int? ?? 1;
+    final connectedPlatforms = _userProfile['connectedPlatforms'] as int? ?? 0;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
@@ -305,36 +493,36 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         children: [
           _buildStatItem(
             'Level',
-            _userProfile['level'].toString(),
+            'Lv $level',
             Icons.trending_up,
             AppTheme.primaryCyan,
           ),
           _buildStatDivider(),
           _buildStatItem(
             'Watch Time',
-            _userProfile['totalWatchTime'],
+            watchTime,
             Icons.access_time,
             AppTheme.primaryPink,
           ),
           _buildStatDivider(),
           _buildStatItem(
             'Videos',
-            _userProfile['videosWatched'].toString(),
+            '$videosWatched',
             Icons.play_circle,
             const Color(0xFFFFE66D),
           ),
           _buildStatDivider(),
           _buildStatItem(
-            'Streak',
-            '${_userProfile['streakDays']} days',
-            Icons.local_fire_department,
-            const Color(0xFFFF8A65),
+            'Platforms',
+            '$connectedPlatforms',
+            Icons.devices,
+            const Color(0xFF4ECDC4),
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildStatItem(String label, String value, IconData icon, Color color) {
     return Expanded(
       child: Column(
@@ -356,7 +544,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             value,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -365,26 +553,184 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             label,
             style: TextStyle(
               color: Colors.white.withOpacity(0.7),
-              fontSize: 12,
+              fontSize: 11,
             ),
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildStatDivider() {
     return Container(
       width: 1,
       height: 40,
       color: Colors.white.withOpacity(0.2),
-      margin: const EdgeInsets.symmetric(horizontal: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 4),
     );
   }
-  
+
+  Widget _buildPlatformConnections() {
+    final platforms = [
+      {
+        'name': 'YouTube',
+        'icon': Icons.play_circle,
+        'color': const Color(0xFFFF0000),
+        'connected': false,
+      },
+      {
+        'name': 'TikTok',
+        'icon': Icons.music_video,
+        'color': Colors.white,
+        'connected': false,
+      },
+      {
+        'name': 'Instagram',
+        'icon': Icons.camera_alt,
+        'color': const Color(0xFFE1306C),
+        'connected': false,
+      },
+      {
+        'name': 'Facebook',
+        'icon': Icons.facebook,
+        'color': const Color(0xFF1877F2),
+        'connected': false,
+      },
+    ];
+
+    final connectedCount = platforms.where((p) => p['connected'] as bool).length;
+    final totalCount = platforms.length;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+          child: Row(
+            children: [
+              const Icon(Icons.devices, color: Color(0xFF4ECDC4), size: 18),
+              const SizedBox(width: 8),
+              const Text(
+                'Connected Platforms',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4ECDC4).withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF4ECDC4).withOpacity(0.3)),
+                ),
+                child: Text(
+                  '$connectedCount / $totalCount',
+                  style: const TextStyle(
+                    color: Color(0xFF4ECDC4),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+          child: Text(
+            'Connect all 4 to unlock the Content Explorer achievement',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.45),
+              fontSize: 11,
+            ),
+          ),
+        ),
+        ...platforms.map((p) => Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.03),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: (p['connected'] as bool)
+                      ? const Color(0xFF00E5FF).withOpacity(0.3)
+                      : Colors.white.withOpacity(0.08),
+                ),
+              ),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                leading: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: (p['color'] as Color).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    p['icon'] as IconData,
+                    color: p['color'] as Color,
+                    size: 22,
+                  ),
+                ),
+                title: Text(
+                  p['name'] as String,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                subtitle: Text(
+                  (p['connected'] as bool) ? 'Connected' : 'Not connected',
+                  style: TextStyle(
+                    color: (p['connected'] as bool)
+                        ? const Color(0xFF00E5FF).withOpacity(0.8)
+                        : Colors.white.withOpacity(0.4),
+                    fontSize: 11,
+                  ),
+                ),
+                trailing: (p['connected'] as bool)
+                    ? const Icon(Icons.check_circle, color: Color(0xFF00E5FF), size: 22)
+                    : TextButton(
+                        onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${p['name']} connection coming soon',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            backgroundColor: const Color(0xFF2D1B69),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: const Text(
+                          'Connect',
+                          style: TextStyle(
+                            color: Color(0xFF00E5FF),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+              ),
+            )),
+        const SizedBox(height: 4),
+      ],
+    );
+  }
+
   Widget _buildTabBar() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
@@ -414,11 +760,13 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildAchievementsTab() {
     return Container(
       padding: const EdgeInsets.all(20),
       child: GridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 16,
@@ -433,23 +781,35 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildAchievementCard(Map<String, dynamic> achievement) {
-    final isUnlocked = achievement['unlocked'];
-    final progress = achievement['progress'];
-    
+    final isUnlocked = achievement['unlocked'] as bool;
+    final progress = achievement['progress'] as double;
+    final achievementColor = achievement['color'] as Color;
+    final progressPct = (progress * 100).toInt();
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isUnlocked 
-            ? achievement['color'].withOpacity(0.1)
-            : Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
+        color: isUnlocked
+            ? achievementColor.withOpacity(0.12)
+            : Colors.white.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isUnlocked 
-              ? achievement['color'].withOpacity(0.5)
+          color: isUnlocked
+              ? achievementColor.withOpacity(0.55)
               : Colors.white.withOpacity(0.1),
+          width: isUnlocked ? 1.5 : 1,
         ),
+        boxShadow: isUnlocked
+            ? [
+                BoxShadow(
+                  color: achievementColor.withOpacity(0.15),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                )
+              ]
+            : null,
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -457,123 +817,215 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           Stack(
             alignment: Alignment.center,
             children: [
-              if (!isUnlocked)
-                SizedBox(
-                  width: 50,
-                  height: 50,
-                  child: CircularProgressIndicator(
-                    value: progress,
-                    strokeWidth: 3,
-                    backgroundColor: Colors.white.withOpacity(0.2),
-                    valueColor: AlwaysStoppedAnimation<Color>(achievement['color']),
+              // Progress ring for locked achievements
+              SizedBox(
+                width: 56,
+                height: 56,
+                child: CircularProgressIndicator(
+                  value: isUnlocked ? 1.0 : progress,
+                  strokeWidth: 3,
+                  backgroundColor: Colors.white.withOpacity(0.12),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    isUnlocked
+                        ? achievementColor
+                        : achievementColor.withOpacity(0.6),
                   ),
                 ),
+              ),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: isUnlocked 
-                      ? achievement['color'].withOpacity(0.2)
-                      : Colors.white.withOpacity(0.1),
+                  color: isUnlocked
+                      ? achievementColor.withOpacity(0.22)
+                      : Colors.white.withOpacity(0.08),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  achievement['icon'],
-                  color: isUnlocked 
-                      ? achievement['color']
-                      : Colors.white.withOpacity(0.5),
-                  size: 24,
+                  achievement['icon'] as IconData,
+                  color: isUnlocked
+                      ? achievementColor
+                      : Colors.white.withOpacity(0.4),
+                  size: 22,
                 ),
               ),
+              // Lock badge for completely locked (0% progress)
+              if (!isUnlocked && progress == 0)
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2D1B69),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                          color: Colors.white.withOpacity(0.2), width: 1),
+                    ),
+                    child: Icon(
+                      Icons.lock,
+                      color: Colors.white.withOpacity(0.5),
+                      size: 10,
+                    ),
+                  ),
+                ),
+              // Checkmark for unlocked
+              if (isUnlocked)
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: achievementColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 10,
+                    ),
+                  ),
+                ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Text(
-            achievement['title'],
+            achievement['title'] as String,
             style: TextStyle(
-              color: isUnlocked 
-                  ? Colors.white
-                  : Colors.white.withOpacity(0.7),
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+              color: isUnlocked ? Colors.white : Colors.white.withOpacity(0.65),
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
           Text(
-            achievement['description'],
+            achievement['description'] as String,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              fontSize: 12,
+              color: Colors.white.withOpacity(isUnlocked ? 0.6 : 0.45),
+              fontSize: 11,
             ),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          if (!isUnlocked) ...[
-            const SizedBox(height: 8),
+          const SizedBox(height: 8),
+          if (isUnlocked)
             Text(
-              '${(progress * 100).toInt()}%',
+              'Unlocked!',
               style: TextStyle(
-                color: achievement['color'],
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+                color: achievementColor,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
               ),
+            )
+          else
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      backgroundColor: Colors.white.withOpacity(0.1),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(achievementColor),
+                      minHeight: 4,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '$progressPct%',
+                  style: TextStyle(
+                    color: achievementColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
-          ],
         ],
       ),
     );
   }
-  
+
   Widget _buildHistoryTab() {
     return Container(
       padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Recent Activity',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+      child: _viewingHistory.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.history, color: Colors.white.withOpacity(0.3), size: 48),
+                  const SizedBox(height: 12),
+                  Text(
+                    'No viewing history yet',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.5),
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Start watching to build your history!',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.35),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
               ),
-              TextButton(
-                onPressed: () => _showClearHistoryDialog(),
-                child: const Text(
-                  'Clear All',
-                  style: TextStyle(
-                    color: AppTheme.primaryCyan,
-                    fontSize: 14,
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Recent Activity',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => _showClearHistoryDialog(),
+                      child: const Text(
+                        'Clear All',
+                        style: TextStyle(
+                          color: AppTheme.primaryCyan,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _viewingHistory.length,
+                    itemBuilder: (context, index) {
+                      final item = _viewingHistory[index];
+                      return _buildHistoryItem(item);
+                    },
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _viewingHistory.length,
-              itemBuilder: (context, index) {
-                final item = _viewingHistory[index];
-                return _buildHistoryItem(item);
-              },
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
-  
+
   Widget _buildHistoryItem(Map<String, dynamic> item) {
-    final completed = item['completed'];
-    final watchedDuration = item['watchedDuration'];
-    final totalDuration = item['duration'];
-    
+    final completed = item['completed'] as bool;
+    final watchedDuration = item['watchedDuration'] as String;
+    final totalDuration = item['duration'] as String;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -589,7 +1041,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  item['thumbnail'],
+                  item['thumbnail'] as String,
                   width: 80,
                   height: 60,
                   fit: BoxFit.cover,
@@ -601,7 +1053,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                   right: 4,
                   child: Container(
                     padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppTheme.primaryCyan,
                       shape: BoxShape.circle,
                     ),
@@ -638,7 +1090,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item['title'],
+                  item['title'] as String,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -649,7 +1101,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  item['creator'],
+                  item['creator'] as String,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.7),
                     fontSize: 12,
@@ -661,13 +1113,13 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: _getPlatformColor(item['platform']).withOpacity(0.2),
+                        color: _getPlatformColor(item['platform'] as String).withOpacity(0.2),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        item['platform'],
+                        item['platform'] as String,
                         style: TextStyle(
-                          color: _getPlatformColor(item['platform']),
+                          color: _getPlatformColor(item['platform'] as String),
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
                         ),
@@ -675,7 +1127,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      item['watchedAt'],
+                      item['watchedAt'] as String,
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.5),
                         fontSize: 10,
@@ -687,7 +1139,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                   const SizedBox(height: 8),
                   Text(
                     'Watched $watchedDuration of $totalDuration',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppTheme.primaryCyan,
                       fontSize: 10,
                     ),
@@ -705,29 +1157,29 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildSubscriptionTab() {
-    return Container(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
           _buildSubscriptionCard(),
           const SizedBox(height: 20),
           _buildSubscriptionFeatures(),
-          const Spacer(),
-          if (!_userProfile['isPremium'])
-            _buildUpgradeButton(),
+          const SizedBox(height: 20),
+          if (!(_userProfile['isPremium'] as bool)) _buildUpgradeButton(),
         ],
       ),
     );
   }
-  
+
   Widget _buildSubscriptionCard() {
+    final isPremium = _userProfile['isPremium'] as bool;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: _userProfile['isPremium']
+          colors: isPremium
               ? [AppTheme.primaryCyan, AppTheme.primaryPink]
               : [Colors.white.withOpacity(0.1), Colors.white.withOpacity(0.05)],
           begin: Alignment.topLeft,
@@ -735,21 +1187,19 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: _userProfile['isPremium']
-              ? Colors.transparent
-              : Colors.white.withOpacity(0.2),
+          color: isPremium ? Colors.transparent : Colors.white.withOpacity(0.2),
         ),
       ),
       child: Column(
         children: [
           Icon(
-            _userProfile['isPremium'] ? Icons.star : Icons.star_border,
+            isPremium ? Icons.star : Icons.star_border,
             color: Colors.white,
             size: 40,
           ),
           const SizedBox(height: 12),
           Text(
-            _userProfile['isPremium'] ? 'Premium Member' : 'Free Member',
+            isPremium ? 'Premium Member' : 'Free Member',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -758,7 +1208,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           ),
           const SizedBox(height: 8),
           Text(
-            _userProfile['isPremium']
+            isPremium
                 ? 'Enjoy unlimited access to all features'
                 : 'Upgrade to unlock premium features',
             style: TextStyle(
@@ -767,56 +1217,40 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             ),
             textAlign: TextAlign.center,
           ),
-          if (_userProfile['isPremium']) ...[
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text(
-                'Renews March 15, 2024',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );
   }
-  
+
   Widget _buildSubscriptionFeatures() {
+    final isPremium = _userProfile['isPremium'] as bool;
     final features = [
       {
         'title': 'Ad-free Experience',
         'description': 'Watch without interruptions',
         'icon': Icons.block,
-        'available': _userProfile['isPremium'],
+        'available': isPremium,
       },
       {
         'title': 'Offline Downloads',
         'description': 'Save videos for offline viewing',
         'icon': Icons.download,
-        'available': _userProfile['isPremium'],
+        'available': isPremium,
       },
       {
         'title': 'Premium Analytics',
         'description': 'Detailed viewing insights',
         'icon': Icons.analytics,
-        'available': _userProfile['isPremium'],
+        'available': isPremium,
       },
       {
         'title': 'Priority Support',
         'description': '24/7 customer support',
         'icon': Icons.support_agent,
-        'available': _userProfile['isPremium'],
+        'available': isPremium,
       },
     ];
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -829,24 +1263,24 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           ),
         ),
         const SizedBox(height: 16),
-        ...features.map((feature) => _buildFeatureItem(feature)).toList(),
+        ...features.map((feature) => _buildFeatureItem(feature)),
       ],
     );
   }
-  
+
   Widget _buildFeatureItem(Map<String, dynamic> feature) {
-    final available = feature['available'];
-    
+    final available = feature['available'] as bool;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: available 
+        color: available
             ? AppTheme.primaryCyan.withOpacity(0.1)
             : Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: available 
+          color: available
               ? AppTheme.primaryCyan.withOpacity(0.3)
               : Colors.white.withOpacity(0.1),
         ),
@@ -856,14 +1290,14 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: available 
+              color: available
                   ? AppTheme.primaryCyan.withOpacity(0.2)
                   : Colors.white.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
-              feature['icon'],
-              color: available 
+              feature['icon'] as IconData,
+              color: available
                   ? AppTheme.primaryCyan
                   : Colors.white.withOpacity(0.5),
               size: 20,
@@ -875,18 +1309,16 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  feature['title'],
+                  feature['title'] as String,
                   style: TextStyle(
-                    color: available 
-                        ? Colors.white
-                        : Colors.white.withOpacity(0.7),
+                    color: available ? Colors.white : Colors.white.withOpacity(0.7),
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  feature['description'],
+                  feature['description'] as String,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.6),
                     fontSize: 12,
@@ -897,7 +1329,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           ),
           Icon(
             available ? Icons.check_circle : Icons.lock,
-            color: available 
+            color: available
                 ? AppTheme.primaryCyan
                 : Colors.white.withOpacity(0.3),
             size: 20,
@@ -906,13 +1338,13 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildUpgradeButton() {
     return Container(
       width: double.infinity,
       height: 50,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [AppTheme.primaryCyan, AppTheme.primaryPink],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
@@ -939,7 +1371,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   Color _getPlatformColor(String platform) {
     switch (platform.toLowerCase()) {
       case 'youtube':
@@ -954,7 +1386,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         return AppTheme.primaryCyan;
     }
   }
-  
+
   // Dialog methods
   void _showEditProfileDialog() {
     showDialog(
@@ -981,7 +1413,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   void _showClearHistoryDialog() {
     showDialog(
       context: context,
@@ -1019,7 +1451,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
     );
   }
-  
+
   void _showUpgradeDialog() {
     showDialog(
       context: context,

@@ -239,40 +239,47 @@ class _ShortsTabState extends State<ShortsTab> {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          PageView.builder(
-            controller: _pageController,
-            scrollDirection: Axis.vertical,
-            onPageChanged: (index) {
-              HapticFeedback.selectionClick();
-              setState(() {
-                _currentIndex = index;
-                _scrollCount++;
-              });
-              if (index < _shortsContent.length) {
-                final viewed = _shortsContent[index];
-                AnalyticsService.instance.trackUserInteraction(
-                  action: 'short_viewed',
-                  screen: 'shorts',
-                  additionalData: {
-                    'content_id': viewed.id,
-                    'platform': viewed.platform.name,
-                    'index': index,
-                  },
-                );
-                // Viewing a short signals interest — 1 point per tag
-                if (viewed.tags.isNotEmpty) _updateGenreWeights(viewed.tags);
-              }
-              _checkShortsUpsell();
-            },
-            itemCount: _shortsContent.length,
-            itemBuilder: (context, index) =>
-                _buildShortItemFromContent(_shortsContent[index], index),
-          ),
-          // Progress dots overlaid at the top
-          _buildProgressDots(_shortsContent.length),
-        ],
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await _loadShortsContent();
+        },
+        color: const Color(0xFF00D4FF),
+        backgroundColor: Colors.black87,
+        child: Stack(
+          children: [
+            PageView.builder(
+              controller: _pageController,
+              scrollDirection: Axis.vertical,
+              onPageChanged: (index) {
+                HapticFeedback.selectionClick();
+                setState(() {
+                  _currentIndex = index;
+                  _scrollCount++;
+                });
+                if (index < _shortsContent.length) {
+                  final viewed = _shortsContent[index];
+                  AnalyticsService.instance.trackUserInteraction(
+                    action: 'short_viewed',
+                    screen: 'shorts',
+                    additionalData: {
+                      'content_id': viewed.id,
+                      'platform': viewed.platform.name,
+                      'index': index,
+                    },
+                  );
+                  // Viewing a short signals interest — 1 point per tag
+                  if (viewed.tags.isNotEmpty) _updateGenreWeights(viewed.tags);
+                }
+                _checkShortsUpsell();
+              },
+              itemCount: _shortsContent.length,
+              itemBuilder: (context, index) =>
+                  _buildShortItemFromContent(_shortsContent[index], index),
+            ),
+            // Progress dots overlaid at the top
+            _buildProgressDots(_shortsContent.length),
+          ],
+        ),
       ),
     );
   }

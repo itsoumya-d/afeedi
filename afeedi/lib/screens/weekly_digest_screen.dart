@@ -36,20 +36,25 @@ class _WeeklyDigestScreenState extends State<WeeklyDigestScreen> {
   }
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    _userName = prefs.getString('onboarding_user_name') ?? '';
-    _genres = prefs.getStringList('onboarding_selected_genres') ?? [];
-    final isPro = prefs.getBool('is_premium') ?? false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _userName = prefs.getString('onboarding_user_name') ?? '';
+      _genres = prefs.getStringList('onboarding_selected_genres') ?? [];
+      final isPro = prefs.getBool('is_premium') ?? false;
 
-    final content = await ContentService.instance
-        .getOnboardingBasedRecommendations(limit: 5);
-    if (!mounted) return;
-    setState(() {
-      _isPro = isPro;
-      // Free users see first 2 picks; Pro sees all 5
-      _picks = isPro ? content.take(5).toList() : content.take(2).toList();
-      _loading = false;
-    });
+      final content = await ContentService.instance
+          .getOnboardingBasedRecommendations(limit: 5);
+      if (!mounted) return;
+      setState(() {
+        _isPro = isPro;
+        // Free users see first 2 picks; Pro sees all 5
+        _picks = isPro ? content.take(5).toList() : content.take(2).toList();
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+    }
   }
 
   String get _weekLabel {

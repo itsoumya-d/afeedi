@@ -173,35 +173,39 @@ class _ProfileScreenState extends State<ProfileScreen>
       },
     ];
 
-    // Load real saved and liked content
-    await UserInteractionService.instance.initialize();
-    final savedIds = UserInteractionService.instance.getSavedContentIds();
-    final likedIds = UserInteractionService.instance.getLikedContentIds();
-
+    // Load real saved and liked content (gracefully handle offline/errors)
     final savedContent = <Content>[];
-    for (final id in savedIds.take(20)) {
-      final c = await ContentService.instance.getVideoById(id);
-      if (c != null) savedContent.add(c);
-    }
-
     final likedContent = <Content>[];
-    for (final id in likedIds.take(20)) {
-      final c = await ContentService.instance.getVideoById(id);
-      if (c != null) likedContent.add(c);
-    }
-
-    // Load viewing history
-    final watchedIdsRaw = prefs.getStringList('watched_ids') ?? [];
     final historyItems = <Map<String, dynamic>>[];
-    for (final id in watchedIdsRaw.take(50).toList().reversed) {
-      final content = await ContentService.instance.getVideoById(id);
-      if (content != null) {
-        historyItems.add({
-          'content': content,
-          'progress': prefs.getDouble('watch_progress_$id') ?? 0.0,
-          'watched_at': prefs.getString('watched_at_$id') ?? 'Recently',
-        });
+    try {
+      await UserInteractionService.instance.initialize();
+      final savedIds = UserInteractionService.instance.getSavedContentIds();
+      final likedIds = UserInteractionService.instance.getLikedContentIds();
+
+      for (final id in savedIds.take(20)) {
+        final c = await ContentService.instance.getVideoById(id);
+        if (c != null) savedContent.add(c);
       }
+
+      for (final id in likedIds.take(20)) {
+        final c = await ContentService.instance.getVideoById(id);
+        if (c != null) likedContent.add(c);
+      }
+
+      // Load viewing history
+      final watchedIdsRaw = prefs.getStringList('watched_ids') ?? [];
+      for (final id in watchedIdsRaw.take(50).toList().reversed) {
+        final content = await ContentService.instance.getVideoById(id);
+        if (content != null) {
+          historyItems.add({
+            'content': content,
+            'progress': prefs.getDouble('watch_progress_$id') ?? 0.0,
+            'watched_at': prefs.getString('watched_at_$id') ?? 'Recently',
+          });
+        }
+      }
+    } catch (_) {
+      // Network/content errors — profile stats still show from SharedPreferences
     }
 
     final topInterests = await _loadTopInterests();

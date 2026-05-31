@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 // import 'dart:html' as html;
 import 'dart:math';
+import 'package:webview_flutter/webview_flutter.dart';
 import '../../models/content_model.dart';
 import '../../services/universal_platform_player_service.dart';
 import '../../services/social_media_streaming_service.dart';
@@ -48,6 +49,7 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
   PlatformPlayerResult? _playerResult;
   String? _containerId;
   bool _showFallbackOptions = false;
+  WebViewController? _webViewController;
   // bool _useEnhancedPlayer = false;
   // VideoContentExtractionService? _extractionService;
   
@@ -92,31 +94,19 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
   
   Future<void> _createPlayer() async {
     try {
-      // Try enhanced video extraction for YouTube content first
       if (widget.content.platform == PlatformType.youtube) {
-        // await _tryEnhancedVideoExtraction();
-        // Temporarily disabled - fallback to iframe
         if (kIsWeb && _containerId != null) {
           await _createWebIframe();
         } else {
-          setState(() {
-            _playerResult = PlatformPlayerResult(
-              success: false,
-              playerId: null,
-              platform: widget.content.platform,
-              fallbackUrl: _getPlatformUrl(),
-              errorMessage: 'Mobile playback requires external app',
-            );
-            _isLoading = false;
-            _showFallbackOptions = true;
-          });
+          // Use WebView with YouTube embed HTML on mobile
+          await _createYouTubeWebView();
         }
       } else if (_isSocialMediaPlatform(widget.content.platform)) {
         await _createSocialMediaPlayer();
       } else if (kIsWeb && _containerId != null) {
         await _createWebIframe();
       } else {
-        // For mobile, use external app launch
+        // For unknown platforms on mobile, use external app launch fallback
         setState(() {
           _playerResult = PlatformPlayerResult(
             success: false,
@@ -129,6 +119,83 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
           _showFallbackOptions = true;
         });
       }
+    } catch (error) {
+      setState(() {
+        _hasError = true;
+        _errorMessage = error.toString();
+        _isLoading = false;
+        _showFallbackOptions = true;
+      });
+      widget.onError?.call(error.toString());
+    }
+  }
+
+  String _buildYouTubeEmbedHtml(String videoId, bool autoPlay) {
+    final autoPlayParam = autoPlay ? '&autoplay=1' : '';
+    return '''
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #000; display: flex; align-items: center; justify-content: center; height: 100vh; }
+    iframe { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <iframe
+    src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1${autoPlayParam}&enablejsapi=1"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+  ></iframe>
+</body>
+</html>
+''';
+  }
+
+  Future<void> _createYouTubeWebView() async {
+    try {
+      final videoId = widget.content.platformContentId;
+      final html = _buildYouTubeEmbedHtml(videoId, widget.autoPlay);
+
+      final controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setBackgroundColor(Colors.black)
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onPageFinished: (url) {
+              widget.onPlayerReady?.call();
+            },
+            onWebResourceError: (error) {
+              widget.onError?.call(error.description);
+            },
+          ),
+        )
+        ..loadHtmlString(html);
+
+      setState(() {
+        _webViewController = controller;
+        _playerResult = PlatformPlayerResult(
+          success: true,
+          playerId: 'youtube_webview_${widget.content.id}',
+          platform: widget.content.platform,
+          embedUrl: _getEmbedUrl(),
+        );
+        _isLoading = false;
+        _hasError = false;
+      });
+
+      await AnalyticsService.instance.trackUserInteraction(
+        action: 'youtube_webview_player_created',
+        screen: 'video_player',
+        additionalData: {
+          'content_id': widget.content.id,
+          'platform': widget.content.platform.name,
+          'embed_mode': 'webview_html',
+        },
+      );
     } catch (error) {
       setState(() {
         _hasError = true;
@@ -383,26 +450,38 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
     if (_isLoading) {
       return _buildLoadingState();
     }
-    
+
     if (_hasError || _showFallbackOptions) {
       return _buildErrorState();
     }
-    
+
     // Temporarily disable enhanced player for debugging
     // if (_useEnhancedPlayer && widget.content.platform == PlatformType.youtube) {
     //   return _buildEnhancedPlayer();
     // }
-    
+
+    // YouTube on mobile: use WebView with embedded HTML
+    if (!kIsWeb &&
+        widget.content.platform == PlatformType.youtube &&
+        _webViewController != null &&
+        _playerResult?.success == true) {
+      return _buildYouTubeWebViewPlayer();
+    }
+
     // Use social media video player for social media platforms
     if (_isSocialMediaPlatform(widget.content.platform) && _playerResult?.success == true) {
       return _buildSocialMediaPlayer();
     }
-    
+
     if (kIsWeb && _containerId != null && _playerResult?.isEmbedded == true) {
       return _buildWebPlayer();
     }
-    
+
     return _buildMobilePlayer();
+  }
+
+  Widget _buildYouTubeWebViewPlayer() {
+    return WebViewWidget(controller: _webViewController!);
   }
 
   // Widget _buildEnhancedPlayer() {

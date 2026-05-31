@@ -380,6 +380,10 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                   width: double.infinity,
                   height: double.infinity,
                   fit: BoxFit.cover,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return const ColoredBox(color: Color(0xFF252545));
+                  },
                   errorBuilder: (context, error, stackTrace) {
                     return _buildPlaceholderThumbnail();
                   },

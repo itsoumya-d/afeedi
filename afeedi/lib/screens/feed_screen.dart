@@ -49,6 +49,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   Future<void> _onRefresh() async {
     try {
+      ContentService.instance.invalidateCache();
       final feedContent = await ContentService.instance
           .getOnboardingBasedRecommendations(limit: 20);
       setState(() {

@@ -863,7 +863,9 @@ class _ProfileScreenState extends State<ProfileScreen>
           fontSize: 12,
           fontWeight: FontWeight.w400,
         ),
-        isScrollable: false,
+        isScrollable: true,
+        tabAlignment: TabAlignment.start,
+        labelPadding: const EdgeInsets.symmetric(horizontal: 12),
         tabs: [
           _buildBadgeTab(
             AppLocalizations.of(context)?.liked ?? 'Liked',

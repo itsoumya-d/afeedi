@@ -89,18 +89,32 @@ class _PlayerScreenState extends State<PlayerScreen>
 
   Future<void> _loadRelatedContent() async {
     try {
+      // Use personalized recommendations as the base pool, then narrow by
+      // the current video's category so "Up Next" is both fresh and relevant.
+      final all = await ContentService.instance
+          .getOnboardingBasedRecommendations(limit: 30);
       final tags = widget.content.tags;
       final category = widget.content.categories.isNotEmpty
           ? widget.content.categories.first
           : (tags.isNotEmpty ? tags.first : null);
-      final all = await ContentService.instance.getVideos(
-        category: category,
-        limit: 12,
-      );
-      final related = all
+      var related = all
           .where((c) => c.id != widget.content.id)
+          .where(
+            (c) =>
+                category == null ||
+                c.categories.any(
+                  (cat) => cat.toLowerCase().contains(category.toLowerCase()),
+                ) ||
+                c.tags.any(
+                  (t) => t.toLowerCase().contains(category.toLowerCase()),
+                ),
+          )
           .take(8)
           .toList();
+      // Fallback: if category filter yields nothing, use top personalized picks
+      if (related.isEmpty) {
+        related = all.where((c) => c.id != widget.content.id).take(8).toList();
+      }
       if (mounted) setState(() => _relatedContent = related);
     } catch (_) {}
   }

@@ -45,8 +45,11 @@ class _ShortsTabState extends State<ShortsTab> {
         _hasError = false;
       });
 
-      final allContent = await ContentService.instance.getFeedContent();
-      final shorts = allContent
+      // Use personalized recommendations (genre-scored) as the primary pool,
+      // then filter to short-form content (<=3 min).
+      final allContent = await ContentService.instance
+          .getOnboardingBasedRecommendations(limit: 60);
+      var shorts = allContent
           .where(
             (content) =>
                 content.contentType == ContentType.short ||
@@ -55,6 +58,20 @@ class _ShortsTabState extends State<ShortsTab> {
                     content.durationSeconds! <= 180),
           )
           .toList();
+      // If the personalized pool has no short-form items, fall back to the
+      // full feed filtered by duration — avoids showing an empty state.
+      if (shorts.isEmpty) {
+        final fallback = await ContentService.instance.getFeedContent();
+        shorts = fallback
+            .where(
+              (content) =>
+                  content.contentType == ContentType.short ||
+                  content.contentType == ContentType.reel ||
+                  (content.durationSeconds != null &&
+                      content.durationSeconds! <= 180),
+            )
+            .toList();
+      }
 
       final followed = UserInteractionService.instance
           .getFollowedCreatorIds()
@@ -216,11 +233,7 @@ class _ShortsTabState extends State<ShortsTab> {
       return _buildErrorState();
     }
 
-    final itemCount = _shortsContent.isNotEmpty
-        ? _shortsContent.length
-        : _mockShortsData.length;
-
-    if (itemCount == 0) {
+    if (_shortsContent.isEmpty) {
       return _buildEmptyState();
     }
 
@@ -237,7 +250,7 @@ class _ShortsTabState extends State<ShortsTab> {
                 _currentIndex = index;
                 _scrollCount++;
               });
-              if (_shortsContent.isNotEmpty && index < _shortsContent.length) {
+              if (index < _shortsContent.length) {
                 final viewed = _shortsContent[index];
                 AnalyticsService.instance.trackUserInteraction(
                   action: 'short_viewed',
@@ -253,17 +266,12 @@ class _ShortsTabState extends State<ShortsTab> {
               }
               _checkShortsUpsell();
             },
-            itemCount: itemCount,
-            itemBuilder: (context, index) {
-              if (_shortsContent.isNotEmpty) {
-                return _buildShortItemFromContent(_shortsContent[index], index);
-              } else {
-                return _buildMockShortItem(_mockShortsData[index]);
-              }
-            },
+            itemCount: _shortsContent.length,
+            itemBuilder: (context, index) =>
+                _buildShortItemFromContent(_shortsContent[index], index),
           ),
           // Progress dots overlaid at the top
-          _buildProgressDots(itemCount),
+          _buildProgressDots(_shortsContent.length),
         ],
       ),
     );

@@ -3037,6 +3037,7 @@ class ContentService {
 
   /// Force-refresh live content (call from pull-to-refresh).
   Future<void> refreshContent() async {
+    invalidateCache(); // flush the 5-min mem-cache so callers get fresh data
     // Prefer local API, fall back to YouTube
     try {
       if (ApiContentService.instance.isAvailable) {

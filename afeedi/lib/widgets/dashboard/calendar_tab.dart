@@ -219,28 +219,20 @@ class _CalendarTabState extends State<CalendarTab>
     _loadContentForSelectedDate();
   }
 
-  final List<Map<String, dynamic>> _aiRecommendations = [
-    {
-      'id': 'ai1',
-      'title': 'Based on your interests',
-      'subtitle': 'New Flutter 3.0 Features',
-      'time': '16:00',
-      'confidence': 0.92,
-      'thumbnail': 'https://picsum.photos/60/60?random=4',
-      'educationValue': 85,
-      'entertainmentValue': 15,
-    },
-    {
-      'id': 'ai2',
-      'title': 'Trending in Tech',
-      'subtitle': 'AI Revolution 2024',
-      'time': '18:30',
-      'confidence': 0.87,
-      'thumbnail': 'https://picsum.photos/60/60?random=5',
-      'educationValue': 70,
-      'entertainmentValue': 30,
-    },
-  ];
+  /// Returns the next 2 scheduled content items across all upcoming days.
+  List<Map<String, dynamic>> get _aiRecommendations {
+    final now = DateTime.now();
+    final upcoming =
+        _scheduledContent.where((item) {
+          final date = item['date'] as DateTime?;
+          return date != null && !date.isBefore(now);
+        }).toList()..sort((a, b) {
+          final da = a['date'] as DateTime;
+          final db = b['date'] as DateTime;
+          return da.compareTo(db);
+        });
+    return upcoming.take(2).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2285,6 +2277,8 @@ class _CalendarTabState extends State<CalendarTab>
   }
 
   Widget _buildAIRecommendations() {
+    final recs = _aiRecommendations;
+    if (recs.isEmpty) return const SizedBox.shrink();
     return Container(
       margin: const EdgeInsets.all(20),
       child: Column(
@@ -2306,9 +2300,7 @@ class _CalendarTabState extends State<CalendarTab>
             ],
           ),
           const SizedBox(height: 12),
-          ...(_aiRecommendations
-              .map((rec) => _buildRecommendationCard(rec))
-              .toList()),
+          ...(recs.map((rec) => _buildRecommendationCard(rec)).toList()),
         ],
       ),
     );
@@ -2352,7 +2344,9 @@ class _CalendarTabState extends State<CalendarTab>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  recommendation['title'],
+                  recommendation['platform']?.toString() ??
+                      recommendation['category']?.toString() ??
+                      'Recommended',
                   style: TextStyle(
                     color: AppTheme.primaryPink,
                     fontSize: 12,
@@ -2360,18 +2354,20 @@ class _CalendarTabState extends State<CalendarTab>
                   ),
                 ),
                 Text(
-                  recommendation['subtitle'],
+                  recommendation['title']?.toString() ?? '',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   AppLocalizations.of(context)?.suggestedFor(
                         recommendation['time']?.toString() ?? '',
                       ) ??
-                      'Suggested for ${recommendation['time']}',
+                      'Suggested for ${recommendation['time'] ?? ''}',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
@@ -2387,7 +2383,9 @@ class _CalendarTabState extends State<CalendarTab>
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              '${(recommendation['confidence'] * 100).toInt()}%',
+              recommendation['educationValue'] != null
+                  ? '${(((recommendation['educationValue'] as num) + 50) / 1.5).toInt()}%'
+                  : '${((recommendation['confidence'] ?? 0.9) * 100).toInt()}%',
               style: TextStyle(
                 color: AppTheme.primaryPink,
                 fontSize: 10,

@@ -1291,7 +1291,10 @@ class _CalendarChatScreenState extends State<CalendarChatScreen>
         12,
         8,
         12,
-        MediaQuery.of(context).padding.bottom + 8,
+        (MediaQuery.of(context).viewInsets.bottom > 0
+                ? MediaQuery.of(context).viewInsets.bottom
+                : MediaQuery.of(context).padding.bottom) +
+            8,
       ),
       decoration: BoxDecoration(
         color: _card,

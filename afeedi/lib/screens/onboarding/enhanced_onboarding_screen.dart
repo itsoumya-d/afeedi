@@ -186,6 +186,19 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
       }
     }
 
+    // Validate language step: require a selection before advancing
+    if (currentStepId == 'language') {
+      if (_userPreferences.language == null ||
+          _userPreferences.language!.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select your preferred content language.'),
+          ),
+        );
+        return;
+      }
+    }
+
     _saveCurrentStepData();
 
     _slideController.forward().then((_) {
@@ -449,197 +462,230 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Gradient background
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.primaryLight, AppColors.primaryDark],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        if (_currentPageIndex > 0) {
+          _previousPage();
+        } else {
+          final leave = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Leave setup?'),
+              content: const Text(
+                'Your progress will be lost. You can always set up later.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(false),
+                  child: const Text('Stay'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(true),
+                  child: const Text('Leave'),
+                ),
+              ],
+            ),
+          );
+          if (leave == true && mounted) Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        body: Stack(
+          children: [
+            // Gradient background
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.primaryLight, AppColors.primaryDark],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
               ),
             ),
-          ),
 
-          // Main content
-          SafeArea(
-            child: Column(
-              children: [
-                // Progress indicator and skip button
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            LinearProgressIndicator(
-                              value: (_currentPageIndex + 1) / _flow.length,
-                              backgroundColor: Colors.white.withValues(
-                                alpha: 0.3,
+            // Main content
+            SafeArea(
+              child: Column(
+                children: [
+                  // Progress indicator and skip button
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              LinearProgressIndicator(
+                                value: (_currentPageIndex + 1) / _flow.length,
+                                backgroundColor: Colors.white.withValues(
+                                  alpha: 0.3,
+                                ),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                Colors.white,
+                              const SizedBox(height: 4),
+                              Text(
+                                'Step ${_currentPageIndex + 1} of ${_flow.length}',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Step ${_currentPageIndex + 1} of ${_flow.length}',
-                              style: const TextStyle(
+                            ],
+                          ),
+                        ),
+                        if (_currentPageIndex < _flow.length / 2)
+                          TextButton(
+                            onPressed: _skipOnboarding,
+                            child: const Text(
+                              'Skip',
+                              style: TextStyle(
                                 color: Colors.white70,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                      if (_currentPageIndex < _flow.length / 2)
-                        TextButton(
-                          onPressed: _skipOnboarding,
-                          child: const Text(
-                            'Skip',
-                            style: TextStyle(
+                          ),
+                      ],
+                    ),
+                  ),
+
+                  // Page content
+                  Expanded(
+                    child: PageView.builder(
+                      controller: _pageController,
+                      physics: const NeverScrollableScrollPhysics(),
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentPageIndex = index;
+                          _isLastStep = index == _flow.length - 1;
+                        });
+                        HapticFeedback.lightImpact();
+                      },
+                      itemCount: _flow.length,
+                      itemBuilder: (context, index) {
+                        final step = _flow[index];
+
+                        return SlideTransition(
+                          position:
+                              Tween<Offset>(
+                                begin: const Offset(0.05, 0),
+                                end: Offset.zero,
+                              ).animate(
+                                CurvedAnimation(
+                                  parent: _slideController,
+                                  curve: Curves.easeOut,
+                                ),
+                              ),
+                          child: FadeTransition(
+                            opacity: Tween<double>(begin: 0.8, end: 1.0)
+                                .animate(
+                                  CurvedAnimation(
+                                    parent: _animationController,
+                                    curve: Curves.easeOut,
+                                  ),
+                                ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                              ),
+                              child: _buildStepContent(step, index),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  // Navigation buttons
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 20,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (_currentPageIndex > 0)
+                          IconButton(
+                            onPressed: _previousPage,
+                            icon: const Icon(
+                              Icons.arrow_back_rounded,
                               color: Colors.white70,
-                              fontWeight: FontWeight.w500,
+                              size: 28,
+                            ),
+                          )
+                        else
+                          const SizedBox(width: 48),
+
+                        // Next/Finish button
+                        ElevatedButton(
+                          onPressed: _isLoading ? null : _nextPage,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: AppColors.primary,
+                            minimumSize: const Size(160, 50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25),
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                ),
-
-                // Page content
-                Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    onPageChanged: (index) {
-                      setState(() {
-                        _currentPageIndex = index;
-                        _isLastStep = index == _flow.length - 1;
-                      });
-                      HapticFeedback.lightImpact();
-                    },
-                    itemCount: _flow.length,
-                    itemBuilder: (context, index) {
-                      final step = _flow[index];
-
-                      return SlideTransition(
-                        position:
-                            Tween<Offset>(
-                              begin: const Offset(0.05, 0),
-                              end: Offset.zero,
-                            ).animate(
-                              CurvedAnimation(
-                                parent: _slideController,
-                                curve: Curves.easeOut,
-                              ),
-                            ),
-                        child: FadeTransition(
-                          opacity: Tween<double>(begin: 0.8, end: 1.0).animate(
-                            CurvedAnimation(
-                              parent: _animationController,
-                              curve: Curves.easeOut,
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: _buildStepContent(step, index),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                // Navigation buttons
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 20,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      if (_currentPageIndex > 0)
-                        IconButton(
-                          onPressed: _previousPage,
-                          icon: const Icon(
-                            Icons.arrow_back_rounded,
-                            color: Colors.white70,
-                            size: 28,
-                          ),
-                        )
-                      else
-                        const SizedBox(width: 48),
-
-                      // Next/Finish button
-                      ElevatedButton(
-                        onPressed: _isLoading ? null : _nextPage,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: AppColors.primary,
-                          minimumSize: const Size(160, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: AppColors.primary,
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primary,
+                                  ),
+                                )
+                              : Text(
+                                  _isLastStep ? 'Finish' : 'Next',
+                                  style: AppTextStyles.buttonMedium.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              )
-                            : Text(
-                                _isLastStep ? 'Finish' : 'Next',
-                                style: AppTextStyles.buttonMedium.copyWith(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          // Confetti effect for completion
-          Align(
-            alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirection: pi / 2,
-              maxBlastForce: 5,
-              minBlastForce: 1,
-              emissionFrequency: 0.05,
-              numberOfParticles: 50,
-              gravity: 0.1,
-              colors: const [
-                Colors.green,
-                Colors.blue,
-                Colors.pink,
-                Colors.orange,
-                Colors.purple,
-                Colors.red,
-              ],
+            // Confetti effect for completion
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: pi / 2,
+                maxBlastForce: 5,
+                minBlastForce: 1,
+                emissionFrequency: 0.05,
+                numberOfParticles: 50,
+                gravity: 0.1,
+                colors: const [
+                  Colors.green,
+                  Colors.blue,
+                  Colors.pink,
+                  Colors.orange,
+                  Colors.purple,
+                  Colors.red,
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      ), // end child: Scaffold
+    ); // end PopScope
   }
 
   Widget _buildStepContent(Map<String, dynamic> step, int index) {
@@ -853,6 +899,7 @@ class _EnhancedOnboardingScreenState extends State<EnhancedOnboardingScreen>
         children: [
           TextFormField(
             controller: _nameController,
+            maxLength: 50,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               labelText: 'Name',

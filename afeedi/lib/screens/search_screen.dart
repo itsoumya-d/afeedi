@@ -888,16 +888,39 @@ class _SearchScreenState extends State<SearchScreen>
     }
   }
 
-  static const List<String> _trendingSearchTerms = [
-    'Flutter',
-    'AI Tutorial',
-    'Minecraft',
-    'Comedy',
-    'Cooking',
-    'Fitness',
-    'Music',
-    'Tech Review',
-  ];
+  /// Derives trending search terms from the real trending content list.
+  /// Falls back to genre names if _trendingContent is not yet loaded.
+  List<String> get _trendingSearchTerms {
+    if (_trendingContent.isNotEmpty) {
+      // Collect unique tags/categories from trending items, keep top 8
+      final seen = <String>{};
+      final terms = <String>[];
+      for (final c in _trendingContent) {
+        for (final tag in [...c.categories, ...c.tags]) {
+          final label = tag.isEmpty
+              ? ''
+              : '${tag[0].toUpperCase()}${tag.substring(1)}';
+          if (label.isNotEmpty && seen.add(label)) {
+            terms.add(label);
+            if (terms.length >= 8) break;
+          }
+        }
+        if (terms.length >= 8) break;
+      }
+      if (terms.isNotEmpty) return terms;
+    }
+    // Fallback before trending data loads
+    return [
+      'Gaming',
+      'Tech',
+      'Music',
+      'Fitness',
+      'Comedy',
+      'Science',
+      'Food',
+      'Sports',
+    ];
+  }
 
   Widget _buildTrendingChips() {
     return Column(

@@ -20,8 +20,10 @@ void main() {
       expect(SubscriptionIds.yearlyPrice, 39.99);
       expect(SubscriptionIds.trialDays, 7);
       // Yearly monthly equivalent should be cheaper than monthly
-      expect(SubscriptionIds.yearlyMonthlyEquivalent,
-          lessThan(SubscriptionIds.monthlyPrice));
+      expect(
+        SubscriptionIds.yearlyMonthlyEquivalent,
+        lessThan(SubscriptionIds.monthlyPrice),
+      );
     });
   });
 
@@ -71,12 +73,16 @@ void main() {
   });
 
   group('SubscriptionService — paywall triggers', () {
-    test('shouldShowProactivePaywall returns false for premium users', () async {
-      await SubscriptionService.instance.debugSetPremium(true);
-      final show = await SubscriptionService.instance.shouldShowProactivePaywall();
-      expect(show, false);
-      await SubscriptionService.instance.debugSetPremium(false);
-    });
+    test(
+      'shouldShowProactivePaywall returns false for premium users',
+      () async {
+        await SubscriptionService.instance.debugSetPremium(true);
+        final show = await SubscriptionService.instance
+            .shouldShowProactivePaywall();
+        expect(show, false);
+        await SubscriptionService.instance.debugSetPremium(false);
+      },
+    );
 
     test('shouldGateBookmarks returns false for premium users', () async {
       await SubscriptionService.instance.debugSetPremium(true);
@@ -87,18 +93,87 @@ void main() {
 
     test('shouldShowShortsUpsell returns false for premium users', () async {
       await SubscriptionService.instance.debugSetPremium(true);
-      final show = await SubscriptionService.instance.shouldShowShortsUpsell(20);
+      final show = await SubscriptionService.instance.shouldShowShortsUpsell(
+        20,
+      );
       expect(show, false);
       await SubscriptionService.instance.debugSetPremium(false);
     });
 
-    test('shouldShowShortsUpsell triggers every 20 scrolls for free users', () async {
-      expect(await SubscriptionService.instance.shouldShowShortsUpsell(0), false);
-      expect(await SubscriptionService.instance.shouldShowShortsUpsell(19), false);
-      expect(await SubscriptionService.instance.shouldShowShortsUpsell(20), true);
-      expect(await SubscriptionService.instance.shouldShowShortsUpsell(21), false);
-      expect(await SubscriptionService.instance.shouldShowShortsUpsell(40), true);
-      expect(await SubscriptionService.instance.shouldShowShortsUpsell(60), true);
+    test(
+      'shouldShowShortsUpsell triggers every 20 scrolls for free users',
+      () async {
+        expect(
+          await SubscriptionService.instance.shouldShowShortsUpsell(0),
+          false,
+        );
+        expect(
+          await SubscriptionService.instance.shouldShowShortsUpsell(19),
+          false,
+        );
+        expect(
+          await SubscriptionService.instance.shouldShowShortsUpsell(20),
+          true,
+        );
+        expect(
+          await SubscriptionService.instance.shouldShowShortsUpsell(21),
+          false,
+        );
+        expect(
+          await SubscriptionService.instance.shouldShowShortsUpsell(40),
+          true,
+        );
+        expect(
+          await SubscriptionService.instance.shouldShowShortsUpsell(60),
+          true,
+        );
+      },
+    );
+
+    test(
+      'shouldShowProactivePaywall triggers on 3rd open for free user',
+      () async {
+        SharedPreferences.setMockInitialValues({'app_open_count': 3});
+        final show = await SubscriptionService.instance
+            .shouldShowProactivePaywall();
+        expect(show, isTrue);
+      },
+    );
+
+    test(
+      'shouldShowProactivePaywall does not trigger before 3rd open',
+      () async {
+        SharedPreferences.setMockInitialValues({'app_open_count': 2});
+        final show = await SubscriptionService.instance
+            .shouldShowProactivePaywall();
+        expect(show, isFalse);
+      },
+    );
+
+    test(
+      'shouldShowProactivePaywall triggers every 10th open after 3rd',
+      () async {
+        SharedPreferences.setMockInitialValues({
+          'app_open_count': 13,
+          'paywall_last_shown_open': 3,
+        });
+        final show = await SubscriptionService.instance
+            .shouldShowProactivePaywall();
+        expect(show, isTrue);
+      },
+    );
+
+    test('shouldGateBookmarks returns true when 10+ items saved', () async {
+      final savedKeys = {for (var i = 0; i < 10; i++) 'saved_content_$i': true};
+      SharedPreferences.setMockInitialValues(savedKeys);
+      final gate = await SubscriptionService.instance.shouldGateBookmarks();
+      expect(gate, isTrue);
+    });
+
+    test('shouldGateBookmarks returns false when under save limit', () async {
+      SharedPreferences.setMockInitialValues({'saved_item_1': true});
+      final gate = await SubscriptionService.instance.shouldGateBookmarks();
+      expect(gate, isFalse);
     });
   });
 

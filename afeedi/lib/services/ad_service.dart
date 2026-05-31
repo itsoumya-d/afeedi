@@ -86,7 +86,11 @@ class AdService {
       debugPrint('AdService: personalized ads disabled by user preference');
     }
 
-    await MobileAds.instance.initialize();
-    debugPrint('AdService: MobileAds initialized');
+    try {
+      await MobileAds.instance.initialize();
+      debugPrint('AdService: MobileAds initialized');
+    } catch (e) {
+      debugPrint('AdService: MobileAds init failed ($e) — ads will not load');
+    }
   }
 }

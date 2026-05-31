@@ -398,7 +398,7 @@ class ContentAggregationService {
       contentType: ContentType.short,
       title: 'TikTok Video ${i + 1}',
       description: 'Trending TikTok content #fyp #viral',
-      thumbnailUrl: 'https://via.placeholder.com/300x400/000000/FFFFFF?text=TikTok',
+      thumbnailUrl: null,
       videoUrl: 'https://www.tiktok.com/@user/video/fallback_$i',
       durationSeconds: 30,
       viewCount: 10000 + (i * 1000),

@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme/app_theme.dart';
 import '../services/streak_service.dart';
 import '../services/local_auth_service.dart';
+import '../core/storage/local_storage_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -19,88 +20,15 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     'name': 'Afeedi User',
     'email': 'user@afeedi.com',
     'joinDate': 'Today',
-    'avatar': 'https://picsum.photos/120/120?random=user',
     'isPremium': false,
     'level': 1,
     'totalWatchTime': '0 hours',
     'videosWatched': 0,
     'streakDays': 0,
   };
-  
-  final List<Map<String, dynamic>> _achievements = [
-    {
-      'id': 'early_bird',
-      'title': 'Early Bird',
-      'description': 'Watch 10 videos before 9 AM',
-      'icon': Icons.wb_sunny,
-      'color': Color(0xFFFFE66D),
-      'unlocked': true,
-      'progress': 1.0,
-    },
-    {
-      'id': 'binge_watcher',
-      'title': 'Binge Watcher',
-      'description': 'Watch 5 hours in a single day',
-      'icon': Icons.play_circle_filled,
-      'color': Color(0xFFFF6B6B),
-      'unlocked': true,
-      'progress': 1.0,
-    },
-    {
-      'id': 'explorer',
-      'title': 'Content Explorer',
-      'description': 'Watch videos from all 4 platforms',
-      'icon': Icons.explore,
-      'color': Color(0xFF4ECDC4),
-      'unlocked': false,
-      'progress': 0.75,
-    },
-    {
-      'id': 'streak_master',
-      'title': 'Streak Master',
-      'description': 'Maintain a 30-day viewing streak',
-      'icon': Icons.local_fire_department,
-      'color': Color(0xFFFF8A65),
-      'unlocked': false,
-      'progress': 0.93,
-    },
-  ];
-  
-  final List<Map<String, dynamic>> _viewingHistory = [
-    {
-      'id': '1',
-      'title': 'Flutter State Management Deep Dive',
-      'creator': 'CodeMaster',
-      'platform': 'YouTube',
-      'thumbnail': 'https://picsum.photos/120/80?random=1',
-      'watchedAt': '2 hours ago',
-      'duration': '45:30',
-      'watchedDuration': '45:30',
-      'completed': true,
-    },
-    {
-      'id': '2',
-      'title': 'Amazing Travel Vlog - Japan',
-      'creator': 'TravelBuddy',
-      'platform': 'Instagram',
-      'thumbnail': 'https://picsum.photos/120/80?random=2',
-      'watchedAt': '1 day ago',
-      'duration': '12:15',
-      'watchedDuration': '8:30',
-      'completed': false,
-    },
-    {
-      'id': '3',
-      'title': 'Quick Cooking Tips',
-      'creator': 'ChefLife',
-      'platform': 'TikTok',
-      'thumbnail': 'https://picsum.photos/120/80?random=3',
-      'watchedAt': '2 days ago',
-      'duration': '1:30',
-      'watchedDuration': '1:30',
-      'completed': true,
-    },
-  ];
+
+  List<Map<String, dynamic>> _achievements = [];
+  List<Map<String, dynamic>> _viewingHistory = [];
 
   @override
   void initState() {
@@ -111,9 +39,11 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
 
   Future<void> _loadRealData() async {
     final streak = StreakService.instance.getCurrentStreak();
-    await StreakService.instance.getLongestStreak();
+    final longest = await StreakService.instance.getLongestStreak();
     final user = LocalAuthService.instance.currentUser;
     final prefs = await SharedPreferences.getInstance();
+
+    // Join date
     final completedAt = prefs.getString('onboarding_completed_at');
     String joinDate = 'Today';
     if (completedAt != null) {
@@ -122,11 +52,65 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         joinDate = '${_monthName(dt.month)} ${dt.day}, ${dt.year}';
       }
     }
+
+    // Viewing history from local storage
+    List<Map<String, dynamic>> history = [];
+    if (user != null) {
+      try {
+        final interactions = await LocalStorageService.instance.getContentInteractions(user.id ?? '');
+        history = interactions.take(20).toList();
+      } catch (_) {}
+    }
+
+    // Achievements with real streak progress
+    final streakProgress = (streak / 30.0).clamp(0.0, 1.0);
+    final achievements = [
+      {
+        'id': 'first_video',
+        'title': 'First Watch',
+        'description': 'Watch your first video',
+        'icon': Icons.play_circle_filled,
+        'color': const Color(0xFFFFE66D),
+        'unlocked': history.isNotEmpty,
+        'progress': history.isNotEmpty ? 1.0 : 0.0,
+      },
+      {
+        'id': 'streak_starter',
+        'title': 'Streak Starter',
+        'description': 'Maintain a 3-day viewing streak',
+        'icon': Icons.local_fire_department,
+        'color': const Color(0xFFFF8A65),
+        'unlocked': streak >= 3,
+        'progress': (streak / 3.0).clamp(0.0, 1.0),
+      },
+      {
+        'id': 'explorer',
+        'title': 'Content Explorer',
+        'description': 'Watch 10 videos',
+        'icon': Icons.explore,
+        'color': const Color(0xFF4ECDC4),
+        'unlocked': history.length >= 10,
+        'progress': (history.length / 10.0).clamp(0.0, 1.0),
+      },
+      {
+        'id': 'streak_master',
+        'title': 'Streak Master',
+        'description': 'Maintain a 30-day viewing streak',
+        'icon': Icons.emoji_events,
+        'color': const Color(0xFFFF6B6B),
+        'unlocked': streak >= 30,
+        'progress': streakProgress,
+      },
+    ];
+
     if (mounted) {
       setState(() {
         _currentStreak = streak;
         _userProfile['streakDays'] = streak;
         _userProfile['joinDate'] = joinDate;
+        _userProfile['videosWatched'] = history.length;
+        _achievements = achievements;
+        _viewingHistory = history;
         if (user != null) {
           final emailName = user.email?.split('@').first ?? 'User';
           _userProfile['name'] = emailName[0].toUpperCase() + emailName.substring(1);
@@ -233,13 +217,26 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 height: 120,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppTheme.primaryCyan,
-                    width: 3,
+                  border: Border.all(color: AppTheme.primaryCyan, width: 3),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppTheme.primaryCyan.withOpacity(0.6),
+                      AppTheme.primaryPink.withOpacity(0.6),
+                    ],
                   ),
-                  image: DecorationImage(
-                    image: NetworkImage(_userProfile['avatar']),
-                    fit: BoxFit.cover,
+                ),
+                child: Center(
+                  child: Text(
+                    (_userProfile['name'] as String).isNotEmpty
+                        ? (_userProfile['name'] as String)[0].toUpperCase()
+                        : 'A',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -437,6 +434,13 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   }
   
   Widget _buildAchievementsTab() {
+    if (_achievements.isEmpty) {
+      return Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryCyan),
+        ),
+      );
+    }
     return Container(
       padding: const EdgeInsets.all(20),
       child: GridView.builder(
@@ -576,24 +580,58 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             ],
           ),
           const SizedBox(height: 16),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _viewingHistory.length,
-              itemBuilder: (context, index) {
-                final item = _viewingHistory[index];
-                return _buildHistoryItem(item);
-              },
+          if (_viewingHistory.isEmpty)
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.history, color: Colors.white.withOpacity(0.3), size: 64),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No watch history yet',
+                      style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Videos you watch will appear here',
+                      style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            Expanded(
+              child: ListView.builder(
+                itemCount: _viewingHistory.length,
+                itemBuilder: (context, index) {
+                  final item = _viewingHistory[index];
+                  return _buildHistoryItem(item);
+                },
+              ),
             ),
-          ),
         ],
       ),
     );
   }
   
+  Widget _buildThumbnailPlaceholder() {
+    return Container(
+      width: 80,
+      height: 60,
+      decoration: BoxDecoration(
+        color: AppTheme.primaryCyan.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Icon(Icons.play_circle_outline, color: AppTheme.primaryCyan.withOpacity(0.5), size: 28),
+    );
+  }
+
   Widget _buildHistoryItem(Map<String, dynamic> item) {
-    final completed = item['completed'];
-    final watchedDuration = item['watchedDuration'];
-    final totalDuration = item['duration'];
+    final completed = item['completed'] as bool? ?? false;
+    final watchedDuration = item['watchedDuration'] as String? ?? '';
+    final totalDuration = item['duration'] as String? ?? '';
     
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -609,12 +647,15 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  item['thumbnail'],
-                  width: 80,
-                  height: 60,
-                  fit: BoxFit.cover,
-                ),
+                child: item['thumbnail'] != null
+                    ? Image.network(
+                        item['thumbnail'],
+                        width: 80,
+                        height: 60,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _buildThumbnailPlaceholder(),
+                      )
+                    : _buildThumbnailPlaceholder(),
               ),
               if (completed)
                 Positioned(

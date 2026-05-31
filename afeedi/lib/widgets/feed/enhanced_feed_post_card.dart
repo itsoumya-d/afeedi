@@ -394,18 +394,22 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
 
             // Play button overlay
             Center(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.7),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  widget.content.contentType == ContentType.video
-                      ? Icons.play_arrow
-                      : Icons.play_circle_filled,
-                  color: Colors.white,
-                  size: 32,
+              child: Semantics(
+                label: 'Play ${widget.content.title ?? 'video'}',
+                button: true,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.7),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    widget.content.contentType == ContentType.video
+                        ? Icons.play_arrow
+                        : Icons.play_circle_filled,
+                    color: Colors.white,
+                    size: 32,
+                  ),
                 ),
               ),
             ),
@@ -579,6 +583,33 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                   'platform': widget.content.platform.name,
                 },
               );
+            },
+          ),
+
+          // Copy link button
+          IconButton(
+            tooltip: 'Copy link',
+            icon: const Icon(
+              Icons.link_outlined,
+              size: 20,
+              color: Colors.white70,
+            ),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            onPressed: () async {
+              final url =
+                  widget.content.videoUrl ?? widget.content.embedUrl ?? '';
+              if (url.isNotEmpty) {
+                await Clipboard.setData(ClipboardData(text: url));
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Link copied to clipboard'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
+              }
             },
           ),
 

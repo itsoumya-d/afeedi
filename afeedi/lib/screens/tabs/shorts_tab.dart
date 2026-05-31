@@ -1687,13 +1687,17 @@ class _ShortItemWrapperState extends State<_ShortItemWrapper> {
       return widget.youtubeOverlayBuilder(overlay);
     }
 
-    return GestureDetector(
-      onTap: widget.onTap,
-      onDoubleTap: widget.onDoubleTap,
-      behavior: HitTestBehavior.opaque,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [widget.thumbnailWidget, overlay],
+    return Semantics(
+      label: 'Watch ${widget.content.title ?? 'video'}',
+      button: true,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        onDoubleTap: widget.onDoubleTap,
+        behavior: HitTestBehavior.opaque,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [widget.thumbnailWidget, overlay],
+        ),
       ),
     );
   }

@@ -1384,35 +1384,43 @@ class _CalendarChatScreenState extends State<CalendarChatScreen>
                 color: Colors.white.withValues(alpha: 0.07),
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: TextField(
-                controller: _input,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-                decoration: const InputDecoration(
-                  hintText: 'Schedule, find, or ask anything…',
-                  hintStyle: TextStyle(color: Colors.white38, fontSize: 13),
-                  border: InputBorder.none,
-                  isDense: true,
+              child: Semantics(
+                label: 'Type your message',
+                textField: true,
+                child: TextField(
+                  controller: _input,
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  decoration: const InputDecoration(
+                    hintText: 'Schedule, find, or ask anything…',
+                    hintStyle: TextStyle(color: Colors.white38, fontSize: 13),
+                    border: InputBorder.none,
+                    isDense: true,
+                  ),
+                  onSubmitted: (_) => _handleSend(),
+                  textInputAction: TextInputAction.send,
                 ),
-                onSubmitted: (_) => _handleSend(),
-                textInputAction: TextInputAction.send,
               ),
             ),
           ),
           const SizedBox(width: 8),
-          GestureDetector(
-            onTap: _handleSend,
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [_cyan, _purple],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+          Semantics(
+            label: 'Send message',
+            button: true,
+            child: GestureDetector(
+              onTap: _handleSend,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [_cyan, _purple],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  shape: BoxShape.circle,
                 ),
-                shape: BoxShape.circle,
+                child: const Icon(Icons.send, color: Colors.white, size: 18),
               ),
-              child: const Icon(Icons.send, color: Colors.white, size: 18),
             ),
           ),
         ],

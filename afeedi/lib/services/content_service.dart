@@ -3348,6 +3348,29 @@ class ContentService {
     }
   }
 
+  /// Returns the last successfully fetched feed items from disk cache,
+  /// or an empty list if no cache exists or it has expired (>24 h).
+  Future<List<Content>> getOfflineFeedContent() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final ts = prefs.getInt('${_feedCacheKey}_ts') ?? 0;
+      final age = DateTime.now().millisecondsSinceEpoch - ts;
+      if (age > const Duration(hours: 24).inMilliseconds) return [];
+      final ids = prefs.getStringList(_feedCacheKey) ?? [];
+      final items = ids
+          .map(
+            (id) => _allContent.firstWhere(
+              (c) => c.id == id,
+              orElse: () => _allContent.first,
+            ),
+          )
+          .toList();
+      return items;
+    } catch (_) {
+      return [];
+    }
+  }
+
   Future<List<Content>> loadMoreContent(int offset, {int limit = 10}) async {
     List<Content> allContent = List.from(_allContent);
     List<Content> moreContent = [];

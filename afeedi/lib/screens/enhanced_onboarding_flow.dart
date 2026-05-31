@@ -16,6 +16,13 @@ import '../widgets/onboarding/platform_selection_widget.dart';
 import '../widgets/onboarding/viewing_habits_widget.dart';
 import '../widgets/onboarding/personalization_settings_widget.dart';
 
+// Dark theme color constants used throughout the onboarding flow
+const Color _kDarkBase = Color(0xFF1A0A3E);
+const Color _kDarkDeep = Color(0xFF0A1628);
+const Color _kDarkAccent = Color(0xFF2D1B69);
+const Color _kDarkMid = Color(0xFF1A2F4A);
+const Color _kCyan = Color(0xFF00E5FF);
+
 class EnhancedOnboardingFlow extends StatefulWidget {
   final Function() onComplete;
 
@@ -25,32 +32,33 @@ class EnhancedOnboardingFlow extends StatefulWidget {
   State<EnhancedOnboardingFlow> createState() => _EnhancedOnboardingFlowState();
 }
 
-class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with SingleTickerProviderStateMixin {
+class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow>
+    with SingleTickerProviderStateMixin {
   final OnboardingService _onboardingService = OnboardingService.instance;
   final AnalyticsService _analyticsService = AnalyticsService.instance;
   final UserService _userService = UserService.instance;
-  
+
   late PageController _pageController;
   late ConfettiController _confettiController;
   late AnimationController _backgroundAnimationController;
   late Animation<Color?> _backgroundColorAnimation;
-  
+
   int _currentStep = 0;
   bool _isLastStep = false;
   UserPreferences _userPreferences = UserPreferences();
   bool _isLoading = false;
-  
-  // Background gradient colors for different steps
+
+  // Dark-themed background gradient colors for each step
   final List<List<Color>> _backgroundColors = [
-    [Colors.blue.shade100, Colors.blue.shade50],
-    [Colors.purple.shade100, Colors.purple.shade50],
-    [Colors.amber.shade100, Colors.amber.shade50],
-    [Colors.green.shade100, Colors.green.shade50],
-    [Colors.orange.shade100, Colors.orange.shade50],
-    [Colors.teal.shade100, Colors.teal.shade50],
-    [Colors.indigo.shade100, Colors.indigo.shade50],
-    [Colors.pink.shade100, Colors.pink.shade50],
-    [Colors.cyan.shade100, Colors.cyan.shade50],
+    [const Color(0xFF1A0A3E), const Color(0xFF2D1B69)],
+    [const Color(0xFF0D1B2A), const Color(0xFF1A2F4A)],
+    [const Color(0xFF1A0A3E), const Color(0xFF3D1A6E)],
+    [const Color(0xFF0A1628), const Color(0xFF1A2A4E)],
+    [const Color(0xFF1A0A3E), const Color(0xFF2D1B69)],
+    [const Color(0xFF0D1B2A), const Color(0xFF1A3A5C)],
+    [const Color(0xFF1A0A3E), const Color(0xFF3D1A6E)],
+    [const Color(0xFF0A1628), const Color(0xFF1A2A4E)],
+    [const Color(0xFF1A0A3E), const Color(0xFF2D1B69)],
   ];
 
   @override
@@ -62,12 +70,12 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-    
+
     _backgroundColorAnimation = ColorTween(
       begin: _backgroundColors[0][0],
       end: _backgroundColors[0][0],
     ).animate(_backgroundAnimationController);
-    
+
     _loadUserPreferences();
     _trackOnboardingStarted();
   }
@@ -76,9 +84,8 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
-      // Load existing preferences if available
       final preferences = await _onboardingService.getCurrentPreferences();
       if (preferences != null) {
         setState(() {
@@ -95,9 +102,13 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
   }
 
   void _trackOnboardingStarted() {
-    _analyticsService.trackEvent(eventName: 'onboarding_started', eventType: 'onboarding', additionalData: {
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    _analyticsService.trackEvent(
+      eventName: 'onboarding_started',
+      eventType: 'onboarding',
+      additionalData: {
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
   }
 
   void _updateBackgroundColor(int stepIndex) {
@@ -142,40 +153,42 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
 
   void _trackStepCompleted(int stepIndex) {
     final stepKey = OnboardingService.onboardingFlow[stepIndex]['id'];
-    _analyticsService.trackEvent(eventName: 'onboarding_step_completed', eventType: 'onboarding', additionalData: {
-      'step_key': stepKey,
-      'step_index': stepIndex,
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    _analyticsService.trackEvent(
+      eventName: 'onboarding_step_completed',
+      eventType: 'onboarding',
+      additionalData: {
+        'step_key': stepKey,
+        'step_index': stepIndex,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
   }
 
   Future<void> _completeOnboarding() async {
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
-      // Save final preferences
       await _onboardingService.savePreferences(_userPreferences);
       await _onboardingService.markOnboardingComplete();
-      
-      // Track completion
-      _analyticsService.trackEvent(eventName: 'onboarding_completed', eventType: 'onboarding', additionalData: {
-        'timestamp': DateTime.now().toIso8601String(),
-        'total_steps': OnboardingService.onboardingFlow.length,
-      });
-      
-      // Celebrate completion
+
+      _analyticsService.trackEvent(
+        eventName: 'onboarding_completed',
+        eventType: 'onboarding',
+        additionalData: {
+          'timestamp': DateTime.now().toIso8601String(),
+          'total_steps': OnboardingService.onboardingFlow.length,
+        },
+      );
+
       _confettiController.play();
-      
-      // Wait for confetti animation before proceeding
+
       await Future.delayed(const Duration(seconds: 2));
-      
-      // Notify parent that onboarding is complete
+
       widget.onComplete();
     } catch (e) {
       debugPrint('Error completing onboarding: $e');
-      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error saving preferences: $e')),
       );
@@ -196,10 +209,12 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
           );
           break;
         case 'contentInterests':
-          _userPreferences = _userPreferences.copyWith(contentInterests: List<String>.from(value));
+          _userPreferences =
+              _userPreferences.copyWith(contentInterests: List<String>.from(value));
           break;
         case 'contentTypes':
-          _userPreferences = _userPreferences.copyWith(contentTypes: List<String>.from(value));
+          _userPreferences =
+              _userPreferences.copyWith(contentTypes: List<String>.from(value));
           break;
         case 'viewingHabits':
           _userPreferences = _userPreferences.copyWith(
@@ -209,7 +224,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
           );
           break;
         case 'entertainmentPreferences':
-           _userPreferences = _userPreferences.copyWith(
+          _userPreferences = _userPreferences.copyWith(
             entertainmentPreferences: {
               ...(_userPreferences.entertainmentPreferences),
               'genres': List<String>.from(value['genres']),
@@ -218,7 +233,8 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
           );
           break;
         case 'platformPreferences':
-          _userPreferences = _userPreferences.copyWith(platformPriorities: Map<String, double>.from(value));
+          _userPreferences =
+              _userPreferences.copyWith(platformPriorities: Map<String, double>.from(value));
           break;
         case 'personalizationSettings':
           _userPreferences = _userPreferences.copyWith(
@@ -243,7 +259,6 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
       }
     });
 
-    // Save preferences after each update
     _onboardingService.savePreferences(_userPreferences);
   }
 
@@ -258,10 +273,18 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Scaffold(
+        backgroundColor: _kDarkBase,
+        body: const Center(
+          child: CircularProgressIndicator(color: _kCyan),
+        ),
+      );
     }
-    
+
+    final totalSteps = OnboardingService.onboardingFlow.length;
+
     return Scaffold(
+      backgroundColor: _kDarkBase,
       body: AnimatedBuilder(
         animation: _backgroundAnimationController,
         builder: (context, child) {
@@ -295,70 +318,61 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                   gravity: 0.2,
                 ),
               ),
-              
+
               // Main content
               Column(
                 children: [
-                  // Progress indicator and step counter
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back),
-                          onPressed: _currentStep > 0 ? _previousStep : null,
-                          color: _currentStep > 0 ? Colors.black87 : Colors.grey.withOpacity(0.5),
-                        ),
-                        Expanded(
-                          child: LinearProgressIndicator(
-                            value: (_currentStep + 1) / OnboardingService.onboardingFlow.length,
-                            backgroundColor: Colors.grey.withOpacity(0.3),
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                            minHeight: 8,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Text(
-                          '${_currentStep + 1}/${OnboardingService.onboardingFlow.length}',
-                          style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
-                  
+                  // Progress bar at the top
+                  _buildProgressHeader(totalSteps),
+
                   // Page content
                   Expanded(
                     child: PageView.builder(
                       controller: _pageController,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: OnboardingService.onboardingFlow.length,
+                      itemCount: totalSteps,
                       itemBuilder: (context, index) {
                         final step = OnboardingService.onboardingFlow[index];
+                        final stepId = step['id'] as String;
+                        final stepTitle = step['title'] as String;
+                        final isCompletionStep = stepId == 'complete';
+
                         return SingleChildScrollView(
                           child: Padding(
-                            padding: const EdgeInsets.all(24.0),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24.0, vertical: 16.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 // Step title
                                 Text(
-                                  step.stepTitle ?? 'Step ${index + 1}',
-                                  style: AppTextStyles.heading2,
-                                ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
-                                
+                                  stepTitle,
+                                  style: AppTextStyles.heading2.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                                    .animate()
+                                    .fadeIn(duration: 400.ms)
+                                    .slideY(begin: 0.1, end: 0),
+
                                 const SizedBox(height: 8),
-                                
+
                                 // Step description
                                 Text(
-                                  step.stepDescription ?? step.botMessage,
-                                  style: AppTextStyles.bodyMedium.copyWith(color: Colors.black87),
-                                ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideY(begin: 0.1, end: 0),
-                                
+                                  _stepDescription(stepId),
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    color: Colors.white.withOpacity(0.8),
+                                  ),
+                                )
+                                    .animate()
+                                    .fadeIn(duration: 400.ms, delay: 100.ms)
+                                    .slideY(begin: 0.1, end: 0),
+
                                 const SizedBox(height: 32),
-                                
+
                                 // Step content
-                                _buildStepContent(step),
+                                _buildStepContent(stepId),
                               ],
                             ),
                           ),
@@ -366,33 +380,9 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                       },
                     ),
                   ),
-                  
-                  // Navigation buttons
-                  Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: _nextStep,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Text(
-                              _isLastStep ? 'Complete' : 'Continue',
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+
+                  // Bottom navigation area
+                  _buildBottomNavigation(),
                 ],
               ),
             ],
@@ -402,84 +392,187 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
     );
   }
 
-  Widget _buildStepContent(OnboardingStep step) {
-    switch (step.key) {
+  /// Thin progress bar header with back button and step counter.
+  Widget _buildProgressHeader(int totalSteps) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8.0, 8.0, 16.0, 0.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: _currentStep > 0 ? _previousStep : null,
+                color: _currentStep > 0 ? Colors.white : Colors.white.withOpacity(0.3),
+              ),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: (_currentStep + 1) / totalSteps,
+                    backgroundColor: Colors.white.withOpacity(0.15),
+                    valueColor: const AlwaysStoppedAnimation<Color>(_kCyan),
+                    minHeight: 6,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '${_currentStep + 1}/$totalSteps',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: Colors.white.withOpacity(0.8),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Bottom navigation: primary CTA + optional skip link.
+  Widget _buildBottomNavigation() {
+    final totalSteps = OnboardingService.onboardingFlow.length;
+    final currentStepId =
+        OnboardingService.onboardingFlow[_currentStep]['id'] as String;
+    final isCompletionStep = currentStepId == 'complete';
+    // Show skip on all non-completion steps except step 0 (has guest button instead)
+    final showSkip = !isCompletionStep && _currentStep > 0;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24.0, 8.0, 24.0, 24.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Primary CTA button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _nextStep,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _kCyan,
+                foregroundColor: const Color(0xFF1A0A3E),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                isCompletionStep ? 'Start Exploring' : 'Continue',
+                style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5),
+              ),
+            ),
+          ),
+
+          // Skip option for optional steps (steps 1 through second-to-last)
+          if (showSkip)
+            TextButton(
+              onPressed: _nextStep,
+              child: Text(
+                'Skip this step',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.5),
+                  fontSize: 14,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  String _stepDescription(String stepId) {
+    switch (stepId) {
       case 'welcome':
-        return _buildWelcomeStep();
-      case 'personal_info':
-        return _buildPersonalInfoStep();
-      case 'content_interests':
-        return InterestSelectionGrid(
-          selectedInterests: _userPreferences.contentInterests ?? [],
-          onInterestsChanged: (interests) => _updateUserPreferences('contentInterests', interests),
-        );
-      case 'content_types':
-        return ContentTypeSelection(
-          selectedContentTypes: _userPreferences.contentTypes ?? [],
-          onContentTypesChanged: (types) => _updateUserPreferences('contentTypes', types),
-        );
-      case 'entertainment_preferences':
-        return _buildEntertainmentPreferencesStep();
-      case 'viewing_habits':
-        return ViewingHabitsWidget(
-          viewingHabits: _userPreferences.viewingHabits ?? {},
-          onViewingHabitsChanged: (habits) => _updateUserPreferences('viewingHabits', habits),
-        );
-      case 'platform_preferences':
-        return PlatformSelectionWidget(
-          platformPriorities: _userPreferences.platformPriorities ?? {},
-          onPlatformPrioritiesChanged: (prefs) => _updateUserPreferences('platformPreferences', prefs),
-        );
-      case 'personalization_settings':
-        return PersonalizationSettingsWidget(
-          personalizationSettings: _userPreferences.personalizationSettings ?? {},
-          onPersonalizationSettingsChanged: (settings) => 
-              _updateUserPreferences('personalizationSettings', settings),
-        );
-      case 'calendar_integration':
-        return _buildCalendarIntegrationStep();
-      case 'welcome':
-        return _buildWelcomeStep();
+        return 'Let\'s get started on your personalized content journey!';
+      case 'genres':
+        return 'Tell us what kind of content you love!';
+      case 'platforms':
+        return 'Link your accounts for better recommendations.';
+      case 'profile':
+        return 'Tell us a bit about yourself.';
+      case 'complete':
+        return 'Your personalized feed is ready.';
       default:
-        return const Center(child: Text('Step content not implemented'));
+        return '';
     }
   }
+
+  Widget _buildStepContent(String stepId) {
+    switch (stepId) {
+      case 'welcome':
+        return _buildWelcomeStep();
+      case 'genres':
+        return InterestSelectionGrid(
+          selectedInterests: _userPreferences.contentInterests,
+          onInterestsChanged: (interests) =>
+              _updateUserPreferences('contentInterests', interests),
+        );
+      case 'platforms':
+        return PlatformSelectionWidget(
+          platformPriorities: _userPreferences.platformPriorities,
+          onPlatformPrioritiesChanged: (prefs) =>
+              _updateUserPreferences('platformPreferences', prefs),
+        );
+      case 'profile':
+        return _buildPersonalInfoStep();
+      case 'complete':
+        return _buildCompletionStep();
+      default:
+        return Center(
+          child: Text(
+            'Step content not implemented',
+            style: TextStyle(color: Colors.white.withOpacity(0.7)),
+          ),
+        );
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Step builders
+  // ---------------------------------------------------------------------------
 
   Widget _buildWelcomeStep() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const SizedBox(height: 20),
+        const SizedBox(height: 12),
         Icon(
-          Icons.celebration,
-          size: 80,
-          color: AppColors.primary,
+          Icons.play_circle_fill,
+          size: 88,
+          color: _kCyan,
         ).animate().scale(duration: 600.ms, curve: Curves.elasticOut),
-        const SizedBox(height: 32),
+        const SizedBox(height: 28),
         Text(
           'Welcome to Afeedi!',
-          style: AppTextStyles.heading2.copyWith(fontSize: 28),
+          style: AppTextStyles.heading2.copyWith(
+            fontSize: 28,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Text(
           'We\'re excited to help you discover content that matters to you. Let\'s personalize your experience in a few simple steps.',
-          style: AppTextStyles.bodyMedium.copyWith(fontSize: 16),
+          style: AppTextStyles.bodyMedium.copyWith(
+            fontSize: 16,
+            color: Colors.white.withOpacity(0.8),
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 32),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.7),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            color: Colors.white.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withOpacity(0.12)),
           ),
           child: Column(
             children: [
@@ -488,19 +581,31 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                 title: 'Personalized Content',
                 description: 'Discover videos tailored to your interests',
               ),
-              const Divider(),
+              Divider(color: Colors.white.withOpacity(0.12)),
               _buildFeatureItem(
                 icon: Icons.calendar_today_outlined,
                 title: 'Calendar Integration',
                 description: 'Content recommendations based on your schedule',
               ),
-              const Divider(),
+              Divider(color: Colors.white.withOpacity(0.12)),
               _buildFeatureItem(
                 icon: Icons.devices_outlined,
                 title: 'Multi-Platform Experience',
                 description: 'Seamlessly watch content from multiple platforms',
               ),
             ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        // "Skip for now" guest option
+        TextButton(
+          onPressed: widget.onComplete,
+          child: Text(
+            'Skip for now →',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.5),
+              fontSize: 14,
+            ),
           ),
         ),
       ],
@@ -519,10 +624,10 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: _kCyan.withOpacity(0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: AppColors.primary),
+            child: Icon(icon, color: _kCyan),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -531,12 +636,19 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.6),
+                    fontSize: 14,
+                  ),
                 ),
               ],
             ),
@@ -547,81 +659,128 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
   }
 
   Widget _buildPersonalInfoStep() {
-    // Initialize controllers with existing values
     final nameController = TextEditingController(
-      text: _userPreferences.personalInfo?['name'] ?? '',
+      text: _userPreferences.personalInfo['name'] ?? '',
     );
     final ageController = TextEditingController(
-      text: _userPreferences.personalInfo?['age']?.toString() ?? '',
+      text: _userPreferences.personalInfo['age']?.toString() ?? '',
     );
-    
-    // Update preferences when text changes
+
     void updatePersonalInfo() {
-      final personalInfo = _userPreferences.personalInfo ?? {};
+      final personalInfo = Map<String, dynamic>.from(_userPreferences.personalInfo);
       personalInfo['name'] = nameController.text;
-      
       final age = int.tryParse(ageController.text);
       if (age != null) {
         personalInfo['age'] = age;
       }
-      
       _updateUserPreferences('personalInfo', personalInfo);
     }
-    
+
     nameController.addListener(updatePersonalInfo);
     ageController.addListener(updatePersonalInfo);
-    
+
+    final inputDecoration = InputDecorationTheme(
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.08),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: _kCyan, width: 1.5),
+      ),
+      labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+      hintStyle: TextStyle(color: Colors.white.withOpacity(0.35)),
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Name field
-        TextField(
-          controller: nameController,
-          decoration: InputDecoration(
-            labelText: 'Name',
-            hintText: 'Enter your name',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            prefixIcon: const Icon(Icons.person_outline),
-            filled: true,
-            fillColor: Colors.white.withOpacity(0.9),
+        Theme(
+          data: Theme.of(context).copyWith(inputDecorationTheme: inputDecoration),
+          child: Column(
+            children: [
+              TextField(
+                controller: nameController,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: 'Name',
+                  hintText: 'Enter your name',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: _kCyan, width: 1.5),
+                  ),
+                  labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.35)),
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.08),
+                  prefixIcon: Icon(Icons.person_outline,
+                      color: Colors.white.withOpacity(0.6)),
+                ),
+                textCapitalization: TextCapitalization.words,
+              ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
+
+              const SizedBox(height: 16),
+
+              TextField(
+                controller: ageController,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: 'Age',
+                  hintText: 'Enter your age',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: _kCyan, width: 1.5),
+                  ),
+                  labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.35)),
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.08),
+                  prefixIcon: Icon(Icons.cake_outlined,
+                      color: Colors.white.withOpacity(0.6)),
+                ),
+                keyboardType: TextInputType.number,
+              ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideY(begin: 0.1, end: 0),
+            ],
           ),
-          textCapitalization: TextCapitalization.words,
-        ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
-        
-        const SizedBox(height: 16),
-        
-        // Age field
-        TextField(
-          controller: ageController,
-          decoration: InputDecoration(
-            labelText: 'Age',
-            hintText: 'Enter your age',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            prefixIcon: const Icon(Icons.cake_outlined),
-            filled: true,
-            fillColor: Colors.white.withOpacity(0.9),
-          ),
-          keyboardType: TextInputType.number,
-        ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideY(begin: 0.1, end: 0),
-        
+        ),
+
         const SizedBox(height: 24),
-        
+
         // Privacy note
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1),
+            color: _kCyan.withOpacity(0.08),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue.withOpacity(0.3)),
+            border: Border.all(color: _kCyan.withOpacity(0.25)),
           ),
           child: Row(
             children: [
-              Icon(Icons.privacy_tip_outlined, color: Colors.blue[700]),
+              Icon(Icons.privacy_tip_outlined, color: _kCyan.withOpacity(0.8)),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   'Your information helps us personalize your experience. We respect your privacy and never share your data with third parties.',
-                  style: TextStyle(fontSize: 14, color: Colors.blue[800]),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
                 ),
               ),
             ],
@@ -631,392 +790,167 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
     );
   }
 
-  Widget _buildEntertainmentPreferencesStep() {
-    final entertainmentPrefs = _userPreferences.entertainmentPreferences ?? {};
-    
-    // Content mood preferences
-    final List<Map<String, dynamic>> moodOptions = [
-      {'value': 'uplifting', 'label': 'Uplifting', 'icon': Icons.sentiment_very_satisfied_outlined},
-      {'value': 'relaxing', 'label': 'Relaxing', 'icon': Icons.spa_outlined},
-      {'value': 'exciting', 'label': 'Exciting', 'icon': Icons.flash_on_outlined},
-      {'value': 'informative', 'label': 'Informative', 'icon': Icons.lightbulb_outline},
-      {'value': 'challenging', 'label': 'Challenging', 'icon': Icons.psychology_outlined},
-      {'value': 'funny', 'label': 'Funny', 'icon': Icons.emoji_emotions_outlined},
-    ];
-    
-    // Initialize selected moods
-    List<String> selectedMoods = List.from(entertainmentPrefs['contentMoods'] ?? []);
-    
-    void updateMoods(List<String> moods) {
-      selectedMoods = moods;
-      final updatedPrefs = Map<String, dynamic>.from(entertainmentPrefs);
-      updatedPrefs['contentMoods'] = moods;
-      _updateUserPreferences('entertainmentPreferences', updatedPrefs);
-    }
-    
-    void toggleMood(String mood) {
-      final updatedMoods = List<String>.from(selectedMoods);
-      if (updatedMoods.contains(mood)) {
-        updatedMoods.remove(mood);
-      } else {
-        updatedMoods.add(mood);
+  Widget _buildCompletionStep() {
+    // Trigger confetti on build (first time the final step is shown)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_confettiController.state != ConfettiControllerState.playing) {
+        _confettiController.play();
       }
-      updateMoods(updatedMoods);
-    }
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'What content moods do you prefer?',
-          style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 16),
-        
-        // Mood selection grid
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 2.5,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-          ),
-          itemCount: moodOptions.length,
-          itemBuilder: (context, index) {
-            final mood = moodOptions[index];
-            final isSelected = selectedMoods.contains(mood['value']);
-            
-            return InkWell(
-              onTap: () => toggleMood(mood['value']),
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.secondary.withOpacity(0.1) : Colors.white.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSelected ? AppColors.secondary : Colors.grey.withOpacity(0.3),
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      mood['icon'],
-                      color: isSelected ? AppColors.secondary : Colors.grey[600],
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      mood['label'],
-                      style: TextStyle(
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isSelected ? AppColors.secondary : Colors.black87,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ).animate().fadeIn(duration: 300.ms, delay: (50 * index).ms).slideY(begin: 0.05, end: 0);
-          },
-        ),
-        
-        const SizedBox(height: 24),
-        
-        // Content length preference
-        Text(
-          'Preferred content length',
-          style: AppTextStyles.subtitle.copyWith(fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 16),
-        
-        // Content length slider
-        StatefulBuilder(
-          builder: (context, setState) {
-            // Content length options
-            const Map<String, String> lengthLabels = {
-              'short': 'Short',
-              'medium': 'Medium',
-              'long': 'Long',
-              'any': 'Any Length',
-            };
-            
-            final currentLength = entertainmentPrefs['contentLength'] ?? 'any';
-            
-            return Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: lengthLabels.entries.map((entry) {
-                    final isSelected = currentLength == entry.key;
-                    return InkWell(
-                      onTap: () {
-                        final updatedPrefs = Map<String, dynamic>.from(entertainmentPrefs);
-                        updatedPrefs['contentLength'] = entry.key;
-                        _updateUserPreferences('entertainmentPreferences', updatedPrefs);
-                        setState(() {});
-                      },
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isSelected ? AppColors.secondary.withOpacity(0.1) : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20),
-                          border: isSelected 
-                              ? Border.all(color: AppColors.secondary, width: 2)
-                              : null,
-                        ),
-                        child: Text(
-                          entry.value,
-                          style: TextStyle(
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            color: isSelected ? AppColors.secondary : Colors.black87,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Explanation of content length
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Content Length Guide:',
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[800]),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildLengthGuideItem('Short', '< 5 minutes'),
-                      _buildLengthGuideItem('Medium', '5-15 minutes'),
-                      _buildLengthGuideItem('Long', '> 15 minutes'),
-                      _buildLengthGuideItem('Any Length', 'No preference'),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ],
-    );
-  }
+    });
 
-  Widget _buildLengthGuideItem(String label, String description) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Text(
-            '$label: ',
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-          Text(description),
-        ],
-      ),
-    );
-  }
+    final selectedInterests = _userPreferences.contentInterests;
+    final selectedPlatforms = _userPreferences.platformPriorities.entries
+        .where((e) => e.value > 0)
+        .map((e) => e.key)
+        .toList();
 
-  Widget _buildCalendarIntegrationStep() {
-    final calendarIntegration = _userPreferences.calendarIntegration ?? {};
-    final isEnabled = calendarIntegration['enabled'] ?? false;
-    
-    void toggleCalendarIntegration(bool value) {
-      final updatedSettings = Map<String, dynamic>.from(calendarIntegration);
-      updatedSettings['enabled'] = value;
-      _updateUserPreferences('calendarIntegration', updatedSettings);
-    }
-    
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Calendar integration toggle
+        const SizedBox(height: 12),
+        // Large animated checkmark
         Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: _kCyan.withOpacity(0.15),
+            border: Border.all(color: _kCyan, width: 2),
+          ),
+          child: const Icon(
+            Icons.check_rounded,
+            size: 60,
+            color: _kCyan,
+          ),
+        )
+            .animate()
+            .scale(duration: 600.ms, curve: Curves.elasticOut)
+            .fadeIn(duration: 400.ms),
+
+        const SizedBox(height: 28),
+
+        Text(
+          'You\'re all set!',
+          style: AppTextStyles.heading2.copyWith(
+            fontSize: 30,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ).animate().fadeIn(duration: 400.ms, delay: 200.ms),
+
+        const SizedBox(height: 12),
+
+        Text(
+          'Your personalized feed is ready to explore.',
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: Colors.white.withOpacity(0.8),
+            fontSize: 16,
+          ),
+          textAlign: TextAlign.center,
+        ).animate().fadeIn(duration: 400.ms, delay: 300.ms),
+
+        const SizedBox(height: 32),
+
+        // Summary card
+        Container(
+          width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.8),
+            color: Colors.white.withOpacity(0.08),
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.calendar_month_outlined,
-                      color: AppColors.primary,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Calendar Integration',
-                          style: AppTextStyles.subtitle.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Get content recommendations based on your schedule',
-                          style: TextStyle(color: Colors.grey[700]),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Switch(
-                    value: isEnabled,
-                    onChanged: toggleCalendarIntegration,
-                    activeColor: AppColors.primary,
-                  ),
-                ],
-              ),
-              
-              if (isEnabled) ...[  
-                const SizedBox(height: 16),
-                const Divider(),
-                const SizedBox(height: 16),
-                
-                // Calendar integration options
-                _buildCalendarOption(
-                  title: 'Recommend content for free time',
-                  subtitle: 'Find videos that fit your schedule gaps',
-                  value: calendarIntegration['recommendForFreeTime'] ?? true,
-                  onChanged: (value) {
-                    final updatedSettings = Map<String, dynamic>.from(calendarIntegration);
-                    updatedSettings['recommendForFreeTime'] = value;
-                    _updateUserPreferences('calendarIntegration', updatedSettings);
-                  },
-                ),
-                
-                _buildCalendarOption(
-                  title: 'Event-related content',
-                  subtitle: 'Suggest videos related to upcoming events',
-                  value: calendarIntegration['eventRelatedContent'] ?? true,
-                  onChanged: (value) {
-                    final updatedSettings = Map<String, dynamic>.from(calendarIntegration);
-                    updatedSettings['eventRelatedContent'] = value;
-                    _updateUserPreferences('calendarIntegration', updatedSettings);
-                  },
-                ),
-                
-                _buildCalendarOption(
-                  title: 'Smart notifications',
-                  subtitle: 'Get notified about relevant content before events',
-                  value: calendarIntegration['smartNotifications'] ?? false,
-                  onChanged: (value) {
-                    final updatedSettings = Map<String, dynamic>.from(calendarIntegration);
-                    updatedSettings['smartNotifications'] = value;
-                    _updateUserPreferences('calendarIntegration', updatedSettings);
-                  },
-                ),
-              ],
-            ],
-          ),
-        ),
-        
-        const SizedBox(height: 24),
-        
-        // Privacy information
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue.withOpacity(0.3)),
+            border: Border.all(color: Colors.white.withOpacity(0.12)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Icon(Icons.privacy_tip_outlined, color: Colors.blue[700]),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Privacy Information',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue[800],
-                      fontSize: 16,
-                    ),
+              Text(
+                'Your preferences',
+                style: TextStyle(
+                  color: _kCyan,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Interests summary
+              if (selectedInterests.isNotEmpty) ...[
+                _buildSummaryRow(
+                  icon: Icons.favorite_outline,
+                  label: 'Interests',
+                  value: selectedInterests.take(3).join(', ') +
+                      (selectedInterests.length > 3
+                          ? ' +${selectedInterests.length - 3} more'
+                          : ''),
+                ),
+                const SizedBox(height: 12),
+              ],
+
+              // Platforms summary
+              if (selectedPlatforms.isNotEmpty)
+                _buildSummaryRow(
+                  icon: Icons.devices_outlined,
+                  label: 'Platforms',
+                  value: selectedPlatforms.take(3).join(', ') +
+                      (selectedPlatforms.length > 3
+                          ? ' +${selectedPlatforms.length - 3} more'
+                          : ''),
+                ),
+
+              if (selectedInterests.isEmpty && selectedPlatforms.isEmpty)
+                Text(
+                  'You can always update your preferences from your profile settings.',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.6),
+                    fontSize: 14,
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
+                ),
+            ],
+          ),
+        ).animate().fadeIn(duration: 500.ms, delay: 400.ms).slideY(begin: 0.05, end: 0),
+
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  Widget _buildSummaryRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: _kCyan.withOpacity(0.8)),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Text(
-                'Calendar integration is completely optional. When enabled, we only access event titles and times to provide contextual recommendations. Your calendar data never leaves your device and is not stored on our servers.',
-                style: TextStyle(color: Colors.blue[800]),
+                label,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.5),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 2),
               Text(
-                'You can disable this feature at any time in your profile settings.',
-                style: TextStyle(color: Colors.blue[800], fontStyle: FontStyle.italic),
+                value,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildCalendarOption({
-    required String title,
-    required String subtitle,
-    required bool value,
-    required Function(bool) onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                ),
-              ],
-            ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: AppColors.primary,
-          ),
-        ],
-      ),
     );
   }
 }

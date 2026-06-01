@@ -15,6 +15,8 @@ import '../screens/calendar_customization_screen.dart';
 import '../screens/personalized_home_screen.dart';
 import '../screens/search_screen.dart';
 import '../screens/notifications_screen.dart';
+import '../widgets/dashboard/settings_tab.dart';
+import '../widgets/dashboard/calendar_tab.dart';
 
 class NavigationService {
   static NavigationService? _instance;
@@ -123,5 +125,11 @@ class AppRoutes {
         AppRoutes.profile: (context) => const ProfileScreen(),
         AppRoutes.search: (context) => const SearchScreen(),
         AppRoutes.notifications: (context) => const NotificationsScreen(),
+        AppRoutes.settings: (context) => const Scaffold(
+              body: SafeArea(child: SettingsTab()),
+            ),
+        AppRoutes.calendar: (context) => const Scaffold(
+              body: SafeArea(child: CalendarTab()),
+            ),
       };
 }

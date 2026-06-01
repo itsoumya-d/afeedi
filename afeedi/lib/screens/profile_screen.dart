@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme/app_theme.dart';
+import '../services/local_auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -10,18 +12,32 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateMixin {
   late TabController _tabController;
-  
+
+  String _userName = '';
+  String _userEmail = '';
+  String _joinDate = '';
+
   final Map<String, dynamic> _userProfile = {
-    'name': 'Alex Johnson',
-    'email': 'alex.johnson@email.com',
-    'joinDate': 'January 2024',
-    'avatar': 'https://picsum.photos/120/120?random=user',
-    'isPremium': true,
-    'level': 15,
-    'totalWatchTime': '127 hours',
-    'videosWatched': 342,
-    'streakDays': 28,
+    'isPremium': false,
+    'level': 1,
+    'totalWatchTime': '—',
+    'videosWatched': 0,
+    'streakDays': 0,
   };
+
+  Future<void> _loadUserData() async {
+    final user = LocalAuthService.instance.currentUser;
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('user_name') ?? '';
+    if (!mounted) return;
+    setState(() {
+      _userEmail = user?.email ?? '';
+      _userName = name.isNotEmpty
+          ? name
+          : (_userEmail.isNotEmpty ? _userEmail.split('@').first : 'User');
+      _joinDate = prefs.getString('user_join_date') ?? 'Recently';
+    });
+  }
   
   final List<Map<String, dynamic>> _achievements = [
     {
@@ -102,6 +118,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _loadUserData();
   }
   
   @override
@@ -212,13 +229,23 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 height: 120,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppTheme.primaryCyan,
-                    width: 3,
+                  border: Border.all(color: AppTheme.primaryCyan, width: 3),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF00D4FF), Color(0xFFFF3C7E)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  image: DecorationImage(
-                    image: NetworkImage(_userProfile['avatar']),
-                    fit: BoxFit.cover,
+                ),
+                child: Center(
+                  child: Text(
+                    _userName.isNotEmpty
+                        ? _userName[0].toUpperCase()
+                        : 'A',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -244,7 +271,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           ),
           const SizedBox(height: 16),
           Text(
-            _userProfile['name'],
+            _userName.isNotEmpty ? _userName : 'User',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 24,
@@ -253,7 +280,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           ),
           const SizedBox(height: 4),
           Text(
-            _userProfile['email'],
+            _userEmail,
             style: TextStyle(
               color: Colors.white.withOpacity(0.7),
               fontSize: 16,
@@ -270,15 +297,12 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.calendar_today,
-                  color: AppTheme.primaryCyan,
-                  size: 16,
-                ),
+                const Icon(Icons.calendar_today,
+                    color: AppTheme.primaryCyan, size: 16),
                 const SizedBox(width: 6),
                 Text(
-                  'Joined ${_userProfile['joinDate']}',
-                  style: TextStyle(
+                  'Joined $_joinDate',
+                  style: const TextStyle(
                     color: AppTheme.primaryCyan,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -589,10 +613,17 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  item['thumbnail'],
+                  item['thumbnail'] ?? '',
                   width: 80,
                   height: 60,
                   fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: 80,
+                    height: 60,
+                    color: Colors.grey[800],
+                    child: const Icon(Icons.play_circle_outline,
+                        color: Colors.white54, size: 28),
+                  ),
                 ),
               ),
               if (completed)
@@ -957,25 +988,47 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   
   // Dialog methods
   void _showEditProfileDialog() {
+    final controller = TextEditingController(text: _userName);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF2D1B69),
-        title: const Text(
-          'Edit Profile',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'Profile editing functionality will be implemented here.',
-          style: TextStyle(color: Colors.white),
+        title: const Text('Edit Profile',
+            style: TextStyle(color: Colors.white)),
+        content: TextField(
+          controller: controller,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            labelText: 'Display Name',
+            labelStyle:
+                TextStyle(color: Colors.white.withOpacity(0.7)),
+            enabledBorder: OutlineInputBorder(
+              borderSide:
+                  BorderSide(color: Colors.white.withOpacity(0.3)),
+            ),
+            focusedBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: AppTheme.primaryCyan),
+            ),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Close',
-              style: TextStyle(color: AppTheme.primaryCyan),
-            ),
+            child: const Text('Cancel',
+                style: TextStyle(color: Colors.white70)),
+          ),
+          TextButton(
+            onPressed: () async {
+              final newName = controller.text.trim();
+              if (newName.isNotEmpty) {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('user_name', newName);
+                if (mounted) setState(() => _userName = newName);
+              }
+              if (mounted) Navigator.pop(context);
+            },
+            child: const Text('Save',
+                style: TextStyle(color: AppTheme.primaryCyan)),
           ),
         ],
       ),

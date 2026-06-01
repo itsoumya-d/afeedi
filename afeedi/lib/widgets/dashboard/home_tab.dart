@@ -93,8 +93,7 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   String _userName() {
     final user = LocalAuthService.instance.currentUser;
     if (user == null) return '';
-    // Use email prefix as display name when there is no dedicated display name
-    return user.email.split('@').first;
+    return user.email.isEmpty ? '' : user.email.split('@').first;
   }
 
   String _formatViews(int count) {

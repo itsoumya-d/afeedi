@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import '../models/platform_connection_model.dart';
 import '../models/content_model.dart';
+import '../core/storage/secure_storage_service.dart';
 import 'oauth_service.dart';
 import 'analytics_service.dart';
 
@@ -41,7 +42,6 @@ class AuthService {
         _currentUser = User(
           id: userId,
           email: userEmail,
-          name: userName ?? 'User',
           role: UserRole.registered,
           isActive: true,
           createdAt: DateTime.now(),
@@ -103,14 +103,11 @@ class AuthService {
       
       _currentUser = user;
       
-      // Track analytics
+      // Track analytics — no PII
        AnalyticsService.instance.trackUserInteraction(
          action: 'signup_success',
          screen: 'auth',
-         additionalData: {
-           'method': 'email',
-           'user_id': userId,
-         },
+         additionalData: {'method': 'email', 'user_id': userId},
        );
       
       return AuthResult(success: true, user: user);
@@ -214,7 +211,6 @@ class AuthService {
       final user = User(
          id: userId,
          email: email,
-         name: displayName,
          role: UserRole.registered,
          isActive: true,
          createdAt: DateTime.now(),
@@ -227,24 +223,23 @@ class AuthService {
       await prefs.setString('user_email', email);
       await prefs.setString('user_name', displayName);
       
-      // Store OAuth tokens securely
+      // Store OAuth tokens in Keychain / Keystore (not SharedPreferences)
       if (authData['accessToken'] != null) {
-        await prefs.setString('oauth_access_token_$provider', authData['accessToken']);
+        await SecureStorageService.instance.saveOAuthToken(provider, authData['accessToken']);
       }
       if (authData['idToken'] != null) {
-        await prefs.setString('oauth_id_token_$provider', authData['idToken']);
+        await SecureStorageService.instance.write('oauth_id_token_$provider', authData['idToken']);
       }
       
       _currentUser = user;
       
-      // Track analytics
+      // Track analytics — no PII (email omitted)
        AnalyticsService.instance.trackUserInteraction(
          action: 'oauth_signin_success',
          screen: 'auth',
          additionalData: {
            'provider': provider,
            'user_id': userId,
-           'email': email,
          },
        );
       

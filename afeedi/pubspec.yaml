@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -73,8 +75,10 @@ dependencies:
   webview_flutter: ^4.7.0
   
   # Video Content Extraction
-  youtube_explode_dart: ^2.5.2
-  
+  # youtube_explode_dart REMOVED: violates YouTube ToS (Section 5.1.H) by
+  # bypassing the official API to extract direct stream URLs. This causes
+  # App Store and Play Store rejection. Use YouTube IFrame API instead.
+
   # OAuth and Social Authentication
   google_sign_in: ^6.2.1
   flutter_facebook_auth: ^6.0.4
@@ -102,6 +106,12 @@ dependencies:
 
   # Security
   crypto: ^3.0.3
+
+  # Secure Storage (iOS Keychain / Android Keystore)
+  flutter_secure_storage: ^9.2.2
+
+  # App Tracking Transparency (required for iOS 14.5+)
+  app_tracking_transparency: ^2.0.4
 
 dev_dependencies:
   flutter_test:
@@ -131,6 +141,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  generate: true
 
   # To add assets to your application, add an assets section, like this:
   # assets:

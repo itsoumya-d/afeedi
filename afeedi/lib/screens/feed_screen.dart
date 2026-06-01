@@ -34,14 +34,16 @@ class _FeedScreenState extends State<FeedScreen> {
     try {
       final feedContent = await ContentService.instance.getFeedContent();
       setState(() {
-        _posts = feedContent;
+        _posts = _selectedPlatforms.length == PlatformType.values.length
+            ? feedContent
+            : feedContent.where((p) => _selectedPlatforms.contains(p.platform)).toList();
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      print('Error loading feed: $e');
+      debugPrint('Error loading feed: $e');
     }
   }
 
@@ -51,25 +53,30 @@ class _FeedScreenState extends State<FeedScreen> {
     try {
       final feedContent = await ContentService.instance.getFeedContent();
       setState(() {
-        _posts = feedContent;
+        _posts = _selectedPlatforms.length == PlatformType.values.length
+            ? feedContent
+            : feedContent.where((p) => _selectedPlatforms.contains(p.platform)).toList();
       });
       _refreshController.refreshCompleted();
     } catch (e) {
       _refreshController.refreshFailed();
-      print('Error refreshing feed: $e');
+      debugPrint('Error refreshing feed: $e');
     }
   }
 
   void _onLoading() async {
     try {
-      final morePosts = await ContentService.instance.getFeedContent(limit: 5);
+      final morePosts = await ContentService.instance.loadMoreContent(_posts.length, limit: 5);
+      final filtered = _selectedPlatforms.length == PlatformType.values.length
+          ? morePosts
+          : morePosts.where((p) => _selectedPlatforms.contains(p.platform)).toList();
       setState(() {
-        _posts.addAll(morePosts);
+        _posts.addAll(filtered);
       });
       _refreshController.loadComplete();
     } catch (e) {
       _refreshController.loadFailed();
-      print('Error loading more posts: $e');
+      debugPrint('Error loading more posts: $e');
     }
   }
 

@@ -4,6 +4,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
+// Analytics only runs when the user has granted consent (see PrivacyConsentService).
+// No PII (email, name, phone) is ever included in events — only anonymous
+// session IDs and hashed user IDs.
+
 class AnalyticsService {
   static final AnalyticsService _instance = AnalyticsService._internal();
   static AnalyticsService get instance => _instance;
@@ -12,6 +16,13 @@ class AnalyticsService {
 
   SharedPreferences? _prefs;
   List<Map<String, dynamic>> _eventQueue = [];
+
+  // Set to true once the user has granted analytics consent.
+  bool _consentGranted = false;
+
+  void setConsentGranted(bool granted) {
+    _consentGranted = granted;
+  }
 
   // Initialize the analytics service
   Future<void> initialize() async {
@@ -262,6 +273,14 @@ class AnalyticsService {
 
   // Private helper methods
   Future<void> _queueEvent(Map<String, dynamic> event) async {
+    // Do not record any analytics without explicit user consent.
+    if (!_consentGranted) return;
+
+    // Strip any PII fields that may have been accidentally included.
+    event.remove('email');
+    event.remove('name');
+    event.remove('phone');
+
     _eventQueue.add(event);
 
     // Get all events including the new one

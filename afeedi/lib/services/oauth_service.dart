@@ -53,12 +53,14 @@ class OAuthService {
   }
 
   // Instagram OAuth (using Facebook Auth)
+  // NOTE: instagram_content_publish requires approved Meta App Review.
+  // We only request instagram_basic for reading content.
   static Future<Map<String, dynamic>?> connectInstagram() async {
     try {
       final LoginResult result = await FacebookAuth.instance.login(
-        permissions: ['instagram_basic', 'instagram_content_publish'],
+        permissions: ['instagram_basic'],
       );
-      
+
       if (result.status == LoginStatus.success) {
         final userData = await FacebookAuth.instance.getUserData(
           fields: "name,email,picture",
@@ -68,6 +70,7 @@ class OAuthService {
           'accessToken': result.accessToken?.token,
           'userId': result.accessToken?.userId,
           'userData': userData,
+          'connected_at': DateTime.now().toIso8601String(),
         };
       }
     } catch (error) {
@@ -76,19 +79,44 @@ class OAuthService {
     return null;
   }
 
-  // TikTok OAuth (using Web Auth)
+  // TikTok OAuth via the official TikTok Login Kit web flow.
+  // Replace CLIENT_KEY with your TikTok app's client_key from
+  // https://developers.tiktok.com — the redirect URI must match
+  // what is registered in your TikTok app dashboard.
   static Future<Map<String, dynamic>?> connectTikTok() async {
     try {
-      // Simulate OAuth flow with mock data for development
-      await Future.delayed(const Duration(seconds: 2));
-      
-      // Return mock successful connection
+      const clientKey = 'YOUR_TIKTOK_CLIENT_KEY'; // replace before release
+      const redirectUri = 'afeedi://tiktok/callback'; // must match registered URI
+      const scopes = 'user.info.basic,video.list';
+      final state = DateTime.now().millisecondsSinceEpoch.toString();
+
+      final authUrl =
+          'https://www.tiktok.com/v2/auth/authorize/'
+          '?client_key=$clientKey'
+          '&scope=$scopes'
+          '&response_type=code'
+          '&redirect_uri=${Uri.encodeComponent(redirectUri)}'
+          '&state=$state';
+
+      final result = await FlutterWebAuth2.authenticate(
+        url: authUrl,
+        callbackUrlScheme: 'afeedi',
+      );
+
+      final uri = Uri.parse(result);
+      final code = uri.queryParameters['code'];
+      final returnedState = uri.queryParameters['state'];
+
+      if (code == null || returnedState != state) {
+        debugPrint('TikTok OAuth: invalid code or state mismatch');
+        return null;
+      }
+
+      // Exchange code for access token via your backend to keep client_secret safe.
+      // For now we return the auth code; your backend should complete the exchange.
       return {
         'platform': 'tiktok',
-        'authCode': 'mock_tiktok_code_${DateTime.now().millisecondsSinceEpoch}',
-        'accessToken': 'mock_tiktok_token_${DateTime.now().millisecondsSinceEpoch}',
-        'userId': 'mock_tiktok_user_${DateTime.now().millisecondsSinceEpoch}',
-        'displayName': 'TikTok User',
+        'authCode': code,
         'connected_at': DateTime.now().toIso8601String(),
       };
     } catch (error) {

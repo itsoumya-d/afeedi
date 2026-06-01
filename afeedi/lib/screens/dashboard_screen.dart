@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
+import 'search_screen.dart';
+import 'notifications_screen.dart';
 import '../widgets/dashboard/home_tab.dart';
 import '../widgets/dashboard/videos_tab.dart';
 import '../screens/tabs/shorts_tab.dart';
@@ -174,7 +176,11 @@ class _DashboardScreenState extends State<DashboardScreen>
           // Action buttons
           IconButton(
             onPressed: () {
-              // Navigate to search
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const SearchScreen()),
+              );
             },
             icon: const Icon(
               Icons.search,
@@ -184,28 +190,16 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
           IconButton(
             onPressed: () {
-              // Navigate to notifications
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const NotificationsScreen()),
+              );
             },
-            icon: Stack(
-              children: [
-                const Icon(
-                  Icons.notifications_outlined,
-                  color: Colors.white,
-                  size: 22,
-                ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: AppTheme.primaryPink,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-              ],
+            icon: const Icon(
+              Icons.notifications_outlined,
+              color: Colors.white,
+              size: 22,
             ),
           ),
         ],

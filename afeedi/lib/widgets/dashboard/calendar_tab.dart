@@ -3,6 +3,7 @@ import '../../core/theme/app_theme.dart';
 import '../../models/content_model.dart';
 import '../../services/enhanced_calendar_service.dart';
 import '../../services/analytics_service.dart';
+import '../../services/youtube_data_api_service.dart';
 import '../../widgets/streaming/responsive_video_player.dart';
 
 class CalendarTab extends StatefulWidget {
@@ -45,69 +46,13 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   late AnimationController _filterAnimationController;
   late Animation<double> _filterAnimation;
   
-  final List<Map<String, dynamic>> _scheduledContent = [
-    {
-      'id': '1',
-      'title': 'Morning Tech News',
-      'time': '08:00',
-      'duration': 15,
-      'platform': 'YouTube',
-      'creator': 'TechDaily',
-      'thumbnail': 'https://picsum.photos/60/60?random=1',
-      'type': 'scheduled',
-      'category': 'entertainment',
-      'keywords': ['tech', 'news', 'daily'],
-      'educationValue': 30,
-      'entertainmentValue': 70,
-    },
-    {
-      'id': '2',
-      'title': 'Flutter Tutorial',
-      'time': '14:30',
-      'duration': 45,
-      'platform': 'YouTube',
-      'creator': 'CodeMaster',
-      'thumbnail': 'https://picsum.photos/60/60?random=2',
-      'type': 'scheduled',
-      'category': 'education',
-      'keywords': ['flutter', 'programming', 'tutorial'],
-      'educationValue': 90,
-      'entertainmentValue': 10,
-    },
-    {
-      'id': '3',
-      'title': 'Relaxing Music',
-      'time': '20:00',
-      'duration': 60,
-      'platform': 'Spotify',
-      'creator': 'ChillBeats',
-      'thumbnail': 'https://picsum.photos/60/60?random=3',
-      'type': 'scheduled',
-      'category': 'entertainment',
-      'keywords': ['music', 'relaxing', 'chill'],
-      'educationValue': 5,
-      'entertainmentValue': 95,
-    },
-    {
-      'id': '4',
-      'title': 'Mathematics Study Session',
-      'time': '10:00',
-      'duration': 90,
-      'platform': 'Khan Academy',
-      'creator': 'Khan Academy',
-      'thumbnail': 'https://picsum.photos/60/60?random=6',
-      'type': 'scheduled',
-      'category': 'study',
-      'keywords': ['mathematics', 'calculus', 'study'],
-      'educationValue': 95,
-      'entertainmentValue': 5,
-    },
-  ];
+  final List<Map<String, dynamic>> _scheduledContent = [];
   
   @override
   void initState() {
     super.initState();
     _loadContentForSelectedDate();
+    _loadYouTubeCalendarContent();
     _calendarAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -185,6 +130,51 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     }
   }
   
+  Future<void> _loadYouTubeCalendarContent() async {
+    try {
+      final results = await Future.wait([
+        YouTubeDataApiService.instance
+            .fetchVideosByQuery(query: 'technology news', maxResults: 4),
+        YouTubeDataApiService.instance
+            .fetchVideosByQuery(query: 'recommended tutorial', maxResults: 2),
+      ]);
+      final scheduled = results[0];
+      final ai = results[1];
+      final slots = ['08:00', '10:00', '14:30', '20:00'];
+      if (mounted) {
+        setState(() {
+          _scheduledContent
+            ..clear()
+            ..addAll(scheduled.asMap().entries.map((e) => {
+                  'id': e.value.id,
+                  'title': e.value.title,
+                  'time': slots[e.key % slots.length],
+                  'duration': 15,
+                  'platform': 'YouTube',
+                  'creator': e.value.channelTitle,
+                  'thumbnail': e.value.thumbnailUrl,
+                  'type': 'scheduled',
+                  'category': 'entertainment',
+                  'keywords': <String>[],
+                  'educationValue': 50,
+                  'entertainmentValue': 50,
+                }));
+          _aiRecommendations = ai.asMap().entries.map((e) => {
+                'id': e.value.id,
+                'title':
+                    e.key == 0 ? 'Based on your interests' : 'Trending today',
+                'subtitle': e.value.title,
+                'time': e.key == 0 ? '16:00' : '18:30',
+                'confidence': e.key == 0 ? 0.92 : 0.87,
+                'thumbnail': e.value.thumbnailUrl,
+                'educationValue': 70,
+                'entertainmentValue': 30,
+              }).toList();
+        });
+      }
+    } catch (_) {}
+  }
+
   void _onDateSelected(DateTime selectedDate) {
     setState(() {
       _selectedDate = selectedDate;
@@ -307,28 +297,7 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
     }
   }
   
-  final List<Map<String, dynamic>> _aiRecommendations = [
-    {
-      'id': 'ai1',
-      'title': 'Based on your interests',
-      'subtitle': 'New Flutter 3.0 Features',
-      'time': '16:00',
-      'confidence': 0.92,
-      'thumbnail': 'https://picsum.photos/60/60?random=4',
-      'educationValue': 85,
-      'entertainmentValue': 15,
-    },
-    {
-      'id': 'ai2',
-      'title': 'Trending in Tech',
-      'subtitle': 'AI Revolution 2024',
-      'time': '18:30',
-      'confidence': 0.87,
-      'thumbnail': 'https://picsum.photos/60/60?random=5',
-      'educationValue': 70,
-      'entertainmentValue': 30,
-    },
-  ];
+  List<Map<String, dynamic>> _aiRecommendations = [];
 
   @override
   Widget build(BuildContext context) {
@@ -1127,16 +1096,10 @@ class _CalendarTabState extends State<CalendarTab> with AutomaticKeepAliveClient
   
   List<Map<String, dynamic>> _getContentForDate(DateTime date) {
     try {
-      return _getFilteredContent().where((content) {
-        try {
-          // Mock logic - in real app, this would check actual scheduled dates
-          final contentDay = date.day;
-          return contentDay % 3 == 0 || contentDay % 5 == 0;
-        } catch (e) {
-          debugPrint('Error checking content for date: $e');
-          return false;
-        }
-      }).toList();
+      final selected = DateTime(
+          _selectedDate.year, _selectedDate.month, _selectedDate.day);
+      final check = DateTime(date.year, date.month, date.day);
+      return check == selected ? _getFilteredContent() : [];
     } catch (e) {
       debugPrint('Error in _getContentForDate: $e');
       return [];

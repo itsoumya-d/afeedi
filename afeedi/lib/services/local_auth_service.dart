@@ -67,14 +67,11 @@ class LocalAuthService {
       // Set as current user
       await _setCurrentUser(user);
       
-      // Track analytics
+      // Track analytics — no PII (email omitted)
       await AnalyticsService.instance.trackUserInteraction(
         action: 'user_signup',
         screen: 'auth',
-        additionalData: {
-          'user_id': user.id,
-          'email': email,
-        },
+        additionalData: {'user_id': user.id},
       );
       
       return user;
@@ -108,14 +105,11 @@ class LocalAuthService {
           // Set as current user
           await _setCurrentUser(user);
           
-          // Track analytics
+          // Track analytics — no PII (email omitted)
           await AnalyticsService.instance.trackUserInteraction(
             action: 'user_signin',
             screen: 'auth',
-            additionalData: {
-              'user_id': user.id,
-              'email': email,
-            },
+            additionalData: {'user_id': user.id},
           );
           
           return user;

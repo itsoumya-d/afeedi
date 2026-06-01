@@ -2,59 +2,88 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/foundation.dart';
-import 'screens/welcome_screen.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'services/navigation_service.dart';
 import 'services/analytics_service.dart';
 import 'services/onboarding_service.dart';
 import 'services/recommendation_integration_service.dart';
 import 'services/platform_view_registration_service.dart';
 import 'services/local_auth_service.dart';
+import 'services/privacy_consent_service.dart';
+import 'services/locale_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/storage/local_storage_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
-    // Initialize Hive for local storage
     await Hive.initFlutter();
-    
-    // Initialize Local Storage Service
     await LocalStorageService.instance.initialize();
-    
-    // Initialize Local Auth Service
     await LocalAuthService.instance.initialize();
-    
-    // Initialize Analytics Service
+
+    // Privacy consent must be initialized before analytics.
+    await PrivacyConsentService.instance.initialize();
     await AnalyticsService.instance.initialize();
-    
-    // Initialize Onboarding Service
+
+    final hasConsent =
+        await PrivacyConsentService.instance.hasAnalyticsConsent();
+    AnalyticsService.instance.setConsentGranted(hasConsent);
+
+    // iOS 14.5+: request App Tracking Transparency before any tracking.
+    if (!kIsWeb) {
+      final attGranted =
+          await PrivacyConsentService.instance.requestTrackingAuthorization();
+      AnalyticsService.instance.setConsentGranted(attGranted);
+    }
+
     await OnboardingService.instance.initialize();
-    
-    // Initialize Recommendation Integration Service
     await RecommendationIntegrationService.instance.initialize();
-    
-    // Initialize Platform View Registration Service for web
+
     if (kIsWeb) {
       await PlatformViewRegistrationService.instance.initialize();
     }
-    
-    // Track app launch
+
     await AnalyticsService.instance.trackUserInteraction(
       action: 'app_launch',
       screen: 'main',
     );
-    
   } catch (error) {
-    // Handle initialization errors
     debugPrint('Initialization error: $error');
   }
-  
+
   runApp(const ProviderScope(child: AfeediApp()));
 }
 
-class AfeediApp extends StatelessWidget {
+class AfeediApp extends StatefulWidget {
   const AfeediApp({super.key});
+
+  @override
+  State<AfeediApp> createState() => AfeediAppState();
+
+  static AfeediAppState of(BuildContext context) {
+    return context.findAncestorStateOfType<AfeediAppState>()!;
+  }
+}
+
+class AfeediAppState extends State<AfeediApp> {
+  Locale? _locale;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLocale();
+  }
+
+  Future<void> _loadLocale() async {
+    final locale = await LocaleService.instance.getLocale();
+    if (mounted) setState(() => _locale = locale);
+  }
+
+  Future<void> setLocale(Locale locale) async {
+    await LocaleService.instance.setLocale(locale);
+    if (mounted) setState(() => _locale = locale);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,8 +92,25 @@ class AfeediApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
+      locale: _locale,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: LocaleService.instance.supportedLocales,
+      localeResolutionCallback: (deviceLocale, supportedLocales) {
+        if (deviceLocale != null) {
+          for (final supported in supportedLocales) {
+            if (supported.languageCode == deviceLocale.languageCode) {
+              return supported;
+            }
+          }
+        }
+        return const Locale('en');
+      },
       navigatorKey: NavigationService.navigatorKey,
-      initialRoute: AppRoutes.enhancedOnboarding,
+      initialRoute: AppRoutes.worldClassOnboarding,
       routes: AppRoutes.routes,
       debugShowCheckedModeBanner: false,
     );

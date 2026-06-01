@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/content_service.dart';
 import '../../models/content_model.dart';
-import '../streaming/responsive_video_player.dart';
 
 class VideosTab extends StatefulWidget {
   const VideosTab({super.key});
@@ -67,12 +67,8 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
       setState(() {
         _isLoading = false;
       });
-      print('Error loading videos: $e');
+      debugPrint('Error loading videos: $e');
     }
-  }
-  
-  List<Content> get _filteredVideos {
-    return _videos;
   }
 
   @override
@@ -191,8 +187,8 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
       );
     }
     
-    final filteredVideos = _filteredVideos;
-    
+    final filteredVideos = _videos;
+
     if (filteredVideos.isEmpty) {
       return Center(
         child: Column(
@@ -234,9 +230,7 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
   
   Widget _buildVideoCard(Content video) {
     return GestureDetector(
-      onTap: () {
-        _playVideo(video);
-      },
+      onTap: () => _playVideo(video),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.1),
@@ -422,83 +416,15 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
     }
   }
   
-  void _playVideo(Content video) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(16),
-        child: Center(
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.95,
-              maxHeight: MediaQuery.of(context).size.height * 0.85,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.5),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Header with close button
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          video.title ?? 'Video Player',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(
-                          Icons.close,
-                          color: Colors.white,
-                        ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.white.withOpacity(0.1),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Video Player
-                Flexible(
-                  child: Container(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: ResponsiveVideoPlayer(
-                        content: video,
-                        autoPlay: true,
-                        showControls: true,
-                        showBranding: true,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+  Future<void> _playVideo(Content video) async {
+    final url = 'https://www.youtube.com/watch?v=${video.platformContentId}';
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open video')),
+        );
+      }
+    }
   }
 }

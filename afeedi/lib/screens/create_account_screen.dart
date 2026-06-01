@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'dart:ui' as ui;
+import 'package:url_launcher/url_launcher.dart';
+import '../services/local_auth_service.dart';
+import '../services/navigation_service.dart';
 
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({super.key});
@@ -23,6 +27,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _agreeToTerms = false;
+  bool _isCreating = false;
 
   @override
   void initState() {
@@ -68,6 +73,40 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _createAccount() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isCreating = true);
+    final user = await LocalAuthService.instance.signUp(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      fullName: _nameController.text.trim(),
+    );
+    if (mounted) setState(() => _isCreating = false);
+    if (user != null) {
+      // Navigate to onboarding
+      Navigator.pushReplacementNamed(context, '/world-class-onboarding');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Account creation failed. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open $url')),
+        );
+      }
+    }
   }
 
   @override
@@ -327,27 +366,31 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                       ),
                                       Expanded(
                                         child: RichText(
-                                          text: const TextSpan(
-                                            style: TextStyle(
+                                          text: TextSpan(
+                                            style: const TextStyle(
                                               color: Colors.white70,
                                               fontSize: 14,
                                             ),
                                             children: [
-                                              TextSpan(text: 'I agree to Afeedi\'s '),
+                                              const TextSpan(text: 'I agree to Afeedi\'s '),
                                               TextSpan(
                                                 text: 'Terms',
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                   color: Color(0xFF00D4FF),
                                                   decoration: TextDecoration.underline,
                                                 ),
+                                                recognizer: TapGestureRecognizer()
+                                                  ..onTap = () => _launchUrl('https://afeedi.com/terms'),
                                               ),
-                                              TextSpan(text: ' & '),
+                                              const TextSpan(text: ' & '),
                                               TextSpan(
                                                 text: 'Privacy Policy',
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                   color: Color(0xFF00D4FF),
                                                   decoration: TextDecoration.underline,
                                                 ),
+                                                recognizer: TapGestureRecognizer()
+                                                  ..onTap = () => _launchUrl('https://afeedi.com/privacy'),
                                               ),
                                             ],
                                           ),
@@ -361,17 +404,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                     width: double.infinity,
                                     height: 52,
                                     child: ElevatedButton(
-                                      onPressed: _agreeToTerms ? () {
-                                        if (_formKey.currentState!.validate()) {
-                                          // TODO: Implement account creation
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Account created successfully!'),
-                                              backgroundColor: Color(0xFF00D4FF),
-                                            ),
-                                          );
-                                        }
-                                      } : null,
+                                      onPressed: _isCreating || !_agreeToTerms ? null : _createAccount,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: const Color(0xFF00D4FF),
                                         disabledBackgroundColor: Colors.white24,
@@ -381,13 +414,22 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                         ),
                                         elevation: 0,
                                       ),
-                                      child: const Text(
-                                        'Create Account',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                      child: _isCreating
+                                          ? const SizedBox(
+                                              width: 24,
+                                              height: 24,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2.5,
+                                                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0D0B1E)),
+                                              ),
+                                            )
+                                          : const Text(
+                                              'Create Account',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
                                     ),
                                   ),
                                   const SizedBox(height: 24),

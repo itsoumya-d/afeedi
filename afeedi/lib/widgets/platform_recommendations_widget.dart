@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import '../models/content_item.dart';
 import '../services/analytics_service.dart';
+import '../services/youtube_data_api_service.dart';
 import '../models/analytics_events.dart';
 import '../utils/ui_scaling.dart';
 import '../core/constants/app_colors.dart';
@@ -62,24 +63,43 @@ class _PlatformRecommendationsWidgetState
     });
 
     try {
-      // In a real app, this would call a service to get recommendations
-      await Future.delayed(const Duration(milliseconds: 800));
+      final ytVideos = await YouTubeDataApiService.instance
+          .fetchVideosByQuery(query: 'trending', maxResults: widget.itemsPerPlatform);
 
-      // Sample data
-      final recommendations = _getSampleRecommendations();
+      final youtubeItems = ytVideos.map((v) => ContentItem(
+            id: v.id,
+            title: v.title,
+            description: v.channelTitle,
+            url: v.watchUrl,
+            platform: 'YouTube',
+            contentType: 'video',
+            creator: v.channelTitle,
+            thumbnailUrl: v.thumbnailUrl,
+            durationSeconds: 0,
+            tags: const [],
+            category: 'Trending',
+            recommendationReason: 'Trending on YouTube',
+            personalizationScore: 0.8,
+          )).toList();
 
-      setState(() {
-        _platformRecommendations = recommendations;
-        _platforms = recommendations.keys.toList();
-        _isLoading = false;
-      });
+      final Map<String, List<ContentItem>> recommendations = {
+        'YouTube': youtubeItems,
+      };
+
+      if (mounted) {
+        setState(() {
+          _platformRecommendations = recommendations;
+          _platforms = recommendations.keys.toList();
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to load recommendations: $e';
-        _isLoading = false;
-      });
-
-      // Track error
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Failed to load recommendations: $e';
+          _isLoading = false;
+        });
+      }
       _analyticsService.trackEvent(
         eventName: 'platform_recommendations_error',
         eventType: AnalyticsEvents.error,
@@ -89,297 +109,6 @@ class _PlatformRecommendationsWidgetState
         },
       );
     }
-  }
-
-  Map<String, List<ContentItem>> _getSampleRecommendations() {
-    // Sample platforms and recommendations
-    return {
-      'Netflix': [
-        ContentItem(
-          id: 'n1',
-          title: 'Stranger Things',
-          description: 'Sci-fi drama series',
-          imageUrl: 'https://example.com/stranger_things.jpg',
-          platform: 'Netflix',
-          duration: const Duration(minutes: 50),
-          recommendationReason: 'Based on your sci-fi preferences',
-          genres: ['Sci-Fi', 'Drama', 'Horror'],
-          rating: 4.8,
-        ),
-        ContentItem(
-          id: 'n2',
-          title: 'The Crown',
-          description: 'Historical drama about the British royal family',
-          imageUrl: 'https://example.com/the_crown.jpg',
-          platform: 'Netflix',
-          duration: const Duration(minutes: 55),
-          recommendationReason: 'Trending in your region',
-          genres: ['Drama', 'History', 'Biography'],
-          rating: 4.7,
-        ),
-        ContentItem(
-          id: 'n3',
-          title: 'Money Heist',
-          description: 'Spanish heist crime drama series',
-          imageUrl: 'https://example.com/money_heist.jpg',
-          platform: 'Netflix',
-          duration: const Duration(minutes: 45),
-          recommendationReason: 'Popular among similar viewers',
-          genres: ['Crime', 'Drama', 'Thriller'],
-          rating: 4.6,
-        ),
-        ContentItem(
-          id: 'n4',
-          title: 'The Witcher',
-          description: 'Fantasy drama based on book series',
-          imageUrl: 'https://example.com/witcher.jpg',
-          platform: 'Netflix',
-          duration: const Duration(minutes: 60),
-          recommendationReason: 'Matches your fantasy interests',
-          genres: ['Fantasy', 'Action', 'Adventure'],
-          rating: 4.5,
-        ),
-        ContentItem(
-          id: 'n5',
-          title: 'Ozark',
-          description: 'Crime drama thriller series',
-          imageUrl: 'https://example.com/ozark.jpg',
-          platform: 'Netflix',
-          duration: const Duration(minutes: 60),
-          recommendationReason: 'Similar to shows you\'ve watched',
-          genres: ['Crime', 'Drama', 'Thriller'],
-          rating: 4.7,
-        ),
-      ],
-      'Hulu': [
-        ContentItem(
-          id: 'h1',
-          title: 'The Handmaid\'s Tale',
-          description: 'Dystopian drama series',
-          imageUrl: 'https://example.com/handmaids_tale.jpg',
-          platform: 'Hulu',
-          duration: const Duration(minutes: 50),
-          recommendationReason: 'Award-winning series you might enjoy',
-          genres: ['Drama', 'Sci-Fi', 'Dystopian'],
-          rating: 4.7,
-        ),
-        ContentItem(
-          id: 'h2',
-          title: 'Only Murders in the Building',
-          description: 'Comedy mystery series',
-          imageUrl: 'https://example.com/only_murders.jpg',
-          platform: 'Hulu',
-          duration: const Duration(minutes: 30),
-          recommendationReason: 'Matches your comedy preferences',
-          genres: ['Comedy', 'Mystery', 'Crime'],
-          rating: 4.8,
-        ),
-        ContentItem(
-          id: 'h3',
-          title: 'The Great',
-          description: 'Historical comedy-drama series',
-          imageUrl: 'https://example.com/the_great.jpg',
-          platform: 'Hulu',
-          duration: const Duration(minutes: 45),
-          recommendationReason: 'Based on your historical interests',
-          genres: ['Comedy', 'Drama', 'History'],
-          rating: 4.6,
-        ),
-        ContentItem(
-          id: 'h4',
-          title: 'Dopesick',
-          description: 'Drama miniseries about the opioid crisis',
-          imageUrl: 'https://example.com/dopesick.jpg',
-          platform: 'Hulu',
-          duration: const Duration(minutes: 60),
-          recommendationReason: 'Critically acclaimed series',
-          genres: ['Drama', 'Crime', 'Biography'],
-          rating: 4.9,
-        ),
-        ContentItem(
-          id: 'h5',
-          title: 'Reservation Dogs',
-          description: 'Comedy-drama about Indigenous teenagers',
-          imageUrl: 'https://example.com/reservation_dogs.jpg',
-          platform: 'Hulu',
-          duration: const Duration(minutes: 30),
-          recommendationReason: 'Fresh perspective you might enjoy',
-          genres: ['Comedy', 'Drama', 'Coming of Age'],
-          rating: 4.7,
-        ),
-      ],
-      'Disney+': [
-        ContentItem(
-          id: 'd1',
-          title: 'The Mandalorian',
-          description: 'Star Wars space western series',
-          imageUrl: 'https://example.com/mandalorian.jpg',
-          platform: 'Disney+',
-          duration: const Duration(minutes: 40),
-          recommendationReason: 'Based on your sci-fi preferences',
-          genres: ['Sci-Fi', 'Action', 'Adventure'],
-          rating: 4.9,
-        ),
-        ContentItem(
-          id: 'd2',
-          title: 'WandaVision',
-          description: 'Marvel superhero miniseries',
-          imageUrl: 'https://example.com/wandavision.jpg',
-          platform: 'Disney+',
-          duration: const Duration(minutes: 40),
-          recommendationReason: 'For Marvel fans like you',
-          genres: ['Superhero', 'Drama', 'Mystery'],
-          rating: 4.7,
-        ),
-        ContentItem(
-          id: 'd3',
-          title: 'Loki',
-          description: 'Marvel series about the God of Mischief',
-          imageUrl: 'https://example.com/loki.jpg',
-          platform: 'Disney+',
-          duration: const Duration(minutes: 50),
-          recommendationReason: 'Continues the Marvel storyline',
-          genres: ['Superhero', 'Sci-Fi', 'Fantasy'],
-          rating: 4.8,
-        ),
-        ContentItem(
-          id: 'd4',
-          title: 'The Beatles: Get Back',
-          description: 'Documentary about The Beatles',
-          imageUrl: 'https://example.com/beatles.jpg',
-          platform: 'Disney+',
-          duration: const Duration(minutes: 160),
-          recommendationReason: 'Based on your music interests',
-          genres: ['Documentary', 'Music', 'History'],
-          rating: 4.9,
-        ),
-        ContentItem(
-          id: 'd5',
-          title: 'Andor',
-          description: 'Star Wars spy thriller series',
-          imageUrl: 'https://example.com/andor.jpg',
-          platform: 'Disney+',
-          duration: const Duration(minutes: 45),
-          recommendationReason: 'New addition to Star Wars universe',
-          genres: ['Sci-Fi', 'Thriller', 'Action'],
-          rating: 4.8,
-        ),
-      ],
-      'HBO Max': [
-        ContentItem(
-          id: 'hbo1',
-          title: 'Succession',
-          description: 'Drama about a dysfunctional media family',
-          imageUrl: 'https://example.com/succession.jpg',
-          platform: 'HBO Max',
-          duration: const Duration(minutes: 60),
-          recommendationReason: 'Award-winning drama series',
-          genres: ['Drama', 'Comedy', 'Business'],
-          rating: 4.9,
-        ),
-        ContentItem(
-          id: 'hbo2',
-          title: 'The Last of Us',
-          description: 'Post-apocalyptic drama based on video game',
-          imageUrl: 'https://example.com/last_of_us.jpg',
-          platform: 'HBO Max',
-          duration: const Duration(minutes: 60),
-          recommendationReason: 'Trending in your region',
-          genres: ['Drama', 'Horror', 'Post-Apocalyptic'],
-          rating: 4.8,
-        ),
-        ContentItem(
-          id: 'hbo3',
-          title: 'House of the Dragon',
-          description: 'Game of Thrones prequel series',
-          imageUrl: 'https://example.com/house_dragon.jpg',
-          platform: 'HBO Max',
-          duration: const Duration(minutes: 60),
-          recommendationReason: 'For Game of Thrones fans',
-          genres: ['Fantasy', 'Drama', 'Action'],
-          rating: 4.7,
-        ),
-        ContentItem(
-          id: 'hbo4',
-          title: 'The White Lotus',
-          description: 'Social satire set at a tropical resort',
-          imageUrl: 'https://example.com/white_lotus.jpg',
-          platform: 'HBO Max',
-          duration: const Duration(minutes: 60),
-          recommendationReason: 'Critically acclaimed series',
-          genres: ['Comedy', 'Drama', 'Satire'],
-          rating: 4.8,
-        ),
-        ContentItem(
-          id: 'hbo5',
-          title: 'Euphoria',
-          description: 'Teen drama about high school students',
-          imageUrl: 'https://example.com/euphoria.jpg',
-          platform: 'HBO Max',
-          duration: const Duration(minutes: 60),
-          recommendationReason: 'Popular among similar viewers',
-          genres: ['Drama', 'Coming of Age'],
-          rating: 4.6,
-        ),
-      ],
-      'Prime Video': [
-        ContentItem(
-          id: 'p1',
-          title: 'The Boys',
-          description: 'Superhero dark comedy series',
-          imageUrl: 'https://example.com/the_boys.jpg',
-          platform: 'Prime Video',
-          duration: const Duration(minutes: 60),
-          recommendationReason: 'Based on your superhero interests',
-          genres: ['Superhero', 'Action', 'Comedy'],
-          rating: 4.8,
-        ),
-        ContentItem(
-          id: 'p2',
-          title: 'The Marvelous Mrs. Maisel',
-          description: 'Period comedy-drama series',
-          imageUrl: 'https://example.com/maisel.jpg',
-          platform: 'Prime Video',
-          duration: const Duration(minutes: 55),
-          recommendationReason: 'Award-winning series you might enjoy',
-          genres: ['Comedy', 'Drama', 'Period'],
-          rating: 4.7,
-        ),
-        ContentItem(
-          id: 'p3',
-          title: 'The Lord of the Rings: The Rings of Power',
-          description: 'Fantasy series based on Tolkien\'s works',
-          imageUrl: 'https://example.com/rings_power.jpg',
-          platform: 'Prime Video',
-          duration: const Duration(minutes: 60),
-          recommendationReason: 'For fantasy enthusiasts',
-          genres: ['Fantasy', 'Adventure', 'Drama'],
-          rating: 4.6,
-        ),
-        ContentItem(
-          id: 'p4',
-          title: 'Fleabag',
-          description: 'Comedy-drama series',
-          imageUrl: 'https://example.com/fleabag.jpg',
-          platform: 'Prime Video',
-          duration: const Duration(minutes: 30),
-          recommendationReason: 'Critically acclaimed comedy',
-          genres: ['Comedy', 'Drama'],
-          rating: 4.9,
-        ),
-        ContentItem(
-          id: 'p5',
-          title: 'The Wheel of Time',
-          description: 'Fantasy series based on novel series',
-          imageUrl: 'https://example.com/wheel_time.jpg',
-          platform: 'Prime Video',
-          duration: const Duration(minutes: 60),
-          recommendationReason: 'Matches your fantasy preferences',
-          genres: ['Fantasy', 'Adventure', 'Drama'],
-          rating: 4.5,
-        ),
-      ],
-    };
   }
 
   @override
@@ -541,7 +270,7 @@ class _PlatformRecommendationsWidgetState
                 fit: StackFit.expand,
                 children: [
                   Image.network(
-                    item.imageUrl,
+                    item.thumbnailUrl ?? '',
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
@@ -572,7 +301,8 @@ class _PlatformRecommendationsWidgetState
                         ),
                       ),
                       child: Text(
-                        _formatDuration(item.duration),
+                        _formatDuration(
+                            Duration(seconds: item.durationSeconds)),
                         style: AppTextStyles.tag.copyWith(
                           color: AppColors.white,
                         ),
@@ -598,7 +328,7 @@ class _PlatformRecommendationsWidgetState
                     ),
                     SizedBox(height: UIScaling.spacing(context, 0.5)),
                     Text(
-                      item.description,
+                      item.description ?? '',
                       style: AppTextStyles.body2.copyWith(
                         color: AppColors.textSecondary,
                       ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/content_model.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/analytics_service.dart';
@@ -618,30 +620,48 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
   }
   
   void _showCommentsModal() {
+    final videoUrl =
+        'https://www.youtube.com/watch?v=${widget.content.platformContentId}';
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.grey[900],
-      builder: (context) => Container(
+      builder: (ctx) => Container(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            const Text(
               'Comments',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Comments are available on the original platform.',
+              style: TextStyle(
+                  color: Colors.white.withOpacity(0.7), fontSize: 14),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            Text(
-              'Comments feature coming soon!',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 14,
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  await launchUrl(Uri.parse(videoUrl),
+                      mode: LaunchMode.externalApplication);
+                },
+                icon: const Icon(Icons.open_in_new, size: 18),
+                label: const Text('Open on YouTube'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryCyan,
+                  foregroundColor: Colors.white,
+                ),
               ),
             ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -649,40 +669,46 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
   }
   
   void _showShareModal() {
+    final videoUrl =
+        'https://www.youtube.com/watch?v=${widget.content.platformContentId}';
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.grey[900],
-      builder: (context) => Container(
+      builder: (ctx) => Container(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            const Text(
               'Share Content',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             ListTile(
               leading: const Icon(Icons.link, color: Colors.white),
-              title: const Text('Copy Link', style: TextStyle(color: Colors.white)),
-              onTap: () {
-                // Copy video URL or embed URL
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Link copied to clipboard')),
-                );
+              title: const Text('Copy Link',
+                  style: TextStyle(color: Colors.white)),
+              onTap: () async {
+                Navigator.pop(ctx);
+                await Clipboard.setData(ClipboardData(text: videoUrl));
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Link copied to clipboard')),
+                  );
+                }
               },
             ),
             ListTile(
-              leading: const Icon(Icons.share, color: Colors.white),
-              title: const Text('Share to...', style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                // Implement native sharing
+              leading: const Icon(Icons.open_in_new, color: Colors.white),
+              title: const Text('Open on YouTube',
+                  style: TextStyle(color: Colors.white)),
+              onTap: () async {
+                Navigator.pop(ctx);
+                await launchUrl(Uri.parse(videoUrl),
+                    mode: LaunchMode.externalApplication);
               },
             ),
           ],

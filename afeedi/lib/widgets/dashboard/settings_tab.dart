@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
+import '../../services/local_auth_service.dart';
+import '../../services/navigation_service.dart';
+import '../../services/privacy_consent_service.dart';
+import '../../services/analytics_service.dart';
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
@@ -11,24 +17,57 @@ class SettingsTab extends StatefulWidget {
 class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-  
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
   // Privacy settings
   bool _dataCollection = true;
   bool _personalizedAds = false;
   bool _analyticsSharing = true;
   bool _locationTracking = false;
-  
+
   // Content settings
   bool _autoplay = true;
   bool _downloadOnWifi = true;
   bool _highQuality = false;
   bool _darkMode = true;
-  
+
   // Notification settings
   bool _pushNotifications = true;
   bool _emailNotifications = false;
   bool _weeklyDigest = true;
   bool _trendingAlerts = true;
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    final analyticsGranted =
+        await PrivacyConsentService.instance.hasAnalyticsConsent();
+    if (!mounted) return;
+    setState(() {
+      _dataCollection = prefs.getBool('setting_data_collection') ?? true;
+      _personalizedAds = prefs.getBool('setting_personalized_ads') ?? false;
+      _analyticsSharing = analyticsGranted;
+      _locationTracking = prefs.getBool('setting_location_tracking') ?? false;
+      _autoplay = prefs.getBool('setting_autoplay') ?? true;
+      _downloadOnWifi = prefs.getBool('setting_download_wifi') ?? true;
+      _highQuality = prefs.getBool('setting_high_quality') ?? false;
+      _darkMode = prefs.getBool('setting_dark_mode') ?? true;
+      _pushNotifications = prefs.getBool('setting_push_notifications') ?? true;
+      _emailNotifications =
+          prefs.getBool('setting_email_notifications') ?? false;
+      _weeklyDigest = prefs.getBool('setting_weekly_digest') ?? true;
+      _trendingAlerts = prefs.getBool('setting_trending_alerts') ?? true;
+    });
+  }
+
+  Future<void> _saveToggle(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,25 +179,38 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           title: 'Data Collection',
           subtitle: 'Allow Afeedi to collect usage data for improvements',
           value: _dataCollection,
-          onChanged: (value) => setState(() => _dataCollection = value),
+          onChanged: (value) {
+            setState(() => _dataCollection = value);
+            _saveToggle('setting_data_collection', value);
+          },
         ),
         _buildToggleItem(
           title: 'Personalized Ads',
           subtitle: 'Show ads based on your interests and activity',
           value: _personalizedAds,
-          onChanged: (value) => setState(() => _personalizedAds = value),
+          onChanged: (value) {
+            setState(() => _personalizedAds = value);
+            _saveToggle('setting_personalized_ads', value);
+          },
         ),
         _buildToggleItem(
           title: 'Analytics Sharing',
           subtitle: 'Share anonymous analytics to improve the platform',
           value: _analyticsSharing,
-          onChanged: (value) => setState(() => _analyticsSharing = value),
+          onChanged: (value) {
+            setState(() => _analyticsSharing = value);
+            PrivacyConsentService.instance.setAnalyticsConsent(value);
+            AnalyticsService.instance.setConsentGranted(value);
+          },
         ),
         _buildToggleItem(
           title: 'Location Tracking',
           subtitle: 'Use location for content recommendations',
           value: _locationTracking,
-          onChanged: (value) => setState(() => _locationTracking = value),
+          onChanged: (value) {
+            setState(() => _locationTracking = value);
+            _saveToggle('setting_location_tracking', value);
+          },
         ),
         _buildActionItem(
           title: 'Download My Data',
@@ -187,25 +239,37 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           title: 'Autoplay Videos',
           subtitle: 'Automatically play videos when scrolling',
           value: _autoplay,
-          onChanged: (value) => setState(() => _autoplay = value),
+          onChanged: (value) {
+            setState(() => _autoplay = value);
+            _saveToggle('setting_autoplay', value);
+          },
         ),
         _buildToggleItem(
           title: 'Download on WiFi Only',
           subtitle: 'Only download content when connected to WiFi',
           value: _downloadOnWifi,
-          onChanged: (value) => setState(() => _downloadOnWifi = value),
+          onChanged: (value) {
+            setState(() => _downloadOnWifi = value);
+            _saveToggle('setting_download_wifi', value);
+          },
         ),
         _buildToggleItem(
           title: 'High Quality Playback',
           subtitle: 'Use higher quality video when available',
           value: _highQuality,
-          onChanged: (value) => setState(() => _highQuality = value),
+          onChanged: (value) {
+            setState(() => _highQuality = value);
+            _saveToggle('setting_high_quality', value);
+          },
         ),
         _buildToggleItem(
           title: 'Dark Mode',
           subtitle: 'Use dark theme throughout the app',
           value: _darkMode,
-          onChanged: (value) => setState(() => _darkMode = value),
+          onChanged: (value) {
+            setState(() => _darkMode = value);
+            _saveToggle('setting_dark_mode', value);
+          },
         ),
         _buildActionItem(
           title: 'Clear Cache',
@@ -227,25 +291,37 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           title: 'Push Notifications',
           subtitle: 'Receive notifications on your device',
           value: _pushNotifications,
-          onChanged: (value) => setState(() => _pushNotifications = value),
+          onChanged: (value) {
+            setState(() => _pushNotifications = value);
+            _saveToggle('setting_push_notifications', value);
+          },
         ),
         _buildToggleItem(
           title: 'Email Notifications',
           subtitle: 'Receive updates via email',
           value: _emailNotifications,
-          onChanged: (value) => setState(() => _emailNotifications = value),
+          onChanged: (value) {
+            setState(() => _emailNotifications = value);
+            _saveToggle('setting_email_notifications', value);
+          },
         ),
         _buildToggleItem(
           title: 'Weekly Digest',
           subtitle: 'Get a summary of your week every Sunday',
           value: _weeklyDigest,
-          onChanged: (value) => setState(() => _weeklyDigest = value),
+          onChanged: (value) {
+            setState(() => _weeklyDigest = value);
+            _saveToggle('setting_weekly_digest', value);
+          },
         ),
         _buildToggleItem(
           title: 'Trending Alerts',
           subtitle: 'Get notified about trending content',
           value: _trendingAlerts,
-          onChanged: (value) => setState(() => _trendingAlerts = value),
+          onChanged: (value) {
+            setState(() => _trendingAlerts = value);
+            _saveToggle('setting_trending_alerts', value);
+          },
         ),
       ],
     );
@@ -515,7 +591,8 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
           style: TextStyle(color: Colors.red),
         ),
         content: Text(
-          'This action cannot be undone. All your data will be permanently deleted.',
+          'This action cannot be undone. All your data — including viewing history, '
+          'preferences, and connected accounts — will be permanently deleted.',
           style: TextStyle(color: Colors.white.withOpacity(0.8)),
         ),
         actions: [
@@ -527,18 +604,41 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Implement account deletion
+              await _deleteAccount();
             },
             child: const Text(
-              'Delete',
+              'Delete Permanently',
               style: TextStyle(color: Colors.red),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _deleteAccount() async {
+    final success = await LocalAuthService.instance.deleteAccount();
+    if (!mounted) return;
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Account deleted. We\'re sorry to see you go.')),
+      );
+      // Navigate back to welcome screen
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.welcome,
+        (route) => false,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to delete account. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
   
   void _showClearCacheDialog() {
@@ -712,9 +812,12 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Open terms URL
+              await launchUrl(
+                Uri.parse('https://afeedi.com/terms'),
+                mode: LaunchMode.externalApplication,
+              );
             },
             child: const Text(
               'Open',
@@ -748,9 +851,12 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Open privacy URL
+              await launchUrl(
+                Uri.parse('https://afeedi.com/privacy'),
+                mode: LaunchMode.externalApplication,
+              );
             },
             child: const Text(
               'Open',
@@ -762,12 +868,13 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
     );
   }
   
-  // Navigation methods
   void _navigateToProfile() {
-    // TODO: Navigate to profile screen
+    Navigator.pushNamed(context, AppRoutes.profile);
   }
-  
+
   void _navigateToSubscription() {
-    // TODO: Navigate to subscription screen
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Subscription management coming soon')),
+    );
   }
 }

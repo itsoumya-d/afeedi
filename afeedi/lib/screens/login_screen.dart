@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+import '../services/local_auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen>
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _rememberMe = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -310,17 +312,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     width: double.infinity,
                                     height: 52,
                                     child: ElevatedButton(
-                                      onPressed: () {
-                                        if (_formKey.currentState!.validate()) {
-                                          // TODO: Implement login
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Login successful!'),
-                                              backgroundColor: Color(0xFF00D4FF),
-                                            ),
-                                          );
-                                        }
-                                      },
+                                      onPressed: _isLoading ? null : _signIn,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: const Color(0xFF00D4FF),
                                         foregroundColor: const Color(0xFF0D0B1E),
@@ -329,13 +321,22 @@ class _LoginScreenState extends State<LoginScreen>
                                         ),
                                         elevation: 0,
                                       ),
-                                      child: const Text(
-                                        'Log In',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                      child: _isLoading
+                                          ? const SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: Color(0xFF0D0B1E),
+                                              ),
+                                            )
+                                          : const Text(
+                                              'Log In',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
                                     ),
                                   ),
                                   const SizedBox(height: 24),
@@ -464,6 +465,27 @@ class _LoginScreenState extends State<LoginScreen>
         ),
       ),
     );
+  }
+
+  Future<void> _signIn() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+    final user = await LocalAuthService.instance.signIn(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+    if (user != null) {
+      Navigator.pushReplacementNamed(context, '/dashboard');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid email or password. Please try again.'),
+          backgroundColor: Color(0xFFFF3C7E),
+        ),
+      );
+    }
   }
 
   Widget _buildTextField({

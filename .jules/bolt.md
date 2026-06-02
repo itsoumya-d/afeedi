@@ -1,0 +1,3 @@
+## 2024-06-02 - Content Aggregation Sequential Bottleneck
+**Learning:** The `ContentAggregationService` was fetching content sequentially from multiple connected platforms in a `for` loop. This caused the total fetch time to be the sum of all individual platform fetch times (e.g., 500ms + 300ms + 400ms = 1200ms latency), resulting in a major performance bottleneck for the user's main content feed.
+**Action:** Replaced sequential `await` loop with `Future.wait` and a `map` combined with `.toList()` to execute the fetch requests concurrently, effectively reducing the total aggregation time to roughly the duration of the single slowest API call. Used `catchError` inside the mapping to ensure one platform's failure doesn't halt the entire `Future.wait` execution.

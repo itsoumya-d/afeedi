@@ -1,0 +1,3 @@
+## 2024-06-03 - [Content Aggregation Bottleneck]
+**Learning:** Sequential network calls inside `aggregateContent` created a significant latency bottleneck as platforms were fetched one by one. Using `Future.wait` for concurrent platform content fetching avoids sequential delays. The catch is ensuring `.catchError` is used per-future so that one platform failing doesn't cause `Future.wait` to abort the entire aggregation operation.
+**Action:** When aggregating data from multiple independent network sources or platforms, always use `Future.wait` for concurrent execution and apply error handling on the individual futures (rather than wrapping the `Future.wait` in a single try-catch) to maintain partial success.

@@ -1,0 +1,3 @@
+## 2024-06-06 - [Content Aggregation Bottleneck]
+**Learning:** The ContentAggregationService aggregates from platforms sequentially. With hardcoded mock latencies (YouTube 500ms, Instagram 300ms, TikTok 400ms, Facebook 600ms), this creates a linear bottleneck (1.8s+ total load time).
+**Action:** Use concurrent `Future.wait` combined with eagerly evaluated iterables and isolated `try-catch` blocks to reduce total latency to the slowest individual platform.

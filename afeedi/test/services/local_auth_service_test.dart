@@ -1,12 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:afeedi/services/local_auth_service.dart';
 import 'package:afeedi/core/storage/local_storage_service.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 import 'dart:io';
 import 'dart:convert';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late LocalAuthService authService;
   late Directory tempDir;
 
@@ -14,6 +17,38 @@ void main() {
     // Setup Hive for testing
     tempDir = await Directory.systemTemp.createTemp('afeedi_test');
     Hive.init(tempDir.path);
+
+    // Mock path_provider
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(const MethodChannel('plugins.flutter.io/path_provider'), (MethodCall methodCall) async {
+      if (methodCall.method == 'getApplicationDocumentsDirectory') {
+        return tempDir.path;
+      }
+      return null;
+    });
+
+    // Mock flutter_secure_storage
+    final secureStorageData = <String, String>{};
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'), (MethodCall methodCall) async {
+      if (methodCall.method == 'read') {
+        final String key = methodCall.arguments['key'];
+        return secureStorageData[key];
+      } else if (methodCall.method == 'write') {
+        final String key = methodCall.arguments['key'];
+        final String value = methodCall.arguments['value'];
+        secureStorageData[key] = value;
+        return null;
+      } else if (methodCall.method == 'delete') {
+        final String key = methodCall.arguments['key'];
+        secureStorageData.remove(key);
+        return null;
+      } else if (methodCall.method == 'deleteAll') {
+        secureStorageData.clear();
+        return null;
+      }
+      return null;
+    });
   });
 
   tearDownAll(() async {
@@ -43,9 +78,9 @@ void main() {
       expect(user, isNotNull);
       expect(user!.email, email);
 
-      // Verify that password is NOT stored as plain text in SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      final credentialsJson = prefs.getString('user_credentials_${user.id}');
+      // Verify that password is NOT stored as plain text in Secure Storage
+      const _secureStorage = FlutterSecureStorage();
+      final credentialsJson = await _secureStorage.read(key: 'user_credentials_${user.id}');
       expect(credentialsJson, isNotNull);
 
       final credentials = jsonDecode(credentialsJson!);
@@ -87,9 +122,9 @@ void main() {
       final user1 = await authService.signUp(email: 'user1@test.com', password: password1);
       final user2 = await authService.signUp(email: 'user2@test.com', password: password2);
 
-      final prefs = await SharedPreferences.getInstance();
-      final creds1 = jsonDecode(prefs.getString('user_credentials_${user1!.id}')!);
-      final creds2 = jsonDecode(prefs.getString('user_credentials_${user2!.id}')!);
+      const _secureStorage = FlutterSecureStorage();
+      final creds1 = jsonDecode((await _secureStorage.read(key: 'user_credentials_${user1!.id}'))!);
+      final creds2 = jsonDecode((await _secureStorage.read(key: 'user_credentials_${user2!.id}'))!);
 
       expect(creds1['password'], isNot(creds2['password']));
     });

@@ -9,17 +9,17 @@ class AppBarWithProfile extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final double elevation;
   final Color? backgroundColor;
-  
+
   const AppBarWithProfile({
-    Key? key,
+    super.key,
     required this.title,
     this.showBackButton = false,
     this.onProfileTap,
     this.actions,
     this.elevation = 0.0,
     this.backgroundColor,
-  }) : super(key: key);
-  
+  });
+
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -34,6 +34,7 @@ class AppBarWithProfile extends StatelessWidget implements PreferredSizeWidget {
       leading: showBackButton
           ? IconButton(
               icon: Icon(Icons.arrow_back),
+              tooltip: 'Back',
               onPressed: () => Navigator.of(context).pop(),
             )
           : null,
@@ -42,28 +43,28 @@ class AppBarWithProfile extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: CircleAvatar(
             backgroundColor: AppColors.primary,
-            child: Icon(
-              Icons.person,
-              color: Colors.white,
-              size: 20,
-            ),
             radius: 16,
+            child: Icon(Icons.person, color: Colors.white, size: 20),
           ),
-          onPressed: onProfileTap ?? () {
-            // Default profile action if none provided
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Profile action not implemented')),
-            );
-          },
+          tooltip: 'User Profile',
+          onPressed:
+              onProfileTap ??
+              () {
+                // Default profile action if none provided
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Profile action not implemented')),
+                );
+              },
         ),
         SizedBox(width: 8),
       ],
       elevation: elevation,
-      backgroundColor: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor:
+          backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       centerTitle: false,
     );
   }
-  
+
   @override
   Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }

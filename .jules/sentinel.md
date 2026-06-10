@@ -1,0 +1,4 @@
+## 2024-06-11 - [Migrate Sensitive Credentials to Secure Storage]
+**Vulnerability:** [The application stored sensitive data like hashed passwords and OAuth access tokens in plain text using SharedPreferences, which can be easily extracted from device storage.]
+**Learning:** [SharedPreferences should never be used for sensitive information. A proper secure storage mechanism like flutter_secure_storage backed by Android Keystore/iOS Keychain must be utilized for such data while handling migration for existing users.]
+**Prevention:** [Implement a policy and automated linting (if possible) to prevent the usage of SharedPreferences for keys containing 'password', 'token', or 'credential'. Always default to secure storage for sensitive data.]

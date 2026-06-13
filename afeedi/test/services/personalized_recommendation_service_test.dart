@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:afeedi/services/personalized_recommendation_service.dart';
 import 'package:afeedi/models/user_preferences.dart';
 import 'package:afeedi/models/recommendation.dart';
+import 'package:afeedi/models/content_item.dart';
 
 void main() {
   late PersonalizedRecommendationService recommendationService;
@@ -190,6 +191,68 @@ void main() {
         categoryGroups.putIfAbsent(rec.category, () => []).add(rec);
       }
       expect(categoryGroups.length, greaterThanOrEqualTo(1));
+    });
+
+    test('applyDiversityToRecommendations handles empty list', () {
+      final diversified = recommendationService.applyDiversityToRecommendations([]);
+      expect(diversified, isEmpty);
+    });
+
+    test('applyDiversityToContentItems returns diverse content items', () {
+      // Arrange
+      final contentItems = [
+        ContentItem(
+          id: '1',
+          title: 'Tech Video 1',
+          description: 'A tech video about the latest technologies',
+          platform: 'youtube',
+          contentType: 'video',
+          category: 'tech',
+          tags: ['tech'],
+          durationSeconds: 300,
+          relevanceScore: 0.9,
+          publishedAt: DateTime.now(),
+        ),
+        ContentItem(
+          id: '2',
+          title: 'Tech Video 2',
+          description: 'Another tech video about programming',
+          platform: 'youtube',
+          contentType: 'video',
+          category: 'tech',
+          tags: ['tech', 'programming'],
+          durationSeconds: 300,
+          relevanceScore: 0.8,
+          publishedAt: DateTime.now(),
+        ),
+        ContentItem(
+          id: '3',
+          title: 'Science Article',
+          description: 'An article about recent scientific discoveries',
+          platform: 'medium',
+          contentType: 'article',
+          category: 'science',
+          tags: ['science'],
+          durationSeconds: 600,
+          relevanceScore: 0.7,
+          publishedAt: DateTime.now(),
+        ),
+      ];
+
+      // Act
+      final diversifiedItems = recommendationService.applyDiversityToContentItems(contentItems);
+
+      // Assert
+      expect(diversifiedItems, isNotEmpty);
+      expect(diversifiedItems.length, contentItems.length);
+
+      // Verify that the order has been adjusted for diversity
+      expect(diversifiedItems, isNot(equals(contentItems)));
+    });
+
+    test('applyDiversityToContentItems handles empty list', () {
+      final diversified = recommendationService.applyDiversityToContentItems([]);
+      expect(diversified, isEmpty);
     });
   });
 

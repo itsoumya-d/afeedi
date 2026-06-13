@@ -1,0 +1,3 @@
+## 2024-03-24 - [Dart Future.wait Concurrent Map Iterables]
+**Learning:** When using `Future.wait` on a `.map` iterable to perform concurrent async operations, appending `.toList()` is necessary to eagerly evaluate the iterable and ensure all requests start immediately. Also, when returning a Future within a `try-catch` block (e.g., inside the `.map` callback), explicitly `return await ...` is required so exceptions are caught locally rather than bubbling up.
+**Action:** When parallelizing operations with `.map` and `Future.wait`, always append `.toList()` to the mapped iterable and use `return await` inside internal try-catch blocks.

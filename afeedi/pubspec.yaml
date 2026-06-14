@@ -102,6 +102,7 @@ dependencies:
 
   # Security
   crypto: ^3.0.3
+  flutter_secure_storage: ^9.2.4
 
 dev_dependencies:
   flutter_test:

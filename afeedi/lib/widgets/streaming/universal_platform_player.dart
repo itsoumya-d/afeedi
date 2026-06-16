@@ -13,6 +13,7 @@ import 'social_media_video_player.dart';
 
 // Conditional import for web
 import '../../src/stubs/ui_web.dart' if (dart.library.html) 'dart:ui_web' as ui_web;
+import '../../src/stubs/html.dart' if (dart.library.html) 'dart:html' as html;
 
 // Global registry to track registered view factories
 final Set<String> _registeredViewFactories = <String>{};
@@ -209,9 +210,14 @@ class _UniversalPlatformPlayerState extends State<UniversalPlatformPlayer> {
       final embedUrl = _getEmbedUrl();
       
       // Create iframe element
-      // TODO: Implement proper iframe creation for web platform
-      final iframe = null; // Simplified for mobile-first approach
-      // Style properties removed - not applicable for mobile-first approach
+      final iframe = html.IFrameElement()
+        ..src = embedUrl
+        ..style.border = 'none'
+        ..style.height = '100%'
+        ..style.width = '100%'
+        ..allowFullscreen = widget.allowFullscreen;
+
+      iframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture');
       
       // Register the view factory only if not already registered
       if (!_registeredViewFactories.contains(_containerId!)) {

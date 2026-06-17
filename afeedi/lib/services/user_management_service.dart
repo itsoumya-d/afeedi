@@ -251,11 +251,39 @@ class UserManagementService {
         return {};
       }
       
-      // Get content interactions count
-      final interactionsResponse = await _supabase
-          .from(SupabaseConfig.contentInteractionsTable)
-          .select('interaction_type')
-          .eq('user_id', targetUserId);
+      // Execute all independent Supabase queries concurrently to reduce overall latency
+      final responses = await Future.wait([
+        // Get content interactions count
+        _supabase
+            .from(SupabaseConfig.contentInteractionsTable)
+            .select('interaction_type')
+            .eq('user_id', targetUserId),
+
+        // Get platform connections count
+        _supabase
+            .from(SupabaseConfig.platformConnectionsTable)
+            .select('platform')
+            .eq('user_id', targetUserId)
+            .eq('is_active', true),
+
+        // Get scheduled content count
+        _supabase
+            .from(SupabaseConfig.scheduledContentTable)
+            .select('id')
+            .eq('user_id', targetUserId)
+            .gt('scheduled_for', DateTime.now().toIso8601String()),
+
+        // Get recommendations metrics
+        _supabase
+            .from(SupabaseConfig.recommendationsTable)
+            .select('is_shown, is_clicked')
+            .eq('user_id', targetUserId),
+      ]);
+
+      final interactionsResponse = responses[0];
+      final connectionsResponse = responses[1];
+      final scheduledResponse = responses[2];
+      final recommendationsResponse = responses[3];
       
       final interactions = interactionsResponse as List;
       final interactionCounts = <String, int>{};
@@ -265,30 +293,10 @@ class UserManagementService {
         interactionCounts[type] = (interactionCounts[type] ?? 0) + 1;
       }
       
-      // Get platform connections count
-      final connectionsResponse = await _supabase
-          .from(SupabaseConfig.platformConnectionsTable)
-          .select('platform')
-          .eq('user_id', targetUserId)
-          .eq('is_active', true);
-      
       final connections = connectionsResponse as List;
       final connectedPlatforms = connections.map((c) => c['platform']).toList();
       
-      // Get scheduled content count
-      final scheduledResponse = await _supabase
-          .from(SupabaseConfig.scheduledContentTable)
-          .select('id')
-          .eq('user_id', targetUserId)
-          .gt('scheduled_for', DateTime.now().toIso8601String());
-      
       final upcomingScheduled = (scheduledResponse as List).length;
-      
-      // Get recommendations metrics
-      final recommendationsResponse = await _supabase
-          .from(SupabaseConfig.recommendationsTable)
-          .select('is_shown, is_clicked')
-          .eq('user_id', targetUserId);
       
       final recommendations = recommendationsResponse as List;
       final totalRecommendations = recommendations.length;

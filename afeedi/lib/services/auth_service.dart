@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/user_model.dart';
 import '../models/platform_connection_model.dart';
 import '../models/content_model.dart';
@@ -11,24 +12,24 @@ class AuthResult {
   final bool success;
   final String? error;
   final User? user;
-  
+
   AuthResult({required this.success, this.error, this.user});
 }
 
 class AuthService {
   static AuthService? _instance;
   static AuthService get instance => _instance ??= AuthService._();
-  
+
   AuthService._();
-  
+
   User? _currentUser;
-  
+
   // Get current user
   User? get currentUser => _currentUser;
-  
+
   // Check if user is authenticated
   bool get isAuthenticated => _currentUser != null;
-  
+
   // Initialize and restore user session from local storage
   Future<void> initializeAuth() async {
     try {
@@ -36,7 +37,7 @@ class AuthService {
       final userId = prefs.getString('user_id');
       final userEmail = prefs.getString('user_email');
       final userName = prefs.getString('user_name');
-      
+
       if (userId != null && userEmail != null) {
         _currentUser = User(
           id: userId,
@@ -52,7 +53,7 @@ class AuthService {
       debugPrint('Error initializing auth: $e');
     }
   }
-  
+
   // Initialize auth service
   Future<void> initialize() async {
     try {
@@ -60,22 +61,22 @@ class AuthService {
       final userId = prefs.getString('user_id');
       final email = prefs.getString('user_email');
       final name = prefs.getString('user_name');
-      
+
       if (userId != null && email != null) {
-         _currentUser = User(
-           id: userId,
-           email: email,
-           role: UserRole.registered,
-           isActive: true,
-           createdAt: DateTime.now(),
-           updatedAt: DateTime.now(),
-         );
-       }
+        _currentUser = User(
+          id: userId,
+          email: email,
+          role: UserRole.registered,
+          isActive: true,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+      }
     } catch (e) {
       debugPrint('Error initializing auth: $e');
     }
   }
-  
+
   // Sign up with email and password
   Future<AuthResult> signUp({
     required String email,
@@ -85,40 +86,37 @@ class AuthService {
     try {
       // Simulate sign up - in real app, this would call backend
       final userId = DateTime.now().millisecondsSinceEpoch.toString();
-      
+
       final user = User(
-         id: userId,
-         email: email,
-         role: UserRole.registered,
-         isActive: true,
-         createdAt: DateTime.now(),
-         updatedAt: DateTime.now(),
-       );
-      
+        id: userId,
+        email: email,
+        role: UserRole.registered,
+        isActive: true,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
       // Save to local storage
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_id', userId);
       await prefs.setString('user_email', email);
       await prefs.setString('user_name', name ?? 'User');
-      
+
       _currentUser = user;
-      
+
       // Track analytics
-       AnalyticsService.instance.trackUserInteraction(
-         action: 'signup_success',
-         screen: 'auth',
-         additionalData: {
-           'method': 'email',
-           'user_id': userId,
-         },
-       );
-      
+      AnalyticsService.instance.trackUserInteraction(
+        action: 'signup_success',
+        screen: 'auth',
+        additionalData: {'method': 'email', 'user_id': userId},
+      );
+
       return AuthResult(success: true, user: user);
     } catch (e) {
       return AuthResult(success: false, error: e.toString());
     }
   }
-  
+
   // Sign in with email and password
   Future<AuthResult> signIn({
     required String email,
@@ -127,40 +125,37 @@ class AuthService {
     try {
       // Simulate sign in - in real app, this would validate credentials
       final userId = DateTime.now().millisecondsSinceEpoch.toString();
-      
+
       final user = User(
-         id: userId,
-         email: email,
-         role: UserRole.registered,
-         isActive: true,
-         createdAt: DateTime.now(),
-         updatedAt: DateTime.now(),
-       );
-      
+        id: userId,
+        email: email,
+        role: UserRole.registered,
+        isActive: true,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
       // Save to local storage
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_id', userId);
       await prefs.setString('user_email', email);
       await prefs.setString('user_name', 'User');
-      
+
       _currentUser = user;
-      
+
       // Track analytics
-       AnalyticsService.instance.trackUserInteraction(
-         action: 'signin_success',
-         screen: 'auth',
-         additionalData: {
-           'method': 'email',
-           'user_id': userId,
-         },
-       );
-      
+      AnalyticsService.instance.trackUserInteraction(
+        action: 'signin_success',
+        screen: 'auth',
+        additionalData: {'method': 'email', 'user_id': userId},
+      );
+
       return AuthResult(success: true, user: user);
     } catch (e) {
       return AuthResult(success: false, error: e.toString());
     }
   }
-  
+
   // Sign out
   Future<AuthResult> signOut() async {
     try {
@@ -168,23 +163,30 @@ class AuthService {
       await prefs.remove('user_id');
       await prefs.remove('user_email');
       await prefs.remove('user_name');
-      
+
+      // Clear securely stored OAuth tokens
+      const secureStorage = FlutterSecureStorage();
+      await secureStorage.deleteAll();
+
       _currentUser = null;
-      
+
       // Track analytics
-       AnalyticsService.instance.trackUserInteraction(
-         action: 'signout',
-         screen: 'app',
-       );
-      
+      AnalyticsService.instance.trackUserInteraction(
+        action: 'signout',
+        screen: 'app',
+      );
+
       return AuthResult(success: true);
     } catch (e) {
       return AuthResult(success: false, error: e.toString());
     }
   }
-  
+
   // OAuth sign in with actual OAuth data
-  Future<AuthResult> signInWithOAuth(String provider, [Map<String, dynamic>? oauthData]) async {
+  Future<AuthResult> signInWithOAuth(
+    String provider, [
+    Map<String, dynamic>? oauthData,
+  ]) async {
     try {
       // Use OAuth data if provided, otherwise get from OAuthService
       Map<String, dynamic>? authData = oauthData;
@@ -198,88 +200,97 @@ class AuthService {
             authData = await OAuthService.connectApple();
             break;
           default:
-            return AuthResult(success: false, error: 'Unsupported OAuth provider: $provider');
+            return AuthResult(
+              success: false,
+              error: 'Unsupported OAuth provider: $provider',
+            );
         }
       }
-      
+
       if (authData == null) {
         return AuthResult(success: false, error: 'OAuth authentication failed');
       }
-      
+
       // Extract user information from OAuth data
       final userId = DateTime.now().millisecondsSinceEpoch.toString();
       final email = authData['email'] ?? 'user@$provider.com';
-      final displayName = authData['displayName'] ?? authData['givenName'] ?? 'User';
-      
+      final displayName =
+          authData['displayName'] ?? authData['givenName'] ?? 'User';
+
       final user = User(
-         id: userId,
-         email: email,
-         name: displayName,
-         role: UserRole.registered,
-         isActive: true,
-         createdAt: DateTime.now(),
-         updatedAt: DateTime.now(),
-       );
-      
+        id: userId,
+        email: email,
+        name: displayName,
+        role: UserRole.registered,
+        isActive: true,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
       // Save to local storage
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_id', userId);
       await prefs.setString('user_email', email);
       await prefs.setString('user_name', displayName);
-      
-      // Store OAuth tokens securely
+
+      // Store OAuth tokens securely using flutter_secure_storage
+      const secureStorage = FlutterSecureStorage();
       if (authData['accessToken'] != null) {
-        await prefs.setString('oauth_access_token_$provider', authData['accessToken']);
+        await secureStorage.write(
+          key: 'oauth_access_token_$provider',
+          value: authData['accessToken'],
+        );
       }
       if (authData['idToken'] != null) {
-        await prefs.setString('oauth_id_token_$provider', authData['idToken']);
+        await secureStorage.write(
+          key: 'oauth_id_token_$provider',
+          value: authData['idToken'],
+        );
       }
-      
+
       _currentUser = user;
-      
+
       // Track analytics
-       AnalyticsService.instance.trackUserInteraction(
-         action: 'oauth_signin_success',
-         screen: 'auth',
-         additionalData: {
-           'provider': provider,
-           'user_id': userId,
-           'email': email,
-         },
-       );
-      
+      AnalyticsService.instance.trackUserInteraction(
+        action: 'oauth_signin_success',
+        screen: 'auth',
+        additionalData: {
+          'provider': provider,
+          'user_id': userId,
+          'email': email,
+        },
+      );
+
       return AuthResult(success: true, user: user);
     } catch (e) {
       return AuthResult(success: false, error: e.toString());
     }
   }
-  
+
   // Update user profile
-  Future<AuthResult> updateProfile({
-    String? email,
-  }) async {
+  Future<AuthResult> updateProfile({String? email}) async {
     try {
       if (_currentUser == null) {
         return AuthResult(success: false, error: 'User not authenticated');
       }
-      
+
       final updatedUser = _currentUser!.copyWith(
         email: email ?? _currentUser!.email,
         updatedAt: DateTime.now(),
       );
-      
+
       // Save to local storage
       final prefs = await SharedPreferences.getInstance();
       if (email != null) await prefs.setString('user_email', email);
-      
+
       _currentUser = updatedUser;
-      
+
       return AuthResult(success: true, user: updatedUser);
     } catch (e) {
       return AuthResult(success: false, error: e.toString());
     }
   }
-  
+
   // Change password (simplified)
   Future<AuthResult> changePassword({
     required String currentPassword,
@@ -292,7 +303,7 @@ class AuthService {
       return AuthResult(success: false, error: e.toString());
     }
   }
-  
+
   // Reset password (simplified)
   Future<AuthResult> resetPassword(String email) async {
     try {
@@ -302,28 +313,34 @@ class AuthService {
       return AuthResult(success: false, error: e.toString());
     }
   }
-  
+
   // Delete account (simplified)
   Future<AuthResult> deleteAccount() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
+
+      // Clear securely stored OAuth tokens
+      const secureStorage = FlutterSecureStorage();
+      await secureStorage.deleteAll();
+
       _currentUser = null;
-      
+
       return AuthResult(success: true);
     } catch (e) {
       return AuthResult(success: false, error: e.toString());
     }
   }
-  
+
   // Get platform connections for the current user
   Future<List<PlatformConnection>> getPlatformConnections() async {
     try {
       if (_currentUser == null) return [];
-      
+
       final prefs = await SharedPreferences.getInstance();
-      final connectionsJson = prefs.getStringList('platform_connections_${_currentUser!.id}') ?? [];
-      
+      final connectionsJson =
+          prefs.getStringList('platform_connections_${_currentUser!.id}') ?? [];
+
       return connectionsJson.map((json) {
         final data = Map<String, dynamic>.from({
           'id': 'conn_${DateTime.now().millisecondsSinceEpoch}',
@@ -333,7 +350,9 @@ class AuthService {
           'platform_username': 'testuser',
           'access_token': 'token123',
           'refresh_token': 'refresh123',
-          'expires_at': DateTime.now().add(Duration(hours: 1)).toIso8601String(),
+          'expires_at': DateTime.now()
+              .add(Duration(hours: 1))
+              .toIso8601String(),
           'is_active': true,
           'created_at': DateTime.now().toIso8601String(),
           'updated_at': DateTime.now().toIso8601String(),

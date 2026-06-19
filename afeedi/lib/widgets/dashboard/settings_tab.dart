@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
+import '../../screens/profile_screen.dart';
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({super.key});
@@ -764,10 +765,16 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
   
   // Navigation methods
   void _navigateToProfile() {
-    // TODO: Navigate to profile screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ProfileScreen(initialTabIndex: 0)),
+    );
   }
   
   void _navigateToSubscription() {
-    // TODO: Navigate to subscription screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ProfileScreen(initialTabIndex: 2)),
+    );
   }
 }

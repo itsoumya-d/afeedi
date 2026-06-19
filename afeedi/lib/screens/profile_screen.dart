@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final int initialTabIndex;
+  const ProfileScreen({super.key, this.initialTabIndex = 0});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -101,7 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: widget.initialTabIndex);
   }
   
   @override

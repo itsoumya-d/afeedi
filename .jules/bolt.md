@@ -1,0 +1,3 @@
+## 2024-06-20 - [Future.wait Synchronous Iteration & Collection For Loops]
+**Learning:** `Future.wait()` iterates over its input synchronously, meaning all mapped asynchronous operations begin immediately upon iteration. Adding `.toList()` to a lazy `.map()` iterable is unnecessary for eager execution in this context. Furthermore, using spread operators with `.map()` is unidiomatic and verbose compared to Dart's collection `for` loops.
+**Action:** Use idiomatic collection `for` loops inside `Future.wait()` list literals (e.g., `[for (int i = 0; i < N; i++) asyncOperation()]`) for clean, concurrent execution without redundant `.toList()` evaluations.

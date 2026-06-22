@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
 
 class SettingsTab extends StatefulWidget {
@@ -712,9 +713,16 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Open terms URL
+              final Uri url = Uri.parse('https://afeedi.com/terms');
+              if (!await launchUrl(url)) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Could not open terms of service')),
+                  );
+                }
+              }
             },
             child: const Text(
               'Open',
@@ -748,9 +756,16 @@ class _SettingsTabState extends State<SettingsTab> with AutomaticKeepAliveClient
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: Open privacy URL
+              final Uri url = Uri.parse('https://afeedi.com/privacy');
+              if (!await launchUrl(url)) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Could not open privacy policy')),
+                  );
+                }
+              }
             },
             child: const Text(
               'Open',

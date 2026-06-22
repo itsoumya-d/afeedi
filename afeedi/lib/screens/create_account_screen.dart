@@ -36,21 +36,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
 
     // Start animations
     _fadeController.forward();
@@ -83,10 +76,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF0D0B1E),
-              Color(0xFF2D1B69),
-            ],
+            colors: [Color(0xFF0D0B1E), Color(0xFF2D1B69)],
           ),
         ),
         child: Stack(
@@ -131,9 +121,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
             // Backdrop filter for blur effect
             BackdropFilter(
               filter: ui.ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-              child: Container(
-                color: Colors.transparent,
-              ),
+              child: Container(color: Colors.transparent),
             ),
             // Main content
             SafeArea(
@@ -147,6 +135,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                       child: FadeTransition(
                         opacity: _fadeAnimation,
                         child: IconButton(
+                          tooltip: 'Go back',
                           onPressed: () {
                             Navigator.pop(context);
                           },
@@ -248,7 +237,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                       if (value == null || value.isEmpty) {
                                         return 'Please enter your email';
                                       }
-                                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$').hasMatch(value)) {
+                                      if (!RegExp(
+                                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$',
+                                      ).hasMatch(value)) {
                                         return 'Please enter a valid email';
                                       }
                                       return null;
@@ -262,13 +253,18 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                     hint: 'Create a strong password',
                                     obscureText: _obscurePassword,
                                     suffixIcon: IconButton(
+                                      tooltip: _obscurePassword
+                                          ? 'Show password'
+                                          : 'Hide password',
                                       onPressed: () {
                                         setState(() {
                                           _obscurePassword = !_obscurePassword;
                                         });
                                       },
                                       icon: Icon(
-                                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                        _obscurePassword
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
                                         color: Colors.white54,
                                       ),
                                     ),
@@ -290,13 +286,19 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                     hint: 'Confirm your password',
                                     obscureText: _obscureConfirmPassword,
                                     suffixIcon: IconButton(
+                                      tooltip: _obscureConfirmPassword
+                                          ? 'Show password'
+                                          : 'Hide password',
                                       onPressed: () {
                                         setState(() {
-                                          _obscureConfirmPassword = !_obscureConfirmPassword;
+                                          _obscureConfirmPassword =
+                                              !_obscureConfirmPassword;
                                         });
                                       },
                                       icon: Icon(
-                                        _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                                        _obscureConfirmPassword
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
                                         color: Colors.white54,
                                       ),
                                     ),
@@ -323,7 +325,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                         },
                                         activeColor: const Color(0xFF00D4FF),
                                         checkColor: const Color(0xFF0D0B1E),
-                                        side: const BorderSide(color: Colors.white54),
+                                        side: const BorderSide(
+                                          color: Colors.white54,
+                                        ),
                                       ),
                                       Expanded(
                                         child: RichText(
@@ -333,12 +337,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                               fontSize: 14,
                                             ),
                                             children: [
-                                              TextSpan(text: 'I agree to Afeedi\'s '),
+                                              TextSpan(
+                                                text: 'I agree to Afeedi\'s ',
+                                              ),
                                               TextSpan(
                                                 text: 'Terms',
                                                 style: TextStyle(
                                                   color: Color(0xFF00D4FF),
-                                                  decoration: TextDecoration.underline,
+                                                  decoration:
+                                                      TextDecoration.underline,
                                                 ),
                                               ),
                                               TextSpan(text: ' & '),
@@ -346,7 +353,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                                 text: 'Privacy Policy',
                                                 style: TextStyle(
                                                   color: Color(0xFF00D4FF),
-                                                  decoration: TextDecoration.underline,
+                                                  decoration:
+                                                      TextDecoration.underline,
                                                 ),
                                               ),
                                             ],
@@ -361,23 +369,38 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                     width: double.infinity,
                                     height: 52,
                                     child: ElevatedButton(
-                                      onPressed: _agreeToTerms ? () {
-                                        if (_formKey.currentState!.validate()) {
-                                          // TODO: Implement account creation
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Account created successfully!'),
-                                              backgroundColor: Color(0xFF00D4FF),
-                                            ),
-                                          );
-                                        }
-                                      } : null,
+                                      onPressed: _agreeToTerms
+                                          ? () {
+                                              if (_formKey.currentState!
+                                                  .validate()) {
+                                                // TODO: Implement account creation
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Account created successfully!',
+                                                    ),
+                                                    backgroundColor: Color(
+                                                      0xFF00D4FF,
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            }
+                                          : null,
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF00D4FF),
+                                        backgroundColor: const Color(
+                                          0xFF00D4FF,
+                                        ),
                                         disabledBackgroundColor: Colors.white24,
-                                        foregroundColor: const Color(0xFF0D0B1E),
+                                        foregroundColor: const Color(
+                                          0xFF0D0B1E,
+                                        ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(26),
+                                          borderRadius: BorderRadius.circular(
+                                            26,
+                                          ),
                                         ),
                                         elevation: 0,
                                       ),
@@ -394,7 +417,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                   // Login Link
                                   TextButton(
                                     onPressed: () {
-                                      Navigator.pushReplacementNamed(context, '/login');
+                                      Navigator.pushReplacementNamed(
+                                        context,
+                                        '/login',
+                                      );
                                     },
                                     child: const Text(
                                       'Already have an account? Log in',
@@ -449,16 +475,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
           keyboardType: keyboardType,
           obscureText: obscureText,
           validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-          ),
+          style: const TextStyle(color: Colors.white, fontSize: 16),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(
-              color: Colors.white54,
-              fontSize: 16,
-            ),
+            hintStyle: const TextStyle(color: Colors.white54, fontSize: 16),
             suffixIcon: suffixIcon,
             filled: true,
             fillColor: Colors.white.withOpacity(0.1),
@@ -482,7 +502,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFFFF3C7E), width: 2),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
           ),
         ),
       ],

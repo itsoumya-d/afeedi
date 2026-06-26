@@ -1,0 +1,4 @@
+## 2024-06-26 - [Use Secure Storage for Credentials]
+**Vulnerability:** User credentials (email and hashed password) were being stored in plaintext `SharedPreferences`, which on some platforms (like Android) are saved as easily accessible plaintext XML files, exposing user data.
+**Learning:** Even if a password is mathematically hashed, storing the combination of email and hashed password in an insecure location like `SharedPreferences` is a significant security risk for local authentication mechanisms.
+**Prevention:** Always use secure storage mechanisms like `flutter_secure_storage` (which uses Keystore on Android and Keychain on iOS) when storing authentication credentials or sensitive user tokens locally.

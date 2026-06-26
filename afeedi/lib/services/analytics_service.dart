@@ -12,6 +12,7 @@ class AnalyticsService {
 
   SharedPreferences? _prefs;
   List<Map<String, dynamic>> _eventQueue = [];
+  bool _isInitialized = false;
 
   // Initialize the analytics service
   Future<void> initialize() async {
@@ -261,13 +262,21 @@ class AnalyticsService {
   }
 
   // Private helper methods
+  Future<void> _ensureLoaded() async {
+    if (!_isInitialized) {
+      if (_prefs == null) {
+        _prefs = await SharedPreferences.getInstance();
+      }
+      await _loadQueuedEvents();
+    }
+  }
+
   Future<void> _queueEvent(Map<String, dynamic> event) async {
+    await _ensureLoaded();
     _eventQueue.add(event);
 
-    // Get all events including the new one
-    final allEvents = await _getStoredEvents();
-    allEvents.add(event);
-    await _persistEvents(allEvents);
+    // Persist memory queue directly to avoid O(N) disk read/parse
+    await _persistEvents(_eventQueue);
 
     // Log event in debug mode
     if (kDebugMode) {
@@ -301,18 +310,22 @@ class AnalyticsService {
   }
 
   Future<void> _loadQueuedEvents() async {
+    if (_isInitialized) return;
     try {
-      final eventsJson = _prefs?.getString('analytics_events');
-      if (eventsJson != null) {
-        final events = List<Map<String, dynamic>>.from(jsonDecode(eventsJson));
-        _eventQueue.addAll(events);
-      }
+      final storedEvents = await _getStoredEvents();
+      _eventQueue.clear();
+      _eventQueue.addAll(storedEvents);
+      _isInitialized = true;
     } catch (e) {
       debugPrint('Error loading queued events: $e');
     }
   }
 
   Future<List<Map<String, dynamic>>> _getStoredEvents() async {
+    if (_isInitialized) {
+      return List.from(_eventQueue);
+    }
+
     try {
       if (kIsWeb) {
         // Use SharedPreferences for web

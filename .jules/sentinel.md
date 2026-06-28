@@ -1,0 +1,4 @@
+## 2024-06-28 - Secure Storage Migration Pattern
+**Vulnerability:** Sensitive credentials and hashed passwords were stored in plaintext inside SharedPreferences, an insecure local storage mechanism.
+**Learning:** When migrating legacy systems from SharedPreferences to flutter_secure_storage, user data can be lost if a fallback is not implemented, breaking existing sessions.
+**Prevention:** Always use flutter_secure_storage for sensitive data like tokens or credentials. When upgrading existing insecure storage, implement a read-fallback mechanism that automatically migrates legacy SharedPreferences data to secure storage on first access.

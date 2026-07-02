@@ -14,9 +14,7 @@ class FeedPostCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -32,7 +30,7 @@ class FeedPostCard extends StatelessWidget {
   String _formatTimeAgo(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
-    
+
     if (difference.inDays > 0) {
       return '${difference.inDays}d ago';
     } else if (difference.inHours > 0) {
@@ -51,7 +49,7 @@ class FeedPostCard extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 16,
-            backgroundImage: content.thumbnailUrl != null 
+            backgroundImage: content.thumbnailUrl != null
                 ? CachedNetworkImageProvider(content.thumbnailUrl!)
                 : null,
             backgroundColor: AppTheme.primaryCyan.withOpacity(0.1),
@@ -75,18 +73,16 @@ class FeedPostCard extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  content.publishedAt != null 
+                  content.publishedAt != null
                       ? _formatTimeAgo(content.publishedAt!)
                       : 'Unknown time',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 11,
-                  ),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 11),
                 ),
               ],
             ),
           ),
           IconButton(
+            tooltip: 'More options',
             icon: const Icon(Icons.more_vert),
             onPressed: () {
               // Show more options
@@ -100,7 +96,7 @@ class FeedPostCard extends StatelessWidget {
   Widget _buildPlatformBadge(String platform) {
     Color color;
     IconData icon;
-    
+
     switch (platform.toLowerCase()) {
       case 'youtube':
         color = const Color(0xFFFF0000);
@@ -129,11 +125,7 @@ class FeedPostCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 10,
-            color: color,
-          ),
+          Icon(icon, size: 10, color: color),
           const SizedBox(width: 3),
           Text(
             platform,
@@ -243,6 +235,7 @@ class FeedPostCard extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           IconButton(
+            tooltip: 'Bookmark',
             icon: const Icon(Icons.bookmark_border),
             onPressed: () async {
               await ContentService.instance.trackContentInteraction(
@@ -271,10 +264,7 @@ class FeedPostCard extends StatelessWidget {
           children: [
             Icon(icon, size: 18),
             const SizedBox(width: 3),
-            Text(
-              count.toString(),
-              style: const TextStyle(fontSize: 12),
-            ),
+            Text(count.toString(), style: const TextStyle(fontSize: 12)),
           ],
         ),
       ),

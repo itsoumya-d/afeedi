@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import 'dart:convert';
 // import 'dart:html' as html;
 import '../models/content_model.dart';
@@ -76,6 +78,7 @@ class SocialMediaStreamingService {
   /// Set access token for a specific platform (required for Instagram)
   void setAccessToken(PlatformType platform, String token) {
     _accessTokens[platform.name] = token;
+    _saveStoredToken(platform, token);
     Logger.info('Access token set for ${platform.name}');
   }
 
@@ -532,9 +535,28 @@ class SocialMediaStreamingService {
 
   /// Private helper methods
   
+  final _secureStorage = const FlutterSecureStorage();
+
   Future<void> _loadStoredTokens() async {
-    // TODO: Implement secure token storage/retrieval
-    // For now, tokens need to be set manually via setAccessToken
+    try {
+      final allData = await _secureStorage.readAll();
+      for (final platform in PlatformType.values) {
+        final token = allData['access_token_${platform.name}'];
+        if (token != null && token.isNotEmpty) {
+          _accessTokens[platform.name] = token;
+        }
+      }
+    } catch (e) {
+      Logger.error('Failed to load stored tokens: $e');
+    }
+  }
+
+  Future<void> _saveStoredToken(PlatformType platform, String token) async {
+    try {
+      await _secureStorage.write(key: 'access_token_${platform.name}', value: token);
+    } catch (e) {
+      Logger.error('Failed to save stored token: $e');
+    }
   }
 
   Future<void> _initializePlatformConfigs() async {

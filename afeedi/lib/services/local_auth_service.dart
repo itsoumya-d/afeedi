@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import '../models/user_model.dart';
@@ -58,8 +59,8 @@ class LocalAuthService {
       await _storage.saveUser(user);
       
       // Save credentials with hashed password
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_credentials_${user.id}', jsonEncode({
+      final secureStorage = const FlutterSecureStorage();
+      await secureStorage.write(key: 'user_credentials_${user.id}', value: jsonEncode({
         'email': email,
         'password': _hashPassword(password),
       }));
@@ -98,8 +99,8 @@ class LocalAuthService {
       );
       
       // Verify hashed password
-      final prefs = await SharedPreferences.getInstance();
-      final credentialsJson = prefs.getString('user_credentials_${user.id}');
+      final secureStorage = const FlutterSecureStorage();
+      final credentialsJson = await secureStorage.read(key: 'user_credentials_${user.id}');
       
       if (credentialsJson != null) {
         final credentials = jsonDecode(credentialsJson);

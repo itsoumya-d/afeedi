@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/user_model.dart';
 import '../models/platform_connection_model.dart';
 import '../models/content_model.dart';
@@ -61,6 +62,19 @@ class AuthService {
       final email = prefs.getString('user_email');
       final name = prefs.getString('user_name');
       
+      // Migrate legacy insecure OAuth tokens to secure storage
+      const secureStorage = FlutterSecureStorage();
+      final keys = prefs.getKeys();
+      for (final key in keys) {
+        if (key.startsWith('oauth_')) {
+          final legacyToken = prefs.getString(key);
+          if (legacyToken != null) {
+            await secureStorage.write(key: key, value: legacyToken);
+            await prefs.remove(key);
+          }
+        }
+      }
+
       if (userId != null && email != null) {
          _currentUser = User(
            id: userId,
@@ -169,6 +183,14 @@ class AuthService {
       await prefs.remove('user_email');
       await prefs.remove('user_name');
       
+      const secureStorage = FlutterSecureStorage();
+      final allSecureData = await secureStorage.readAll();
+      for (final key in allSecureData.keys) {
+        if (key.startsWith('oauth_')) {
+          await secureStorage.delete(key: key);
+        }
+      }
+
       _currentUser = null;
       
       // Track analytics
@@ -228,11 +250,12 @@ class AuthService {
       await prefs.setString('user_name', displayName);
       
       // Store OAuth tokens securely
+      const secureStorage = FlutterSecureStorage();
       if (authData['accessToken'] != null) {
-        await prefs.setString('oauth_access_token_$provider', authData['accessToken']);
+        await secureStorage.write(key: 'oauth_access_token_$provider', value: authData['accessToken']);
       }
       if (authData['idToken'] != null) {
-        await prefs.setString('oauth_id_token_$provider', authData['idToken']);
+        await secureStorage.write(key: 'oauth_id_token_$provider', value: authData['idToken']);
       }
       
       _currentUser = user;
@@ -308,6 +331,15 @@ class AuthService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
+
+      const secureStorage = FlutterSecureStorage();
+      final allSecureData = await secureStorage.readAll();
+      for (final key in allSecureData.keys) {
+        if (key.startsWith('oauth_')) {
+          await secureStorage.delete(key: key);
+        }
+      }
+
       _currentUser = null;
       
       return AuthResult(success: true);

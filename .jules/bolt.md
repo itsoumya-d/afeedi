@@ -1,0 +1,3 @@
+## 2024-07-06 - [Concurrent API Fetching with Dart IIFEs]
+**Learning:** In Dart, to execute complex asynchronous blocks with error handling (like try-catch) concurrently within a `Future.wait()` list literal, you can use an async Immediately Invoked Function Expression (IIFE) inside a collection `for` loop. This avoids verbose `.map().toList()` patterns while allowing per-element error isolation.
+**Action:** Use `[for (var item in list) () async { try { return await process(item); } catch (e) { return fallback; } }() ]` when making concurrent API requests that shouldn't fail the whole batch if one throws.

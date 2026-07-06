@@ -42,24 +42,31 @@ class ContentAggregationService {
       
       final allContent = <Content>[];
       
-      // Aggregate content from each platform
-      for (final connection in filteredConnections) {
-        try {
-          final platformContent = await _fetchPlatformContent(
-            connection: connection,
-            limit: limit ~/ filteredConnections.length,
-            categories: categories,
-            searchQuery: searchQuery,
-          );
-          allContent.addAll(platformContent);
-        } catch (error) {
-          debugPrint('Error fetching content from ${connection.platform}: $error');
-          await AnalyticsService.instance.trackError(
-            errorType: 'content_aggregation_error',
-            errorMessage: 'Failed to fetch from ${connection.platform}: $error',
-            screen: 'content_aggregation',
-          );
-        }
+      // Aggregate content from each platform concurrently
+      final platformResults = await Future.wait([
+        for (final connection in filteredConnections)
+          () async {
+            try {
+              return await _fetchPlatformContent(
+                connection: connection,
+                limit: limit ~/ filteredConnections.length,
+                categories: categories,
+                searchQuery: searchQuery,
+              );
+            } catch (error) {
+              debugPrint('Error fetching content from ${connection.platform}: $error');
+              await AnalyticsService.instance.trackError(
+                errorType: 'content_aggregation_error',
+                errorMessage: 'Failed to fetch from ${connection.platform}: $error',
+                screen: 'content_aggregation',
+              );
+              return <Content>[];
+            }
+          }()
+      ]);
+
+      for (final platformContent in platformResults) {
+        allContent.addAll(platformContent);
       }
       
       // Sort by published date (newest first)

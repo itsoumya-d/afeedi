@@ -141,6 +141,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
           
           // More options
           IconButton(
+            tooltip: 'More options',
             onPressed: _showMoreOptions,
             icon: Icon(
               Icons.more_vert,
@@ -587,6 +588,7 @@ class _EnhancedFeedPostCardState extends State<EnhancedFeedPostCard> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: IconButton(
+                      tooltip: 'Close',
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.close, color: Colors.white, size: 20),
                     ),

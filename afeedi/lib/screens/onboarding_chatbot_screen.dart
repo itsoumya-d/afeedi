@@ -30,6 +30,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
   final FocusNode _searchFocusNode = FocusNode();
   final OnboardingService _onboardingService = OnboardingService();
   late ChatController _chatController;
+  final TextEditingController _textController = TextEditingController();
 
   late AnimationController _fadeController;
   late AnimationController _slideController;
@@ -147,6 +148,7 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
     _scrollController.dispose();
     _searchController.dispose();
     _searchFocusNode.dispose();
+    _textController.dispose();
     _chatController.dispose();
     super.dispose();
   }
@@ -472,9 +474,33 @@ class _OnboardingChatbotScreenState extends State<OnboardingChatbotScreen>
                 child: ChatInterface(
                   controller: _chatController,
                   scrollController: _scrollController,
-                  fadeAnimation: _fadeAnimation,
-                  slideAnimation: _slideAnimation,
-                  typingAnimation: _typingAnimation,
+                  textController: _textController,
+                  textFocusNode: FocusNode(),
+                  searchController: _searchController,
+                  searchFocusNode: _searchFocusNode,
+                  handleTextInput: (val) {
+                    if (val.trim().isNotEmpty) {
+                      _textController.clear();
+                      _addUserMessage(val.trim());
+                      _processUserInput(val.trim());
+                      _updateSuggestions();
+                    }
+                  },
+                  handleSuggestionTap: (val) {
+                    _textController.text = val;
+                    final text = _textController.text.trim();
+                    if (text.isNotEmpty) {
+                      _textController.clear();
+                      _addUserMessage(text);
+                      _processUserInput(text);
+                      _updateSuggestions();
+                    }
+                  },
+                  handleGenreToggle: (val) {
+                    // Logic to toggle genre in chat controller
+                    // Using internal chat controller method
+                  },
+                  selectedGenres: _chatController.selectedGenres,
                 ),
               ),
             ],

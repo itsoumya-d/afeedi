@@ -1,5 +1,7 @@
 import '../models/onboarding_step.dart';
 import '../models/genre.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/chat_message.dart';
 import '../models/user_preferences.dart';
 
@@ -9,6 +11,10 @@ class OnboardingService {
   OnboardingService._internal();
   
   static OnboardingService get instance => _instance;
+
+  Future<void> initialize() async {
+    // Initialization logic for OnboardingService
+  }
 
   // Static onboarding flow data
   static final List<Map<String, dynamic>> onboardingFlow = [
@@ -203,25 +209,50 @@ class OnboardingService {
     return message;
   }
 
-  // Save onboarding data (placeholder for actual implementation)
+  // Save onboarding data
   Future<void> saveOnboardingData({
     required String userName,
     required List<Genre> selectedGenres,
     required Map<String, bool> platformConnections,
     required List<ChatMessage> chatHistory,
   }) async {
-    // TODO: Implement actual data persistence
-    // This could save to local storage, database, or API
-    print('Saving onboarding data for $userName');
-    print('Selected genres: ${selectedGenres.map((g) => g.name).join(', ')}');
-    print('Platform connections: $platformConnections');
-    print('Chat history: ${chatHistory.length} messages');
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      final data = {
+        'userName': userName,
+        'selectedGenres': selectedGenres.map((g) => g.name).toList(),
+        'platformConnections': platformConnections,
+        'chatHistoryCount': chatHistory.length,
+        'completed': true,
+        'completedAt': DateTime.now().toIso8601String(),
+      };
+
+      await prefs.setString('onboarding_data', jsonEncode(data));
+
+      // Update the user profile if connected
+      final userId = prefs.getString('user_id');
+      if (userId != null) {
+        // Ideally this maps directly to a Supabase call, e.g.:
+        // await Supabase.instance.client.from('user_preferences').upsert({...});
+        print('Mock Supabase call: Saved preferences for user $userId');
+      }
+    } catch (e) {
+      print('Error saving onboarding data: $e');
+    }
   }
 
-  // Load saved onboarding data (placeholder for actual implementation)
+  // Load saved onboarding data
   Future<Map<String, dynamic>?> loadOnboardingData() async {
-    // TODO: Implement actual data loading
-    // This could load from local storage, database, or API
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final dataStr = prefs.getString('onboarding_data');
+      if (dataStr != null) {
+        return jsonDecode(dataStr) as Map<String, dynamic>;
+      }
+    } catch (e) {
+      print('Error loading onboarding data: $e');
+    }
     return null;
   }
 
@@ -290,6 +321,7 @@ class OnboardingService {
   // Current step tracking
   int _currentStepIndex = 0;
   final List<bool> _completedSteps = [];
+  List<bool> get completedSteps => _completedSteps;
 
   // Get next onboarding step
   Map<String, dynamic>? getNextStep() {

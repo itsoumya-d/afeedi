@@ -343,7 +343,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                               children: [
                                 // Step title
                                 Text(
-                                  step.stepTitle ?? 'Step ${index + 1}',
+                                  step['title'] ?? 'Step ${index + 1}',
                                   style: AppTextStyles.heading2,
                                 ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
                                 
@@ -351,7 +351,7 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
                                 
                                 // Step description
                                 Text(
-                                  step.stepDescription ?? step.botMessage,
+                                  step['description'] ?? step['title'],
                                   style: AppTextStyles.bodyMedium.copyWith(color: Colors.black87),
                                 ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideY(begin: 0.1, end: 0),
                                 
@@ -402,8 +402,8 @@ class _EnhancedOnboardingFlowState extends State<EnhancedOnboardingFlow> with Si
     );
   }
 
-  Widget _buildStepContent(OnboardingStep step) {
-    switch (step.key) {
+  Widget _buildStepContent(Map<String, dynamic> step) {
+    switch (step['id']) {
       case 'welcome':
         return _buildWelcomeStep();
       case 'personal_info':

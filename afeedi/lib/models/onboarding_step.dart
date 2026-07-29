@@ -7,6 +7,8 @@ class OnboardingStep {
   final bool isPlatformSelection;
   final bool allowMultiSelect;
   final bool showSkipOption;
+  bool get showGenreSelection => isGenreSelection;
+  bool get showPlatformSelection => isPlatformSelection;
   final String? stepTitle;
   final String? stepDescription;
   final String? helpText;

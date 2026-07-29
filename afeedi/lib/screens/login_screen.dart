@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
+import '../services/auth_service.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -600,15 +602,68 @@ class _LoginScreenState extends State<LoginScreen>
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                // TODO: Implement password reset
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Password reset link sent to your email!'),
-                    backgroundColor: Color(0xFF00D4FF),
-                  ),
+              onPressed: () async {
+                final email = emailController.text.trim();
+                if (email.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter your email address'),
+                      backgroundColor: Color(0xFFFF3C7E),
+                    ),
+                  );
+                  return;
+                }
+
+                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$').hasMatch(email)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter a valid email address'),
+                      backgroundColor: Color(0xFFFF3C7E),
+                    ),
+                  );
+                  return;
+                }
+
+                // Show loading indicator
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00D4FF)),
+                      ),
+                    );
+                  },
                 );
+
+                final result = await AuthService.instance.resetPassword(email);
+
+                // Hide loading indicator
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                }
+
+                if (result.success) {
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Password reset link sent to your email!'),
+                        backgroundColor: Color(0xFF00D4FF),
+                      ),
+                    );
+                  }
+                } else {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(result.error ?? 'Failed to send reset link'),
+                        backgroundColor: const Color(0xFFFF3C7E),
+                      ),
+                    );
+                  }
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF00D4FF),

@@ -117,10 +117,8 @@ class UniversalPlatformPlayerService {
       if (kIsWeb) {
         // Create Instagram embed iframe
         final embedUrl = 'https://www.instagram.com/p/${content.platformContentId}/embed/';
-        // TODO: Implement proper iframe creation for web platform
-        final iframe = null; // Simplified for mobile-first approach
-        // Style properties removed - not applicable for mobile-first approach
         
+        // TODO: Implement proper iframe creation for web platform
         // Note: View factory registration is now handled by UniversalPlatformPlayer
         // to avoid conflicts with multiple registrations
         
@@ -324,9 +322,6 @@ class UniversalPlatformPlayerService {
         final embedUrl = 'https://www.facebook.com/plugins/video.php?href=${Uri.encodeComponent(videoUrl)}&width=500&show_text=false&appId';
         
         // TODO: Implement proper iframe creation for web platform
-        final iframe = null; // Simplified for mobile-first approach
-        // Style properties removed - not applicable for mobile-first approach
-        
         // Note: View factory registration is now handled by UniversalPlatformPlayer
         // to avoid conflicts with multiple registrations
         

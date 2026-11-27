@@ -13,7 +13,7 @@ void main() {
   late UserPreferences mockUserPreferences;
 
   setUp(() {
-    recommendationService = PersonalizedRecommendationService._()..setRandom(math.Random(42));
+    recommendationService = PersonalizedRecommendationService.instance..setRandom(math.Random(42));
     
     // Create mock user preferences
     mockUserPreferences = UserPreferences(
@@ -21,7 +21,7 @@ void main() {
       age: 30,
       language: 'en',
       timezone: 'UTC-5',
-      interests: ['technology', 'science', 'travel'],
+      contentInterests: ['technology', 'science', 'travel'],
       contentTypes: ['video', 'article', 'podcast'],
       platformPriorities: {
         'youtube': 0.8,
@@ -31,29 +31,17 @@ void main() {
       preferredCreators: ['Creator1', 'Creator2'],
       contentFilters: {'explicit': false, 'violent': false},
       preferredViewingTimes: ['evening', 'night'],
-      averageSessionDuration: 30,
+      averageSessionDuration: '30',
       contentDiscoveryStyle: 'balanced',
-      autoplay: true,
-      videoQuality: 'high',
-      genres: ['tech', 'documentary', 'comedy'],
-      moods: ['relaxing', 'educational'],
       contentLengthPreferences: {'short': 80, 'medium': 15, 'long': 5},
-      explicitContent: false,
       enableAIRecommendations: true,
       diversityLevel: 0.7,
       crossPlatformRecommendations: true,
-      blockedKeywords: [],
-      favoriteKeywords: ['innovation', 'future'],
-      calendarIntegration: true,
-      scheduledContentTypes: ['educational', 'news'],
+      calendarIntegrationEnabled: true,
       timeBasedPreferences: {'morning': 'educational', 'evening': 'entertainment'},
       smartScheduling: true,
-      reminderMinutes: 15,
       theme: 'dark',
       compactMode: false,
-      showThumbnails: true,
-      showDuration: true,
-      showCreatorInfo: true,
       feedLayout: 'cards',
     );
   });
@@ -74,7 +62,7 @@ void main() {
       
       // Verify that recommendations are related to user interests
       final interestBasedItems = recommendations.where((item) {
-        return userPreferences.interests.any((interest) =>
+        return userPreferences.contentInterests.any((interest) =>
           item.recommendationReason.toLowerCase().contains(interest.toLowerCase()));
       }).toList();
       

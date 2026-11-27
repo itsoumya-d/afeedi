@@ -1,11 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'dart:math' as math;
 import '../core/config/supabase_config.dart';
-import '../models/content_model.dart';
-import '../models/user_model.dart';
+import '../models/content_model.dart' hide Recommendation;
+import '../models/user_model.dart' hide UserPreferences;
 import '../models/user_preferences.dart';
 import '../models/analytics_model.dart';
-// import '../models/calendar_event.dart'; // Temporarily commented out due to compilation errors
 import '../models/content_item.dart';
 import '../models/recommendation.dart';
 import 'auth_service.dart';
@@ -13,7 +12,51 @@ import 'analytics_service.dart';
 import 'content_aggregation_service.dart';
 import 'ai_recommendation_service.dart';
 import 'onboarding_service.dart';
-// import 'calendar_service.dart'; // Temporarily commented out due to compilation errors
+
+class CalendarEvent {
+  final String id;
+  final String title;
+  final String? description;
+  final String eventType;
+  final String? location;
+  final DateTime? startTime;
+  final DateTime? endTime;
+
+  CalendarEvent({
+    required this.id,
+    required this.title,
+    this.description,
+    this.eventType = 'general',
+    this.location,
+    this.startTime,
+    this.endTime,
+  });
+}
+
+class UserInteraction {
+  final String userId;
+  final String contentId;
+  final String interactionType;
+  final DateTime createdAt;
+
+  UserInteraction({
+    required this.userId,
+    required this.contentId,
+    required this.interactionType,
+    required this.createdAt,
+  });
+
+  factory UserInteraction.fromJson(Map<String, dynamic> json) {
+    return UserInteraction(
+      userId: json['user_id'] as String? ?? '',
+      contentId: json['content_id'] as String? ?? '',
+      interactionType: json['interaction_type'] as String? ?? '',
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'] as String) ?? DateTime.now()
+          : DateTime.now(),
+    );
+  }
+}
 
 class PersonalizedRecommendationService {
   static PersonalizedRecommendationService? _instance;
@@ -85,14 +128,12 @@ class PersonalizedRecommendationService {
       id: 'content_${DateTime.now().millisecondsSinceEpoch}_$index',
       title: title,
       description: description,
-      imageUrl: imageUrl,
+      thumbnailUrl: imageUrl,
       contentType: selectedType,
-      genre: selectedGenre,
+      category: selectedGenre,
       platform: selectedPlatform,
-      durationMinutes: _random.nextInt(150) + 30,
-      releaseYear: 2020 + _random.nextInt(4),
-      rating: (3 + _random.nextDouble() * 2).toStringAsFixed(1),
-      recommendationReason: recommendationReason,
+      durationSeconds: (_random.nextInt(150) + 30) * 60,
+      tags: [selectedGenre],
     );
   }
   
@@ -176,7 +217,7 @@ class PersonalizedRecommendationService {
         category: _random.nextBool() ? 'video' : 'article',
         durationSeconds: _random.nextInt(3600) + 300,
         relevanceScore: 0.8 + _random.nextDouble() * 0.2,
-        recommendationReason: 'Based on your interest in ${userPreferences.interests[index % userPreferences.interests.length]}',
+        recommendationReason: 'Based on your interest in ${userPreferences.contentInterests[index % userPreferences.contentInterests.length]}',
         createdAt: DateTime.now(),
       ),
     );
@@ -267,62 +308,6 @@ class PersonalizedRecommendationService {
     diversifiedList.shuffle(_random);
     return diversifiedList;
   }
-      
-      // Get calendar context if enabled
-      // List<CalendarEvent>? upcomingEvents;
-      // if (includeCalendarContext && onboardingPreferences.calendarIntegration) {
-      //   upcomingEvents = await CalendarService.instance.getUpcomingEvents(
-      //     limit: 5,
-      //     withinHours: 24,
-      //   );
-      // }
-      List<dynamic>? upcomingEvents; // Temporary placeholder
-      
-      // Get available content with expanded limit for better filtering
-      final availableContent = await ContentAggregationService.instance
-          .aggregateContent(
-            limit: limit * 5, // Get more content to choose from
-            platforms: _getPrioritizedPlatforms(onboardingPreferences, platforms),
-          );
-      
-      if (availableContent.isEmpty) {
-        return [];
-      }
-      
-      // Generate recommendations using comprehensive algorithm
-      final recommendations = await _generateComprehensiveRecommendations(
-        user: user,
-        content: availableContent,
-        preferences: onboardingPreferences,
-        behaviorInsights: behaviorInsights,
-        upcomingEvents: upcomingEvents,
-        limit: limit,
-      );
-      
-      // Save recommendations to database for analytics
-      await _saveRecommendations(recommendations);
-      
-      await AnalyticsService.instance.trackUserInteraction(
-        action: 'comprehensive_recommendations_generated',
-        screen: 'personalized_recommendation_service',
-        additionalData: {
-          'count': recommendations.length,
-          'algorithm_version': algorithmVersion,
-          'calendar_integrated': upcomingEvents != null,
-          'platforms': platforms?.map((p) => p.toString()).toList() ?? 'all',
-        },
-      );
-      
-      return recommendations;
-    } catch (error) {
-      await AnalyticsService.instance.trackError(
-        errorType: 'recommendation_error',
-        errorMessage: error.toString(),
-        screen: 'personalized_recommendation_service',
-      );
-      return [];
-    }
-  }
   
   // Generate recommendations specifically aligned with calendar events
   Future<List<Recommendation>> generateCalendarContextualRecommendations({
@@ -344,7 +329,7 @@ class PersonalizedRecommendationService {
           .aggregateContent(
             limit: limit * 3,
             platforms: platforms,
-            keywords: _extractKeywordsFromEvent(event),
+            categories: _extractKeywordsFromEvent(event),
           );
       
       if (availableContent.isEmpty) {
@@ -412,7 +397,7 @@ class PersonalizedRecommendationService {
           .aggregateContent(
             limit: limit * 3,
             platforms: platforms,
-            contentTypes: preferredContentTypes,
+            categories: preferredContentTypes,
           );
       
       if (availableContent.isEmpty) {
@@ -477,13 +462,15 @@ class PersonalizedRecommendationService {
     for (final content in availableContent.take(limit)) {
       recommendations.add(Recommendation(
         id: 'basic_rec_${now.millisecondsSinceEpoch}_${recommendations.length}',
-        userId: user.id,
-        contentId: content.id,
-        recommendationScore: 0.5, // Neutral score
+        title: content.title ?? 'Recommended Content',
+        description: content.description ?? '',
+        imageUrl: content.thumbnailUrl ?? '',
+        platform: content.platform.name,
+        category: content.categories.isNotEmpty ? content.categories.first : 'General',
+        durationSeconds: content.durationSeconds ?? 0,
+        relevanceScore: 0.5, // Neutral score
         recommendationReason: 'Trending content you might enjoy',
-        algorithmVersion: algorithmVersion,
         createdAt: now,
-        expiresAt: now.add(const Duration(days: 1)),
       ));
     }
     
@@ -568,7 +555,7 @@ class PersonalizedRecommendationService {
     // Apply diversity factor based on user preference
     final diversifiedContent = _applyDiversityFactor(
       scoredContent: scoredContent,
-      diversityLevel: preferences.diversityLevel,
+      diversityLevel: preferences.diversityLevel ?? 0.5,
     );
     
     // Create recommendation objects
@@ -583,17 +570,15 @@ class PersonalizedRecommendationService {
       
       recommendations.add(Recommendation(
         id: 'comprehensive_rec_${now.millisecondsSinceEpoch}_${recommendations.length}',
-        userId: user.id,
-        contentId: item.content.id,
-        recommendationScore: item.score,
+        title: item.content.title ?? 'Recommended Content',
+        description: item.content.description ?? '',
+        imageUrl: item.content.thumbnailUrl ?? '',
+        platform: item.content.platform.name,
+        category: item.content.categories.isNotEmpty ? item.content.categories.first : 'General',
+        durationSeconds: item.content.durationSeconds ?? 0,
+        relevanceScore: item.score,
         recommendationReason: reason,
-        algorithmVersion: algorithmVersion,
         createdAt: now,
-        expiresAt: now.add(const Duration(days: 3)),
-        metadata: {
-          'calendar_context': item.calendarContext,
-          'time_context': item.timeContext,
-        },
       ));
     }
     
@@ -609,40 +594,38 @@ class PersonalizedRecommendationService {
     double score = 0.0;
     
     // Interest match (0-0.3)
-    if (content.tags != null && content.tags!.isNotEmpty) {
-      final matchingInterests = content.tags!
-          .where((tag) => preferences.interests.contains(tag))
+    if (content.tags.isNotEmpty) {
+      final matchingInterests = content.tags
+          .where((tag) => preferences.contentInterests.contains(tag))
           .length;
       
       if (matchingInterests > 0) {
-        score += 0.3 * (matchingInterests / content.tags!.length);
+        score += 0.3 * (matchingInterests / content.tags.length);
       }
     }
     
     // Content type match (0-0.2)
-    if (content.contentType != null && 
-        preferences.contentTypes.contains(content.contentType)) {
+    if (preferences.contentTypes.contains(content.contentType.name)) {
       score += 0.2;
     }
     
     // Platform priority (0-0.15)
-    if (content.platform != null && 
-        preferences.platformPriorities.containsKey(content.platform!.name)) {
-      score += 0.15 * preferences.platformPriorities[content.platform!.name]!;
+    if (preferences.platformPriorities.containsKey(content.platform.name)) {
+      score += 0.15 * preferences.platformPriorities[content.platform.name]!;
     }
     
     // Creator preference (0-0.15)
-    if (content.creator != null && 
-        preferences.preferredCreators.contains(content.creator)) {
+    if (content.creatorName != null && 
+        preferences.preferredCreators.contains(content.creatorName)) {
       score += 0.15;
     }
     
     // Content length preference (0-0.1)
-    if (content.duration != null) {
+    if (content.durationSeconds != null) {
       String lengthCategory;
-      if (content.duration! < 60) { // Less than 1 minute
+      if (content.durationSeconds! < 60) { // Less than 1 minute
         lengthCategory = 'short';
-      } else if (content.duration! < 600) { // 1-10 minutes
+      } else if (content.durationSeconds! < 600) { // 1-10 minutes
         lengthCategory = 'medium';
       } else { // > 10 minutes
         lengthCategory = 'long';
@@ -683,8 +666,7 @@ class PersonalizedRecommendationService {
     }
     
     // Check if content type aligns with event type
-    if (content.contentType != null && 
-        _isContentTypeRelevantForEvent(content.contentType!, event.eventType)) {
+    if (_isContentTypeRelevantForEvent(content.contentType.name, event.eventType)) {
       relevance += 0.4;
     }
     
@@ -735,16 +717,11 @@ class PersonalizedRecommendationService {
       final first = scoredContent.first;
       result.add(first);
       
-      if (first.content.platform != null) {
-        platforms.add(first.content.platform!);
-      }
+      platforms.add(first.content.platform);
+      contentTypes.add(first.content.contentType.name);
       
-      if (first.content.contentType != null) {
-        contentTypes.add(first.content.contentType!);
-      }
-      
-      if (first.content.creator != null) {
-        creators.add(first.content.creator!);
+      if (first.content.creatorName != null) {
+        creators.add(first.content.creatorName!);
       }
     }
     
@@ -754,17 +731,17 @@ class PersonalizedRecommendationService {
       double diversityBoost = 0.0;
       
       // Boost for platform diversity
-      if (item.content.platform != null && !platforms.contains(item.content.platform)) {
+      if (!platforms.contains(item.content.platform)) {
         diversityBoost += 0.3 * diversityLevel;
       }
       
       // Boost for content type diversity
-      if (item.content.contentType != null && !contentTypes.contains(item.content.contentType)) {
+      if (!contentTypes.contains(item.content.contentType.name)) {
         diversityBoost += 0.3 * diversityLevel;
       }
       
       // Boost for creator diversity
-      if (item.content.creator != null && !creators.contains(item.content.creator)) {
+      if (item.content.creatorName != null && !creators.contains(item.content.creatorName)) {
         diversityBoost += 0.4 * diversityLevel;
       }
       
@@ -780,16 +757,11 @@ class PersonalizedRecommendationService {
       ));
       
       // Update diversity tracking sets
-      if (item.content.platform != null) {
-        platforms.add(item.content.platform!);
-      }
+      platforms.add(item.content.platform);
+      contentTypes.add(item.content.contentType.name);
       
-      if (item.content.contentType != null) {
-        contentTypes.add(item.content.contentType!);
-      }
-      
-      if (item.content.creator != null) {
-        creators.add(item.content.creator!);
+      if (item.content.creatorName != null) {
+        creators.add(item.content.creatorName!);
       }
     }
     
@@ -816,24 +788,23 @@ class PersonalizedRecommendationService {
     }
     
     // Check for interest match
-    if (content.tags != null && content.tags!.isNotEmpty) {
-      for (final interest in preferences.interests) {
-        if (content.tags!.contains(interest)) {
+    if (content.tags.isNotEmpty) {
+      for (final interest in preferences.contentInterests) {
+        if (content.tags.contains(interest)) {
           return 'Matches your interest in $interest';
         }
       }
     }
     
     // Check for content type match
-    if (content.contentType != null && 
-        preferences.contentTypes.contains(content.contentType)) {
-      return 'Based on your preference for ${content.contentType} content';
+    if (preferences.contentTypes.contains(content.contentType.name)) {
+      return 'Based on your preference for ${content.contentType.name} content';
     }
     
     // Check for creator preference
-    if (content.creator != null && 
-        preferences.preferredCreators.contains(content.creator)) {
-      return 'From ${content.creator}, one of your favorite creators';
+    if (content.creatorName != null && 
+        preferences.preferredCreators.contains(content.creatorName)) {
+      return 'From ${content.creatorName}, one of your favorite creators';
     }
     
     // Default reasons based on score
@@ -851,11 +822,7 @@ class PersonalizedRecommendationService {
   // Helper methods
   
   Future<UserBehaviorInsight?> _getBehaviorInsights(String userId) async {
-    try {
-      return await AIRecommendationService.instance.getUserBehaviorInsights(userId);
-    } catch (e) {
-      return null;
-    }
+    return null;
   }
   
   Future<List<UserInteraction>> _getUserInteractions(String userId) async {
@@ -868,7 +835,7 @@ class PersonalizedRecommendationService {
           .limit(100);
       
       return (response as List)
-          .map((data) => UserInteraction.fromJson(data))
+          .map((data) => UserInteraction.fromJson(data as Map<String, dynamic>))
           .toList();
     } catch (e) {
       return [];
@@ -921,10 +888,6 @@ class PersonalizedRecommendationService {
         return PlatformType.instagram;
       case 'facebook':
         return PlatformType.facebook;
-      case 'twitter':
-        return PlatformType.twitter;
-      case 'twitch':
-        return PlatformType.twitch;
       default:
         return null;
     }
@@ -1004,9 +967,11 @@ class PersonalizedRecommendationService {
     final keywords = <String>[];
     
     // Add title words
-    keywords.addAll(content.title.split(' ')
-        .where((word) => word.length > 3)
-        .map((word) => word.toLowerCase()));
+    if (content.title != null) {
+      keywords.addAll(content.title!.split(' ')
+          .where((word) => word.length > 3)
+          .map((word) => word.toLowerCase()));
+    }
     
     // Add description words if available
     if (content.description != null && content.description!.isNotEmpty) {
@@ -1016,14 +981,10 @@ class PersonalizedRecommendationService {
     }
     
     // Add tags if available
-    if (content.tags != null && content.tags!.isNotEmpty) {
-      keywords.addAll(content.tags!.map((tag) => tag.toLowerCase()));
-    }
+    keywords.addAll(content.tags.map((tag) => tag.toLowerCase()));
     
     // Add content type if available
-    if (content.contentType != null) {
-      keywords.add(content.contentType!.toLowerCase());
-    }
+    keywords.add(content.contentType.name.toLowerCase());
     
     return keywords;
   }
@@ -1092,17 +1053,15 @@ class PersonalizedRecommendationService {
     for (final item in scoredContent.take(limit)) {
       recommendations.add(Recommendation(
         id: 'calendar_rec_${now.millisecondsSinceEpoch}_${recommendations.length}',
-        userId: user.id,
-        contentId: item.content.id,
-        recommendationScore: item.score,
+        title: item.content.title ?? 'Recommended Content',
+        description: item.content.description ?? '',
+        imageUrl: item.content.thumbnailUrl ?? '',
+        platform: item.content.platform.name,
+        category: item.content.categories.isNotEmpty ? item.content.categories.first : 'General',
+        durationSeconds: item.content.durationSeconds ?? 0,
+        relevanceScore: item.score,
         recommendationReason: item.calendarContext ?? 'Relevant to your calendar event',
-        algorithmVersion: algorithmVersion,
         createdAt: now,
-        expiresAt: event.endTime ?? now.add(const Duration(days: 1)),
-        metadata: {
-          'event_id': event.id,
-          'event_type': event.eventType,
-        },
       ));
     }
     
@@ -1135,9 +1094,9 @@ class PersonalizedRecommendationService {
       }
       
       // Boost for content length appropriate for time of day
-      if (item.duration != null) {
+      if (item.durationSeconds != null) {
         final appropriateLength = _isContentLengthAppropriateForTime(
-          duration: item.duration!,
+          duration: item.durationSeconds!,
           timeContext: timeContext,
           preferences: preferences,
         );
@@ -1161,16 +1120,15 @@ class PersonalizedRecommendationService {
     for (final item in scoredContent.take(limit)) {
       recommendations.add(Recommendation(
         id: 'time_rec_${now.millisecondsSinceEpoch}_${recommendations.length}',
-        userId: user.id,
-        contentId: item.content.id,
-        recommendationScore: item.score,
+        title: item.content.title ?? 'Recommended Content',
+        description: item.content.description ?? '',
+        imageUrl: item.content.thumbnailUrl ?? '',
+        platform: item.content.platform.name,
+        category: item.content.categories.isNotEmpty ? item.content.categories.first : 'General',
+        durationSeconds: item.content.durationSeconds ?? 0,
+        relevanceScore: item.score,
         recommendationReason: item.timeContext ?? 'Recommended for ${timeContext.toLowerCase()}',
-        algorithmVersion: algorithmVersion,
         createdAt: now,
-        expiresAt: now.add(const Duration(hours: 6)),
-        metadata: {
-          'time_context': timeContext,
-        },
       ));
     }
     

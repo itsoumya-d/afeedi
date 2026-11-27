@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 // Stub implementation to replace Supabase dependencies
@@ -128,136 +129,59 @@ class SupabaseClient {
 }
 
 // Stub SupabaseQueryBuilder class
-class SupabaseQueryBuilder {
-  Future<void> upsert(Map<String, dynamic> data) async {
-    // No-op implementation
-  }
-  
-  Future<void> insert(Map<String, dynamic> data) async {
-    // No-op implementation
-  }
-  
-  Future<void> update(Map<String, dynamic> data) async {
-    // No-op implementation
-  }
-  
-  Future<void> delete() async {
-    // No-op implementation
-  }
-  
-  Future<List<Map<String, dynamic>>> select([String? columns]) async {
-    return [];
-  }
-  
-  SupabaseQueryBuilder eq(String column, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder neq(String column, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder gt(String column, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder gte(String column, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder lt(String column, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder lte(String column, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder like(String column, String pattern) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder ilike(String column, String pattern) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder is_(String column, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder in_(String column, List values) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder contains(String column, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder containedBy(String column, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder rangeGt(String column, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder rangeGte(String column, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder rangeLt(String column, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder rangeLte(String column, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder rangeAdjacent(String column, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder overlaps(String column, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder textSearch(String column, String query, {String? config}) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder match(Map<String, dynamic> query) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder not(String column, String operator, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder or(String filters) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder filter(String column, String operator, dynamic value) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder order(String column, {bool ascending = true}) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder limit(int count) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder range(int from, int to) {
-    return this;
-  }
-  
-  SupabaseQueryBuilder single() {
-    return this;
-  }
-  
-  SupabaseQueryBuilder maybeSingle() {
-    return this;
-  }
+class SupabaseQueryBuilder implements Future<List<Map<String, dynamic>>> {
+  final Future<List<Map<String, dynamic>>> _future = Future.value(<Map<String, dynamic>>[]);
+
+  @override
+  Stream<List<Map<String, dynamic>>> asStream() => _future.asStream();
+
+  @override
+  Future<List<Map<String, dynamic>>> catchError(Function onError, {bool Function(Object error)? test}) =>
+      _future.catchError(onError, test: test);
+
+  @override
+  Future<R> then<R>(FutureOr<R> Function(List<Map<String, dynamic>> value) onValue, {Function? onError}) =>
+      _future.then(onValue, onError: onError);
+
+  @override
+  Future<List<Map<String, dynamic>>> timeout(Duration timeLimit, {FutureOr<List<Map<String, dynamic>>> Function()? onTimeout}) =>
+      _future.timeout(timeLimit, onTimeout: onTimeout);
+
+  @override
+  Future<List<Map<String, dynamic>>> whenComplete(FutureOr<void> Function() action) =>
+      _future.whenComplete(action);
+
+  SupabaseQueryBuilder upsert(dynamic data) => this;
+  SupabaseQueryBuilder insert(dynamic data) => this;
+  SupabaseQueryBuilder update(dynamic data) => this;
+  SupabaseQueryBuilder delete() => this;
+  SupabaseQueryBuilder select([String? columns]) => this;
+  SupabaseQueryBuilder eq(String column, dynamic value) => this;
+  SupabaseQueryBuilder neq(String column, dynamic value) => this;
+  SupabaseQueryBuilder gt(String column, dynamic value) => this;
+  SupabaseQueryBuilder gte(String column, dynamic value) => this;
+  SupabaseQueryBuilder lt(String column, dynamic value) => this;
+  SupabaseQueryBuilder lte(String column, dynamic value) => this;
+  SupabaseQueryBuilder like(String column, String pattern) => this;
+  SupabaseQueryBuilder ilike(String column, String pattern) => this;
+  SupabaseQueryBuilder is_(String column, dynamic value) => this;
+  SupabaseQueryBuilder in_(String column, List values) => this;
+  SupabaseQueryBuilder contains(String column, dynamic value) => this;
+  SupabaseQueryBuilder containedBy(String column, dynamic value) => this;
+  SupabaseQueryBuilder rangeGt(String column, dynamic value) => this;
+  SupabaseQueryBuilder rangeGte(String column, dynamic value) => this;
+  SupabaseQueryBuilder rangeLt(String column, dynamic value) => this;
+  SupabaseQueryBuilder rangeLte(String column, dynamic value) => this;
+  SupabaseQueryBuilder rangeAdjacent(String column, dynamic value) => this;
+  SupabaseQueryBuilder overlaps(String column, dynamic value) => this;
+  SupabaseQueryBuilder textSearch(String column, String query, {String? config}) => this;
+  SupabaseQueryBuilder match(Map<String, dynamic> query) => this;
+  SupabaseQueryBuilder not(String column, String operator, dynamic value) => this;
+  SupabaseQueryBuilder or(String filters) => this;
+  SupabaseQueryBuilder filter(String column, String operator, dynamic value) => this;
+  SupabaseQueryBuilder order(String column, {bool ascending = true}) => this;
+  SupabaseQueryBuilder limit(int count) => this;
+  SupabaseQueryBuilder range(int from, int to) => this;
+  Future<Map<String, dynamic>> single() async => <String, dynamic>{};
+  Future<Map<String, dynamic>?> maybeSingle() async => null;
 }

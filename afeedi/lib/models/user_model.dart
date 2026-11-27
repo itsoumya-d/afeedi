@@ -8,6 +8,7 @@ enum UserRole {
 class User {
   final String id;
   final String email;
+  final String? name;
   final UserRole role;
   final bool isActive;
   final DateTime createdAt;
@@ -20,6 +21,7 @@ class User {
   const User({
     required this.id,
     required this.email,
+    this.name,
     required this.role,
     required this.isActive,
     required this.createdAt,
@@ -34,6 +36,7 @@ class User {
     return User(
       id: json['id'] as String,
       email: json['email'] as String,
+      name: json['name'] as String?,
       role: UserRole.values.firstWhere(
         (e) => e.name == json['role'],
         orElse: () => UserRole.registered,
